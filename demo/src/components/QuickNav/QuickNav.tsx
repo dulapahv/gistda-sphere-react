@@ -1,5 +1,5 @@
 import type { Location } from "gistda-sphere-react";
-import { LOCATIONS } from "../constants";
+import { LOCATIONS } from "../../constants";
 import "./QuickNav.css";
 
 interface QuickNavProps {

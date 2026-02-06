@@ -2,7 +2,7 @@ import type { Location } from "gistda-sphere-react";
 import { useSearch } from "gistda-sphere-react";
 import { MapPin, Search, X } from "lucide-react";
 import { useState } from "react";
-import type { SearchMarkerData } from "../types";
+import type { SearchMarkerData } from "../../types";
 import "./SearchPanel.css";
 
 interface SearchPanelProps {

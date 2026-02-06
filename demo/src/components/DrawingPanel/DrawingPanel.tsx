@@ -1,5 +1,9 @@
 import { Trash2 } from "lucide-react";
-import { DRAWING_HINTS, DRAWING_TOOLS, type DrawingMode } from "../constants";
+import {
+  DRAWING_HINTS,
+  DRAWING_TOOLS,
+  type DrawingMode,
+} from "../../constants";
 import "./DrawingPanel.css";
 
 interface DrawingPanelProps {

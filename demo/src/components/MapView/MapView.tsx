@@ -9,9 +9,9 @@ import {
   Rectangle,
   SphereMap,
 } from "gistda-sphere-react";
-import { getShapeColor, LOCATIONS } from "../constants";
-import type { UseDrawingReturn } from "../hooks";
-import type { SearchMarkerData } from "../types";
+import { getShapeColor, LOCATIONS } from "../../constants";
+import type { UseDrawingReturn } from "../../hooks";
+import type { SearchMarkerData } from "../../types";
 
 interface MapViewProps {
   drawing: UseDrawingReturn;

@@ -1,4 +1,4 @@
-import { BASE_LAYERS, type BaseLayer } from "../constants";
+import { BASE_LAYERS, type BaseLayer } from "../../constants";
 import "./LayerSelector.css";
 
 interface LayerSelectorProps {

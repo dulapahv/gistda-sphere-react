@@ -1,4 +1,4 @@
-import { UI_CONTROLS, type UiControlId } from "../constants";
+import { UI_CONTROLS, type UiControlId } from "../../constants";
 import "./MapControlsPanel.css";
 
 interface MapControlsPanelProps {

@@ -2,8 +2,8 @@ import type { Location } from "gistda-sphere-react";
 import { useRoute } from "gistda-sphere-react";
 import { ArrowLeftRight, MapPin, Route, Trash2 } from "lucide-react";
 import { useState } from "react";
-import { ROUTE_MODES, type RouteMode } from "../constants";
-import type { RouteInfoData } from "../types";
+import { ROUTE_MODES, type RouteMode } from "../../constants";
+import type { RouteInfoData } from "../../types";
 import "./RoutePanel.css";
 
 interface RoutePanelProps {
