@@ -1,6 +1,6 @@
 {
   "name": "gistda-sphere-react",
-  "version": "1.0.1",
+  "version": "1.1.0",
   "description": "React wrapper library for GISTDA Sphere Map API with TypeScript support",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
