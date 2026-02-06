@@ -1,11 +1,14 @@
 import {
   Car,
   Circle as CircleIcon,
+  CloudRain,
   DollarSign,
   Dot,
+  Flame,
   Fullscreen,
   Gamepad2,
   Hand,
+  Image,
   LocateFixed,
   Map as MapIcon,
   MapPin,
@@ -16,8 +19,10 @@ import {
   Ruler,
   Satellite,
   Settings2,
+  Sprout,
   Square,
   VectorSquare,
+  Wind,
   Zap,
   ZoomIn,
 } from "lucide-react";
@@ -75,13 +80,30 @@ export const DRAWING_HINTS: Record<DrawingMode, string> = {
   rectangle: "Click corner, then click opposite corner",
 };
 
-export type BaseLayer = "SIMPLE" | "STREETS" | "HYBRID" | "STREETS_NIGHT";
+export type BaseLayer = "SIMPLE" | "STREETS" | "STREETS_NIGHT" | "HYBRID";
 
 export const BASE_LAYERS = [
   { id: "SIMPLE" as const, label: "Simple", icon: MapIcon },
   { id: "STREETS" as const, label: "Streets", icon: Navigation },
-  { id: "HYBRID" as const, label: "Satellite", icon: Satellite },
   { id: "STREETS_NIGHT" as const, label: "Night", icon: Moon },
+  { id: "HYBRID" as const, label: "Hybrid", icon: Satellite },
+];
+
+export type OverlayLayer =
+  | "TRAFFIC"
+  | "IMAGES"
+  | "PM25"
+  | "HOTSPOT"
+  | "FLOOD"
+  | "DROUGHT";
+
+export const OVERLAY_LAYERS = [
+  { id: "TRAFFIC" as const, label: "Traffic", icon: Car },
+  { id: "IMAGES" as const, label: "Images", icon: Image },
+  { id: "PM25" as const, label: "PM2.5", icon: Wind },
+  { id: "HOTSPOT" as const, label: "Hotspot", icon: Flame },
+  { id: "FLOOD" as const, label: "Flood", icon: CloudRain },
+  { id: "DROUGHT" as const, label: "Drought", icon: Sprout },
 ];
 
 export const UI_CONTROLS = [

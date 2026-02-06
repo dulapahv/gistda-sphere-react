@@ -5,16 +5,19 @@ import {
   type BaseLayer,
   DEFAULT_UI_CONTROLS,
   LOCATIONS,
+  type OverlayLayer,
   type UiControlId,
 } from "../constants";
 
 export interface UseMapSettingsReturn {
   mapReady: boolean;
   currentLayer: BaseLayer;
+  activeOverlays: Set<OverlayLayer>;
   uiControls: Record<UiControlId, boolean>;
   zoom: number;
   center: Location | null;
   setLayer: (layer: BaseLayer) => void;
+  toggleOverlay: (layer: OverlayLayer) => void;
   toggleUiControl: (controlId: UiControlId) => void;
   navigateTo: (location: Location, zoom?: number) => void;
   setZoom: (zoom: number) => void;
@@ -23,9 +26,12 @@ export interface UseMapSettingsReturn {
 
 export function useMapSettings(): UseMapSettingsReturn {
   const { map, isReady: mapReady } = useMap();
-  const { setBaseLayer, goTo } = useMapControls();
+  const { setBaseLayer, addLayer, removeLayer, goTo } = useMapControls();
 
   const [currentLayer, setCurrentLayer] = useState<BaseLayer>("STREETS");
+  const [activeOverlays, setActiveOverlays] = useState<Set<OverlayLayer>>(
+    new Set()
+  );
   const [uiControls, setUiControls] =
     useState<Record<UiControlId, boolean>>(DEFAULT_UI_CONTROLS);
   const [zoom, setZoom] = useState(10);
@@ -48,6 +54,20 @@ export function useMapSettings(): UseMapSettingsReturn {
     setBaseLayer(layer);
   };
 
+  const toggleOverlay = (layer: OverlayLayer) => {
+    setActiveOverlays((prev) => {
+      const next = new Set(prev);
+      if (next.has(layer)) {
+        next.delete(layer);
+        removeLayer(layer);
+      } else {
+        next.add(layer);
+        addLayer(layer);
+      }
+      return next;
+    });
+  };
+
   const toggleUiControl = (controlId: UiControlId) => {
     if (!(mapReady && map)) {
       return;
@@ -67,10 +87,12 @@ export function useMapSettings(): UseMapSettingsReturn {
   return {
     mapReady,
     currentLayer,
+    activeOverlays,
     uiControls,
     zoom,
     center,
     setLayer,
+    toggleOverlay,
     toggleUiControl,
     navigateTo,
     setZoom,
