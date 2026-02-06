@@ -2,7 +2,7 @@
 
 > **Disclaimer**: This is an **unofficial** community project and is not affiliated with, endorsed by, or supported by GISTDA (Geo-Informatics and Space Technology Development Agency). For official documentation and support, please visit [sphere.gistda.or.th](https://sphere.gistda.or.th/).
 
-A React wrapper for the [GISTDA Sphere Map API](https://sphere.gistda.or.th/). Build interactive maps of Thailand with TypeScript support.
+A React wrapper for the [GISTDA Sphere Map API](https://sphere.gistda.or.th/). Build interactive maps of Thailand with full TypeScript support.
 
 - [gistda-sphere-react](#gistda-sphere-react)
   - [Installation](#installation)
@@ -19,23 +19,44 @@ A React wrapper for the [GISTDA Sphere Map API](https://sphere.gistda.or.th/). B
     - [Dot](#dot)
     - [Rectangle](#rectangle)
     - [Layer](#layer)
+      - [Layer Types](#layer-types)
   - [Hooks](#hooks)
-    - [useMapControls](#usemapcontrols)
     - [useMap](#usemap)
+    - [useSphere](#usesphere)
+    - [useMapControls](#usemapcontrols)
     - [Event Hooks](#event-hooks)
     - [useSearch](#usesearch)
     - [useRoute](#useroute)
     - [useTags](#usetags)
+    - [Overlay Collection Hooks](#overlay-collection-hooks)
+      - [useMarkers](#usemarkers)
+      - [usePolygons, usePolylines, useCircles](#usepolygons-usepolylines-usecircles)
+      - [useOverlays](#useoverlays)
+  - [Built-in Layers](#built-in-layers)
+  - [Predefined Overlays](#predefined-overlays)
+  - [Color Filters](#color-filters)
+  - [Ref APIs](#ref-apis)
+    - [SphereMapRef](#spheremapref)
+    - [MarkerRef](#markerref)
+    - [PolygonRef](#polygonref)
+    - [PolylineRef](#polylineref)
+    - [CircleRef](#circleref)
+    - [PopupRef](#popupref)
+    - [DotRef](#dotref)
+    - [RectangleRef](#rectangleref)
+  - [TypeScript](#typescript)
+    - [Icon Type](#icon-type)
+    - [PopupOptions Type](#popupoptions-type)
   - [Examples](#examples)
     - [Adding Elements Programmatically](#adding-elements-programmatically)
     - [Interactive Marker Placement](#interactive-marker-placement)
     - [Drawing Polygons](#drawing-polygons)
     - [Sidebar with Map Controls](#sidebar-with-map-controls)
-  - [Built-in Layers](#built-in-layers)
-  - [Predefined Overlays](#predefined-overlays)
-  - [Color Filters](#color-filters)
+    - [Custom WMS Layer](#custom-wms-layer)
+    - [Routing between Locations](#routing-between-locations)
+    - [Searching for POIs](#searching-for-pois)
+    - [Displaying Tags on the Map](#displaying-tags-on-the-map)
   - [Troubleshooting](#troubleshooting)
-  - [TypeScript](#typescript)
   - [License](#license)
 
 ## Installation
@@ -74,29 +95,35 @@ function App() {
 2. Register for an account
 3. Create a new API key and register your domain(s)
 
-> **Note**: Register `localhost` for development.
+> **Note**: Register `localhost` for local development.
+
+---
 
 ## Components
 
 ### SphereProvider
 
-Wraps your app and loads the Sphere API.
+Wraps your app and loads the Sphere API script. Must be an ancestor of all other Sphere components.
 
 ```tsx
-<SphereProvider apiKey="YOUR_API_KEY">
+<SphereProvider apiKey="YOUR_API_KEY" onLoad={() => console.log('API loaded')}>
   {/* Your app */}
 </SphereProvider>
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `apiKey` | `string` | *required* | Your GISTDA Sphere API key |
-| `onLoad` | `() => void` | - | Called when API finishes loading |
-| `onError` | `(error: Error) => void` | - | Called if API fails to load |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `apiKey` | `string` | Yes | - | Your GISTDA Sphere API key |
+| `children` | `ReactNode` | Yes | - | Child components |
+| `scriptUrl` | `string` | No | Official Sphere API URL | Custom URL for the Sphere API script |
+| `onLoad` | `() => void` | No | - | Called when the API script finishes loading |
+| `onError` | `(error: Error) => void` | No | - | Called if the API script fails to load |
+
+---
 
 ### SphereMap
 
-The map container. All overlays (Marker, Polygon, etc.) go inside.
+The map container component. All overlay components (Marker, Polygon, etc.) must be placed inside.
 
 ```tsx
 <SphereMap
@@ -109,20 +136,43 @@ The map container. All overlays (Marker, Polygon, etc.) go inside.
 </SphereMap>
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `center` | `{ lon: number, lat: number }` | Bangkok | Initial map center |
-| `zoom` | `number` | `7` | Initial zoom level (1-20) |
-| `style` | `CSSProperties` | - | CSS styles for container |
-| `className` | `string` | - | CSS class for container |
-| `language` | `'th' \| 'en'` | `'th'` | Map label language |
-| `onClick` | `(location) => void` | - | Map click handler |
-| `onDoubleClick` | `(location) => void` | - | Map double-click handler |
-| `onZoom` | `(zoom: number) => void` | - | Zoom change handler |
-| `onLocation` | `(location) => void` | - | Center change handler |
-| `onReady` | `(map) => void` | - | Called when map is ready |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `center` | `Location` | No | Bangkok (`{ lon: 100.49, lat: 13.72 }`) | Initial map center coordinates |
+| `zoom` | `number` | No | `7` | Initial zoom level (1-22) |
+| `zoomRange` | `Range` | No | All zoom levels | Allowed zoom range (`{ min, max }`) |
+| `language` | `string` | No | `"th"` | Map label language (ISO 639-1, e.g. `"th"`, `"en"`) |
+| `input` | `boolean` | No | `true` | Allow user input (click, drag, scroll) |
+| `lastView` | `boolean` | No | `false` | Restore last location/zoom from local storage |
+| `ui` | `"Full" \| "Mobile" \| "None"` | No | Fit screen size | UI component mode |
+| `filter` | `FilterType` | No | `"None"` | Initial color filter |
+| `rotate` | `number` | No | `0` | Initial rotation angle in degrees (clockwise from north) |
+| `pitch` | `number` | No | `0` | Initial pitch angle in degrees (0 = looking straight down) |
+| `style` | `CSSProperties` | No | - | CSS styles for the map container |
+| `className` | `string` | No | - | CSS class for the map container |
+| `id` | `string` | No | - | HTML id attribute for the map container |
+| `ref` | `Ref<SphereMapRef>` | No | - | Ref for imperative map control (see [SphereMapRef](#spheremapref)) |
+| `children` | `ReactNode` | No | - | Overlay components to render on the map |
+| `onReady` | `(map: SphereMapInstance) => void` | No | - | Called when the map is initialized and ready |
+| `onClick` | `(location: Location) => void` | No | - | Called when the map is clicked |
+| `onDoubleClick` | `(location: Location) => void` | No | - | Called when the map is double-clicked |
+| `onZoom` | `(zoom: number) => void` | No | - | Called when the zoom level changes |
+| `onLocation` | `(location: Location) => void` | No | - | Called when the map center changes |
+| `onRotate` | `(angle: number) => void` | No | - | Called when the map rotation changes |
+| `onPitch` | `(angle: number) => void` | No | - | Called when the map pitch changes |
+| `onDrag` | `() => void` | No | - | Called when the user starts dragging the map |
+| `onDrop` | `() => void` | No | - | Called when the user stops dragging the map |
+| `onMouseMove` | `(location: Location) => void` | No | - | Called when the mouse moves over the map |
+| `onIdle` | `() => void` | No | - | Called when the map becomes idle (no input, animation, or tile loading) |
+| `onError` | `(error: Error) => void` | No | - | Called when an error occurs |
+
+> **Important**: The map container must have an explicit height. Without it, the `<div>` collapses to 0px.
+
+---
 
 ### Marker
+
+Displays a point marker on the map with optional popup, custom icon, and drag support.
 
 ```tsx
 <Marker
@@ -134,17 +184,24 @@ The map container. All overlays (Marker, Polygon, etc.) go inside.
 />
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `position` | `{ lon: number, lat: number }` | *required* | Marker position |
-| `title` | `string` | - | Popup title |
-| `detail` | `string` | - | Popup detail text |
-| `draggable` | `boolean` | `false` | Allow dragging |
-| `icon` | `{ url, size?, offset? }` | - | Custom icon |
-| `rotate` | `number` | - | Rotation angle in degrees |
-| `onClick` | `(marker) => void` | - | Click handler |
-| `onDrag` | `(marker) => void` | - | Drag handler |
-| `onDrop` | `(marker, location) => void` | - | Drop handler (after drag) |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | Marker coordinates (`{ lon, lat }`) |
+| `ref` | `Ref<MarkerRef>` | No | - | Ref for imperative control (see [MarkerRef](#markerref)) |
+| `icon` | `Icon` | No | Default red pin | Custom icon (see [Icon type](#icon)) |
+| `title` | `string` | No | - | Text shown on hover tooltip |
+| `detail` | `string` | No | - | Text shown in popup when clicked |
+| `popup` | `PopupOptions` | No | - | Popup configuration (overrides `detail`) |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range at which the marker is visible (`{ min, max }`) |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor on hover |
+| `draggable` | `boolean` | No | `false` | Allow the user to drag this marker |
+| `zIndex` | `number` | No | `0` | Stacking order (higher values appear on top) |
+| `rotate` | `number` | No | `0` | Rotation angle in degrees (clockwise) |
+| `onClick` | `(marker: SphereMarker) => void` | No | - | Called when the marker is clicked |
+| `onDrag` | `(marker: SphereMarker) => void` | No | - | Called while the marker is being dragged |
+| `onDrop` | `(marker: SphereMarker, location: Location) => void` | No | - | Called when the marker is dropped after dragging |
+| `onHover` | `(marker: SphereMarker) => void` | No | - | Called when the mouse enters the marker |
+| `onLeave` | `(marker: SphereMarker) => void` | No | - | Called when the mouse leaves the marker |
 
 **Custom icon example:**
 
@@ -159,7 +216,23 @@ The map container. All overlays (Marker, Polygon, etc.) go inside.
 />
 ```
 
+**HTML icon example:**
+
+```tsx
+<Marker
+  position={{ lon: 100.5, lat: 13.75 }}
+  icon={{
+    html: '<div style="background: red; width: 20px; height: 20px; border-radius: 50%;"></div>',
+    offset: { x: 10, y: 10 }
+  }}
+/>
+```
+
+---
+
 ### Polygon
+
+Draws a filled polygon on the map.
 
 ```tsx
 <Polygon
@@ -174,20 +247,35 @@ The map container. All overlays (Marker, Polygon, etc.) go inside.
 />
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `positions` | `{ lon, lat }[]` | *required* | Array of vertices |
-| `fillColor` | `string` | - | Fill color (CSS color) |
-| `lineColor` | `string` | - | Border color |
-| `lineWidth` | `number` | `1` | Border width in pixels |
-| `lineStyle` | `'Solid' \| 'Dashed' \| 'Dot'` | `'Solid'` | Border style |
-| `title` | `string` | - | Popup title |
-| `detail` | `string` | - | Popup detail |
-| `draggable` | `boolean` | `false` | Allow dragging |
-| `editable` | `boolean` | `false` | Allow vertex editing |
-| `onClick` | `(polygon) => void` | - | Click handler |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `positions` | `Location[]` | Yes (min 3) | - | Array of vertices defining the polygon |
+| `ref` | `Ref<PolygonRef>` | No | - | Ref for imperative control (see [PolygonRef](#polygonref)) |
+| `title` | `string` | No | - | Text shown on hover tooltip |
+| `detail` | `string` | No | - | Text shown in popup when clicked |
+| `label` | `string` | No | - | Text label displayed at the polygon center |
+| `labelOptions` | `MarkerOptions` | No | - | Options for the label marker (overrides `label` visible range) |
+| `popup` | `PopupOptions` | No | - | Popup configuration (overrides `detail`) |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range at which the polygon is visible |
+| `lineWidth` | `number` | No | `3` | Border width in pixels |
+| `lineColor` | `string` | No | Preset color | Border color (any CSS color value) |
+| `fillColor` | `string` | No | Preset color | Fill color (any CSS color value) |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | Border line style |
+| `pivot` | `Location` | No | Center of geometry | Rotation pivot point and label location |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor on hover |
+| `draggable` | `boolean` | No | `false` | Allow the user to drag this polygon |
+| `pointer` | `boolean` | No | `false` | Show draggable pointer on hover |
+| `editable` | `boolean` | No | `false` | Allow vertex editing |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `onClick` | `(polygon: SpherePolygon) => void` | No | - | Called when the polygon is clicked |
+| `onDrag` | `(polygon: SpherePolygon) => void` | No | - | Called while the polygon is being dragged |
+| `onDrop` | `(polygon: SpherePolygon) => void` | No | - | Called when the polygon is dropped after dragging |
+
+---
 
 ### Polyline
+
+Draws a line on the map connecting a series of points.
 
 ```tsx
 <Polyline
@@ -201,19 +289,33 @@ The map container. All overlays (Marker, Polygon, etc.) go inside.
 />
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `positions` | `{ lon, lat }[]` | *required* | Array of points |
-| `lineColor` | `string` | - | Line color (CSS color) |
-| `lineWidth` | `number` | `1` | Line width in pixels |
-| `lineStyle` | `'Solid' \| 'Dashed' \| 'Dot'` | `'Solid'` | Line style |
-| `title` | `string` | - | Popup title |
-| `detail` | `string` | - | Popup detail |
-| `draggable` | `boolean` | `false` | Allow dragging |
-| `editable` | `boolean` | `false` | Allow vertex editing |
-| `onClick` | `(polyline) => void` | - | Click handler |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `positions` | `Location[]` | Yes (min 2) | - | Array of points defining the line |
+| `ref` | `Ref<PolylineRef>` | No | - | Ref for imperative control (see [PolylineRef](#polylineref)) |
+| `title` | `string` | No | - | Text shown on hover tooltip |
+| `detail` | `string` | No | - | Text shown in popup when clicked |
+| `label` | `string` | No | - | Text label displayed at the line center |
+| `labelOptions` | `MarkerOptions` | No | - | Options for the label marker |
+| `popup` | `PopupOptions` | No | - | Popup configuration (overrides `detail`) |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range at which the line is visible |
+| `lineWidth` | `number` | No | `3` | Line width in pixels |
+| `lineColor` | `string` | No | Preset color | Line color (any CSS color value) |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | Line style |
+| `pivot` | `Location` | No | Center of geometry | Rotation pivot point and label location |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor on hover |
+| `draggable` | `boolean` | No | `false` | Allow the user to drag this line |
+| `pointer` | `boolean` | No | `false` | Show draggable pointer on hover |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `onClick` | `(polyline: SpherePolyline) => void` | No | - | Called when the line is clicked |
+| `onDrag` | `(polyline: SpherePolyline) => void` | No | - | Called while the line is being dragged |
+| `onDrop` | `(polyline: SpherePolyline) => void` | No | - | Called when the line is dropped after dragging |
+
+---
 
 ### Circle
+
+Draws a circle on the map.
 
 ```tsx
 <Circle
@@ -225,20 +327,31 @@ The map container. All overlays (Marker, Polygon, etc.) go inside.
 />
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `center` | `{ lon: number, lat: number }` | *required* | Circle center |
-| `radius` | `number` | *required* | Radius in degrees |
-| `fillColor` | `string` | - | Fill color (CSS color) |
-| `lineColor` | `string` | - | Border color |
-| `lineWidth` | `number` | `1` | Border width in pixels |
-| `lineStyle` | `'Solid' \| 'Dashed' \| 'Dot'` | `'Solid'` | Border style |
-| `title` | `string` | - | Popup title |
-| `detail` | `string` | - | Popup detail |
-| `draggable` | `boolean` | `false` | Allow dragging |
-| `onClick` | `(circle) => void` | - | Click handler |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `center` | `Location` | Yes | - | Circle center coordinates |
+| `radius` | `number` | Yes | - | Circle radius in degrees |
+| `ref` | `Ref<CircleRef>` | No | - | Ref for imperative control (see [CircleRef](#circleref)) |
+| `title` | `string` | No | - | Text shown on hover tooltip |
+| `detail` | `string` | No | - | Text shown in popup when clicked |
+| `popup` | `PopupOptions` | No | - | Popup configuration (overrides `detail`) |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range at which the circle is visible |
+| `lineWidth` | `number` | No | `3` | Border width in pixels |
+| `lineColor` | `string` | No | Preset color | Border color (any CSS color value) |
+| `fillColor` | `string` | No | Preset color | Fill color (any CSS color value) |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | Border line style |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor on hover |
+| `draggable` | `boolean` | No | `false` | Allow the user to drag this circle |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `onClick` | `(circle: SphereCircle) => void` | No | - | Called when the circle is clicked |
+| `onDrag` | `(circle: SphereCircle) => void` | No | - | Called while the circle is being dragged |
+| `onDrop` | `(circle: SphereCircle) => void` | No | - | Called when the circle is dropped after dragging |
+
+---
 
 ### Popup
+
+Displays an information popup at a specific location on the map.
 
 ```tsx
 <Popup
@@ -249,16 +362,47 @@ The map container. All overlays (Marker, Polygon, etc.) go inside.
 />
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `position` | `{ lon: number, lat: number }` | *required* | Popup position |
-| `title` | `string` | - | Popup title |
-| `detail` | `string` | - | Popup detail text |
-| `onClose` | `() => void` | - | Called when popup closes |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | Popup coordinates |
+| `ref` | `Ref<PopupRef>` | No | - | Ref for imperative control (see [PopupRef](#popupref)) |
+| `title` | `string` | No | - | Popup title |
+| `detail` | `string` | No | - | Popup detail text (supports HTML) |
+| `loadDetail` | `(element: HTMLElement) => void` | No | - | Callback to dynamically load detail content into the popup element |
+| `html` | `string` | No | - | Custom HTML content (overrides `detail`) |
+| `loadHtml` | `(element: HTMLElement) => void` | No | - | Callback to dynamically load custom HTML content |
+| `size` | `Size` | No | Auto | Popup size (`{ width, height }` in pixels) |
+| `closable` | `boolean` | No | `true` | Show close button |
+| `onClose` | `(popup: SpherePopup) => void` | No | - | Called when the popup is closed |
+
+**Custom HTML popup:**
+
+```tsx
+<Popup
+  position={{ lon: 100.5, lat: 13.75 }}
+  html='<div style="background: #eeeeff; padding: 10px;">Custom content</div>'
+/>
+```
+
+**Dynamic content loading:**
+
+```tsx
+<Popup
+  position={{ lon: 100.5, lat: 13.75 }}
+  title="Loading..."
+  loadDetail={(element) => {
+    fetch('/api/data')
+      .then(res => res.json())
+      .then(data => { element.innerHTML = data.description; });
+  }}
+/>
+```
+
+---
 
 ### Dot
 
-A simple point marker on the map.
+A simple point geometry on the map (smaller and simpler than Marker).
 
 ```tsx
 <Dot
@@ -270,18 +414,27 @@ A simple point marker on the map.
 />
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `position` | `{ lon: number, lat: number }` | *required* | Dot position |
-| `lineWidth` | `number` | `3` | Dot size in pixels |
-| `lineColor` | `string` | - | Dot color (CSS color) |
-| `title` | `string` | - | Popup title |
-| `detail` | `string` | - | Popup detail |
-| `draggable` | `boolean` | `false` | Allow dragging |
-| `onClick` | `(dot) => void` | - | Click handler |
-| `onDrop` | `(dot, location) => void` | - | Drop handler |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | Dot coordinates |
+| `ref` | `Ref<DotRef>` | No | - | Ref for imperative control (see [DotRef](#dotref)) |
+| `title` | `string` | No | - | Text shown on hover tooltip |
+| `detail` | `string` | No | - | Text shown in popup when clicked |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range at which the dot is visible |
+| `lineWidth` | `number` | No | `3` | Dot size in pixels |
+| `lineColor` | `string` | No | Preset color | Dot color (any CSS color value) |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor on hover |
+| `draggable` | `boolean` | No | `false` | Allow the user to drag this dot |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `onClick` | `(dot: SphereDot) => void` | No | - | Called when the dot is clicked |
+| `onDrag` | `(dot: SphereDot) => void` | No | - | Called while the dot is being dragged |
+| `onDrop` | `(dot: SphereDot, location: Location) => void` | No | - | Called when the dot is dropped after dragging |
+
+---
 
 ### Rectangle
+
+Draws a rectangle on the map.
 
 ```tsx
 <Rectangle
@@ -294,26 +447,35 @@ A simple point marker on the map.
 />
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `position` | `{ lon: number, lat: number }` | *required* | Top-left corner position |
-| `size` | `{ width, height }` | *required* | Size in degrees |
-| `fillColor` | `string` | - | Fill color (CSS color) |
-| `lineColor` | `string` | - | Border color |
-| `lineWidth` | `number` | `1` | Border width in pixels |
-| `lineStyle` | `'Solid' \| 'Dashed' \| 'Dot'` | `'Solid'` | Border style |
-| `title` | `string` | - | Popup title |
-| `detail` | `string` | - | Popup detail |
-| `draggable` | `boolean` | `false` | Allow dragging |
-| `editable` | `boolean` | `false` | Allow corner editing |
-| `onClick` | `(rectangle) => void` | - | Click handler |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | Top-left corner coordinates |
+| `size` | `Size \| Location` | Yes | - | Size in degrees (`{ width, height }`) or bottom-right corner (`{ lon, lat }`) |
+| `ref` | `Ref<RectangleRef>` | No | - | Ref for imperative control (see [RectangleRef](#rectangleref)) |
+| `title` | `string` | No | - | Text shown on hover tooltip |
+| `detail` | `string` | No | - | Text shown in popup when clicked |
+| `popup` | `PopupOptions` | No | - | Popup configuration (overrides `detail`) |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range at which the rectangle is visible |
+| `lineWidth` | `number` | No | `3` | Border width in pixels |
+| `lineColor` | `string` | No | Preset color | Border color (any CSS color value) |
+| `fillColor` | `string` | No | Preset color | Fill color (any CSS color value) |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | Border line style |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor on hover |
+| `draggable` | `boolean` | No | `false` | Allow the user to drag this rectangle |
+| `editable` | `boolean` | No | `false` | Allow corner editing |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `onClick` | `(rectangle: SphereRectangle) => void` | No | - | Called when the rectangle is clicked |
+| `onDrag` | `(rectangle: SphereRectangle) => void` | No | - | Called while the rectangle is being dragged |
+| `onDrop` | `(rectangle: SphereRectangle) => void` | No | - | Called when the rectangle is dropped after dragging |
+
+---
 
 ### Layer
 
-Add custom or built-in layers to the map.
+Add built-in or custom tile layers to the map.
 
 ```tsx
-{/* Built-in layer preset */}
+{/* Built-in data layer */}
 <Layer preset="TRAFFIC" />
 
 {/* Custom WMS layer */}
@@ -325,32 +487,110 @@ Add custom or built-in layers to the map.
   opacity={0.7}
 />
 
-{/* Set as base layer */}
+{/* Change the base layer */}
 <Layer preset="HYBRID" isBase />
 ```
 
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `preset` | `BuiltInLayer` | - | Use a built-in layer |
-| `name` | `string` | - | Custom layer name |
-| `isBase` | `boolean` | `false` | Set as base layer |
-| `type` | `'WMS' \| 'TMS' \| 'XYZ' \| ...` | `'Vector'` | Layer type |
-| `url` | `string` | - | Tile server URL |
-| `zoomRange` | `{ min, max }` | - | Visible zoom range |
-| `opacity` | `number` | `1` | Layer opacity (0-1) |
-| `zIndex` | `number` | `0` | Stacking order |
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `preset` | `BuiltInLayer` | No | - | Use a built-in layer (see [Built-in Layers](#built-in-layers)) |
+| `name` | `string` | Conditional | - | Layer name (required when `preset` is not provided) |
+| `isBase` | `boolean` | No | `false` | Set as the base layer instead of adding as overlay |
+| `type` | `LayerType` | No | `"Vector"` | Layer type (see [Layer Types](#layer-types) below) |
+| `url` | `string` | No | Sphere tile server | Tile server URL |
+| `zoomRange` | `Range` | No | All zoom levels | Visible zoom range (`{ min, max }`) |
+| `source` | `Range` | No | All zoom levels | Available tile zoom range |
+| `opacity` | `number` | No | `1` | Layer opacity (0 = transparent, 1 = opaque) |
+| `zIndex` | `number` | No | `0` | Stacking order (higher values appear on top) |
+| `bound` | `Bound` | No | World | Only show tiles within this bounding box |
+| `attribution` | `string` | No | - | Attribution text for the layer |
+| `extraQuery` | `string` | No | - | Extra query string appended to tile requests |
+| `id` | `string` | No | Layer name | Unique layer identifier |
+| `format` | `string` | No | `"image/png"` (WMS) / `"png"` (others) | Image format or MIME type |
+| `srs` | `string` | No | `"EPSG:3857"` | Spatial reference system / tile matrix set |
+| `tileMatrixPrefix` | `string` | No | - | WMTS tile matrix prefix before zoom level |
+| `styles` | `string` | No | Default | Layer styles |
+| `version` | `string` | No | `"1.1.1"` (WMS) | WMS/WMTS version |
+| `refresh` | `number` | No | - | Auto-refresh interval in milliseconds |
+| `zoomOffset` | `number` | No | - | Zoom level offset for tile requests |
+| `beforeId` | `string` | No | Symbol layer | Insert layer before this layer ID |
+
+#### Layer Types
+
+| Type | Description |
+|------|-------------|
+| `"Vector"` | Mapbox Vector Tiles (default) |
+| `"XYZ"` | XYZ raster tiles |
+| `"WMS"` | Web Map Service |
+| `"WMTS"` | Web Map Tile Service (key-value-pairs encoding) |
+| `"WMTS_REST"` | Web Map Tile Service (RESTful encoding) |
+| `"TMS"` | Tile Map Service |
+| `"Tiles3D"` | OGC 3D Tiles |
+| `"I3S"` | Indexed 3D Scene Layer |
+
+---
 
 ## Hooks
 
+### useMap
+
+Access the raw map instance and the Sphere API namespace directly.
+
+```tsx
+import { useMap } from 'gistda-sphere-react';
+
+function MapInfo() {
+  const { map, sphere, isReady } = useMap();
+
+  if (!isReady) return <div>Loading...</div>;
+
+  return <div>Zoom: {map.zoom()}</div>;
+}
+```
+
+| Return Property | Type | Description |
+|-----------------|------|-------------|
+| `map` | `SphereMapInstance \| null` | The underlying Sphere map instance |
+| `sphere` | `SphereNamespace \| null` | The global `sphere` API namespace |
+| `isReady` | `boolean` | `true` when the map is initialized and ready to use |
+
+---
+
+### useSphere
+
+Access the Sphere API namespace without requiring a map.
+
+```tsx
+import { useSphere } from 'gistda-sphere-react';
+
+function SphereInfo() {
+  const { sphere, isLoaded, error, apiKey } = useSphere();
+
+  if (!isLoaded) return <div>Loading API...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return <div>API loaded with key: {apiKey}</div>;
+}
+```
+
+| Return Property | Type | Description |
+|-----------------|------|-------------|
+| `sphere` | `SphereNamespace \| null` | The global `sphere` API namespace |
+| `isLoaded` | `boolean` | `true` when the API script has loaded |
+| `error` | `Error \| null` | Error if the API failed to load |
+| `apiKey` | `string` | The API key passed to `SphereProvider` |
+
+---
+
 ### useMapControls
 
-Control the map from anywhere inside `SphereProvider`.
+Control the map programmatically from any component inside `SphereProvider`.
 
 ```tsx
 import { useMapControls } from 'gistda-sphere-react';
 
 function Sidebar() {
-  const { goTo, setZoom, setFilter, setBaseLayer } = useMapControls();
+  const { goTo, setZoom, setFilter, setBaseLayer, isReady } = useMapControls();
 
   return (
     <div>
@@ -367,47 +607,38 @@ function Sidebar() {
 
 | Function | Parameters | Description |
 |----------|------------|-------------|
-| `goTo` | `{ center?, zoom? }` | Navigate to location with optional zoom |
-| `setCenter` | `{ lon, lat }` | Set map center |
-| `setZoom` | `number` | Set zoom level |
-| `setFilter` | `FilterType \| false` | Apply color filter (see Filter Types below) |
-| `setBaseLayer` | `BuiltInLayer` | Change base map layer |
-| `addLayer` | `BuiltInLayer` | Add a data layer |
-| `removeLayer` | `BuiltInLayer` | Remove a data layer |
-| `setLanguage` | `'th' \| 'en'` | Change map language |
-| `setRotate` | `number` | Set rotation angle |
-| `setPitch` | `number` | Set pitch angle |
-| `loadPredefinedOverlay` | `PredefinedOverlay` | Load a predefined overlay (CCTV, events, AQI) |
-| `unloadPredefinedOverlay` | `PredefinedOverlay` | Remove a predefined overlay |
+| `isReady` | - | `boolean` indicating whether the map is ready |
+| `goTo` | `(options: FlyToOptions, animate?: boolean)` | Navigate to a location with optional zoom, rotation, pitch, and padding. Accepts [MapLibre FlyToOptions](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/FlyToOptions/) |
+| `setCenter` | `(location: Location, animate?: boolean)` | Set the map center |
+| `setZoom` | `(zoom: number, animate?: boolean)` | Set the zoom level |
+| `setBound` | `(bound: Bound, options?: FitBoundsOptions)` | Fit the map to a bounding box |
+| `setRotate` | `(angle: number, animate?: boolean)` | Set rotation angle in degrees (clockwise from north) |
+| `setPitch` | `(angle: number)` | Set pitch angle in degrees |
+| `setFilter` | `(filter: FilterType \| false)` | Apply a color filter, or pass `false` to remove |
+| `setLanguage` | `(language: string)` | Change the map language (ISO 639-1 code) |
+| `setBaseLayer` | `(layer: BuiltInLayer)` | Change the base map layer |
+| `addLayer` | `(layer: BuiltInLayer)` | Add a data layer on top of the base layer |
+| `removeLayer` | `(layer: BuiltInLayer)` | Remove a data layer |
+| `loadPredefinedOverlay` | `(overlay: PredefinedOverlay)` | Load a predefined overlay (`"cameras"`, `"events"`, or `"aqi"`) |
+| `unloadPredefinedOverlay` | `(overlay: PredefinedOverlay)` | Remove a predefined overlay |
+| `resize` | `()` | Resize the map to fit its container |
+| `repaint` | `()` | Force the map to repaint |
 
-### useMap
-
-Access the map instance directly.
-
-```tsx
-import { useMap } from 'gistda-sphere-react';
-
-function MapInfo() {
-  const { map, isReady } = useMap();
-
-  if (!isReady) return <div>Loading...</div>;
-
-  return <div>Map ID: {map.id()}</div>;
-}
-```
-
-| Return Value | Type | Description |
-|--------------|------|-------------|
-| `map` | `SphereMap \| null` | The map instance |
-| `sphere` | `SphereNamespace \| null` | The Sphere API namespace |
-| `isReady` | `boolean` | `true` when map is ready to use |
+---
 
 ### Event Hooks
 
-Listen to map events from any component inside `SphereMap`:
+Listen to map events from any component inside `SphereMap`.
 
 ```tsx
-import { useMapClick, useMapZoom, useMapReady, useMapLocation, useOverlayClick } from 'gistda-sphere-react';
+import {
+  useMapReady,
+  useMapClick,
+  useMapZoom,
+  useMapLocation,
+  useOverlayClick,
+  useMapEvent,
+} from 'gistda-sphere-react';
 
 function MapEvents() {
   useMapReady(() => {
@@ -430,22 +661,71 @@ function MapEvents() {
     console.log('Overlay clicked at:', location);
   });
 
+  // Generic event hook for any Sphere event
+  useMapEvent('rotate', (angle) => {
+    console.log('Rotated to:', angle);
+  });
+
   return null;
 }
 ```
 
-| Hook | Handler Receives | Description |
-|------|-----------------|-------------|
-| `useMapReady` | `() => void` | Map finished initializing |
-| `useMapClick` | `(location: { lon, lat }) => void` | Map was clicked |
-| `useMapZoom` | `() => void` | Zoom level changed |
-| `useMapLocation` | `() => void` | Map center changed |
-| `useOverlayClick` | `({ overlay, location }) => void` | An overlay was clicked |
-| `useMapEvent` | `(data) => void` | Generic — listen to any Sphere event by name |
+| Hook | Handler Signature | Description |
+|------|-------------------|-------------|
+| `useMapReady` | `() => void` | Fires when the map is initialized |
+| `useMapClick` | `(location: Location) => void` | Fires when the map is clicked |
+| `useMapZoom` | `() => void` | Fires when the zoom level changes |
+| `useMapLocation` | `() => void` | Fires when the map center changes |
+| `useOverlayClick` | `(data: { overlay: SphereOverlay, location: Location }) => void` | Fires when any overlay on the map is clicked |
+| `useMapEvent` | `(data: unknown) => void` | Generic hook to listen to any Sphere event by name |
+
+**Available event names for `useMapEvent`:**
+
+| Event Name | Data Received | Description |
+|------------|---------------|-------------|
+| `"ready"` | - | Map is ready to use |
+| `"resize"` | - | Map has been resized |
+| `"repaint"` | - | Map has been repainted |
+| `"zoom"` | - | Zoom level changed |
+| `"zoomRange"` | - | Zoom range changed |
+| `"location"` | - | Map center changed |
+| `"fullscreen"` | `boolean` | Map entered/exited fullscreen |
+| `"rotate"` | - | Map rotation changed |
+| `"pitch"` | - | Map pitch changed |
+| `"click"` | `Location` | User clicked the map |
+| `"doubleClick"` | `Location` | User double-clicked the map |
+| `"mousemove"` | `Location` | Mouse moved over the map |
+| `"wheel"` | `Point` | Mouse wheel scrolled |
+| `"drag"` | - | User started dragging |
+| `"drop"` | - | User stopped dragging |
+| `"idle"` | - | Map is idle (no input, animation, or tile loading) |
+| `"layerChange"` | `Layer` (added), `Layer` (removed) | A layer was added or removed |
+| `"tileLoading"` | `string` (layer name) | Tiles are loading |
+| `"tileLoaded"` | `string` (layer name) | Tiles finished loading |
+| `"overlayChange"` | `Overlay` | An overlay was added, removed, or cleared |
+| `"overlayUpdate"` | `Overlay` | An overlay was modified |
+| `"overlayClick"` | `{ overlay, location }` | User clicked an overlay |
+| `"overlayLoad"` | `object` | Predefined overlays finished loading |
+| `"overlayDrag"` | `Overlay` | User started dragging an overlay |
+| `"overlayDrop"` | `Overlay` | User dropped an overlay |
+| `"overlayHover"` | `Overlay` | Mouse entered an overlay |
+| `"overlayLeave"` | `Overlay` | Mouse left an overlay |
+| `"popupClose"` | `Popup` | A popup was closed |
+| `"routeError"` | `number` (error code) | A routing error occurred |
+| `"routeComplete"` | `object[]` (route list) | Route calculation completed |
+| `"error"` | `object` (error message) | An error occurred |
+| `"toolbarChange"` | `string` (mode) | Toolbar drawing mode changed |
+| `"drawCreate"` | `GeoJSON[]` | Features were created via drawing |
+| `"drawDelete"` | `GeoJSON[]` | Features were deleted via drawing |
+| `"tooltipChange"` | `string` (message) | Map tooltip changed |
+| `"beforeContextmenu"` | `MenuEvent` | Context menu is about to appear (return `false` to prevent) |
+| `"contextmenu"` | - | Context menu appeared |
+
+---
 
 ### useSearch
 
-Search for POIs and perform reverse geocoding.
+Search for points of interest (POIs) and perform reverse geocoding.
 
 ```tsx
 import { useSearch } from 'gistda-sphere-react';
@@ -458,13 +738,18 @@ function SearchComponent() {
     console.log(results.data);
   };
 
+  const getSuggestions = async () => {
+    const results = await suggest('กรุงเทพ', { limit: 5 });
+    console.log(results.data);
+  };
+
   const reverseGeocode = async (location) => {
     const addr = await address(location);
     console.log(addr.address, addr.province);
   };
 
   const findNearby = async (location) => {
-    const pois = await nearPoi(location, { limit: 5 });
+    const pois = await nearPoi(location, { limit: 5, span: 0.01 });
     console.log(pois);
   };
 
@@ -474,13 +759,80 @@ function SearchComponent() {
 
 | Function | Parameters | Returns | Description |
 |----------|------------|---------|-------------|
-| `suggest` | `(keyword, options?)` | `Promise<SearchResult>` | Get search suggestions |
-| `search` | `(keyword, options?)` | `Promise<SearchResult>` | Search for POIs |
-| `address` | `(location, options?)` | `Promise<AddressResult>` | Reverse geocode location |
-| `nearPoi` | `(location, options?)` | `Promise<PoiResult[]>` | Find nearby POIs |
-| `clear` | `()` | `void` | Clear search results |
-| `enablePopup` | `(state)` | `void` | Enable/disable result popups |
-| `setLanguage` | `(lang)` | `void` | Set search language |
+| `isReady` | - | `boolean` | Whether the search service is initialized |
+| `suggest` | `(keyword: string, options?: SuggestOptions)` | `Promise<SearchResult>` | Get auto-complete search suggestions |
+| `search` | `(keyword: string, options?: SearchOptions)` | `Promise<SearchResult>` | Search for POIs by keyword |
+| `address` | `(location: Location, options?: AddressOptions)` | `Promise<AddressResult>` | Reverse geocode a location to an address |
+| `nearPoi` | `(location: Location, options?: NearPoiOptions)` | `Promise<PoiResult[]>` | Find POIs near a location |
+| `clear` | `()` | `void` | Clear search results from the map |
+| `enablePopup` | `(state: boolean)` | `void` | Enable or disable popups for search results |
+| `setLanguage` | `(lang: string)` | `void` | Set the search language (ISO 639-1 code) |
+
+**SuggestOptions:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `area` | `string` | Any area | Geocode to restrict suggestions to a specific area |
+| `offset` | `number` | `0` | Offset of the first result returned |
+| `limit` | `number` | `10` | Maximum number of results to return |
+| `dataset` | `string` | Default data | Search dataset to use |
+
+**SearchOptions:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `area` | `string` | Any area | Geocode to restrict search to a specific area |
+| `tag` | `string` | Any tag | Filter results by tag category |
+| `span` | `string` | Anywhere | Search radius with unit (e.g. `"5km"`, `"1000m"`, `"0.1deg"`) |
+| `offset` | `number` | `0` | Offset of the first result returned |
+| `limit` | `number` | `20` | Maximum number of results to return |
+| `dataset` | `string` | Default data | Search dataset to use |
+
+**AddressOptions:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `limit` | `number` | `5` | Maximum number of results when searching by street address |
+| `dataset` | `string` | Default data | Dataset for address lookup |
+
+**NearPoiOptions:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `span` | `number` | Optimal span | Search radius in degrees |
+| `zoom` | `number` | All zoom levels | Maximum POI zoom level |
+| `limit` | `number` | `10` | Maximum number of results to return |
+
+**Return types:**
+
+```typescript
+// SearchResult (returned by suggest and search)
+{
+  data: object[];    // Array of POI result objects
+  total?: number;    // Total number of matching results
+}
+
+// AddressResult (returned by address)
+{
+  address?: string;      // Full address string
+  subdistrict?: string;  // Sub-district name
+  district?: string;     // District name
+  province?: string;     // Province name
+  postcode?: string;     // Postal code
+  geocode?: string;      // Area geocode
+}
+
+// PoiResult (returned by nearPoi)
+{
+  id: string;            // POI identifier
+  name: string;          // POI name
+  location: Location;    // POI coordinates
+  category?: string;     // POI category
+  distance?: number;     // Distance from search location in meters
+}
+```
+
+---
 
 ### useRoute
 
@@ -490,17 +842,17 @@ Calculate and display routes between locations.
 import { useRoute } from 'gistda-sphere-react';
 
 function RouteComponent() {
-  const { addDestination, search, getDistance, getInterval, clear, isReady } = useRoute();
+  const { addDestination, search, getDistance, getInterval, getGuide, clear, isReady } = useRoute();
 
   const calculateRoute = () => {
     addDestination({ lon: 100.5018, lat: 13.7563 }); // Bangkok
     addDestination({ lon: 98.9853, lat: 18.7883 });  // Chiang Mai
-    search(); // Calculate route
+    search(); // Calculate and display the route
   };
 
   const showInfo = () => {
-    console.log('Distance:', getDistance(true)); // "450 km"
-    console.log('Time:', getInterval(true));     // "5 hours 30 mins"
+    console.log('Distance:', getDistance(true)); // e.g. "450 km"
+    console.log('Time:', getInterval(true));     // e.g. "5 hours 30 mins"
   };
 
   return (
@@ -515,22 +867,71 @@ function RouteComponent() {
 
 | Function | Parameters | Returns | Description |
 |----------|------------|---------|-------------|
-| `addDestination` | `(location, mode?)` | `void` | Add a destination |
-| `insertDestination` | `(index, location, mode?)` | `void` | Insert destination at index |
-| `removeDestinationAt` | `(index)` | `void` | Remove destination by index |
-| `clearDestinations` | `()` | `void` | Clear all destinations |
-| `clear` | `()` | `void` | Clear everything |
-| `reverse` | `()` | `void` | Reverse route direction |
-| `search` | `()` | `void` | Calculate and display route |
-| `getDistance` | `(format?)` | `number \| string` | Get total distance |
-| `getInterval` | `(format?)` | `number \| string` | Get estimated time |
-| `getGuide` | `(format?)` | `RouteGuideStep[]` | Get turn-by-turn directions |
-| `setMode` | `(mode)` | `void` | Set route mode (Traffic/Cost/Distance/Fly) |
-| `setLabel` | `(label)` | `void` | Set label display (Distance/Time/Hide) |
+| `isReady` | - | `boolean` | Whether the routing service is initialized |
+| `addDestination` | `(destination: SphereMarker \| Location, mode?: RouteMode)` | `void` | Add a destination to the route |
+| `insertDestination` | `(index: number, destination: SphereMarker \| Location, mode?: RouteMode)` | `void` | Insert a destination at a specific index |
+| `removeDestination` | `(destination: SphereMarker)` | `void` | Remove a destination by its marker reference |
+| `removeDestinationAt` | `(index: number)` | `void` | Remove a destination by index |
+| `clearDestinations` | `()` | `void` | Remove all destinations |
+| `clearPath` | `()` | `void` | Remove the displayed route path only |
+| `clear` | `()` | `void` | Remove the entire route (destinations and path) |
+| `reverse` | `()` | `void` | Reverse the direction of the route |
+| `search` | `()` | `void` | Calculate and display the route |
+| `getDistance` | `(format?: boolean)` | `number \| string` | Get total distance. Pass `true` for formatted string (e.g. `"450 km"`), `false` for meters |
+| `getInterval` | `(format?: boolean)` | `number \| string` | Get estimated travel time. Pass `true` for formatted string (e.g. `"5 hours 30 mins"`), `false` for seconds |
+| `getGuide` | `(format?: boolean)` | `RouteGuideStep[] \| HTMLElement` | Get turn-by-turn directions. Pass `true` for an HTML element, `false` for data array |
+| `exportRouteLine` | `(options?: GeometryOptions)` | `SpherePolyline \| null` | Export the calculated route as a Polyline overlay |
+| `listDestinations` | `()` | `SphereMarker[]` | List all destination markers |
+| `size` | `()` | `number` | Get the number of destinations |
+| `setMode` | `(mode: RouteMode)` | `void` | Set the routing mode for all destinations |
+| `setModeAt` | `(index: number, mode: RouteMode)` | `void` | Set the routing mode for a specific destination segment |
+| `enableRouteType` | `(routeType: RouteType, state: boolean)` | `void` | Enable or disable a route type |
+| `setLabel` | `(label: RouteLabelType)` | `void` | Set label display mode on the route |
+| `setAuto` | `(state: boolean)` | `void` | Enable or disable auto-recalculation when destinations change |
+| `setLanguage` | `(lang: string)` | `void` | Set the routing language |
+
+**RouteMode values:**
+
+| Mode | Description |
+|------|-------------|
+| `"Traffic"` | Fastest route using real-time and predicted traffic data; avoids road closures and floods |
+| `"Cost"` | Fastest route without traffic consideration |
+| `"Distance"` | Shortest route by distance |
+| `"Fly"` | Direct straight line to destination |
+
+**RouteType values:**
+
+| Type | Description |
+|------|-------------|
+| `"Road"` | Regular roads |
+| `"Ferry"` | Ferry routes |
+| `"Tollway"` | Toll roads / expressways |
+| `"All"` | All route types |
+
+**RouteLabelType values:**
+
+| Label | Description |
+|-------|-------------|
+| `"Distance"` | Show distance labels on the route |
+| `"Time"` | Show time labels on the route |
+| `"Hide"` | Hide all labels |
+
+**RouteGuideStep (when `format` is `false`):**
+
+```typescript
+{
+  instruction: string;         // Turn-by-turn instruction text
+  distance: number | string;   // Distance for this step
+  duration: number | string;   // Duration for this step
+  location: Location;          // Location of this step
+}
+```
+
+---
 
 ### useTags
 
-Display POI markers by category on the map.
+Display POI markers by category on the map. Tags are predefined groups of POIs from the Sphere database.
 
 ```tsx
 import { useTags } from 'gistda-sphere-react';
@@ -563,32 +964,447 @@ function TagsComponent() {
 
 | Function | Parameters | Returns | Description |
 |----------|------------|---------|-------------|
-| `set` | `(tag, options?)` | `void` | Set tag (clears existing) |
-| `add` | `(tag, options?)` | `void` | Add a tag |
-| `remove` | `(tag)` | `void` | Remove a tag |
-| `clear` | `()` | `void` | Clear all tags |
-| `list` | `()` | `string[]` | Get active tag names |
-| `size` | `()` | `number` | Get tag count |
-| `enablePopup` | `(state)` | `void` | Enable/disable tag popups |
+| `isReady` | - | `boolean` | Whether the tag service is initialized |
+| `set` | `(tag: string \| TagDataFunction, options?: TagOptions)` | `void` | Clear all existing tags and set a new one |
+| `add` | `(tag: string \| TagDataFunction, options?: TagOptions)` | `void` | Add a tag to the map |
+| `remove` | `(tag: string)` | `void` | Remove a tag from the map |
+| `clear` | `()` | `void` | Remove all tags from the map |
+| `list` | `()` | `string[]` | Get the names of all active tags |
+| `size` | `()` | `number` | Get the number of active tags |
+| `enablePopup` | `(state: boolean)` | `void` | Enable or disable popups for tag POIs |
+| `setLanguage` | `(lang: string)` | `void` | Set the tag display language |
 
-**Available tag categories** (use the `TAG_CATEGORIES` constant or the Thai-language IDs directly):
+> **Tip**: Use `"%"` as the tag name to load all available POIs.
 
-- Food & Dining: `อาหารไทย` (Thai), `อาหารญี่ปุ่น` (Japanese), `อาหารจีน` (Chinese), `อาหารเกาหลี` (Korean), `อาหารเวียดนาม` (Vietnamese), `อาหารอินเดีย` (Indian), `อาหารอิตาลี` (Italian), `อาหารฝรั่งเศส` (French), `อาหารเยอรมัน` (German), `อาหารยุโรป` (European)
-- Services: `ธนาคาร` (Bank), `ATM`, `โรงพยาบาล` (Hospital), `ปั๊มน้ำมัน` (Gas Station)
-- Tourism: `โรงแรม` (Hotel), `วัด` (Temple), `พิพิธภัณฑ์` (Museum), `ห้างสรรพสินค้า` (Shopping Mall)
+**TagDataFunction** (for custom data sources):
 
-You can also iterate over `TAG_CATEGORIES` to build a UI:
+```typescript
+type TagDataFunction = (tile: Tile) => object[];
+// tile: { x: number, y: number, z: number }
+```
+
+**TagOptions:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `source` | `string` | Sphere tag server | Custom tag server URL |
+| `type` | `"WFS" \| "OGC"` | Default server | Tag data source type |
+| `icon` | `Icon \| string` | Default icons | Custom icon, or `"big"`/`"small"` for default icon sizes |
+| `visibleRange` | `Range` | All zoom levels | Zoom range at which tags are visible |
+| `label` | `Range` | None | Zoom range at which tag labels are visible |
+| `area` | `string` | Any area | Geocode to restrict tags to a specific area |
+| `dataset` | `string` | Default data | Tag dataset to use |
+
+**WFS-specific TagOptions:**
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `name` | `string` | Required | WFS data name |
+| `extraQuery` | `string` | - | Extra query string |
+| `version` | `string` | `"2.0.0"` | WFS version |
+
+**Available tag categories** (use `TAG_CATEGORIES` constant or Thai-language IDs directly):
+
+| Category | Tag ID | English Label |
+|----------|--------|---------------|
+| Food & Dining | `อาหารไทย` | Thai Food |
+| Food & Dining | `อาหารญี่ปุ่น` | Japanese |
+| Food & Dining | `อาหารจีน` | Chinese |
+| Food & Dining | `อาหารเกาหลี` | Korean |
+| Food & Dining | `อาหารเวียดนาม` | Vietnamese |
+| Food & Dining | `อาหารอินเดีย` | Indian |
+| Food & Dining | `อาหารอิตาลี` | Italian |
+| Food & Dining | `อาหารฝรั่งเศส` | French |
+| Food & Dining | `อาหารเยอรมัน` | German |
+| Food & Dining | `อาหารยุโรป` | European |
+| Services | `ธนาคาร` | Bank |
+| Services | `ATM` | ATM |
+| Services | `โรงพยาบาล` | Hospital |
+| Services | `ปั๊มน้ำมัน` | Gas Station |
+| Tourism | `โรงแรม` | Hotel |
+| Tourism | `วัด` | Temple |
+| Tourism | `พิพิธภัณฑ์` | Museum |
+| Tourism | `ห้างสรรพสินค้า` | Shopping Mall |
+
+**Using `TAG_CATEGORIES` to build a UI:**
 
 ```tsx
 import { TAG_CATEGORIES } from 'gistda-sphere-react';
 
-TAG_CATEGORIES.forEach((category) => {
-  console.log(category.name); // "Food & Dining", "Services", "Tourism"
-  category.tags.forEach((tag) => {
-    console.log(tag.id, tag.label); // "อาหารไทย", "Thai Food"
-  });
-});
+function TagSelector() {
+  const { add, remove } = useTags();
+
+  return (
+    <div>
+      {TAG_CATEGORIES.map((category) => (
+        <div key={category.name}>
+          <h3>{category.name}</h3>
+          {category.tags.map((tag) => (
+            <button key={tag.id} onClick={() => add(tag.id)}>
+              {tag.label}
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
 ```
+
+---
+
+### Overlay Collection Hooks
+
+Manage collections of overlays programmatically using these hooks.
+
+#### useMarkers
+
+```tsx
+import { useMarkers } from 'gistda-sphere-react';
+
+function MarkerManager() {
+  const { items, add, update, remove, clear, get } = useMarkers();
+
+  const addMarker = () => {
+    const id = add({
+      position: { lon: 100.5, lat: 13.75 },
+      title: 'New Marker',
+      draggable: true,
+    });
+    console.log('Added marker with ID:', id);
+  };
+
+  return (
+    <div>
+      <button onClick={addMarker}>Add</button>
+      <button onClick={clear}>Clear All</button>
+      <p>Count: {items.length}</p>
+    </div>
+  );
+}
+```
+
+#### usePolygons, usePolylines, useCircles
+
+These hooks follow the same pattern as `useMarkers` but for their respective overlay types.
+
+#### useOverlays
+
+Combines all overlay collection hooks into a single hook.
+
+```tsx
+import { useOverlays } from 'gistda-sphere-react';
+
+const { markers, polygons, polylines, circles, clearAll } = useOverlays();
+```
+
+**All overlay collection hooks return:**
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `items` | `T[]` | Array of current overlay data objects |
+| `add` | `(data: OverlayInput<T>) => string` | Add an overlay and return its generated ID |
+| `update` | `(id: string, data: Partial<T>) => void` | Update an overlay's properties by ID |
+| `remove` | `(id: string) => void` | Remove an overlay by ID |
+| `clear` | `() => void` | Remove all overlays of this type |
+| `get` | `(id: string) => T \| undefined` | Get an overlay's data by ID |
+
+---
+
+## Built-in Layers
+
+Use these with the `Layer` component's `preset` prop or with `useMapControls`'s `setBaseLayer`/`addLayer`/`removeLayer` functions.
+
+| Layer | Type | Description |
+|-------|------|-------------|
+| `"SIMPLE"` | Base | Low-complexity base layer |
+| `"STREETS"` | Base | Standard street map (default base layer) |
+| `"STREETS_NIGHT"` | Base | Street map with dark theme |
+| `"HYBRID"` | Base | Satellite imagery with street labels |
+| `"IMAGES"` | Base | Satellite/aerial imagery without labels |
+| `"TRAFFIC"` | Data | Real-time traffic overlay (auto-refreshes every 3 minutes) |
+| `"PM25"` | Data | Air quality (PM2.5) heatmap |
+| `"HOTSPOT"` | Data | Fire hotspot locations |
+| `"FLOOD"` | Data | Flood-affected areas |
+| `"DROUGHT"` | Data | Drought-affected areas |
+
+**Base layers** replace the current base map. Only one base layer can be active at a time.
+
+**Data layers** are added on top of the base layer. Multiple data layers can be active simultaneously.
+
+```tsx
+// Using the Layer component
+<Layer preset="TRAFFIC" />           {/* Add data layer */}
+<Layer preset="HYBRID" isBase />     {/* Change base layer */}
+
+// Using useMapControls hook
+const { setBaseLayer, addLayer, removeLayer } = useMapControls();
+
+setBaseLayer('HYBRID');     // Change base layer
+addLayer('TRAFFIC');        // Add data layer
+addLayer('PM25');           // Add another data layer
+removeLayer('TRAFFIC');     // Remove data layer
+```
+
+---
+
+## Predefined Overlays
+
+The Sphere API provides predefined overlays that display live data on the map.
+
+| Overlay | Description |
+|---------|-------------|
+| `"cameras"` | Live CCTV traffic camera feeds with optional motion video |
+| `"events"` | Active traffic and road events with popup details |
+| `"aqi"` | Thai Air Quality Index data points with popup details |
+
+```tsx
+const { loadPredefinedOverlay, unloadPredefinedOverlay } = useMapControls();
+
+loadPredefinedOverlay('cameras');      // Show CCTV cameras
+loadPredefinedOverlay('events');       // Show traffic events
+loadPredefinedOverlay('aqi');          // Show air quality data
+unloadPredefinedOverlay('cameras');    // Hide CCTV cameras
+```
+
+---
+
+## Color Filters
+
+Apply visual color filters to the map for accessibility or aesthetics.
+
+| Filter | Description |
+|--------|-------------|
+| `"Dark"` | Dark mode filter for map and UI |
+| `"Light"` | Lighter map colors |
+| `"Protanopia"` | Accessibility filter for red color blindness |
+| `"Deuteranopia"` | Accessibility filter for green color blindness |
+| `"None"` | No filter (default) |
+
+```tsx
+const { setFilter } = useMapControls();
+
+setFilter('Dark');          // Apply dark mode
+setFilter('Protanopia');    // Apply red color blindness filter
+setFilter('Light');         // Apply lighter colors
+setFilter(false);           // Remove filter (same as 'None')
+```
+
+---
+
+## Ref APIs
+
+All overlay components support React refs for imperative control. Access the underlying Sphere API instance and call methods directly.
+
+### SphereMapRef
+
+```tsx
+const mapRef = useRef<SphereMapRef>(null);
+
+<SphereMap ref={mapRef} style={{ height: '500px' }}>
+  {/* children */}
+</SphereMap>
+
+// Later:
+mapRef.current?.setZoom(15);
+mapRef.current?.goTo({ center: { lon: 100.5, lat: 13.75 }, zoom: 12 });
+```
+
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `getMap` | `()` | `SphereMapInstance \| null` | Get the underlying map instance |
+| `setZoom` | `(zoom: number, animate?: boolean)` | `void` | Set zoom level |
+| `setCenter` | `(location: Location, animate?: boolean)` | `void` | Set map center |
+| `setBound` | `(bound: Bound, options?: object)` | `void` | Fit map to bounding box |
+| `goTo` | `(target: FlyToOptions, animate?: boolean)` | `void` | Animate to a target location/zoom/rotation/pitch |
+| `setRotate` | `(angle: number, animate?: boolean)` | `void` | Set rotation angle |
+| `setPitch` | `(angle: number)` | `void` | Set pitch angle |
+| `setFilter` | `(filter: FilterType)` | `void` | Apply a color filter |
+| `resize` | `()` | `void` | Resize map to fit container |
+| `repaint` | `()` | `void` | Force map repaint |
+
+### MarkerRef
+
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `getMarker` | `()` | `SphereMarker \| null` | Get the underlying marker instance |
+| `togglePopup` | `(show?: boolean)` | `void` | Show or hide the marker popup (toggles if no argument) |
+| `setPosition` | `(location: Location, animate?: boolean)` | `void` | Move the marker to a new location |
+| `setRotation` | `(angle: number)` | `void` | Set rotation angle in degrees |
+
+### PolygonRef
+
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `getPolygon` | `()` | `SpherePolygon \| null` | Get the underlying polygon instance |
+| `togglePopup` | `(show?: boolean, location?: Location)` | `void` | Show or hide popup at the specified location |
+| `getPivot` | `()` | `Location \| null` | Get a point on the polygon surface |
+| `getCentroid` | `()` | `Location \| null` | Get the geometric center |
+| `getBound` | `()` | `Bound \| null` | Get the bounding box |
+| `getArea` | `(language?: string)` | `number \| string \| null` | Get area in square meters, or formatted if language is provided (e.g. `"th"`) |
+| `rotate` | `(angle: number)` | `void` | Rotate the polygon by an angle in degrees |
+| `updateStyle` | `(options: Partial<GeometryOptions>)` | `void` | Update line/fill style (lineWidth, lineColor, fillColor, lineStyle) |
+| `toGeoJSON` | `()` | `object \| null` | Convert to GeoJSON |
+
+### PolylineRef
+
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `getPolyline` | `()` | `SpherePolyline \| null` | Get the underlying polyline instance |
+| `togglePopup` | `(show?: boolean, location?: Location)` | `void` | Show or hide popup |
+| `getPivot` | `()` | `Location \| null` | Get a point on the line |
+| `getCentroid` | `()` | `Location \| null` | Get the geometric center |
+| `getBound` | `()` | `Bound \| null` | Get the bounding box |
+| `getLength` | `(language?: string)` | `number \| string \| null` | Get length in meters, or formatted if language is provided (e.g. `"th"` returns `"309 กม."`) |
+| `rotate` | `(angle: number)` | `void` | Rotate the polyline by an angle |
+| `updateStyle` | `(options: Partial<GeometryOptions>)` | `void` | Update line style |
+
+### CircleRef
+
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `getCircle` | `()` | `SphereCircle \| null` | Get the underlying circle instance |
+| `togglePopup` | `(show?: boolean, location?: Location)` | `void` | Show or hide popup |
+| `getCenter` | `()` | `Location \| null` | Get the circle center |
+| `getBound` | `()` | `Bound \| null` | Get the bounding box |
+| `getArea` | `(language?: string)` | `number \| string \| null` | Get area in square meters, or formatted |
+| `getRadius` | `(language?: string)` | `number \| string \| null` | Get radius in meters, or formatted |
+| `updateStyle` | `(options: Partial<GeometryOptions>)` | `void` | Update circle style |
+
+### PopupRef
+
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `getPopup` | `()` | `SpherePopup \| null` | Get the underlying popup instance |
+| `setPosition` | `(location: Location)` | `void` | Move the popup to a new location |
+| `setTitle` | `(title: string)` | `void` | Change the popup title |
+| `setDetail` | `(detail: string)` | `void` | Change the popup detail text |
+| `getElement` | `()` | `HTMLElement \| null` | Get the popup's DOM element |
+
+### DotRef
+
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `getDot` | `()` | `SphereDot \| null` | Get the underlying dot instance |
+| `setPosition` | `(location: Location)` | `void` | Move the dot to a new location |
+| `getPosition` | `()` | `Location \| null` | Get the current dot position |
+
+### RectangleRef
+
+| Method | Parameters | Returns | Description |
+|--------|------------|---------|-------------|
+| `getRectangle` | `()` | `SphereRectangle \| null` | Get the underlying rectangle instance |
+| `togglePopup` | `(show?: boolean, location?: Location)` | `void` | Show or hide popup |
+| `getBound` | `()` | `Bound \| null` | Get the bounding box |
+| `getArea` | `(language?: string)` | `number \| string \| null` | Get area in square meters, or formatted |
+| `updateStyle` | `(options: Partial<GeometryOptions>)` | `void` | Update rectangle style |
+
+---
+
+## TypeScript
+
+All types are exported from the package:
+
+```tsx
+import type {
+  // Core geometric types
+  Location,             // { lon: number, lat: number }
+  Point,                // { x: number, y: number }
+  Size,                 // { width: number, height: number }
+  Range,                // { min: number, max: number }
+  Bound,                // { minLon: number, minLat: number, maxLon: number, maxLat: number }
+  Tile,                 // { x: number, y: number, z: number }
+  Icon,                 // { url?, urlHD?, html?, offset?: Point, size?: Size }
+
+  // Enum types
+  BuiltInLayer,         // 'SIMPLE' | 'STREETS' | 'STREETS_NIGHT' | 'HYBRID' | 'TRAFFIC' | 'IMAGES' | 'PM25' | 'HOTSPOT' | 'FLOOD' | 'DROUGHT'
+  LayerType,            // 'Vector' | 'XYZ' | 'WMS' | 'WMTS' | 'WMTS_REST' | 'TMS' | 'Tiles3D' | 'I3S'
+  FilterType,           // 'Dark' | 'Light' | 'Protanopia' | 'Deuteranopia' | 'None'
+  LineStyleType,        // 'Solid' | 'Dashed' | 'Dot'
+  PredefinedOverlay,    // 'cameras' | 'events' | 'aqi'
+  UiComponentMode,      // 'Full' | 'Mobile' | 'None'
+
+  // Options types
+  PopupOptions,         // Popup configuration
+  GeometryOptions,      // Geometry styling options
+  MarkerOptions,        // Marker configuration
+  TagOptions,           // Tag configuration
+  SearchOptions,        // Search query options
+  SuggestOptions,       // Suggest query options
+  AddressOptions,       // Address lookup options
+  NearPoiOptions,       // Nearby POI search options
+
+  // Route types
+  RouteMode,            // 'Traffic' | 'Cost' | 'Distance' | 'Fly'
+  RouteType,            // 'Road' | 'Ferry' | 'Tollway' | 'All'
+  RouteLabelType,       // 'Distance' | 'Time' | 'Hide'
+  RouteGuideStep,       // Route instruction step
+
+  // Tag types
+  TagType,              // 'WFS' | 'OGC'
+
+  // Instance types
+  SphereMapInstance,     // Map instance type
+  SphereMarker,         // Marker instance type
+  SpherePolygon,        // Polygon instance type
+  SpherePolyline,       // Polyline instance type
+  SphereCircle,         // Circle instance type
+  SphereDot,            // Dot instance type
+  SphereRectangle,      // Rectangle instance type
+  SpherePopup,          // Popup instance type
+  SphereOverlay,        // Base overlay instance type
+  SphereNamespace,      // Global sphere namespace
+
+  // Ref types
+  SphereMapRef,         // Map component ref
+  MarkerRef,            // Marker component ref
+  PolygonRef,           // Polygon component ref
+  PolylineRef,          // Polyline component ref
+  CircleRef,            // Circle component ref
+  PopupRef,             // Popup component ref
+  DotRef,               // Dot component ref
+  RectangleRef,         // Rectangle component ref
+} from 'gistda-sphere-react';
+```
+
+### Icon Type
+
+The `Icon` type is used for custom marker icons. You can provide either a URL-based or HTML-based icon:
+
+```typescript
+// URL-based icon
+{
+  url: string;           // Icon image URL (required for URL-based)
+  urlHD?: string;        // High-DPI icon URL
+  size?: Size;           // Icon size in pixels ({ width, height }). Default: image dimensions
+  offset?: Point;        // Icon offset from the anchor point ({ x, y }). Default: center of icon
+}
+
+// HTML-based icon (overrides url)
+{
+  html: string;          // Custom HTML content for the icon
+  offset?: Point;        // Offset from the anchor point
+  size?: Size;           // Logical size
+}
+```
+
+### PopupOptions Type
+
+Used for configuring popups on markers and geometries:
+
+```typescript
+{
+  title?: string;                            // Popup title (supports HTML)
+  detail?: string;                           // Popup detail (supports HTML)
+  loadDetail?: (element: HTMLElement) => void; // Dynamically load detail content
+  html?: string;                             // Custom HTML content (overrides detail)
+  loadHtml?: (element: HTMLElement) => void;  // Dynamically load custom HTML
+  size?: Size;                               // Popup size ({ width, height })
+  closable?: boolean;                        // Show close button (default: true)
+}
+```
+
+---
 
 ## Examples
 
@@ -658,7 +1474,7 @@ function App() {
 
 ### Drawing Polygons
 
-Click to add points, double-click to finish:
+Click to add points, double-click to finish the polygon:
 
 ```tsx
 import { useState } from 'react';
@@ -685,7 +1501,12 @@ function App() {
         onDoubleClick={handleDoubleClick}
       >
         {polygons.map((positions) => (
-          <Polygon key={positions.map((p) => `${p.lon},${p.lat}`).join('|')} positions={positions} fillColor="rgba(255,0,0,0.3)" lineColor="red" />
+          <Polygon
+            key={positions.map((p) => `${p.lon},${p.lat}`).join('|')}
+            positions={positions}
+            fillColor="rgba(255,0,0,0.3)"
+            lineColor="red"
+          />
         ))}
         {points.map((pos) => (
           <Marker key={`${pos.lon}-${pos.lat}`} position={pos} />
@@ -746,62 +1567,145 @@ function App() {
 }
 ```
 
-## Built-in Layers
+### Custom WMS Layer
 
-| Layer | Type | Description |
-|-------|------|-------------|
-| `SIMPLE` | Base | Simple map |
-| `STREETS` | Base | Street map (default) |
-| `STREETS_NIGHT` | Base | Street map (dark) |
-| `HYBRID` | Base | Satellite with labels |
-| `TRAFFIC` | Data | Real-time traffic |
-| `PM25` | Data | Air quality (PM2.5) |
-| `FLOOD` | Data | Flood areas |
-| `HOTSPOT` | Data | Fire hotspots |
-| `DROUGHT` | Data | Drought areas |
+Add a custom Web Map Service layer:
 
 ```tsx
-const { setBaseLayer, addLayer, removeLayer } = useMapControls();
+import { SphereProvider, SphereMap, Layer } from 'gistda-sphere-react';
 
-setBaseLayer('HYBRID');     // Change base layer
-addLayer('TRAFFIC');        // Add data layer
-removeLayer('TRAFFIC');     // Remove data layer
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <SphereMap style={{ width: '100%', height: '500px' }}>
+        <Layer
+          name="bluemarble_terrain"
+          type="WMS"
+          url="https://ms.longdo.com/mapproxy/service"
+          zoomRange={{ min: 1, max: 9 }}
+          refresh={180000}
+          opacity={0.7}
+        />
+      </SphereMap>
+    </SphereProvider>
+  );
+}
 ```
 
-## Predefined Overlays
+### Routing between Locations
 
-The Sphere API provides predefined overlays that display live data on the map.
-
-| Overlay | Description |
-|---------|-------------|
-| `cameras` | Live CCTV camera feeds |
-| `events` | Active events |
-| `aqi` | Thai Air Quality Index |
+Calculate and display a route:
 
 ```tsx
-const { loadPredefinedOverlay, unloadPredefinedOverlay } = useMapControls();
+import { SphereProvider, SphereMap, useRoute } from 'gistda-sphere-react';
 
-loadPredefinedOverlay('cameras');      // Show CCTV cameras
-unloadPredefinedOverlay('cameras');    // Hide CCTV cameras
+function RoutePanel() {
+  const { addDestination, search, getDistance, getInterval, setMode, clear, isReady } = useRoute();
+
+  const calculateRoute = () => {
+    clear();
+    addDestination({ lon: 100.5018, lat: 13.7563 }); // Bangkok
+    addDestination({ lon: 98.9853, lat: 18.7883 });  // Chiang Mai
+    setMode('Traffic'); // Use real-time traffic data
+    search();
+  };
+
+  return (
+    <div>
+      <button onClick={calculateRoute} disabled={!isReady}>Calculate Route</button>
+      <button onClick={() => console.log('Distance:', getDistance(true))}>Show Distance</button>
+      <button onClick={() => console.log('Time:', getInterval(true))}>Show Time</button>
+      <button onClick={clear}>Clear Route</button>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <RoutePanel />
+      <SphereMap style={{ width: '100%', height: '500px' }} />
+    </SphereProvider>
+  );
+}
 ```
 
-## Color Filters
+### Searching for POIs
 
-| Filter | Description |
-|--------|-------------|
-| `Dark` | Dark mode filter |
-| `Light` | Light mode filter |
-| `Protanopia` | Red color blindness accessibility filter |
-| `Deuteranopia` | Green color blindness accessibility filter |
-| `None` | No filter (default) |
+Search for points of interest and reverse geocode:
 
 ```tsx
-const { setFilter } = useMapControls();
+import { SphereProvider, SphereMap, useSearch } from 'gistda-sphere-react';
 
-setFilter('Dark');          // Apply dark mode
-setFilter('Protanopia');    // Apply red color blindness filter
-setFilter(false);           // Remove filter
+function SearchPanel() {
+  const { search, address, nearPoi, isReady } = useSearch();
+
+  const searchCoffee = async () => {
+    const results = await search('coffee', { limit: 10 });
+    console.log('Found:', results.data);
+  };
+
+  const reverseGeocode = async () => {
+    const addr = await address({ lon: 100.5018, lat: 13.7563 });
+    console.log('Address:', addr.address, addr.province);
+  };
+
+  const findNearby = async () => {
+    const pois = await nearPoi({ lon: 100.5018, lat: 13.7563 }, { limit: 5 });
+    console.log('Nearby POIs:', pois);
+  };
+
+  return (
+    <div>
+      <button onClick={searchCoffee} disabled={!isReady}>Search Coffee</button>
+      <button onClick={reverseGeocode} disabled={!isReady}>Reverse Geocode</button>
+      <button onClick={findNearby} disabled={!isReady}>Find Nearby</button>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <SearchPanel />
+      <SphereMap style={{ width: '100%', height: '500px' }} />
+    </SphereProvider>
+  );
+}
 ```
+
+### Displaying Tags on the Map
+
+Show POI markers by category:
+
+```tsx
+import { SphereProvider, SphereMap, useTags } from 'gistda-sphere-react';
+
+function TagPanel() {
+  const { add, clear, list, isReady } = useTags();
+
+  return (
+    <div>
+      <button onClick={() => add('โรงพยาบาล')} disabled={!isReady}>Show Hospitals</button>
+      <button onClick={() => add('ATM')} disabled={!isReady}>Show ATMs</button>
+      <button onClick={() => add('วัด')} disabled={!isReady}>Show Temples</button>
+      <button onClick={clear}>Clear All</button>
+      <p>Active tags: {list().join(', ')}</p>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <TagPanel />
+      <SphereMap style={{ width: '100%', height: '500px' }} />
+    </SphereProvider>
+  );
+}
+```
+
+---
 
 ## Troubleshooting
 
@@ -824,22 +1728,13 @@ Wrap your component tree with `<SphereProvider>`:
 </SphereProvider>
 ```
 
-## TypeScript
+**Hooks returning `isReady: false`**
+Hooks like `useSearch`, `useRoute`, and `useTags` depend on the map being fully initialized. Wait for `isReady` to become `true` before calling their methods. You can also use the `onReady` prop on `SphereMap` or the `useMapReady` hook.
 
-All types are exported:
+**Overlays not appearing**
+Make sure the overlay components (Marker, Polygon, etc.) are placed inside the `<SphereMap>` component, not outside it.
 
-```tsx
-import type {
-  Location,           // { lon: number, lat: number }
-  Bound,              // { minLon, minLat, maxLon, maxLat }
-  BuiltInLayer,       // 'SIMPLE' | 'STREETS' | ...
-  PredefinedOverlay,  // 'cameras' | 'events' | 'aqi'
-  FilterType,         // 'Dark' | 'Light' | 'Protanopia' | 'Deuteranopia' | 'None'
-  SphereMapInstance,  // Map instance type
-  SphereMarker,       // Marker instance type
-  SpherePolygon,      // Polygon instance type
-} from 'gistda-sphere-react';
-```
+---
 
 ## License
 
