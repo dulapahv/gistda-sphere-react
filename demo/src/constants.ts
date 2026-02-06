@@ -1,7 +1,10 @@
 import {
+  Calendar,
+  Camera,
   Car,
   Circle as CircleIcon,
   CloudRain,
+  CloudSun,
   DollarSign,
   Dot,
   Flame,
@@ -104,6 +107,14 @@ export const OVERLAY_LAYERS = [
   { id: "HOTSPOT" as const, label: "Hotspot", icon: Flame },
   { id: "FLOOD" as const, label: "Flood", icon: CloudRain },
   { id: "DROUGHT" as const, label: "Drought", icon: Sprout },
+];
+
+export type PredefinedOverlay = "cameras" | "events" | "aqi";
+
+export const PREDEFINED_OVERLAYS = [
+  { id: "cameras" as const, label: "CCTV", icon: Camera },
+  { id: "events" as const, label: "Events", icon: Calendar },
+  { id: "aqi" as const, label: "AQI", icon: CloudSun },
 ];
 
 export const UI_CONTROLS = [

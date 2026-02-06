@@ -69,9 +69,11 @@ function MapContent() {
 
         <LayerSelector
           activeOverlays={mapSettings.activeOverlays}
+          activePredefined={mapSettings.activePredefined}
           currentLayer={mapSettings.currentLayer}
           onLayerChange={mapSettings.setLayer}
           onOverlayToggle={mapSettings.toggleOverlay}
+          onPredefinedToggle={mapSettings.togglePredefined}
         />
 
         <MapControlsPanel

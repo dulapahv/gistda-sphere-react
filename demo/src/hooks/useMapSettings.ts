@@ -6,6 +6,7 @@ import {
   DEFAULT_UI_CONTROLS,
   LOCATIONS,
   type OverlayLayer,
+  type PredefinedOverlay,
   type UiControlId,
 } from "../constants";
 
@@ -13,11 +14,13 @@ export interface UseMapSettingsReturn {
   mapReady: boolean;
   currentLayer: BaseLayer;
   activeOverlays: Set<OverlayLayer>;
+  activePredefined: Set<PredefinedOverlay>;
   uiControls: Record<UiControlId, boolean>;
   zoom: number;
   center: Location | null;
   setLayer: (layer: BaseLayer) => void;
   toggleOverlay: (layer: OverlayLayer) => void;
+  togglePredefined: (overlay: PredefinedOverlay) => void;
   toggleUiControl: (controlId: UiControlId) => void;
   navigateTo: (location: Location, zoom?: number) => void;
   setZoom: (zoom: number) => void;
@@ -26,12 +29,22 @@ export interface UseMapSettingsReturn {
 
 export function useMapSettings(): UseMapSettingsReturn {
   const { map, isReady: mapReady } = useMap();
-  const { setBaseLayer, addLayer, removeLayer, goTo } = useMapControls();
+  const {
+    setBaseLayer,
+    addLayer,
+    removeLayer,
+    loadPredefinedOverlay,
+    unloadPredefinedOverlay,
+    goTo,
+  } = useMapControls();
 
   const [currentLayer, setCurrentLayer] = useState<BaseLayer>("STREETS");
   const [activeOverlays, setActiveOverlays] = useState<Set<OverlayLayer>>(
     new Set()
   );
+  const [activePredefined, setActivePredefined] = useState<
+    Set<PredefinedOverlay>
+  >(new Set());
   const [uiControls, setUiControls] =
     useState<Record<UiControlId, boolean>>(DEFAULT_UI_CONTROLS);
   const [zoom, setZoom] = useState(10);
@@ -68,6 +81,20 @@ export function useMapSettings(): UseMapSettingsReturn {
     });
   };
 
+  const togglePredefined = (overlay: PredefinedOverlay) => {
+    setActivePredefined((prev) => {
+      const next = new Set(prev);
+      if (next.has(overlay)) {
+        next.delete(overlay);
+        unloadPredefinedOverlay(overlay);
+      } else {
+        next.add(overlay);
+        loadPredefinedOverlay(overlay);
+      }
+      return next;
+    });
+  };
+
   const toggleUiControl = (controlId: UiControlId) => {
     if (!(mapReady && map)) {
       return;
@@ -88,11 +115,13 @@ export function useMapSettings(): UseMapSettingsReturn {
     mapReady,
     currentLayer,
     activeOverlays,
+    activePredefined,
     uiControls,
     zoom,
     center,
     setLayer,
     toggleOverlay,
+    togglePredefined,
     toggleUiControl,
     navigateTo,
     setZoom,

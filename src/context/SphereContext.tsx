@@ -17,6 +17,8 @@ import type {
   SphereNamespace,
 } from "../types";
 
+type PredefinedOverlay = "cameras" | "events" | "aqi";
+
 type BuiltInLayer =
   | "SIMPLE"
   | "STREETS"
@@ -42,6 +44,8 @@ interface MapControls {
   setBaseLayer: (layer: BuiltInLayer) => void;
   addLayer: (layer: BuiltInLayer) => void;
   removeLayer: (layer: BuiltInLayer) => void;
+  loadPredefinedOverlay: (overlay: PredefinedOverlay) => void;
+  unloadPredefinedOverlay: (overlay: PredefinedOverlay) => void;
   resize: () => void;
   repaint: () => void;
 }
@@ -238,6 +242,20 @@ export function SphereProvider({
     }
   }, []);
 
+  const loadPredefinedOverlay = useCallback((overlay: PredefinedOverlay) => {
+    const predefined = window.sphere?.Overlays?.[overlay];
+    if (mapRef.current && predefined) {
+      mapRef.current.Overlays.load(predefined);
+    }
+  }, []);
+
+  const unloadPredefinedOverlay = useCallback((overlay: PredefinedOverlay) => {
+    const predefined = window.sphere?.Overlays?.[overlay];
+    if (mapRef.current && predefined) {
+      mapRef.current.Overlays.unload(predefined);
+    }
+  }, []);
+
   const controls = useMemo<MapControls>(
     () => ({
       isReady: isMapReady && sphere !== null,
@@ -252,6 +270,8 @@ export function SphereProvider({
       setBaseLayer,
       addLayer,
       removeLayer,
+      loadPredefinedOverlay,
+      unloadPredefinedOverlay,
       resize,
       repaint,
     }),
@@ -269,6 +289,8 @@ export function SphereProvider({
       setBaseLayer,
       addLayer,
       removeLayer,
+      loadPredefinedOverlay,
+      unloadPredefinedOverlay,
       resize,
       repaint,
     ]
@@ -343,6 +365,7 @@ export { SphereContext };
 export type {
   BuiltInLayer,
   MapControls,
+  PredefinedOverlay,
   SphereContextValue,
   SphereProviderProps,
 };

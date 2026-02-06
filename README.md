@@ -32,6 +32,7 @@ A React wrapper for the [GISTDA Sphere Map API](https://sphere.gistda.or.th/). B
     - [Drawing Polygons](#drawing-polygons)
     - [Sidebar with Map Controls](#sidebar-with-map-controls)
   - [Built-in Layers](#built-in-layers)
+  - [Predefined Overlays](#predefined-overlays)
   - [Color Filters](#color-filters)
   - [Troubleshooting](#troubleshooting)
   - [TypeScript](#typescript)
@@ -376,6 +377,8 @@ function Sidebar() {
 | `setLanguage` | `'th' \| 'en'` | Change map language |
 | `setRotate` | `number` | Set rotation angle |
 | `setPitch` | `number` | Set pitch angle |
+| `loadPredefinedOverlay` | `PredefinedOverlay` | Load a predefined overlay (CCTV, events, AQI) |
+| `unloadPredefinedOverlay` | `PredefinedOverlay` | Remove a predefined overlay |
 
 ### useMap
 
@@ -765,6 +768,23 @@ addLayer('TRAFFIC');        // Add data layer
 removeLayer('TRAFFIC');     // Remove data layer
 ```
 
+## Predefined Overlays
+
+The Sphere API provides predefined overlays that display live data on the map.
+
+| Overlay | Description |
+|---------|-------------|
+| `cameras` | Live CCTV camera feeds |
+| `events` | Active events |
+| `aqi` | Thai Air Quality Index |
+
+```tsx
+const { loadPredefinedOverlay, unloadPredefinedOverlay } = useMapControls();
+
+loadPredefinedOverlay('cameras');      // Show CCTV cameras
+unloadPredefinedOverlay('cameras');    // Hide CCTV cameras
+```
+
 ## Color Filters
 
 | Filter | Description |
@@ -813,6 +833,7 @@ import type {
   Location,           // { lon: number, lat: number }
   Bound,              // { minLon, minLat, maxLon, maxLat }
   BuiltInLayer,       // 'SIMPLE' | 'STREETS' | ...
+  PredefinedOverlay,  // 'cameras' | 'events' | 'aqi'
   FilterType,         // 'Dark' | 'Light' | 'Protanopia' | 'Deuteranopia' | 'None'
   SphereMapInstance,  // Map instance type
   SphereMarker,       // Marker instance type

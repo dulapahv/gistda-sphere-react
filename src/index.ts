@@ -33,6 +33,7 @@ export type {
   BuiltInLayer,
   MapContextValue,
   MapControls,
+  PredefinedOverlay,
   SphereContextValue,
   SphereProviderProps,
 } from "./context";
