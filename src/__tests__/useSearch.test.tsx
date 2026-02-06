@@ -11,7 +11,7 @@ describe("useSearch", () => {
   const map = mockMap as any;
 
   beforeEach(() => {
-    // @ts-expect-error - mockSphere is a partial mock
+    // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
     window.sphere = mockSphere;
     vi.clearAllMocks();
   });

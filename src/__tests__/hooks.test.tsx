@@ -12,7 +12,7 @@ describe("Hooks", () => {
   const map = mockMap as any;
 
   beforeEach(() => {
-    // @ts-expect-error - mockSphere is a partial mock
+    // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
     window.sphere = mockSphere;
     vi.clearAllMocks();
   });
@@ -105,7 +105,7 @@ describe("Hooks", () => {
 
       // Get the bound handler and call it
       const boundHandler = mockMap.Event.bind.mock.calls.find(
-        (call) => call[0] === "click"
+        (call: any) => call[0] === "click"
       )?.[1];
 
       const eventData = { lon: 100.5, lat: 13.75 };

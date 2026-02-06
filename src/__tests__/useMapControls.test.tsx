@@ -8,7 +8,7 @@ describe("useMapControls", () => {
   const { mockSphere } = createMockSphereApi();
 
   beforeEach(() => {
-    // @ts-expect-error - mockSphere is a partial mock
+    // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
     window.sphere = mockSphere;
     vi.clearAllMocks();
   });

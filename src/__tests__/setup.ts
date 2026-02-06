@@ -1,5 +1,6 @@
 import "@testing-library/jest-dom/vitest";
 import { cleanup } from "@testing-library/react";
+import type { Mock } from "vitest";
 import { afterEach, beforeEach, vi } from "vitest";
 
 afterEach(() => {
@@ -12,7 +13,91 @@ afterEach(() => {
  */
 type EventHandler = (data?: unknown) => void;
 
-export function createMockSphereApi() {
+interface MockEvent {
+  bind: Mock;
+  unbind: Mock;
+  fire: Mock;
+}
+
+interface MockOverlays {
+  add: Mock;
+  remove: Mock;
+  load: Mock;
+  unload: Mock;
+  clear: Mock;
+  list: Mock;
+  size: Mock;
+  lastOpenPopup: Mock;
+}
+
+interface MockLayers {
+  setBase: Mock;
+  add: Mock;
+  remove: Mock;
+  clear: Mock;
+  list: Mock;
+  size: Mock;
+  language: Mock;
+}
+
+interface MockMap {
+  Event: MockEvent;
+  Overlays: MockOverlays;
+  Layers: MockLayers;
+  Ui: Record<string, never>;
+  Search: Record<string, never>;
+  Tags: Record<string, never>;
+  Route: Record<string, never>;
+  Renderer: { on: Mock };
+  id: Mock;
+  resize: Mock;
+  repaint: Mock;
+  placeholder: Mock;
+  zoom: Mock;
+  zoomRange: Mock;
+  location: Mock;
+  bound: Mock;
+  move: Mock;
+  language: Mock;
+  rotate: Mock;
+  pitch: Mock;
+  enableFilter: Mock;
+  goTo: Mock;
+  _triggerReady: () => void;
+  _triggerClick: (location: object) => void;
+  _triggerZoom: () => void;
+}
+
+interface MockSphere {
+  Map: Mock;
+  Marker: Mock;
+  Popup: Mock;
+  Polyline: Mock;
+  Polygon: Mock;
+  Circle: Mock;
+  Dot: Mock;
+  Rectangle: Mock;
+  Layer: Mock;
+  Layers: Record<string, object>;
+  LayerType: Record<string, string>;
+  LineStyle: Record<string, string>;
+  Filter: Record<string, string>;
+  EventName: Record<string, never>;
+  TagType: Record<string, string>;
+  RouteMode: Record<string, string>;
+  RouteType: Record<string, string>;
+  RouteLabel: Record<string, string>;
+  Util: Record<string, never>;
+  Math: Record<string, never>;
+  Overlays: Record<string, never>;
+}
+
+interface MockSphereApi {
+  mockSphere: MockSphere;
+  mockMap: MockMap;
+}
+
+export function createMockSphereApi(): MockSphereApi {
   const eventHandlers: Record<string, Set<EventHandler>> = {};
 
   const mockEvent = {
@@ -207,8 +292,7 @@ export function createMockSphereApi() {
   return { mockSphere, mockMap };
 }
 
-// Helper to set up global Sphere mock
-export function setupSphereGlobal() {
+export function setupSphereGlobal(): MockSphereApi {
   const { mockSphere, mockMap } = createMockSphereApi();
 
   beforeEach(() => {

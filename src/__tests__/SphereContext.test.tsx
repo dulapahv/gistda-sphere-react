@@ -14,7 +14,7 @@ describe("SphereContext", () => {
 
   describe("SphereProvider", () => {
     it("renders children", () => {
-      // @ts-expect-error - mockSphere is a partial mock
+      // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
       window.sphere = mockSphere;
 
       render(
@@ -27,7 +27,7 @@ describe("SphereContext", () => {
     });
 
     it("provides isLoaded=true when sphere API is available", async () => {
-      // @ts-expect-error - mockSphere is a partial mock
+      // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
       window.sphere = mockSphere;
 
       function TestComponent() {
@@ -49,7 +49,7 @@ describe("SphereContext", () => {
     });
 
     it("provides the sphere namespace", async () => {
-      // @ts-expect-error - mockSphere is a partial mock
+      // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
       window.sphere = mockSphere;
 
       function TestComponent() {
@@ -71,7 +71,7 @@ describe("SphereContext", () => {
     });
 
     it("provides the API key", () => {
-      // @ts-expect-error - mockSphere is a partial mock
+      // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
       window.sphere = mockSphere;
 
       function TestComponent() {
@@ -89,7 +89,7 @@ describe("SphereContext", () => {
     });
 
     it("calls onLoad callback when script loads", async () => {
-      // @ts-expect-error - mockSphere is a partial mock
+      // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
       window.sphere = mockSphere;
       const onLoad = vi.fn();
 

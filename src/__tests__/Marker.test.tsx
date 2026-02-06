@@ -10,7 +10,7 @@ describe("Marker", () => {
   let mockMarkerInstance: ReturnType<typeof mockSphere.Marker>;
 
   beforeEach(() => {
-    // @ts-expect-error - mockSphere is a partial mock
+    // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
     window.sphere = mockSphere;
     mockMarkerInstance = mockSphere.Marker();
     mockSphere.Marker.mockImplementation(function () {
