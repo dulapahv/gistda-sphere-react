@@ -1,0 +1,39 @@
+.layer-grid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.layer-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--bg-tertiary);
+  color: var(--text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.layer-btn:hover {
+  background: var(--bg-hover);
+  color: var(--text-primary);
+  border-color: var(--border-light);
+}
+
+.layer-btn.active {
+  background: var(--text-primary);
+  border-color: var(--text-primary);
+  color: var(--bg-primary);
+}
+
+.layer-btn .icon {
+  width: 14px;
+  height: 14px;
+}
+
+.layer-btn .label {
+  font-weight: 500;
+}

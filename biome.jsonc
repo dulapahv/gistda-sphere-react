@@ -1,0 +1,35 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/core", "ultracite/next"],
+  "linter": {
+    "rules": {
+      "style": {
+        // PascalCase is standard for React components
+        "useFilenamingConvention": "off"
+      },
+      "complexity": {
+        // Allow higher complexity for complex map component setup logic
+        "noExcessiveCognitiveComplexity": {
+          "level": "warn",
+          "options": {
+            "maxAllowedComplexity": 65
+          }
+        },
+        // forEach is acceptable in test setup
+        "noForEach": "warn",
+        // Banned types are needed for mock setup
+        "noBannedTypes": "off"
+      },
+      "performance": {
+        // Barrel files are standard for library exports
+        "noBarrelFile": "off"
+      },
+      "suspicious": {
+        // Array index keys are acceptable when items are not reordered
+        "noArrayIndexKey": "warn",
+        // Iterator callback return is acceptable in test setup
+        "useIterableCallbackReturn": "warn"
+      }
+    }
+  }
+}
