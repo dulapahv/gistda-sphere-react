@@ -1,10 +1,19 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { useMapContext } from "../context/MapContext";
 import { useSphereContext } from "../context/SphereContext";
 import type { Location, PopupOptions, Size, SpherePopup } from "../types";
 
+export interface PopupRef {
+  getPopup(): SpherePopup | null;
+  setPosition(location: Location): void;
+  setTitle(title: string): void;
+  setDetail(detail: string): void;
+  getElement(): HTMLElement | null;
+}
+
 export interface PopupProps {
   position: Location;
+  ref?: Ref<PopupRef>;
   title?: string;
   detail?: string;
   loadDetail?: (element: HTMLElement) => void;
@@ -15,28 +24,18 @@ export interface PopupProps {
   onClose?: (popup: SpherePopup) => void;
 }
 
-export interface PopupRef {
-  getPopup(): SpherePopup | null;
-  setPosition(location: Location): void;
-  setTitle(title: string): void;
-  setDetail(detail: string): void;
-  getElement(): HTMLElement | null;
-}
-
-export const Popup = forwardRef<PopupRef, PopupProps>(function Popup(
-  {
-    position,
-    title,
-    detail,
-    loadDetail,
-    html,
-    loadHtml,
-    size,
-    closable = true,
-    onClose,
-  },
-  ref
-) {
+export function Popup({
+  position,
+  ref,
+  title,
+  detail,
+  loadDetail,
+  html,
+  loadHtml,
+  size,
+  closable = true,
+  onClose,
+}: PopupProps) {
   const { map, isReady } = useMapContext();
   const { sphere } = useSphereContext();
   const popupRef = useRef<SpherePopup | null>(null);
@@ -125,6 +124,4 @@ export const Popup = forwardRef<PopupRef, PopupProps>(function Popup(
   );
 
   return null;
-});
-
-export default Popup;
+}

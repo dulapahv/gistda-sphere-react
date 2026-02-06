@@ -23,11 +23,11 @@ function MapContent() {
   const { navigateTo } = mapSettings;
 
   const [searchMarker, setSearchMarker] = useState<SearchMarkerData | null>(
-    null,
+    null
   );
   const [routeOrigin, setRouteOrigin] = useState<Location | null>(null);
   const [routeDestination, setRouteDestination] = useState<Location | null>(
-    null,
+    null
   );
   const [settingRoutePoint, setSettingRoutePoint] = useState<
     "origin" | "destination" | null
@@ -47,7 +47,7 @@ function MapContent() {
       }
       drawingClick(location);
     },
-    [settingRoutePoint, drawingClick],
+    [settingRoutePoint, drawingClick]
   );
 
   const handleSearchResult = useCallback(
@@ -55,7 +55,7 @@ function MapContent() {
       setSearchMarker(marker);
       navigateTo(marker.position, 16);
     },
-    [navigateTo],
+    [navigateTo]
   );
 
   return (

@@ -43,8 +43,6 @@ A React wrapper for the [GISTDA Sphere Map API](https://sphere.gistda.or.th/). B
 npm install gistda-sphere-react
 ```
 
-**Peer dependencies:** React 18+ and ReactDOM 18+
-
 ## Quick Start
 
 ```tsx

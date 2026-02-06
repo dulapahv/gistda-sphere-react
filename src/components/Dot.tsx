@@ -1,10 +1,17 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { useMapContext } from "../context/MapContext";
 import { useSphereContext } from "../context/SphereContext";
 import type { GeometryOptions, Location, Range, SphereDot } from "../types";
 
+export interface DotRef {
+  getDot(): SphereDot | null;
+  setPosition(location: Location): void;
+  getPosition(): Location | null;
+}
+
 export interface DotProps {
   position: Location;
+  ref?: Ref<DotRef>;
   title?: string;
   detail?: string;
   visibleRange?: Range;
@@ -18,29 +25,21 @@ export interface DotProps {
   onDrop?: (dot: SphereDot, location: Location) => void;
 }
 
-export interface DotRef {
-  getDot(): SphereDot | null;
-  setPosition(location: Location): void;
-  getPosition(): Location | null;
-}
-
-export const Dot = forwardRef<DotRef, DotProps>(function Dot(
-  {
-    position,
-    title,
-    detail,
-    visibleRange,
-    lineWidth,
-    lineColor,
-    clickable,
-    draggable,
-    zIndex,
-    onClick,
-    onDrag,
-    onDrop,
-  },
-  ref
-) {
+export function Dot({
+  position,
+  ref,
+  title,
+  detail,
+  visibleRange,
+  lineWidth,
+  lineColor,
+  clickable,
+  draggable,
+  zIndex,
+  onClick,
+  onDrag,
+  onDrop,
+}: DotProps) {
   const { map, isReady } = useMapContext();
   const { sphere } = useSphereContext();
   const dotRef = useRef<SphereDot | null>(null);
@@ -145,6 +144,4 @@ export const Dot = forwardRef<DotRef, DotProps>(function Dot(
   );
 
   return null;
-});
-
-export default Dot;
+}

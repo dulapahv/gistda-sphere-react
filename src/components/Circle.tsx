@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { useMapContext } from "../context/MapContext";
 import { useSphereContext } from "../context/SphereContext";
 import type {
@@ -11,9 +11,20 @@ import type {
   SphereCircle,
 } from "../types";
 
+export interface CircleRef {
+  getCircle(): SphereCircle | null;
+  togglePopup(show?: boolean, location?: Location): void;
+  getCenter(): Location | null;
+  getBound(): Bound | null;
+  getArea(language?: string): number | string | null;
+  getRadius(language?: string): number | string | null;
+  updateStyle(options: Partial<GeometryOptions>): void;
+}
+
 export interface CircleProps {
   center: Location;
   radius: number;
+  ref?: Ref<CircleRef>;
   title?: string;
   detail?: string;
   popup?: PopupOptions;
@@ -30,37 +41,25 @@ export interface CircleProps {
   onDrop?: (circle: SphereCircle) => void;
 }
 
-export interface CircleRef {
-  getCircle(): SphereCircle | null;
-  togglePopup(show?: boolean, location?: Location): void;
-  getCenter(): Location | null;
-  getBound(): Bound | null;
-  getArea(language?: string): number | string | null;
-  getRadius(language?: string): number | string | null;
-  updateStyle(options: Partial<GeometryOptions>): void;
-}
-
-export const Circle = forwardRef<CircleRef, CircleProps>(function Circle(
-  {
-    center,
-    radius,
-    title,
-    detail,
-    popup,
-    visibleRange,
-    lineWidth,
-    lineColor,
-    fillColor,
-    lineStyle,
-    clickable,
-    draggable,
-    zIndex,
-    onClick,
-    onDrag,
-    onDrop,
-  },
-  ref
-) {
+export function Circle({
+  center,
+  radius,
+  ref,
+  title,
+  detail,
+  popup,
+  visibleRange,
+  lineWidth,
+  lineColor,
+  fillColor,
+  lineStyle,
+  clickable,
+  draggable,
+  zIndex,
+  onClick,
+  onDrag,
+  onDrop,
+}: CircleProps) {
   const { map, isReady } = useMapContext();
   const { sphere } = useSphereContext();
   const circleRef = useRef<SphereCircle | null>(null);
@@ -184,6 +183,4 @@ export const Circle = forwardRef<CircleRef, CircleProps>(function Circle(
   );
 
   return null;
-});
-
-export default Circle;
+}

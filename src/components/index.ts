@@ -15,4 +15,4 @@ export { Popup } from "./Popup";
 export type { RectangleProps, RectangleRef } from "./Rectangle";
 export { Rectangle } from "./Rectangle";
 export type { SphereMapProps, SphereMapRef } from "./SphereMap";
-export { default as Map, SphereMap } from "./SphereMap";
+export { SphereMap, SphereMap as Map } from "./SphereMap";

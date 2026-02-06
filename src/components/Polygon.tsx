@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { useMapContext } from "../context/MapContext";
 import { useSphereContext } from "../context/SphereContext";
 import type {
@@ -12,8 +12,21 @@ import type {
   SpherePolygon,
 } from "../types";
 
+export interface PolygonRef {
+  getPolygon(): SpherePolygon | null;
+  togglePopup(show?: boolean, location?: Location): void;
+  getPivot(): Location | null;
+  getCentroid(): Location | null;
+  getBound(): Bound | null;
+  getArea(language?: string): number | string | null;
+  rotate(angle: number): void;
+  updateStyle(options: Partial<GeometryOptions>): void;
+  toGeoJSON(): object | null;
+}
+
 export interface PolygonProps {
   positions: Location[];
+  ref?: Ref<PolygonRef>;
   title?: string;
   detail?: string;
   label?: string;
@@ -35,43 +48,29 @@ export interface PolygonProps {
   onDrop?: (polygon: SpherePolygon) => void;
 }
 
-export interface PolygonRef {
-  getPolygon(): SpherePolygon | null;
-  togglePopup(show?: boolean, location?: Location): void;
-  getPivot(): Location | null;
-  getCentroid(): Location | null;
-  getBound(): Bound | null;
-  getArea(language?: string): number | string | null;
-  rotate(angle: number): void;
-  updateStyle(options: Partial<GeometryOptions>): void;
-  toGeoJSON(): object | null;
-}
-
-export const Polygon = forwardRef<PolygonRef, PolygonProps>(function Polygon(
-  {
-    positions,
-    title,
-    detail,
-    label,
-    labelOptions,
-    popup,
-    visibleRange,
-    lineWidth,
-    lineColor,
-    fillColor,
-    lineStyle,
-    pivot,
-    clickable,
-    draggable,
-    pointer,
-    zIndex,
-    editable,
-    onClick,
-    onDrag,
-    onDrop,
-  },
+export function Polygon({
+  positions,
   ref,
-) {
+  title,
+  detail,
+  label,
+  labelOptions,
+  popup,
+  visibleRange,
+  lineWidth,
+  lineColor,
+  fillColor,
+  lineStyle,
+  pivot,
+  clickable,
+  draggable,
+  pointer,
+  zIndex,
+  editable,
+  onClick,
+  onDrag,
+  onDrop,
+}: PolygonProps) {
   const { map, isReady } = useMapContext();
   const { sphere } = useSphereContext();
   const polygonRef = useRef<SpherePolygon | null>(null);
@@ -214,10 +213,8 @@ export const Polygon = forwardRef<PolygonRef, PolygonProps>(function Polygon(
       },
       toGeoJSON: () => polygonRef.current?.toJSON() ?? null,
     }),
-    [],
+    []
   );
 
   return null;
-});
-
-export default Polygon;
+}

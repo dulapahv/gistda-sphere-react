@@ -1,4 +1,4 @@
-import { forwardRef, useEffect, useImperativeHandle, useRef } from "react";
+import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
 import { useMapContext } from "../context/MapContext";
 import { useSphereContext } from "../context/SphereContext";
 import type {
@@ -10,8 +10,16 @@ import type {
   SphereMarker,
 } from "../types";
 
+export interface MarkerRef {
+  getMarker(): SphereMarker | null;
+  togglePopup(show?: boolean): void;
+  setPosition(location: Location, animate?: boolean): void;
+  setRotation(angle: number): void;
+}
+
 export interface MarkerProps {
   position: Location;
+  ref?: Ref<MarkerRef>;
   icon?: Icon;
   title?: string;
   detail?: string;
@@ -28,33 +36,24 @@ export interface MarkerProps {
   onLeave?: (marker: SphereMarker) => void;
 }
 
-export interface MarkerRef {
-  getMarker(): SphereMarker | null;
-  togglePopup(show?: boolean): void;
-  setPosition(location: Location, animate?: boolean): void;
-  setRotation(angle: number): void;
-}
-
-export const Marker = forwardRef<MarkerRef, MarkerProps>(function Marker(
-  {
-    position,
-    icon,
-    title,
-    detail,
-    popup,
-    visibleRange,
-    clickable,
-    draggable,
-    zIndex,
-    rotate,
-    onClick,
-    onDrag,
-    onDrop,
-    onHover,
-    onLeave,
-  },
-  ref
-) {
+export function Marker({
+  position,
+  ref,
+  icon,
+  title,
+  detail,
+  popup,
+  visibleRange,
+  clickable,
+  draggable,
+  zIndex,
+  rotate,
+  onClick,
+  onDrag,
+  onDrop,
+  onHover,
+  onLeave,
+}: MarkerProps) {
   const { map, isReady } = useMapContext();
   const { sphere } = useSphereContext();
   const markerRef = useRef<SphereMarker | null>(null);
@@ -199,6 +198,4 @@ export const Marker = forwardRef<MarkerRef, MarkerProps>(function Marker(
   );
 
   return null;
-});
-
-export default Marker;
+}
