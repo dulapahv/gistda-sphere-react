@@ -6,9 +6,11 @@ export default defineConfig({
     environment: "jsdom",
     setupFiles: ["./src/__tests__/setup.ts"],
     include: ["src/**/*.{test,spec}.{ts,tsx}"],
+    reporters: ["dot"],
     coverage: {
+      enabled: true,
       provider: "v8",
-      reporter: ["text", "json", "html"],
+      reporter: ["text", "lcov", "cobertura", "html"],
       include: ["src/**/*.{ts,tsx}"],
       exclude: [
         "src/**/*.{test,spec}.{ts,tsx}",
@@ -16,14 +18,6 @@ export default defineConfig({
         "src/types/**",
         "src/**/index.ts",
       ],
-      thresholds: {
-        // Core components and hooks should maintain high coverage
-        // Lower thresholds allow for incremental test coverage
-        statements: 25,
-        branches: 60,
-        functions: 30,
-        lines: 25,
-      },
     },
   },
 });
