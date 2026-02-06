@@ -95,6 +95,7 @@ export function RoutePanel({
               : "Not set"}
           </span>
           <button
+            aria-label="Set origin on map"
             className={`btn btn-sm ${settingPoint === "origin" ? "btn-primary" : ""}`}
             onClick={() => toggleSettingPoint("origin")}
             type="button"
@@ -110,6 +111,7 @@ export function RoutePanel({
               : "Not set"}
           </span>
           <button
+            aria-label="Set destination on map"
             className={`btn btn-sm ${settingPoint === "destination" ? "btn-primary" : ""}`}
             onClick={() => toggleSettingPoint("destination")}
             type="button"
@@ -147,6 +149,7 @@ export function RoutePanel({
           <Route size={14} /> Calculate
         </button>
         <button
+          aria-label="Reverse route"
           className="btn btn-sm"
           disabled={!(origin && destination)}
           onClick={handleReverseRoute}
@@ -154,7 +157,12 @@ export function RoutePanel({
         >
           <ArrowLeftRight size={14} />
         </button>
-        <button className="btn btn-sm" onClick={handleClearRoute} type="button">
+        <button
+          aria-label="Clear route"
+          className="btn btn-sm"
+          onClick={handleClearRoute}
+          type="button"
+        >
           <Trash2 size={14} />
         </button>
       </div>

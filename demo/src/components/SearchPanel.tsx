@@ -74,6 +74,7 @@ export function SearchPanel({ onResultSelect }: SearchPanelProps) {
           value={keyword}
         />
         <button
+          aria-label="Search"
           className="btn btn-primary btn-icon"
           disabled={loading || !isReady}
           onClick={handleSearch}

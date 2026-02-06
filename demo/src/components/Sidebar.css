@@ -15,6 +15,24 @@
   flex-shrink: 0;
 }
 
+.sidebar-header-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+}
+
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: color 0.15s;
+}
+
+.github-link:hover {
+  color: var(--text-primary);
+}
+
 .sidebar-header h1 {
   font-size: 14px;
   font-weight: 600;
