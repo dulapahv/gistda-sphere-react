@@ -71,16 +71,30 @@ export function createMockSphereApi() {
     resize: vi.fn().mockReturnThis(),
     repaint: vi.fn().mockReturnThis(),
     placeholder: vi.fn().mockReturnValue(document.createElement("div")),
-    zoom: vi.fn((value?: number) => (value !== undefined ? mockMap : 10)),
+    zoom: vi
+      .fn()
+      .mockImplementation((value?: number) =>
+        value !== undefined ? mockMap : 10
+      ),
     zoomRange: vi.fn().mockReturnThis(),
-    location: vi.fn((value?: object) =>
-      value !== undefined ? mockMap : { lon: 100.5, lat: 13.75 }
-    ),
+    location: vi
+      .fn()
+      .mockImplementation((value?: object) =>
+        value !== undefined ? mockMap : { lon: 100.5, lat: 13.75 }
+      ),
     bound: vi.fn().mockReturnThis(),
     move: vi.fn().mockReturnThis(),
     language: vi.fn().mockReturnValue("th"),
-    rotate: vi.fn((value?: number) => (value !== undefined ? mockMap : 0)),
-    pitch: vi.fn((value?: number) => (value !== undefined ? mockMap : 0)),
+    rotate: vi
+      .fn()
+      .mockImplementation((value?: number) =>
+        value !== undefined ? mockMap : 0
+      ),
+    pitch: vi
+      .fn()
+      .mockImplementation((value?: number) =>
+        value !== undefined ? mockMap : 0
+      ),
     enableFilter: vi.fn().mockReturnThis(),
     goTo: vi.fn().mockReturnThis(),
     // Helper to trigger ready event in tests
@@ -89,43 +103,48 @@ export function createMockSphereApi() {
     _triggerZoom: () => mockEvent.fire("zoom"),
   };
 
-  const createMockOverlay = (_type: string) => {
-    return vi.fn().mockImplementation(() => ({
-      location: vi.fn().mockReturnValue({ lon: 100.5, lat: 13.75 }),
-      visibleRange: vi.fn().mockReturnValue({ min: 0, max: 22 }),
-      active: vi.fn().mockReturnValue(true),
-      shift: vi.fn().mockReturnThis(),
-      distance: vi.fn().mockReturnValue(0),
-      intersects: vi.fn().mockReturnValue(false),
-      contains: vi.fn().mockReturnValue(false),
-      within: vi.fn().mockReturnValue(false),
-      toJSON: vi.fn().mockReturnValue({}),
-      popup: vi.fn().mockReturnValue(null),
-      element: vi.fn().mockReturnValue(document.createElement("div")),
-      pop: vi.fn().mockReturnThis(),
-      update: vi.fn().mockReturnThis(),
-      pivot: vi.fn().mockReturnValue({ lon: 100.5, lat: 13.75 }),
-      centroid: vi.fn().mockReturnValue({ lon: 100.5, lat: 13.75 }),
-      bound: vi.fn().mockReturnValue({
-        minLon: 100,
-        minLat: 13,
-        maxLon: 101,
-        maxLat: 14,
-      }),
-      rotate: vi.fn().mockReturnThis(),
-      size: vi.fn().mockReturnValue(100),
-      union: vi.fn().mockReturnThis(),
-      intersection: vi.fn().mockReturnThis(),
-      difference: vi.fn().mockReturnThis(),
-      split: vi.fn().mockReturnValue([]),
-      radius: vi.fn().mockReturnValue(100),
-      title: vi.fn().mockReturnThis(),
-      detail: vi.fn().mockReturnThis(),
-    }));
-  };
+  const overlayProps = () => ({
+    location: vi.fn().mockReturnValue({ lon: 100.5, lat: 13.75 }),
+    visibleRange: vi.fn().mockReturnValue({ min: 0, max: 22 }),
+    active: vi.fn().mockReturnValue(true),
+    shift: vi.fn().mockReturnThis(),
+    distance: vi.fn().mockReturnValue(0),
+    intersects: vi.fn().mockReturnValue(false),
+    contains: vi.fn().mockReturnValue(false),
+    within: vi.fn().mockReturnValue(false),
+    toJSON: vi.fn().mockReturnValue({}),
+    popup: vi.fn().mockReturnValue(null),
+    element: vi.fn().mockReturnValue(document.createElement("div")),
+    pop: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    pivot: vi.fn().mockReturnValue({ lon: 100.5, lat: 13.75 }),
+    centroid: vi.fn().mockReturnValue({ lon: 100.5, lat: 13.75 }),
+    bound: vi.fn().mockReturnValue({
+      minLon: 100,
+      minLat: 13,
+      maxLon: 101,
+      maxLat: 14,
+    }),
+    rotate: vi.fn().mockReturnThis(),
+    size: vi.fn().mockReturnValue(100),
+    union: vi.fn().mockReturnThis(),
+    intersection: vi.fn().mockReturnThis(),
+    difference: vi.fn().mockReturnThis(),
+    split: vi.fn().mockReturnValue([]),
+    radius: vi.fn().mockReturnValue(100),
+    title: vi.fn().mockReturnThis(),
+    detail: vi.fn().mockReturnThis(),
+  });
+  const createMockOverlay = (_type: string) =>
+    vi.fn().mockImplementation(function () {
+      return overlayProps();
+    });
 
+  const mapConstructor = function () {
+    return mockMap;
+  };
   const mockSphere = {
-    Map: vi.fn().mockImplementation(() => mockMap),
+    Map: vi.fn().mockImplementation(mapConstructor),
     Marker: createMockOverlay("Marker"),
     Popup: createMockOverlay("Popup"),
     Polyline: createMockOverlay("Polyline"),
@@ -133,7 +152,9 @@ export function createMockSphereApi() {
     Circle: createMockOverlay("Circle"),
     Dot: createMockOverlay("Dot"),
     Rectangle: createMockOverlay("Rectangle"),
-    Layer: vi.fn().mockImplementation(() => ({})),
+    Layer: vi.fn().mockImplementation(function () {
+      return {};
+    }),
     Layers: {
       SIMPLE: {},
       STREETS: {},

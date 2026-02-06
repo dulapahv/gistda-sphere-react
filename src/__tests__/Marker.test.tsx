@@ -13,7 +13,9 @@ describe("Marker", () => {
     // @ts-expect-error - mockSphere is a partial mock
     window.sphere = mockSphere;
     mockMarkerInstance = mockSphere.Marker();
-    mockSphere.Marker.mockReturnValue(mockMarkerInstance);
+    mockSphere.Marker.mockImplementation(function () {
+      return mockMarkerInstance;
+    });
     vi.clearAllMocks();
   });
 

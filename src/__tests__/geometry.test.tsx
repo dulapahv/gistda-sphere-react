@@ -32,7 +32,9 @@ describe("Geometry Components", () => {
 
     beforeEach(() => {
       mockCircleInstance = mockSphere.Circle();
-      mockSphere.Circle.mockReturnValue(mockCircleInstance);
+      mockSphere.Circle.mockImplementation(function () {
+        return mockCircleInstance;
+      });
     });
 
     it("creates circle with center and radius", async () => {
@@ -122,7 +124,9 @@ describe("Geometry Components", () => {
 
     beforeEach(() => {
       mockPolygonInstance = mockSphere.Polygon();
-      mockSphere.Polygon.mockReturnValue(mockPolygonInstance);
+      mockSphere.Polygon.mockImplementation(function () {
+        return mockPolygonInstance;
+      });
       mockSphere.Polygon.mockClear();
     });
 
@@ -215,7 +219,9 @@ describe("Geometry Components", () => {
 
     beforeEach(() => {
       mockPolylineInstance = mockSphere.Polyline();
-      mockSphere.Polyline.mockReturnValue(mockPolylineInstance);
+      mockSphere.Polyline.mockImplementation(function () {
+        return mockPolylineInstance;
+      });
       mockSphere.Polyline.mockClear();
     });
 
@@ -271,7 +277,9 @@ describe("Geometry Components", () => {
 
     beforeEach(() => {
       mockRectangleInstance = mockSphere.Rectangle();
-      mockSphere.Rectangle.mockReturnValue(mockRectangleInstance);
+      mockSphere.Rectangle.mockImplementation(function () {
+        return mockRectangleInstance;
+      });
     });
 
     it("creates rectangle with position and size", async () => {
@@ -327,7 +335,9 @@ describe("Geometry Components", () => {
 
     beforeEach(() => {
       mockDotInstance = mockSphere.Dot();
-      mockSphere.Dot.mockReturnValue(mockDotInstance);
+      mockSphere.Dot.mockImplementation(function () {
+        return mockDotInstance;
+      });
     });
 
     it("creates dot with position", async () => {
@@ -392,7 +402,9 @@ describe("Geometry Components", () => {
 
     beforeEach(() => {
       mockPopupInstance = mockSphere.Popup();
-      mockSphere.Popup.mockReturnValue(mockPopupInstance);
+      mockSphere.Popup.mockImplementation(function () {
+        return mockPopupInstance;
+      });
     });
 
     it("creates popup with position and title", async () => {

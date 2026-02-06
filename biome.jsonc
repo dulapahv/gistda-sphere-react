@@ -1,6 +1,19 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
   "extends": ["ultracite/core", "ultracite/next"],
+  "overrides": [
+    {
+      // Vitest 4 requires `function` (not arrow) for constructor mocks called with `new`
+      "includes": ["src/__tests__/**"],
+      "linter": {
+        "rules": {
+          "complexity": {
+            "useArrowFunction": "off"
+          }
+        }
+      }
+    }
+  ],
   "linter": {
     "rules": {
       "style": {
