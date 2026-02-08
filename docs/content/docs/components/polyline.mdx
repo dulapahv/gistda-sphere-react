@@ -1,0 +1,52 @@
+---
+title: Polyline
+description: Draw a line connecting points on the map
+---
+
+<MapDemo height="400px" zoom={11} center={{ lon: 100.5, lat: 13.75 }} language="en">
+  <Polyline
+    positions={[
+      { lon: 100.3, lat: 13.7 },
+      { lon: 100.5, lat: 13.8 },
+      { lon: 100.7, lat: 13.7 },
+    ]}
+    lineColor="blue"
+    lineWidth={3}
+  />
+</MapDemo>
+
+```tsx
+<Polyline
+  positions={[
+    { lon: 100.3, lat: 13.7 },
+    { lon: 100.5, lat: 13.8 },
+    { lon: 100.7, lat: 13.7 },
+  ]}
+  lineColor="blue"
+  lineWidth={3}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `positions` | `Location[]` | Yes (min 2) | - | Array of points |
+| `ref` | `Ref<PolylineRef>` | No | - | Ref for imperative control |
+| `title` | `string` | No | - | Hover tooltip text |
+| `detail` | `string` | No | - | Popup text when clicked |
+| `label` | `string` | No | - | Label at line center |
+| `labelOptions` | `MarkerOptions` | No | - | Label marker options |
+| `popup` | `PopupOptions` | No | - | Popup configuration |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range visibility |
+| `lineWidth` | `number` | No | `3` | Line width in pixels |
+| `lineColor` | `string` | No | Preset color | Line color |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | Line style |
+| `pivot` | `Location` | No | Center | Rotation pivot |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor |
+| `draggable` | `boolean` | No | `false` | Allow dragging |
+| `pointer` | `boolean` | No | `false` | Show drag pointer |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `onClick` | `(polyline: SpherePolyline) => void` | No | - | Click handler |
+| `onDrag` | `(polyline: SpherePolyline) => void` | No | - | Drag handler |
+| `onDrop` | `(polyline: SpherePolyline) => void` | No | - | Drop handler |

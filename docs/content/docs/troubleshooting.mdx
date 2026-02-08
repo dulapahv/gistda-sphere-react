@@ -1,0 +1,34 @@
+---
+title: Troubleshooting
+description: Common issues and solutions
+---
+
+## Map not rendering
+
+The map container needs an explicit height. Without it, the `<div>` collapses to 0px:
+
+```tsx
+<SphereMap style={{ width: '100%', height: '500px' }} />
+```
+
+## API key not working
+
+Make sure your domain is registered for the API key at [sphere.gistda.or.th](https://sphere.gistda.or.th/). For local development, register `localhost`.
+
+## "useSphereContext must be used within a SphereProvider"
+
+Wrap your component tree with `<SphereProvider>`:
+
+```tsx
+<SphereProvider apiKey="YOUR_API_KEY">
+  <App />
+</SphereProvider>
+```
+
+## Hooks returning `isReady: false`
+
+Hooks like `useSearch`, `useRoute`, and `useTags` depend on the map being fully initialized. Wait for `isReady` to become `true` before calling their methods. You can also use the `onReady` prop on `SphereMap` or the `useMapReady` hook.
+
+## Overlays not appearing
+
+Make sure overlay components (Marker, Polygon, etc.) are placed **inside** the `<SphereMap>` component, not outside it.

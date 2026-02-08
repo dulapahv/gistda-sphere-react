@@ -1,0 +1,49 @@
+---
+title: Drawing Polygons
+description: Click to add points, double-click to finish
+---
+
+Click to add points, double-click to finish the polygon:
+
+<DrawingDemo />
+
+```tsx lineNumbers
+import { useState } from 'react';
+import { SphereProvider, SphereMap, Polygon, Marker, type Location } from 'gistda-sphere-react';
+
+function App() {
+  const [points, setPoints] = useState<Location[]>([]);
+  const [polygons, setPolygons] = useState<Location[][]>([]);
+
+  const handleDoubleClick = () => {
+    if (points.length >= 3) {
+      setPolygons([...polygons, points]);
+      setPoints([]);
+    }
+  };
+
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <SphereMap
+        center={{ lon: 100.5, lat: 13.75 }}
+        zoom={10}
+        style={{ height: '500px' }}
+        onClick={(location) => setPoints([...points, location])}
+        onDoubleClick={handleDoubleClick}
+      >
+        {polygons.map((positions) => (
+          <Polygon
+            key={positions.map((p) => `${p.lon},${p.lat}`).join('|')}
+            positions={positions}
+            fillColor="rgba(255,0,0,0.3)"
+            lineColor="red"
+          />
+        ))}
+        {points.map((pos) => (
+          <Marker key={`${pos.lon}-${pos.lat}`} position={pos} />
+        ))}
+      </SphereMap>
+    </SphereProvider>
+  );
+}
+```

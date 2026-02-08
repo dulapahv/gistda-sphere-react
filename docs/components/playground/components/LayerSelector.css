@@ -1,0 +1,40 @@
+.pg-layer-grid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pg-layer-btn {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  border: 1px solid var(--pg-border-color);
+  border-radius: 6px;
+  background: var(--pg-bg-tertiary);
+  color: var(--pg-text-secondary);
+  font-size: 12px;
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pg-layer-btn:hover {
+  background: var(--pg-bg-hover);
+  color: var(--pg-text-primary);
+  border-color: var(--pg-border-light);
+}
+
+.pg-layer-btn.active {
+  background: var(--pg-text-primary);
+  border-color: var(--pg-text-primary);
+  color: var(--pg-bg-primary);
+}
+
+.pg-layer-btn .pg-icon {
+  width: 14px;
+  height: 14px;
+}
+
+.pg-layer-btn .pg-label {
+  font-weight: 500;
+}

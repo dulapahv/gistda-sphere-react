@@ -23,7 +23,11 @@ export {
   usePolygons,
   usePolylines,
 } from "./useOverlays";
-export type { RouteGuideStep, UseRouteReturn } from "./useRoute";
+export type {
+  RouteGuideStep,
+  UseRouteOptions,
+  UseRouteReturn,
+} from "./useRoute";
 export { useRoute } from "./useRoute";
 export type {
   AddressResult,

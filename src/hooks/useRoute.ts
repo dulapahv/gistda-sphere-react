@@ -1,7 +1,8 @@
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import { useMap } from "../context/SphereContext";
 import type {
   GeometryOptions,
+  Language,
   Location,
   RouteLabelType,
   RouteMode,
@@ -15,6 +16,13 @@ export interface RouteGuideStep {
   distance: number | string;
   duration: number | string;
   location: Location;
+}
+
+export interface UseRouteOptions {
+  /** Called when route calculation completes. */
+  onRouteComplete?: (routes: unknown[]) => void;
+  /** Called when route calculation fails. */
+  onRouteError?: (errorCode: number) => void;
 }
 
 export interface UseRouteReturn {
@@ -46,11 +54,33 @@ export interface UseRouteReturn {
   enableRouteType: (routeType: RouteType, state: boolean) => void;
   setLabel: (label: RouteLabelType) => void;
   setAuto: (state: boolean) => void;
-  setLanguage: (lang: string) => void;
+  setLanguage: (lang: Language) => void;
 }
 
-export function useRoute(): UseRouteReturn {
+export function useRoute(options?: UseRouteOptions): UseRouteReturn {
   const { map, isReady } = useMap();
+
+  const callbacksRef = useRef(options);
+  callbacksRef.current = options;
+
+  useEffect(() => {
+    if (!map) return;
+
+    const handleComplete = (routes: unknown[]) => {
+      callbacksRef.current?.onRouteComplete?.(routes);
+    };
+    const handleError = (errorCode: number) => {
+      callbacksRef.current?.onRouteError?.(errorCode);
+    };
+
+    map.Event.bind("routeComplete", handleComplete);
+    map.Event.bind("routeError", handleError);
+
+    return () => {
+      map.Event.unbind("routeComplete", handleComplete);
+      map.Event.unbind("routeError", handleError);
+    };
+  }, [map]);
 
   const addDestination = useCallback(
     (destination: SphereMarker | Location, mode?: RouteMode) => {
@@ -173,7 +203,7 @@ export function useRoute(): UseRouteReturn {
   );
 
   const setLanguage = useCallback(
-    (lang: string) => {
+    (lang: Language) => {
       map?.Route?.language(lang);
     },
     [map]

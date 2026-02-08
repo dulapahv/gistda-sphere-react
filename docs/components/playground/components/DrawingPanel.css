@@ -1,0 +1,40 @@
+.pg-tool-grid {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.pg-tool-btn {
+  width: 38px;
+  height: 38px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pg-border-color);
+  border-radius: 6px;
+  background: var(--pg-bg-tertiary);
+  color: var(--pg-text-secondary);
+  cursor: pointer;
+  font-family: inherit;
+}
+
+.pg-tool-btn:hover {
+  background: var(--pg-bg-hover);
+  color: var(--pg-text-primary);
+  border-color: var(--pg-border-light);
+}
+
+.pg-tool-btn.active {
+  background: var(--pg-text-primary);
+  border-color: var(--pg-text-primary);
+  color: var(--pg-bg-primary);
+}
+
+.pg-tool-btn.danger {
+  color: var(--pg-error);
+}
+
+.pg-tool-btn.danger:hover {
+  background: rgba(224, 0, 0, 0.1);
+  border-color: var(--pg-error);
+}

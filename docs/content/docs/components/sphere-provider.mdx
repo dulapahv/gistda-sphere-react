@@ -1,0 +1,20 @@
+---
+title: SphereProvider
+description: Root provider that loads the Sphere API script
+---
+
+```tsx
+<SphereProvider apiKey="YOUR_API_KEY" onLoad={() => console.log('API loaded')}>
+  {/* Your app */}
+</SphereProvider>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `apiKey` | `string` | Yes | - | Your GISTDA Sphere API key |
+| `children` | `ReactNode` | Yes | - | Child components |
+| `scriptUrl` | `string` | No | Official Sphere API URL | Custom URL for the Sphere API script |
+| `onLoad` | `() => void` | No | - | Called when the API script finishes loading |
+| `onError` | `(error: Error) => void` | No | - | Called if the API script fails to load |

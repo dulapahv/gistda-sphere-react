@@ -1,0 +1,89 @@
+---
+title: useTags
+description: Display POI markers by category on the map
+---
+
+Display POI markers by category on the map. Tags are predefined groups of POIs from the Sphere database.
+
+<TagsDemo />
+
+```tsx
+import { useTags } from 'gistda-sphere-react';
+
+function TagsComponent() {
+  const { add, remove, clear, list, isReady } = useTags();
+
+  const showRestaurants = () => {
+    add('อาหารไทย');
+    add('อาหารญี่ปุ่น');
+  };
+
+  return (
+    <div>
+      <button onClick={showRestaurants}>Show Restaurants</button>
+      <button onClick={clear}>Clear All</button>
+      <p>Active: {list().join(', ')}</p>
+    </div>
+  );
+}
+```
+
+## Functions
+
+| Function | Parameters | Returns | Description |
+|----------|------------|---------|-------------|
+| `isReady` | - | `boolean` | Tag service initialized |
+| `set` | `(tag, options?)` | `void` | Clear all and set a new tag |
+| `add` | `(tag, options?)` | `void` | Add a tag |
+| `remove` | `(tag)` | `void` | Remove a tag |
+| `clear` | `()` | `void` | Remove all tags |
+| `list` | `()` | `string[]` | Active tag names |
+| `size` | `()` | `number` | Number of active tags |
+| `enablePopup` | `(state)` | `void` | Toggle popups |
+| `setLanguage` | `(lang: Language)` | `void` | Set display language: `"th"` or `"en"` |
+
+> **Tip**: Use `"%"` as the tag name to load all available POIs.
+
+## Available tag categories
+
+| Category | Tag ID | English Label |
+|----------|--------|---------------|
+| Food | `อาหารไทย` | Thai Food |
+| Food | `อาหารญี่ปุ่น` | Japanese |
+| Food | `อาหารจีน` | Chinese |
+| Food | `อาหารเกาหลี` | Korean |
+| Food | `อาหารอินเดีย` | Indian |
+| Food | `อาหารอิตาลี` | Italian |
+| Services | `ธนาคาร` | Bank |
+| Services | `ATM` | ATM |
+| Services | `โรงพยาบาล` | Hospital |
+| Services | `ปั๊มน้ำมัน` | Gas Station |
+| Tourism | `โรงแรม` | Hotel |
+| Tourism | `วัด` | Temple |
+| Tourism | `พิพิธภัณฑ์` | Museum |
+| Tourism | `ห้างสรรพสินค้า` | Shopping Mall |
+
+## Using TAG_CATEGORIES
+
+```tsx
+import { TAG_CATEGORIES } from 'gistda-sphere-react';
+
+function TagSelector() {
+  const { add } = useTags();
+
+  return (
+    <div>
+      {TAG_CATEGORIES.map((category) => (
+        <div key={category.name}>
+          <h3>{category.name}</h3>
+          {category.tags.map((tag) => (
+            <button key={tag.id} onClick={() => add(tag.id)}>
+              {tag.label}
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+```

@@ -1,0 +1,55 @@
+---
+title: Popup
+description: Display an information popup on the map
+---
+
+<MapDemo height="400px" zoom={12} center={{ lon: 100.5, lat: 13.75 }} language="en">
+  <Popup position={{ lon: 100.5, lat: 13.75 }} title="Hello!" detail="This is a popup on the map." />
+</MapDemo>
+
+```tsx
+<Popup
+  position={{ lon: 100.5, lat: 13.75 }}
+  title="Hello!"
+  detail="This is a popup on the map."
+  onClose={() => console.log('Popup closed')}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | Popup coordinates |
+| `ref` | `Ref<PopupRef>` | No | - | Ref for imperative control |
+| `title` | `string` | No | - | Popup title |
+| `detail` | `string` | No | - | Detail text (supports HTML) |
+| `loadDetail` | `(element: HTMLElement) => void` | No | - | Dynamically load detail content |
+| `html` | `string` | No | - | Custom HTML content (overrides `detail`) |
+| `loadHtml` | `(element: HTMLElement) => void` | No | - | Dynamically load custom HTML |
+| `size` | `Size` | No | Auto | Popup size (`{ width, height }`) |
+| `closable` | `boolean` | No | `true` | Show close button |
+| `onClose` | `(popup: SpherePopup) => void` | No | - | Close handler |
+
+## Custom HTML popup
+
+```tsx
+<Popup
+  position={{ lon: 100.5, lat: 13.75 }}
+  html='<div style="background: #eeeeff; padding: 10px;">Custom content</div>'
+/>
+```
+
+## Dynamic content loading
+
+```tsx
+<Popup
+  position={{ lon: 100.5, lat: 13.75 }}
+  title="Loading..."
+  loadDetail={(element) => {
+    fetch('/api/data')
+      .then(res => res.json())
+      .then(data => { element.innerHTML = data.description; });
+  }}
+/>
+```

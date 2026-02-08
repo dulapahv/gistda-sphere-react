@@ -1,0 +1,148 @@
+---
+title: Layer
+description: Add built-in or custom tile layers to the map
+---
+
+<LayerDemo />
+
+```tsx
+{/* Built-in data layer */}
+<Layer preset="TRAFFIC" />
+
+{/* Custom WMS layer */}
+<Layer
+  name="my-wms-layer"
+  type="WMS"
+  url="https://example.com/wms"
+  zoomRange={{ min: 1, max: 18 }}
+  opacity={0.7}
+/>
+
+{/* Change the base layer */}
+<Layer preset="HYBRID" isBase />
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `preset` | `BuiltInLayer` | No | - | Use a built-in layer |
+| `name` | `string` | Conditional | - | Layer name (required when `preset` is not provided) |
+| `isBase` | `boolean` | No | `false` | Set as the base layer |
+| `type` | `LayerType` | No | `"Vector"` | Layer type |
+| `url` | `string` | No | Sphere tile server | Tile server URL |
+| `zoomRange` | `Range` | No | All zoom levels | Visible zoom range |
+| `source` | `Range` | No | All zoom levels | Available tile zoom range |
+| `opacity` | `number` | No | `1` | Layer opacity (0-1) |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `bound` | `Bound` | No | World | Bounding box for tiles |
+| `attribution` | `string` | No | - | Attribution text |
+| `extraQuery` | `string` | No | - | Extra query string for tile requests |
+| `id` | `string` | No | Layer name | Unique layer identifier |
+| `format` | `string` | No | `"image/png"` / `"png"` | Image format |
+| `srs` | `string` | No | `"EPSG:3857"` | Spatial reference system |
+| `tileMatrixPrefix` | `string` | No | - | WMTS tile matrix prefix |
+| `styles` | `string` | No | Default | Layer styles |
+| `version` | `string` | No | `"1.1.1"` | WMS/WMTS version |
+| `refresh` | `number` | No | - | Auto-refresh interval in ms |
+| `zoomOffset` | `number` | No | - | Zoom level offset |
+| `beforeId` | `string` | No | Symbol layer | Insert before layer ID |
+
+## Layer types
+
+| Type | Description |
+|------|-------------|
+| `"Vector"` | Mapbox Vector Tiles (default) |
+| `"XYZ"` | XYZ raster tiles |
+| `"WMS"` | Web Map Service |
+| `"WMTS"` | Web Map Tile Service (KVP encoding) |
+| `"WMTS_REST"` | Web Map Tile Service (RESTful encoding) |
+| `"TMS"` | Tile Map Service |
+| `"Tiles3D"` | OGC 3D Tiles |
+| `"I3S"` | Indexed 3D Scene Layer |
+
+## Built-in base layers
+
+Base layers replace the current base map. Only one can be active at a time.
+
+| Layer | Description |
+|-------|-------------|
+| `"SIMPLE"` | Low-complexity base layer |
+| `"STREETS"` | Standard street map (default) |
+| `"STREETS_NIGHT"` | Street map with dark theme |
+| `"HYBRID"` | Satellite imagery with labels |
+| `"IMAGES"` | Satellite imagery without labels |
+
+## Built-in data layers
+
+Data layers are added on top of the base layer. Multiple can be active.
+
+| Layer | Description |
+|-------|-------------|
+| `"TRAFFIC"` | Real-time traffic (auto-refreshes every 3 minutes) |
+| `"PM25"` | Air quality (PM2.5) heatmap |
+| `"HOTSPOT"` | Fire hotspot locations |
+| `"FLOOD"` | Flood-affected areas |
+| `"DROUGHT"` | Drought-affected areas |
+
+## Predefined overlays
+
+The Sphere API provides predefined overlays that display live data on the map.
+
+<PredefinedOverlaysDemo />
+
+| Overlay | Description |
+|---------|-------------|
+| `"cameras"` | Live CCTV traffic camera feeds with optional motion video |
+| `"events"` | Active traffic and road events with popup details |
+| `"aqi"` | Thai Air Quality Index data points with popup details |
+
+```tsx
+const { loadPredefinedOverlay, unloadPredefinedOverlay } = useMapControls();
+
+loadPredefinedOverlay('cameras');
+loadPredefinedOverlay('events');
+loadPredefinedOverlay('aqi');
+unloadPredefinedOverlay('cameras');
+```
+
+## Color filters
+
+Apply visual color filters to the map for accessibility or aesthetics.
+
+<ControlsDemo />
+
+| Filter | Description |
+|--------|-------------|
+| `"Dark"` | Dark mode filter |
+| `"Light"` | Lighter map colors |
+| `"Protanopia"` | Red color blindness filter |
+| `"Deuteranopia"` | Green color blindness filter |
+| `"None"` | No filter (default) |
+
+```tsx
+const { setFilter } = useMapControls();
+
+setFilter('Dark');
+setFilter('Protanopia');
+setFilter(false); // same as 'None'
+```
+
+Or via `SphereMap` prop:
+
+```tsx
+<SphereMap filter="Dark" style={{ height: '500px' }}>
+  {/* children */}
+</SphereMap>
+```
+
+## Using layers programmatically
+
+```tsx
+const { setBaseLayer, addLayer, removeLayer } = useMapControls();
+
+setBaseLayer('HYBRID');
+addLayer('TRAFFIC');
+addLayer('PM25');
+removeLayer('TRAFFIC');
+```

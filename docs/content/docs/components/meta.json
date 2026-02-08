@@ -1,0 +1,15 @@
+{
+  "title": "Components",
+  "pages": [
+    "sphere-provider",
+    "sphere-map",
+    "marker",
+    "polygon",
+    "polyline",
+    "circle",
+    "popup",
+    "dot",
+    "rectangle",
+    "layer"
+  ]
+}

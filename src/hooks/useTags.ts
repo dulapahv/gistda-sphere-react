@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useMap } from "../context/SphereContext";
-import type { TagOptions, Tile } from "../types";
+import type { Language, TagOptions, Tile } from "../types";
 
 export type TagDataFunction = (tile: Tile) => object[];
 
@@ -13,7 +13,7 @@ export interface UseTagsReturn {
   list: () => string[];
   size: () => number;
   enablePopup: (state: boolean) => void;
-  setLanguage: (lang: string) => void;
+  setLanguage: (lang: Language) => void;
 }
 
 export interface TagDefinition {
@@ -106,7 +106,7 @@ export function useTags(): UseTagsReturn {
   );
 
   const setLanguage = useCallback(
-    (lang: string) => {
+    (lang: Language) => {
       map?.Tags?.language(lang);
     },
     [map]

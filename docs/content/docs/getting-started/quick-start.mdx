@@ -1,0 +1,86 @@
+---
+title: Quick Start
+description: Render your first map with gistda-sphere-react
+---
+
+## Minimal example
+
+Wrap your app with `SphereProvider`, then use `SphereMap` to render a map:
+
+<MapDemo height="400px" zoom={10} center={{ lon: 100.5018, lat: 13.7563 }} language="en">
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" detail="Capital of Thailand" />
+</MapDemo>
+
+```tsx lineNumbers
+import { SphereProvider, SphereMap, Marker } from 'gistda-sphere-react';
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <SphereMap
+        center={{ lon: 100.5018, lat: 13.7563 }}
+        zoom={10}
+        style={{ width: '100%', height: '500px' }}
+      >
+        <Marker
+          position={{ lon: 100.5018, lat: 13.7563 }}
+          title="Bangkok"
+          detail="Capital of Thailand"
+        />
+      </SphereMap>
+    </SphereProvider>
+  );
+}
+```
+
+## Key concepts
+
+1. **`SphereProvider`** must wrap all Sphere components. It loads the API script.
+2. **`SphereMap`** is the map container. It **must have an explicit height** or its `<div>` collapses to 0px.
+3. **Overlay components** (Marker, Polygon, etc.) go inside `SphereMap` as JSX children.
+4. **Overlay hooks** (`useMarkers`, `useOverlays`, etc.) let you add/remove/update overlays programmatically from any component.
+5. **API hooks** (`useSearch`, `useRoute`, `useTags`) access the Sphere API services from any component inside `SphereProvider`.
+
+## Adding overlays
+
+Place overlay components as children of `SphereMap`:
+
+<MapDemo height="400px" zoom={11} center={{ lon: 100.5018, lat: 13.7563 }} language="en">
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" />
+  <Polygon
+    positions={[
+      { lon: 100.41, lat: 13.78 },
+      { lon: 100.47, lat: 13.78 },
+      { lon: 100.44, lat: 13.73 },
+    ]}
+    fillColor="rgba(255, 0, 0, 0.3)"
+    lineColor="red"
+  />
+  <Circle
+    center={{ lon: 100.58, lat: 13.75 }}
+    radius={0.03}
+    fillColor="rgba(0, 100, 255, 0.3)"
+    lineColor="blue"
+  />
+</MapDemo>
+
+```tsx lineNumbers
+<SphereMap style={{ width: '100%', height: '500px' }}>
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" />
+  <Polygon
+    positions={[
+      { lon: 100.41, lat: 13.78 },
+      { lon: 100.47, lat: 13.78 },
+      { lon: 100.44, lat: 13.73 },
+    ]}
+    fillColor="rgba(255, 0, 0, 0.3)"
+    lineColor="red"
+  />
+  <Circle
+    center={{ lon: 100.58, lat: 13.75 }}
+    radius={0.03}
+    fillColor="rgba(0, 100, 255, 0.3)"
+    lineColor="blue"
+  />
+</SphereMap>
+```

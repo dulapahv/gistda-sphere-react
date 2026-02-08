@@ -1,0 +1,56 @@
+---
+title: Polygon
+description: Draw a filled polygon on the map
+---
+
+<MapDemo height="400px" zoom={12} center={{ lon: 100.50, lat: 13.75 }} language="en">
+  <Polygon
+    positions={[
+      { lon: 100.475, lat: 13.775 },
+      { lon: 100.525, lat: 13.775 },
+      { lon: 100.50, lat: 13.725 },
+    ]}
+    fillColor="rgba(255, 0, 0, 0.3)"
+    lineColor="red"
+    lineWidth={2}
+  />
+</MapDemo>
+
+```tsx
+<Polygon
+  positions={[
+    { lon: 100.475, lat: 13.775 },
+    { lon: 100.525, lat: 13.775 },
+    { lon: 100.50, lat: 13.725 },
+  ]}
+  fillColor="rgba(255, 0, 0, 0.3)"
+  lineColor="red"
+  lineWidth={2}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `positions` | `Location[]` | Yes (min 3) | - | Array of vertices |
+| `ref` | `Ref<PolygonRef>` | No | - | Ref for imperative control |
+| `title` | `string` | No | - | Hover tooltip text |
+| `detail` | `string` | No | - | Popup text when clicked |
+| `label` | `string` | No | - | Label at polygon center |
+| `labelOptions` | `MarkerOptions` | No | - | Label marker options |
+| `popup` | `PopupOptions` | No | - | Popup configuration |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range visibility |
+| `lineWidth` | `number` | No | `3` | Border width in pixels |
+| `lineColor` | `string` | No | Preset color | Border color |
+| `fillColor` | `string` | No | Preset color | Fill color |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | Border style |
+| `pivot` | `Location` | No | Center | Rotation pivot point |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor |
+| `draggable` | `boolean` | No | `false` | Allow dragging |
+| `pointer` | `boolean` | No | `false` | Show drag pointer |
+| `editable` | `boolean` | No | `false` | Allow vertex editing |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `onClick` | `(polygon: SpherePolygon) => void` | No | - | Click handler |
+| `onDrag` | `(polygon: SpherePolygon) => void` | No | - | Drag handler |
+| `onDrop` | `(polygon: SpherePolygon) => void` | No | - | Drop handler |

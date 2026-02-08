@@ -1,0 +1,56 @@
+.pg-suggestions-list {
+  background: var(--pg-bg-tertiary);
+  border: 1px solid var(--pg-border-color);
+  border-radius: 6px;
+  margin-top: 8px;
+  overflow: hidden;
+}
+
+button.pg-suggestion-item {
+  width: 100%;
+  padding: 8px 12px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--pg-text-primary);
+  cursor: pointer;
+  border: none;
+  border-bottom: 1px solid var(--pg-border-color);
+  background: transparent;
+  text-align: left;
+}
+
+button.pg-suggestion-item:last-child {
+  border-bottom: none;
+}
+
+button.pg-suggestion-item:hover {
+  background: var(--pg-bg-hover);
+}
+
+.pg-results-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+button.pg-result-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 10px 12px;
+  background: var(--pg-bg-tertiary);
+  border: 1px solid var(--pg-border-color);
+  border-radius: 6px;
+  font-size: 12px;
+  font-family: inherit;
+  color: var(--pg-text-primary);
+  cursor: pointer;
+  text-align: left;
+}
+
+button.pg-result-item:hover {
+  border-color: var(--pg-border-light);
+  background: var(--pg-bg-hover);
+}

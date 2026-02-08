@@ -1,0 +1,62 @@
+---
+title: Overlay Collection Hooks
+description: Manage collections of overlays programmatically
+---
+
+Manage collections of overlays programmatically using these hooks.
+
+<OverlayDemo />
+
+## useMarkers
+
+```tsx
+import { useMarkers } from 'gistda-sphere-react';
+
+function MarkerManager() {
+  const { items, add, update, remove, clear, get } = useMarkers();
+
+  const addMarker = () => {
+    const id = add({
+      position: { lon: 100.5, lat: 13.75 },
+      title: 'New Marker',
+      draggable: true,
+    });
+    console.log('Added marker with ID:', id);
+  };
+
+  return (
+    <div>
+      <button onClick={addMarker}>Add</button>
+      <button onClick={clear}>Clear All</button>
+      <p>Count: {items.length}</p>
+    </div>
+  );
+}
+```
+
+## usePolygons, usePolylines, useCircles
+
+These hooks follow the same pattern as `useMarkers` but for their respective overlay types.
+
+## useOverlays
+
+Combines all overlay collection hooks into a single hook.
+
+```tsx
+import { useOverlays } from 'gistda-sphere-react';
+
+const { markers, polygons, polylines, circles, clearAll } = useOverlays();
+```
+
+## Shared return value
+
+All overlay collection hooks return:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `items` | `T[]` | Current overlay data objects |
+| `add` | `(data) => string` | Add an overlay, returns ID |
+| `update` | `(id, data) => void` | Update overlay by ID |
+| `remove` | `(id) => void` | Remove overlay by ID |
+| `clear` | `() => void` | Remove all of this type |
+| `get` | `(id) => T \| undefined` | Get overlay data by ID |

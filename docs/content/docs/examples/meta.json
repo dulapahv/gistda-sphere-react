@@ -1,0 +1,13 @@
+{
+  "title": "Examples",
+  "pages": [
+    "programmatic-markers",
+    "interactive-placement",
+    "drawing-polygons",
+    "sidebar-controls",
+    "custom-wms-layer",
+    "routing",
+    "search",
+    "tags"
+  ]
+}

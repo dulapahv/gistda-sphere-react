@@ -1,0 +1,103 @@
+---
+title: useRoute
+description: Calculate and display routes between locations
+---
+
+Calculate and display routes between locations.
+
+<RouteDemo />
+
+```tsx
+import { useRoute } from 'gistda-sphere-react';
+
+function RouteComponent() {
+  const { addDestination, search, getDistance, getInterval, clear, isReady } = useRoute();
+
+  const calculateRoute = () => {
+    addDestination({ lon: 100.5018, lat: 13.7563 });
+    addDestination({ lon: 98.9853, lat: 18.7883 });
+    search();
+  };
+
+  return (
+    <div>
+      <button onClick={calculateRoute}>Calculate Route</button>
+      <button onClick={clear}>Clear</button>
+    </div>
+  );
+}
+```
+
+## Options
+
+`useRoute` accepts an optional options object for route events:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `onRouteComplete` | `(routes: unknown[]) => void` | Called when route calculation finishes |
+| `onRouteError` | `(errorCode: number) => void` | Called when route calculation fails |
+
+```tsx
+const { search, getDistance, getInterval, addDestination, clear } = useRoute({
+  onRouteComplete() {
+    console.log('Distance:', getDistance(true));
+    console.log('Duration:', getInterval(true));
+  },
+  onRouteError(code) {
+    console.error('Route error:', code);
+  },
+});
+```
+
+## Functions
+
+| Function | Parameters | Returns | Description |
+|----------|------------|---------|-------------|
+| `isReady` | - | `boolean` | Routing service initialized |
+| `addDestination` | `(destination, mode?)` | `void` | Add a destination |
+| `insertDestination` | `(index, destination, mode?)` | `void` | Insert at index |
+| `removeDestination` | `(marker)` | `void` | Remove by marker ref |
+| `removeDestinationAt` | `(index)` | `void` | Remove by index |
+| `clearDestinations` | `()` | `void` | Remove all destinations |
+| `clearPath` | `()` | `void` | Remove route path only |
+| `clear` | `()` | `void` | Remove entire route |
+| `reverse` | `()` | `void` | Reverse direction |
+| `search` | `()` | `void` | Calculate and display route |
+| `getDistance` | `(format?)` | `number \| string` | Total distance |
+| `getInterval` | `(format?)` | `number \| string` | Estimated travel time |
+| `getGuide` | `(format?)` | `RouteGuideStep[] \| HTMLElement` | Turn-by-turn directions |
+| `exportRouteLine` | `(options?)` | `SpherePolyline \| null` | Export as Polyline |
+| `listDestinations` | `()` | `SphereMarker[]` | List destination markers |
+| `size` | `()` | `number` | Number of destinations |
+| `setMode` | `(mode)` | `void` | Set routing mode |
+| `setModeAt` | `(index, mode)` | `void` | Set mode for segment |
+| `enableRouteType` | `(routeType, state)` | `void` | Enable/disable route type |
+| `setLabel` | `(label)` | `void` | Set label display mode |
+| `setAuto` | `(state)` | `void` | Toggle auto-recalculation |
+| `setLanguage` | `(lang: Language)` | `void` | Set routing language: `"th"` or `"en"` |
+
+## RouteMode
+
+| Mode | Description |
+|------|-------------|
+| `"Traffic"` | Fastest route using real-time traffic data |
+| `"Cost"` | Fastest route without traffic |
+| `"Distance"` | Shortest route by distance |
+| `"Fly"` | Direct straight line |
+
+## RouteType
+
+| Type | Description |
+|------|-------------|
+| `"Road"` | Regular roads |
+| `"Ferry"` | Ferry routes |
+| `"Tollway"` | Toll roads |
+| `"All"` | All route types |
+
+## RouteLabelType
+
+| Label | Description |
+|-------|-------------|
+| `"Distance"` | Show distance labels |
+| `"Time"` | Show time labels |
+| `"Hide"` | Hide all labels |

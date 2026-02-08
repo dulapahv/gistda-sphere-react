@@ -70,6 +70,8 @@ export type FilterType =
 
 export type LineStyleType = "Solid" | "Dashed" | "Dot";
 
+export type Language = "th" | "en";
+
 export type UiComponentMode = "Full" | "Mobile" | "None";
 
 export type RouteMode = "Traffic" | "Cost" | "Distance" | "Fly";
@@ -89,7 +91,7 @@ export interface MapOptions {
   ui?: UiComponentMode;
   input?: boolean;
   lastView?: boolean;
-  language?: string;
+  language?: Language;
   [key: string]:
     | SphereLayer
     | string
@@ -265,7 +267,7 @@ export interface SphereLayer {
 }
 
 export interface SphereLayerCollection {
-  language(value?: string): string | this;
+  language(value?: Language): Language | this;
   setBase(layer: SphereLayer | object | string): this;
   add(layer: SphereLayer | object, beforeId?: string): this;
   remove(layer: SphereLayer | object): this;
@@ -377,14 +379,14 @@ export interface SphereUiCollection {
   ContextMenu: SphereContextMenu;
   Keyboard: SphereKeyboard;
   Mouse: SphereMouse;
-  language(value?: string): string | SphereUiCollection;
+  language(value?: Language): Language | SphereUiCollection;
   add(control: object): SphereUiCollection;
   remove(control: object): SphereUiCollection;
   lockMap(options?: object): SphereUiCollection;
 }
 
 export interface SphereSearch {
-  language(value?: string): string | this;
+  language(value?: Language): Language | this;
   placeholder(value?: HTMLElement, options?: object): HTMLElement | this;
   suggest(keyword: string, options?: SuggestOptions): Promise<object>;
   search(keyword: string, options?: SearchOptions): Promise<object>;
@@ -395,7 +397,7 @@ export interface SphereSearch {
 }
 
 export interface SphereTagCollection {
-  language(value?: string): string | this;
+  language(value?: Language): Language | this;
   set(tag: string | ((tile: Tile) => object[]), options?: TagOptions): this;
   add(tag: string | ((tile: Tile) => object[]), options?: TagOptions): this;
   remove(tag: string): this;
@@ -406,7 +408,7 @@ export interface SphereTagCollection {
 }
 
 export interface SphereRoute {
-  language(value?: string): string | this;
+  language(value?: Language): Language | this;
   placeholder(value?: HTMLElement): HTMLElement | this;
   enableContextMenu(): this;
   line(type: string, value?: GeometryOptions): GeometryOptions | this;
@@ -466,7 +468,7 @@ export interface SphereMap {
   location(value?: Location, animate?: boolean): Location | this;
   bound(value?: Bound, options?: object): Bound | this;
   move(offset: Point, animate?: boolean): this;
-  language(value?: string): string | this;
+  language(value?: Language): Language | this;
   rotate(angle?: number, animate?: boolean): number | this;
   pitch(angle?: number): number | this;
   enableFilter(filter?: FilterType | false): FilterType | false | this;

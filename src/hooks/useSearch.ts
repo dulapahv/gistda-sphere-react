@@ -2,6 +2,7 @@ import { useCallback, useMemo } from "react";
 import { useMap } from "../context/SphereContext";
 import type {
   AddressOptions,
+  Language,
   Location,
   NearPoiOptions,
   SearchOptions,
@@ -44,7 +45,7 @@ export interface UseSearchReturn {
   ) => Promise<PoiResult[]>;
   clear: () => void;
   enablePopup: (state: boolean) => void;
-  setLanguage: (lang: string) => void;
+  setLanguage: (lang: Language) => void;
 }
 
 export function useSearch(): UseSearchReturn {
@@ -112,7 +113,7 @@ export function useSearch(): UseSearchReturn {
   );
 
   const setLanguage = useCallback(
-    (lang: string) => {
+    (lang: Language) => {
       map?.Search?.language(lang);
     },
     [map]

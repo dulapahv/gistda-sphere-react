@@ -12,6 +12,7 @@ import type {
   Bound,
   FilterType,
   FlyToOptions,
+  Language,
   Location,
   SphereMap,
   SphereNamespace,
@@ -40,7 +41,7 @@ interface MapControls {
   setRotate: (angle: number, animate?: boolean) => void;
   setPitch: (angle: number) => void;
   setFilter: (filter: FilterType | false) => void;
-  setLanguage: (language: string) => void;
+  setLanguage: (language: Language) => void;
   setBaseLayer: (layer: BuiltInLayer) => void;
   addLayer: (layer: BuiltInLayer) => void;
   removeLayer: (layer: BuiltInLayer) => void;
@@ -209,7 +210,7 @@ export function SphereProvider({
     }
   }, []);
 
-  const setLanguage = useCallback((language: string) => {
+  const setLanguage = useCallback((language: Language) => {
     mapRef.current?.language(language);
   }, []);
 

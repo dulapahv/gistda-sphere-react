@@ -1,0 +1,28 @@
+---
+title: useSphere
+description: Access the Sphere API namespace without requiring a map
+---
+
+Access the Sphere API namespace without requiring a map.
+
+```tsx
+import { useSphere } from 'gistda-sphere-react';
+
+function SphereInfo() {
+  const { sphere, isLoaded, error, apiKey } = useSphere();
+
+  if (!isLoaded) return <div>Loading API...</div>;
+  if (error) return <div>Error: {error.message}</div>;
+
+  return <div>API loaded with key: {apiKey}</div>;
+}
+```
+
+## Return value
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `sphere` | `SphereNamespace \| null` | The global `sphere` API namespace |
+| `isLoaded` | `boolean` | `true` when the API script has loaded |
+| `error` | `Error \| null` | Error if the API failed to load |
+| `apiKey` | `string` | The API key passed to `SphereProvider` |

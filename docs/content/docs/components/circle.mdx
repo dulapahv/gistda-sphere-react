@@ -1,0 +1,46 @@
+---
+title: Circle
+description: Draw a circle on the map
+---
+
+<MapDemo height="400px" zoom={11} center={{ lon: 100.5, lat: 13.75 }} language="en">
+  <Circle
+    center={{ lon: 100.5, lat: 13.75 }}
+    radius={0.05}
+    fillColor="rgba(0, 100, 255, 0.3)"
+    lineColor="blue"
+    lineWidth={2}
+  />
+</MapDemo>
+
+```tsx
+<Circle
+  center={{ lon: 100.5, lat: 13.75 }}
+  radius={0.05}
+  fillColor="rgba(0, 100, 255, 0.3)"
+  lineColor="blue"
+  lineWidth={2}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `center` | `Location` | Yes | - | Circle center coordinates |
+| `radius` | `number` | Yes | - | Circle radius in degrees |
+| `ref` | `Ref<CircleRef>` | No | - | Ref for imperative control |
+| `title` | `string` | No | - | Hover tooltip text |
+| `detail` | `string` | No | - | Popup text when clicked |
+| `popup` | `PopupOptions` | No | - | Popup configuration |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range visibility |
+| `lineWidth` | `number` | No | `3` | Border width in pixels |
+| `lineColor` | `string` | No | Preset color | Border color |
+| `fillColor` | `string` | No | Preset color | Fill color |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | Border style |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor |
+| `draggable` | `boolean` | No | `false` | Allow dragging |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `onClick` | `(circle: SphereCircle) => void` | No | - | Click handler |
+| `onDrag` | `(circle: SphereCircle) => void` | No | - | Drag handler |
+| `onDrop` | `(circle: SphereCircle) => void` | No | - | Drop handler |

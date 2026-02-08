@@ -1,0 +1,35 @@
+---
+title: Displaying Tags on the Map
+description: Show POI markers by category
+---
+
+Show POI markers by category:
+
+<TagsDemo />
+
+```tsx lineNumbers
+import { SphereProvider, SphereMap, useTags } from 'gistda-sphere-react';
+
+function TagPanel() {
+  const { add, clear, list, isReady } = useTags();
+
+  return (
+    <div>
+      <button onClick={() => add('โรงพยาบาล')} disabled={!isReady}>Show Hospitals</button>
+      <button onClick={() => add('ATM')} disabled={!isReady}>Show ATMs</button>
+      <button onClick={() => add('วัด')} disabled={!isReady}>Show Temples</button>
+      <button onClick={clear}>Clear All</button>
+      <p>Active tags: {list().join(', ')}</p>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <TagPanel />
+      <SphereMap style={{ width: '100%', height: '500px' }} />
+    </SphereProvider>
+  );
+}
+```

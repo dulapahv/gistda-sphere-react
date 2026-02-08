@@ -1,0 +1,36 @@
+---
+title: Dot
+description: A simple point geometry on the map
+---
+
+<MapDemo height="400px" zoom={12} center={{ lon: 100.5, lat: 13.75 }} language="en">
+  <Dot position={{ lon: 100.49, lat: 13.76 }} lineWidth={12} lineColor="red" />
+</MapDemo>
+
+```tsx
+<Dot
+  position={{ lon: 100.49, lat: 13.76 }}
+  lineWidth={12}
+  lineColor="red"
+  draggable
+  onDrop={(dot, location) => console.log('Dropped at:', location)}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | Dot coordinates |
+| `ref` | `Ref<DotRef>` | No | - | Ref for imperative control |
+| `title` | `string` | No | - | Hover tooltip text |
+| `detail` | `string` | No | - | Popup text when clicked |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range visibility |
+| `lineWidth` | `number` | No | `3` | Dot size in pixels |
+| `lineColor` | `string` | No | Preset color | Dot color |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor |
+| `draggable` | `boolean` | No | `false` | Allow dragging |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `onClick` | `(dot: SphereDot) => void` | No | - | Click handler |
+| `onDrag` | `(dot: SphereDot) => void` | No | - | Drag handler |
+| `onDrop` | `(dot: SphereDot, location: Location) => void` | No | - | Drop handler |

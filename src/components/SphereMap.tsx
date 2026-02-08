@@ -13,6 +13,7 @@ import type {
   Bound,
   FilterType,
   FlyToOptions,
+  Language,
   Location,
   MapOptions,
   Range,
@@ -38,7 +39,7 @@ export interface SphereMapProps {
   zoom?: number;
   zoomRange?: Range;
   center?: Location;
-  language?: string;
+  language?: Language;
   input?: boolean;
   lastView?: boolean;
   ui?: "Full" | "Mobile" | "None";

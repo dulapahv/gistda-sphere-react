@@ -1,0 +1,88 @@
+---
+title: Event Hooks
+description: Listen to map events from any component
+---
+
+Listen to map events from any component inside `SphereMap`.
+
+<EventLogDemo />
+
+```tsx
+import {
+  useMapReady,
+  useMapClick,
+  useMapZoom,
+  useMapLocation,
+  useOverlayClick,
+  useMapEvent,
+} from 'gistda-sphere-react';
+
+function MapEvents() {
+  useMapReady(() => {
+    console.log('Map is ready');
+  });
+
+  useMapClick((location) => {
+    console.log('Clicked at:', location.lon, location.lat);
+  });
+
+  useMapZoom(() => {
+    console.log('Zoom changed');
+  });
+
+  useMapLocation(() => {
+    console.log('Map center changed');
+  });
+
+  useOverlayClick(({ overlay, location }) => {
+    console.log('Overlay clicked at:', location);
+  });
+
+  // Generic event hook for any Sphere event
+  useMapEvent('rotate', (angle) => {
+    console.log('Rotated to:', angle);
+  });
+
+  return null;
+}
+```
+
+## Specialized hooks
+
+| Hook | Handler Signature | Description |
+|------|-------------------|-------------|
+| `useMapReady` | `() => void` | Fires when the map is initialized |
+| `useMapClick` | `(location: Location) => void` | Fires when the map is clicked |
+| `useMapZoom` | `() => void` | Fires when the zoom level changes |
+| `useMapLocation` | `() => void` | Fires when the map center changes |
+| `useOverlayClick` | `(data: { overlay, location }) => void` | Fires when any overlay is clicked |
+
+## Generic event hook
+
+`useMapEvent(eventName, handler)` listens to any Sphere event by name.
+
+### Available events
+
+| Event Name | Data | Description |
+|------------|------|-------------|
+| `"ready"` | - | Map is ready |
+| `"resize"` | - | Map resized |
+| `"zoom"` | - | Zoom changed |
+| `"location"` | - | Center changed |
+| `"rotate"` | - | Rotation changed |
+| `"pitch"` | - | Pitch changed |
+| `"click"` | `Location` | Map clicked |
+| `"doubleClick"` | `Location` | Map double-clicked |
+| `"mousemove"` | `Location` | Mouse moved |
+| `"drag"` | - | Drag started |
+| `"drop"` | - | Drag ended |
+| `"idle"` | - | Map is idle |
+| `"layerChange"` | `Layer` | Layer added or removed |
+| `"overlayClick"` | `{ overlay, location }` | Overlay clicked |
+| `"overlayDrag"` | `Overlay` | Overlay dragged |
+| `"overlayDrop"` | `Overlay` | Overlay dropped |
+| `"overlayHover"` | `Overlay` | Mouse entered overlay |
+| `"overlayLeave"` | `Overlay` | Mouse left overlay |
+| `"popupClose"` | `Popup` | Popup closed |
+| `"routeComplete"` | `object[]` | Route calculated |
+| `"error"` | `object` | Error occurred |

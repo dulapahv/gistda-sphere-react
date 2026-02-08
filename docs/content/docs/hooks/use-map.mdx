@@ -1,0 +1,26 @@
+---
+title: useMap
+description: Access the raw map instance and Sphere API namespace
+---
+
+Access the raw map instance and the Sphere API namespace directly.
+
+```tsx
+import { useMap } from 'gistda-sphere-react';
+
+function MapInfo() {
+  const { map, sphere, isReady } = useMap();
+
+  if (!isReady) return <div>Loading...</div>;
+
+  return <div>Zoom: {map.zoom()}</div>;
+}
+```
+
+## Return value
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `map` | `SphereMapInstance \| null` | The underlying Sphere map instance |
+| `sphere` | `SphereNamespace \| null` | The global `sphere` API namespace |
+| `isReady` | `boolean` | `true` when the map is initialized |

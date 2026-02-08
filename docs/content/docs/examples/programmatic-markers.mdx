@@ -1,0 +1,37 @@
+---
+title: Adding Markers Programmatically
+description: Use React state to add overlays dynamically
+---
+
+Use React state to add markers, polygons, or any overlay dynamically.
+
+<InteractiveMarkerDemo />
+
+```tsx lineNumbers
+import { useState } from 'react';
+import { SphereProvider, SphereMap, Marker, type Location } from 'gistda-sphere-react';
+
+function App() {
+  const [markers, setMarkers] = useState<Location[]>([]);
+
+  const addMarker = () => {
+    const newMarker = {
+      lon: 100.5 + (Math.random() - 0.5) * 0.2,
+      lat: 13.75 + (Math.random() - 0.5) * 0.2,
+    };
+    setMarkers([...markers, newMarker]);
+  };
+
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <button onClick={addMarker}>Add Marker</button>
+      <button onClick={() => setMarkers([])}>Clear All</button>
+      <SphereMap center={{ lon: 100.5, lat: 13.75 }} zoom={11} style={{ height: '500px' }}>
+        {markers.map((position) => (
+          <Marker key={`${position.lon}-${position.lat}`} position={position} />
+        ))}
+      </SphereMap>
+    </SphereProvider>
+  );
+}
+```

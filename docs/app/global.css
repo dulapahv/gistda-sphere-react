@@ -1,0 +1,16 @@
+@import "tailwindcss";
+@import "fumadocs-ui/css/neutral.css";
+@import "fumadocs-ui/css/preset.css";
+
+/* Force Sphere map popup text and close button to be readable in dark mode */
+@layer base {
+  .maplibregl-popup .sphere-popup_title,
+  .maplibregl-popup .sphere-popup_detail,
+  .mapboxgl-popup .sphere-popup_title,
+  .mapboxgl-popup .sphere-popup_detail,
+  .mapboxgl-popup-close-button,
+  .maplibregl-popup-close-button,
+  .maplibregl-control-container {
+    color: #1a1a1a !important;
+  }
+}

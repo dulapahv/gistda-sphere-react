@@ -1,0 +1,71 @@
+---
+title: Marker
+description: Display a point marker on the map
+---
+
+<MapDemo height="400px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }} language="en">
+  <Marker
+    position={{ lon: 100.5018, lat: 13.7563 }}
+    title="Bangkok"
+    detail="Capital of Thailand"
+    draggable
+  />
+</MapDemo>
+
+```tsx
+<Marker
+  position={{ lon: 100.5018, lat: 13.7563 }}
+  title="Bangkok"
+  detail="Capital of Thailand"
+  draggable
+  onDrop={(marker, newPosition) => console.log('Moved to:', newPosition)}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | Marker coordinates (`{ lon, lat }`) |
+| `ref` | `Ref<MarkerRef>` | No | - | Ref for imperative control |
+| `icon` | `Icon` | No | Default red pin | Custom icon |
+| `title` | `string` | No | - | Text shown on hover tooltip |
+| `detail` | `string` | No | - | Text shown in popup when clicked |
+| `popup` | `PopupOptions` | No | - | Popup configuration (overrides `detail`) |
+| `visibleRange` | `Range` | No | All zoom levels | Zoom range visibility |
+| `clickable` | `boolean` | No | `false` | Show pointer cursor on hover |
+| `draggable` | `boolean` | No | `false` | Allow dragging |
+| `zIndex` | `number` | No | `0` | Stacking order |
+| `rotate` | `number` | No | `0` | Rotation angle in degrees |
+| `onClick` | `(marker: SphereMarker) => void` | No | - | Click handler |
+| `onDrag` | `(marker: SphereMarker) => void` | No | - | Drag handler |
+| `onDrop` | `(marker: SphereMarker, location: Location) => void` | No | - | Drop handler |
+| `onHover` | `(marker: SphereMarker) => void` | No | - | Mouse enter handler |
+| `onLeave` | `(marker: SphereMarker) => void` | No | - | Mouse leave handler |
+
+## Custom icon
+
+### URL-based icon
+
+```tsx
+<Marker
+  position={{ lon: 100.5, lat: 13.75 }}
+  icon={{
+    url: '/my-icon.png',
+    size: { width: 32, height: 32 },
+    offset: { x: 16, y: 32 }
+  }}
+/>
+```
+
+### HTML icon
+
+```tsx
+<Marker
+  position={{ lon: 100.5, lat: 13.75 }}
+  icon={{
+    html: '<div style="background: red; width: 20px; height: 20px; border-radius: 50%;"></div>',
+    offset: { x: 10, y: 10 }
+  }}
+/>
+```

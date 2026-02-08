@@ -1,0 +1,98 @@
+---
+title: TypeScript
+description: Type definitions and exports
+---
+
+All types are exported from the package:
+
+```tsx
+import type {
+  // Core geometric types
+  Location,          // { lon: number, lat: number }
+  Point,             // { x: number, y: number }
+  Size,              // { width: number, height: number }
+  Range,             // { min: number, max: number }
+  Bound,             // { minLon, minLat, maxLon, maxLat }
+  Tile,              // { x: number, y: number, z: number }
+  Icon,              // { url?, urlHD?, html?, offset?, size? }
+
+  // Enum types
+  BuiltInLayer,
+  LayerType,
+  FilterType,
+  LineStyleType,
+  PredefinedOverlay,
+  UiComponentMode,
+
+  // Options types
+  PopupOptions,
+  GeometryOptions,
+  MarkerOptions,
+  TagOptions,
+  SearchOptions,
+  SuggestOptions,
+  AddressOptions,
+  NearPoiOptions,
+
+  // Route types
+  RouteMode,
+  RouteType,
+  RouteLabelType,
+  RouteGuideStep,
+
+  // Instance types
+  SphereMapInstance,
+  SphereMarker,
+  SpherePolygon,
+  SpherePolyline,
+  SphereCircle,
+  SphereDot,
+  SphereRectangle,
+  SpherePopup,
+  SphereOverlay,
+  SphereNamespace,
+
+  // Ref types
+  SphereMapRef,
+  MarkerRef,
+  PolygonRef,
+  PolylineRef,
+  CircleRef,
+  PopupRef,
+  DotRef,
+  RectangleRef,
+} from 'gistda-sphere-react';
+```
+
+## Icon type
+
+```typescript
+// URL-based icon
+{
+  url: string;
+  urlHD?: string;
+  size?: Size;
+  offset?: Point;
+}
+
+// HTML-based icon (overrides url)
+{
+  html: string;
+  offset?: Point;
+  size?: Size;
+}
+```
+
+## PopupOptions type
+
+```typescript
+{
+  title?: string;
+  detail?: string;
+  loadDetail?: (element: HTMLElement) => void;
+  html?: string;
+  loadHtml?: (element: HTMLElement) => void;
+  size?: Size;
+  closable?: boolean;
+}
+```

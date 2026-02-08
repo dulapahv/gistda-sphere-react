@@ -1,0 +1,99 @@
+---
+title: SphereMap
+description: The map container component
+---
+
+<SphereMapDemo />
+
+```tsx
+<SphereMap
+  center={{ lon: 100.5018, lat: 13.7563 }}
+  style={{ width: "100%", height: "300px" }}
+  zoom={10}
+  onClick={(e) => {
+    console.log(`Clicked at ${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`);
+  }}
+  onLocation={(e) => {
+    console.log(`Moved to ${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`);
+  }}
+  onZoom={(e) => {
+    console.log(`Zoomed to level ${e.toFixed(2)}`);
+  }}
+>
+  {/* Markers, Polygons, etc. */}
+</SphereMap>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `center` | `Location` | No | Bangkok (`{ lon: 100.49, lat: 13.72 }`) | Initial map center coordinates |
+| `zoom` | `number` | No | `7` | Initial zoom level (1-22) |
+| `zoomRange` | `Range` | No | All zoom levels | Allowed zoom range (`{ min, max }`) |
+| `language` | `Language` | No | `"th"` | Map language: `"th"` (Thai) or `"en"` (English) |
+| `input` | `boolean` | No | `true` | Allow user input (click, drag, scroll) |
+| `lastView` | `boolean` | No | `false` | Restore last location/zoom from local storage |
+| `ui` | `"Full" \| "Mobile" \| "None"` | No | Fit screen size | UI component mode |
+| `filter` | `FilterType` | No | `"None"` | Initial color filter |
+| `rotate` | `number` | No | `0` | Initial rotation angle in degrees |
+| `pitch` | `number` | No | `0` | Initial pitch angle in degrees |
+| `style` | `CSSProperties` | No | - | CSS styles for the map container |
+| `className` | `string` | No | - | CSS class for the map container |
+| `id` | `string` | No | - | HTML id attribute |
+| `ref` | `Ref<SphereMapRef>` | No | - | Ref for imperative map control |
+| `children` | `ReactNode` | No | - | Overlay components |
+
+## Event callbacks
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `onReady` | `(map: SphereMapInstance) => void` | Map initialized and ready |
+| `onClick` | `(location: Location) => void` | Map clicked |
+| `onDoubleClick` | `(location: Location) => void` | Map double-clicked |
+| `onZoom` | `(zoom: number) => void` | Zoom level changed |
+| `onLocation` | `(location: Location) => void` | Map center changed |
+| `onRotate` | `(angle: number) => void` | Rotation changed |
+| `onPitch` | `(angle: number) => void` | Pitch changed |
+| `onDrag` | `() => void` | User started dragging |
+| `onDrop` | `() => void` | User stopped dragging |
+| `onMouseMove` | `(location: Location) => void` | Mouse moved over map |
+| `onIdle` | `() => void` | Map is idle |
+| `onError` | `(error: Error) => void` | An error occurred |
+
+> **Important**: The map container must have an explicit height. Without it, the `<div>` collapses to 0px.
+
+## UI modes
+
+The `ui` prop controls which built-in UI elements are shown:
+
+| Mode | Description |
+|------|-------------|
+| `"Full"` | All controls: zoom bar, d-pad, geolocation, toolbar, layer selector, fullscreen, scale |
+| `"Mobile"` | Compact controls optimized for small screens |
+| `"None"` | No built-in UI controls |
+
+By default, the mode is automatically chosen based on screen size.
+
+### Available UI controls
+
+| Control | Description |
+|---------|-------------|
+| DPad | Directional navigation pad |
+| Zoombar | Zoom in/out slider |
+| Geolocation | Navigate to user's location |
+| Toolbar | Drawing tools (desktop only) |
+| LayerSelector | Base layer picker |
+| Fullscreen | Toggle fullscreen (desktop only) |
+| Crosshair | Center crosshair indicator |
+| Scale | Distance scale bar |
+
+UI control visibility can be toggled via the raw map instance:
+
+```tsx
+const { map } = useMap();
+
+map?.Ui.DPad.visible(false);    // hide d-pad
+map?.Ui.Scale.visible(true);    // show scale bar
+map?.Ui.Toolbar.visible(false); // hide toolbar
+```

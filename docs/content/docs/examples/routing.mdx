@@ -1,0 +1,40 @@
+---
+title: Routing between Locations
+description: Calculate and display a route
+---
+
+Calculate and display a route:
+
+<RouteDemo />
+
+```tsx lineNumbers
+import { SphereProvider, SphereMap, useRoute } from 'gistda-sphere-react';
+
+function RoutePanel() {
+  const { addDestination, search, getDistance, getInterval, setMode, clear, isReady } = useRoute();
+
+  const calculateRoute = () => {
+    clear();
+    addDestination({ lon: 100.5018, lat: 13.7563 });
+    addDestination({ lon: 98.9853, lat: 18.7883 });
+    setMode('Traffic');
+    search();
+  };
+
+  return (
+    <div>
+      <button onClick={calculateRoute} disabled={!isReady}>Calculate Route</button>
+      <button onClick={clear}>Clear Route</button>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <RoutePanel />
+      <SphereMap style={{ width: '100%', height: '500px' }} />
+    </SphereProvider>
+  );
+}
+```

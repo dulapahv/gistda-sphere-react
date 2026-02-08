@@ -1,0 +1,48 @@
+---
+title: Getting an API Key
+description: How to obtain a GISTDA Sphere API key
+---
+
+## Steps
+
+1. Visit [sphere.gistda.or.th](https://sphere.gistda.or.th/)
+2. Register for an account
+3. Create a new API key and register your domain(s)
+
+> **Note**: Register `localhost` for local development.
+
+## Usage
+
+Pass the API key to `SphereProvider`:
+
+```tsx
+<SphereProvider apiKey="YOUR_API_KEY">
+  {/* Your app */}
+</SphereProvider>
+```
+
+## Environment variables
+
+For security, store your API key in an environment variable:
+
+```bash title=".env.local"
+NEXT_PUBLIC_SPHERE_API_KEY=your_api_key_here
+```
+
+```tsx
+<SphereProvider apiKey={process.env.NEXT_PUBLIC_SPHERE_API_KEY!}>
+  {/* Your app */}
+</SphereProvider>
+```
+
+For Vite projects:
+
+```bash title=".env"
+VITE_SPHERE_API_KEY=your_api_key_here
+```
+
+```tsx
+<SphereProvider apiKey={import.meta.env.VITE_SPHERE_API_KEY}>
+  {/* Your app */}
+</SphereProvider>
+```

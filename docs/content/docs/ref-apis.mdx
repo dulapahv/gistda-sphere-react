@@ -1,0 +1,106 @@
+---
+title: Ref APIs
+description: Imperative control via React refs
+---
+
+All overlay components support React refs for imperative control.
+
+## SphereMapRef
+
+```tsx
+const mapRef = useRef<SphereMapRef>(null);
+
+<SphereMap ref={mapRef} style={{ height: '500px' }} />
+
+mapRef.current?.setZoom(15);
+mapRef.current?.goTo({ center: { lon: 100.5, lat: 13.75 }, zoom: 12 });
+```
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getMap` | `()` | Get the underlying map instance |
+| `setZoom` | `(zoom, animate?)` | Set zoom level |
+| `setCenter` | `(location, animate?)` | Set map center |
+| `setBound` | `(bound, options?)` | Fit to bounding box |
+| `goTo` | `(target, animate?)` | Animate to target |
+| `setRotate` | `(angle, animate?)` | Set rotation |
+| `setPitch` | `(angle)` | Set pitch |
+| `setFilter` | `(filter)` | Apply color filter |
+| `resize` | `()` | Resize to fit container |
+| `repaint` | `()` | Force repaint |
+
+## MarkerRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getMarker` | `()` | Get the underlying marker |
+| `togglePopup` | `(show?)` | Show or hide popup |
+| `setPosition` | `(location, animate?)` | Move the marker |
+| `setRotation` | `(angle)` | Set rotation |
+
+## PolygonRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getPolygon` | `()` | Get the underlying polygon |
+| `togglePopup` | `(show?, location?)` | Show or hide popup |
+| `getPivot` | `()` | Get a point on the surface |
+| `getCentroid` | `()` | Get the geometric center |
+| `getBound` | `()` | Get the bounding box |
+| `getArea` | `(language?)` | Get area |
+| `rotate` | `(angle)` | Rotate the polygon |
+| `updateStyle` | `(options)` | Update line/fill style |
+| `toGeoJSON` | `()` | Convert to GeoJSON |
+
+## PolylineRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getPolyline` | `()` | Get the underlying polyline |
+| `togglePopup` | `(show?, location?)` | Show or hide popup |
+| `getPivot` | `()` | Get a point on the line |
+| `getCentroid` | `()` | Get the geometric center |
+| `getBound` | `()` | Get the bounding box |
+| `getLength` | `(language?)` | Get length |
+| `rotate` | `(angle)` | Rotate the polyline |
+| `updateStyle` | `(options)` | Update line style |
+
+## CircleRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getCircle` | `()` | Get the underlying circle |
+| `togglePopup` | `(show?, location?)` | Show or hide popup |
+| `getCenter` | `()` | Get the center |
+| `getBound` | `()` | Get the bounding box |
+| `getArea` | `(language?)` | Get area |
+| `getRadius` | `(language?)` | Get radius |
+| `updateStyle` | `(options)` | Update circle style |
+
+## PopupRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getPopup` | `()` | Get the underlying popup |
+| `setPosition` | `(location)` | Move the popup |
+| `setTitle` | `(title)` | Change the title |
+| `setDetail` | `(detail)` | Change the detail |
+| `getElement` | `()` | Get the DOM element |
+
+## DotRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getDot` | `()` | Get the underlying dot |
+| `setPosition` | `(location)` | Move the dot |
+| `getPosition` | `()` | Get the position |
+
+## RectangleRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getRectangle` | `()` | Get the underlying rectangle |
+| `togglePopup` | `(show?, location?)` | Show or hide popup |
+| `getBound` | `()` | Get the bounding box |
+| `getArea` | `(language?)` | Get area |
+| `updateStyle` | `(options)` | Update rectangle style |

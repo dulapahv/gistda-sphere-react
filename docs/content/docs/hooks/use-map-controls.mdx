@@ -1,0 +1,48 @@
+---
+title: useMapControls
+description: Control the map programmatically from any component
+---
+
+Control the map programmatically from any component inside `SphereProvider`.
+
+<ControlsDemo />
+
+```tsx
+import { useMapControls } from 'gistda-sphere-react';
+
+function Sidebar() {
+  const { goTo, setZoom, setFilter, setBaseLayer, isReady } = useMapControls();
+
+  return (
+    <div>
+      <button onClick={() => goTo({ center: { lon: 98.98, lat: 18.78 }, zoom: 12 })}>
+        Go to Chiang Mai
+      </button>
+      <button onClick={() => setZoom(15)}>Zoom In</button>
+      <button onClick={() => setFilter('Dark')}>Dark Mode</button>
+      <button onClick={() => setBaseLayer('HYBRID')}>Satellite</button>
+    </div>
+  );
+}
+```
+
+## Functions
+
+| Function | Parameters | Description |
+|----------|------------|-------------|
+| `isReady` | - | `boolean` indicating whether the map is ready |
+| `goTo` | `(options: FlyToOptions, animate?: boolean)` | Navigate to a location with optional zoom, rotation, pitch, and padding |
+| `setCenter` | `(location: Location, animate?: boolean)` | Set the map center |
+| `setZoom` | `(zoom: number, animate?: boolean)` | Set the zoom level |
+| `setBound` | `(bound: Bound, options?: FitBoundsOptions)` | Fit the map to a bounding box |
+| `setRotate` | `(angle: number, animate?: boolean)` | Set rotation angle in degrees |
+| `setPitch` | `(angle: number)` | Set pitch angle in degrees |
+| `setFilter` | `(filter: FilterType \| false)` | Apply a color filter, or `false` to remove |
+| `setLanguage` | `(language: Language)` | Change the map language: `"th"` or `"en"` |
+| `setBaseLayer` | `(layer: BuiltInLayer)` | Change the base map layer |
+| `addLayer` | `(layer: BuiltInLayer)` | Add a data layer |
+| `removeLayer` | `(layer: BuiltInLayer)` | Remove a data layer |
+| `loadPredefinedOverlay` | `(overlay: PredefinedOverlay)` | Load a predefined overlay |
+| `unloadPredefinedOverlay` | `(overlay: PredefinedOverlay)` | Remove a predefined overlay |
+| `resize` | `()` | Resize the map to fit its container |
+| `repaint` | `()` | Force the map to repaint |

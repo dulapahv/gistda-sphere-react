@@ -1,0 +1,95 @@
+---
+title: useSearch
+description: Search for POIs and perform reverse geocoding
+---
+
+Search for points of interest (POIs) and perform reverse geocoding.
+
+<SearchDemo />
+
+```tsx
+import { useSearch } from 'gistda-sphere-react';
+
+function SearchComponent() {
+  const { search, suggest, address, nearPoi, isReady } = useSearch();
+
+  const searchPlace = async () => {
+    const results = await search('พระบรมมหาราชวัง', { limit: 10 });
+    console.log(results.data);
+  };
+
+  const getSuggestions = async () => {
+    const results = await suggest('สวนกุหลาบวิทยาลัย', { limit: 5 });
+    console.log(results.data);
+  };
+
+  const reverseGeocode = async (location) => {
+    const addr = await address(location);
+    console.log(addr.address, addr.province);
+  };
+
+  return <button onClick={searchPlace}>Search Coffee Shops</button>;
+}
+```
+
+## Functions
+
+| Function | Parameters | Returns | Description |
+|----------|------------|---------|-------------|
+| `isReady` | - | `boolean` | Search service initialized |
+| `suggest` | `(keyword, options?)` | `Promise<SearchResult>` | Auto-complete suggestions |
+| `search` | `(keyword, options?)` | `Promise<SearchResult>` | Search for POIs |
+| `address` | `(location, options?)` | `Promise<AddressResult>` | Reverse geocode a location |
+| `nearPoi` | `(location, options?)` | `Promise<PoiResult[]>` | Find nearby POIs |
+| `clear` | `()` | `void` | Clear search results |
+| `enablePopup` | `(state)` | `void` | Toggle popups for results |
+| `setLanguage` | `(lang: Language)` | `void` | Set search language: `"th"` or `"en"` |
+
+## SuggestOptions
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `area` | `string` | Any | Restrict to area |
+| `offset` | `number` | `0` | Result offset |
+| `limit` | `number` | `10` | Max results |
+| `dataset` | `string` | Default | Search dataset |
+
+## SearchOptions
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `area` | `string` | Any | Restrict to area |
+| `tag` | `string` | Any | Filter by tag |
+| `span` | `string` | Anywhere | Search radius (e.g. `"5km"`) |
+| `offset` | `number` | `0` | Result offset |
+| `limit` | `number` | `20` | Max results |
+| `dataset` | `string` | Default | Search dataset |
+
+## Return types
+
+```typescript
+// SearchResult (returned by suggest and search)
+{
+  data: object[];
+  total?: number;
+}
+
+// AddressResult (returned by address)
+{
+  address?: string;
+  subdistrict?: string;
+  district?: string;
+  province?: string;
+  postcode?: string;
+  geocode?: string;
+}
+
+// PoiResult (returned by nearPoi)
+{
+  id: string;
+  name: string;
+  location: Location;
+  category?: string;
+  distance?: number;
+}
+```
