@@ -1,3 +1,4 @@
+import { initOpenNextCloudflareForDev } from "@opennextjs/cloudflare";
 import { createMDX } from "fumadocs-mdx/next";
 
 const withMDX = createMDX();
@@ -12,6 +13,10 @@ const config = {
     viewTransition: true,
     turbopackFileSystemCacheForDev: true,
   },
+  images: {
+    loader: "custom",
+    loaderFile: "./image-loader.ts",
+  },
   async rewrites() {
     return [
       {
@@ -23,3 +28,5 @@ const config = {
 };
 
 export default withMDX(config);
+
+initOpenNextCloudflareForDev();

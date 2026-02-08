@@ -1,3 +1,4 @@
+import type { Route } from "next";
 import Link from "next/link";
 
 export default function HomePage() {
@@ -19,13 +20,13 @@ export default function HomePage() {
       <div className="flex gap-3">
         <Link
           className="rounded-lg bg-fd-primary px-5 py-2.5 font-medium text-fd-primary-foreground text-sm hover:bg-fd-primary/90"
-          href="/docs"
+          href={"/docs" as Route}
         >
           Get Started
         </Link>
         <Link
           className="rounded-lg border border-fd-border px-5 py-2.5 font-medium text-sm hover:bg-fd-accent"
-          href="/playground"
+          href={"/playground" as Route}
           rel="noopener noreferrer"
           target="_blank"
         >

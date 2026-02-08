@@ -1,6 +1,7 @@
 "use client";
 
 import { ExternalLink } from "lucide-react";
+import type { Route } from "next";
 import Link from "next/link";
 import type { ReactNode } from "react";
 
@@ -11,7 +12,7 @@ interface SidebarProps {
 /** Playground sidebar with header and scrollable content area. */
 export function Sidebar({ children }: SidebarProps) {
   return (
-    <div className="flex h-full w-[340px] shrink-0 flex-col overflow-hidden border-fd-border border-r bg-fd-card text-fd-foreground max-md:h-[50vh] max-md:w-full max-md:border-fd-border max-md:border-r-0 max-md:border-b">
+    <div className="flex h-full w-85 shrink-0 flex-col overflow-hidden border-fd-border border-r bg-fd-card text-fd-foreground max-md:h-[50vh] max-md:w-full max-md:border-fd-border max-md:border-r-0 max-md:border-b">
       <div className="shrink-0 border-fd-border border-b px-5 py-4">
         <div className="flex items-start justify-between">
           <div>
@@ -24,7 +25,7 @@ export function Sidebar({ children }: SidebarProps) {
           </div>
           <Link
             className="inline-flex items-center gap-1 text-[11px] text-fd-secondary-foreground no-underline hover:text-fd-foreground"
-            href="/docs"
+            href={"/docs" as Route}
             title="Back to docs"
           >
             Docs
