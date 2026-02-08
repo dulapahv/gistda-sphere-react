@@ -3,6 +3,7 @@
 import {
   type Location,
   Marker,
+  type RouteGuideStep,
   SphereMap,
   SphereProvider,
   useRoute,
@@ -19,6 +20,8 @@ function RouteControls() {
     distance: string;
     time: string;
   } | null>(null);
+  const [guide, setGuide] = useState<RouteGuideStep[]>([]);
+  const [showGuide, setShowGuide] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [routeCompleted, setRouteCompleted] = useState(false);
 
@@ -30,13 +33,23 @@ function RouteControls() {
   const handleRouteError = useCallback(() => {
     setCalculating(false);
     setRouteInfo(null);
+    setGuide([]);
   }, []);
 
-  const { addDestination, search, getDistance, getInterval, clear, isReady } =
-    useRoute({
-      onRouteComplete: handleRouteComplete,
-      onRouteError: handleRouteError,
-    });
+  const {
+    addDestination,
+    search,
+    getDistance,
+    getInterval,
+    getGuide,
+    clear,
+    clearDestinations,
+    clearPath,
+    isReady,
+  } = useRoute({
+    onRouteComplete: handleRouteComplete,
+    onRouteError: handleRouteError,
+  });
 
   useEffect(() => {
     if (!routeCompleted) {
@@ -53,12 +66,20 @@ function RouteControls() {
         time: String(time ?? "-"),
       });
     }
-  }, [routeCompleted, getDistance, getInterval]);
+
+    const steps = getGuide();
+    if (Array.isArray(steps) && steps.length > 0) {
+      setGuide(steps as RouteGuideStep[]);
+    }
+  }, [routeCompleted, getDistance, getInterval, getGuide]);
 
   const handleCalculate = () => {
     setCalculating(true);
     setRouteInfo(null);
-    clear();
+    setGuide([]);
+    setShowGuide(false);
+    clearDestinations();
+    clearPath();
     addDestination(BANGKOK);
     addDestination(CHIANG_MAI);
     search();
@@ -67,6 +88,8 @@ function RouteControls() {
   const handleClear = () => {
     clear();
     setRouteInfo(null);
+    setGuide([]);
+    setShowGuide(false);
     setCalculating(false);
   };
 
@@ -83,11 +106,11 @@ function RouteControls() {
       </SphereMap>
       <div className="flex flex-col gap-2 bg-fd-card p-3">
         <div className="flex flex-wrap items-center gap-2">
-          <span className="text-[0.8125rem] text-fd-muted-foreground">
+          <span className="py-2 text-fd-muted-foreground text-sm">
             Bangkok → Chiang Mai
           </span>
           <button
-            className="cursor-pointer rounded-md border border-fd-primary bg-fd-primary px-2 text-[0.8125rem] text-fd-primary-foreground transition-colors disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-md border border-fd-primary bg-fd-primary px-2 py-1.5 text-fd-primary-foreground text-xs transition-colors disabled:cursor-not-allowed disabled:opacity-50"
             disabled={!isReady || calculating}
             onClick={handleCalculate}
             type="button"
@@ -95,29 +118,63 @@ function RouteControls() {
             {calculating ? "Calculating..." : "Calculate Route"}
           </button>
           {routeInfo && (
-            <button
-              className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 text-[0.8125rem] text-fd-secondary-foreground transition-colors hover:bg-fd-accent"
-              onClick={handleClear}
-              type="button"
-            >
-              Clear
-            </button>
+            <>
+              <button
+                className={`cursor-pointer rounded-md border px-2 py-2 text-sm transition-colors ${
+                  showGuide
+                    ? "border-fd-primary bg-fd-primary text-fd-primary-foreground"
+                    : "border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent"
+                }`}
+                onClick={() => setShowGuide(!showGuide)}
+                type="button"
+              >
+                {showGuide ? "Hide Directions" : "Turn-by-Turn"}
+              </button>
+              <button
+                className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-2 text-fd-secondary-foreground text-sm transition-colors hover:bg-fd-accent"
+                onClick={handleClear}
+                type="button"
+              >
+                Clear
+              </button>
+            </>
           )}
         </div>
         {routeInfo && (
-          <div className="rounded-md border border-fd-border bg-fd-muted px-3 py-2">
-            <div className="flex justify-between py-1 text-[0.8125rem]">
+          <div className="rounded-md border border-fd-border bg-fd-muted px-2 py-1.5">
+            <div className="flex justify-between py-1 text-xs">
               <span className="text-fd-muted-foreground">Distance</span>
               <span className="font-medium text-fd-foreground">
                 {routeInfo.distance}
               </span>
             </div>
-            <div className="flex justify-between py-1 text-[0.8125rem]">
+            <div className="flex justify-between py-1 text-xs">
               <span className="text-fd-muted-foreground">Duration</span>
               <span className="font-medium text-fd-foreground">
                 {routeInfo.time}
               </span>
             </div>
+          </div>
+        )}
+        {showGuide && guide.length > 0 && (
+          <div className="max-h-50 overflow-y-auto rounded-md border border-fd-border bg-fd-muted">
+            {guide.map((step, i) => (
+              <div
+                className="flex items-start gap-2 border-fd-border border-b px-2 py-1.5 last:border-b-0"
+                key={`step-${step.instruction}-${String(step.distance)}`}
+              >
+                <span className="shrink-0 font-medium text-fd-muted-foreground text-xs">
+                  {i + 1}.
+                </span>
+                <div className="flex-1 py-2 text-sm">
+                  <p className="text-fd-foreground">{step.instruction}</p>
+                  <p className="text-fd-muted-foreground text-xs">
+                    {String(step.distance)}
+                    {step.duration ? ` · ${String(step.duration)}` : ""}
+                  </p>
+                </div>
+              </div>
+            ))}
           </div>
         )}
       </div>

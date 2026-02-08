@@ -2,7 +2,6 @@
 
 import type { Location } from "gistda-sphere-react";
 import { LOCATIONS } from "../constants";
-import "./QuickNav.css";
 
 interface QuickNavProps {
   onNavigate: (location: Location, zoom?: number) => void;
@@ -11,12 +10,14 @@ interface QuickNavProps {
 /** Quick navigation buttons for common Thai cities. */
 export function QuickNav({ onNavigate }: QuickNavProps) {
   return (
-    <div className="pg-panel-section">
-      <div className="pg-section-header">Quick Navigation</div>
-      <div className="pg-quick-nav">
+    <div className="mb-4">
+      <div className="mb-2.5 font-semibold text-[11px] text-fd-muted-foreground uppercase tracking-wider">
+        Quick Navigation
+      </div>
+      <div className="flex flex-wrap gap-1.5">
         {Object.entries(LOCATIONS).map(([name, loc]) => (
           <button
-            className="pg-nav-btn"
+            className="cursor-pointer rounded-full border border-fd-border bg-fd-secondary px-2.5 py-1.5 text-[11px] text-fd-secondary-foreground hover:border-fd-ring hover:text-fd-foreground"
             key={name}
             onClick={() => onNavigate(loc)}
             type="button"

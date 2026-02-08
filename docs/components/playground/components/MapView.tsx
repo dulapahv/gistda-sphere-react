@@ -42,7 +42,7 @@ export function MapView({
   onDoubleClick,
 }: MapViewProps) {
   return (
-    <div className="pg-map-container">
+    <div className="relative min-w-0 flex-1 max-md:h-[50vh]">
       <SphereMap
         center={center || LOCATIONS.Bangkok}
         onClick={onClick}

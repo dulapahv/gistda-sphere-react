@@ -64,7 +64,9 @@ export function useRoute(options?: UseRouteOptions): UseRouteReturn {
   callbacksRef.current = options;
 
   useEffect(() => {
-    if (!map) return;
+    if (!map) {
+      return;
+    }
 
     const handleComplete = (routes: unknown[]) => {
       callbacksRef.current?.onRouteComplete?.(routes);

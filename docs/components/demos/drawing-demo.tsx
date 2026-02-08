@@ -70,12 +70,12 @@ export function DrawingDemo() {
         </SphereMap>
       </SphereProvider>
       <div className="flex flex-wrap items-center gap-2 bg-fd-card p-3">
-        <span className="text-[0.8125rem] text-fd-muted-foreground">
+        <span className="py-2 text-fd-muted-foreground text-sm">
           Click to add points, double-click to complete polygon (
           {polygons.length} drawn, {points.length} pending points)
         </span>
         <button
-          className="ml-auto cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-3 text-[0.8125rem] text-fd-secondary-foreground hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
+          className="ml-auto cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
           onClick={handleClear}
           type="button"
         >

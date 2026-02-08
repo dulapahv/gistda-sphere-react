@@ -9,7 +9,20 @@ description: How to obtain a GISTDA Sphere API key
 2. Register for an account
 3. Create a new API key and register your domain(s)
 
-> **Note**: Register `localhost` for local development.
+## Host Restrictions
+
+When creating your API key, set the **allowed hosts** to limit usage to only your domains. This is your primary security mechanism since the API key is sent as a query parameter in requests and is visible in the browser's network tab.
+
+For example, if your site is deployed at `example.com` and you develop locally:
+
+| Host | Purpose |
+|------|---------|
+| `localhost` | Local development |
+| `example.com` | Production deployment |
+
+<Callout>
+  Don't forget to register `localhost` for local development.
+</Callout>
 
 ## Usage
 
@@ -21,9 +34,13 @@ Pass the API key to `SphereProvider`:
 </SphereProvider>
 ```
 
-## Environment variables
+## Environment Variables
 
-For security, store your API key in an environment variable:
+While the API key is ultimately visible in network requests (it's sent as a query parameter to load the SDK), using environment variables keeps the key out of your source code and version control:
+
+<Callout type="warning">
+  The API key is sent as a query parameter in requests and is visible client-side. Use host restrictions as your primary security mechanism.
+</Callout>
 
 ```bash title=".env.local"
 NEXT_PUBLIC_SPHERE_API_KEY=your_api_key_here

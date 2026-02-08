@@ -1,7 +1,6 @@
 "use client";
 
 import type { Location } from "gistda-sphere-react";
-import "./MapStats.css";
 
 interface MapStatsProps {
   zoom: number;
@@ -12,20 +11,24 @@ interface MapStatsProps {
 /** Displays current map zoom, center coordinates, and shape count. */
 export function MapStats({ zoom, center, totalShapes }: MapStatsProps) {
   return (
-    <div className="pg-stats-section">
-      <div className="pg-stat-row">
-        <span className="pg-stat-label">Zoom</span>
-        <span className="pg-stat-value">{zoom.toFixed(1)}</span>
+    <div className="mb-4 rounded-lg border border-fd-border bg-fd-secondary px-4 py-2">
+      <div className="flex items-center justify-between py-1">
+        <span className="text-fd-secondary-foreground text-xs">Zoom</span>
+        <span className="font-medium text-fd-foreground text-xs tabular-nums">
+          {zoom.toFixed(1)}
+        </span>
       </div>
-      <div className="pg-stat-row">
-        <span className="pg-stat-label">Center</span>
-        <span className="pg-stat-value">
+      <div className="flex items-center justify-between py-1">
+        <span className="text-fd-secondary-foreground text-xs">Center</span>
+        <span className="font-medium text-fd-foreground text-xs tabular-nums">
           {center ? `${center.lat.toFixed(4)}, ${center.lon.toFixed(4)}` : "-"}
         </span>
       </div>
-      <div className="pg-stat-row">
-        <span className="pg-stat-label">Shapes</span>
-        <span className="pg-stat-value">{totalShapes}</span>
+      <div className="flex items-center justify-between py-1">
+        <span className="text-fd-secondary-foreground text-xs">Shapes</span>
+        <span className="font-medium text-fd-foreground text-xs tabular-nums">
+          {totalShapes}
+        </span>
       </div>
     </div>
   );

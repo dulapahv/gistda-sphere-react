@@ -1,8 +1,10 @@
+/** biome-ignore-all lint/style/noExportedImports: Need to re-export overlay components so MDX files can use them directly */
 "use client";
 
 import {
   Circle,
   Dot,
+  type Language,
   type Location,
   Marker,
   Polygon,
@@ -17,22 +19,13 @@ import type { ReactNode } from "react";
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
 interface MapDemoProps {
-  /** Child overlay components */
   children?: ReactNode;
-  /** Map container height */
   height?: string;
-  /** Initial center coordinates */
   center?: Location;
-  /** Initial zoom level */
   zoom?: number;
-  /** Map language */
-  language?: "en" | "th";
+  language?: Language;
 }
 
-/**
- * Reusable map demo wrapper for documentation pages.
- * Wraps children in SphereProvider and SphereMap.
- */
 export function MapDemo({
   children,
   height = "400px",

@@ -49,6 +49,60 @@ const { search, getDistance, getInterval, addDestination, clear } = useRoute({
 });
 ```
 
+## Turn-by-Turn Directions
+
+Use `getGuide()` to retrieve step-by-step navigation instructions after a route is calculated.
+
+- `getGuide()` returns an array of `RouteGuideStep` objects
+- `getGuide(true)` returns an `HTMLElement` with formatted directions
+
+```tsx
+import { useRoute, type RouteGuideStep } from 'gistda-sphere-react';
+
+function TurnByTurnRoute() {
+  const [steps, setSteps] = useState<RouteGuideStep[]>([]);
+
+  const { addDestination, search, getGuide } = useRoute({
+    onRouteComplete() {
+      const guide = getGuide();
+      if (Array.isArray(guide)) {
+        setSteps(guide as RouteGuideStep[]);
+      }
+    },
+  });
+
+  return (
+    <div>
+      <button onClick={() => {
+        addDestination({ lon: 100.5018, lat: 13.7563 });
+        addDestination({ lon: 98.9853, lat: 18.7883 });
+        search();
+      }}>
+        Get Directions
+      </button>
+      <ol>
+        {steps.map((step, i) => (
+          <li key={i}>
+            <strong>{step.instruction}</strong>
+            <span> — {String(step.distance)}</span>
+            {step.duration && <span> · {String(step.duration)}</span>}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+```
+
+### RouteGuideStep
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `instruction` | `string` | Turn-by-turn instruction text |
+| `distance` | `number \| string` | Distance for this step |
+| `duration` | `number \| string` | Duration for this step |
+| `location` | `Location` | Geographic coordinates of this step |
+
 ## Functions
 
 | Function | Parameters | Returns | Description |

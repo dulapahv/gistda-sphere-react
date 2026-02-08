@@ -2,6 +2,8 @@
 
 > **Disclaimer**: This is an **unofficial** community project and is not affiliated with, endorsed by, or supported by GISTDA (Geo-Informatics and Space Technology Development Agency). For official documentation and support, please visit [sphere.gistda.or.th](https://sphere.gistda.or.th/).
 
+> **Note**: This project is currently under active development. APIs may change between releases.
+
 A React wrapper for the [GISTDA Sphere Map API](https://sphere.gistda.or.th/). Build interactive maps of Thailand with full TypeScript support.
 
 - [gistda-sphere-react](#gistda-sphere-react)

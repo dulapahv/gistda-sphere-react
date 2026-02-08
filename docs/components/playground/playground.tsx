@@ -15,7 +15,6 @@ import {
   TagsPanel,
 } from "./components";
 import { useDrawing, useMapSettings } from "./hooks";
-import "./playground.css";
 import type { SearchMarkerData } from "./types";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
@@ -64,7 +63,7 @@ function PlaygroundContent() {
   );
 
   return (
-    <div className="pg-container">
+    <div className="flex h-screen w-full overflow-hidden bg-fd-background font-sans text-[13px] text-fd-foreground max-md:flex-col">
       <Sidebar>
         <MapStats
           center={mapSettings.center}
@@ -89,7 +88,7 @@ function PlaygroundContent() {
 
         <QuickNav onNavigate={mapSettings.navigateTo} />
 
-        <div className="pg-section-divider" />
+        <div className="my-4 h-px bg-fd-border" />
 
         <DrawingPanel
           mode={drawing.mode}
@@ -97,11 +96,11 @@ function PlaygroundContent() {
           onModeChange={drawing.setMode}
         />
 
-        <div className="pg-section-divider" />
+        <div className="my-4 h-px bg-fd-border" />
 
         <SearchPanel onResultSelect={handleSearchResult} />
 
-        <div className="pg-section-divider" />
+        <div className="my-4 h-px bg-fd-border" />
 
         <RoutePanel
           destination={routeDestination}
@@ -112,7 +111,7 @@ function PlaygroundContent() {
           settingPoint={settingRoutePoint}
         />
 
-        <div className="pg-section-divider" />
+        <div className="my-4 h-px bg-fd-border" />
 
         <TagsPanel />
       </Sidebar>
@@ -140,10 +139,17 @@ function PlaygroundContent() {
 export function StandalonePlayground() {
   if (!API_KEY) {
     return (
-      <div className="pg-error-screen">
-        <p>
-          Set <code>NEXT_PUBLIC_SPHERE_API_KEY</code> in{" "}
-          <code>docs/.env.local</code> to use the playground.
+      <div className="flex h-screen flex-col items-center justify-center bg-fd-background p-8 text-center text-fd-foreground">
+        <p className="text-fd-secondary-foreground text-sm">
+          Set{" "}
+          <code className="rounded bg-fd-secondary px-1.5 py-0.5 text-[13px]">
+            NEXT_PUBLIC_SPHERE_API_KEY
+          </code>{" "}
+          in{" "}
+          <code className="rounded bg-fd-secondary px-1.5 py-0.5 text-[13px]">
+            docs/.env.local
+          </code>{" "}
+          to use the playground.
         </p>
       </div>
     );

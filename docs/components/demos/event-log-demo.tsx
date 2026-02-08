@@ -68,7 +68,7 @@ export function EventLogDemo() {
       </SphereProvider>
       <div className="flex flex-col gap-2 bg-fd-card p-3">
         <div className="flex items-center justify-between">
-          <span className="text-[0.8125rem] text-fd-muted-foreground">
+          <span className="py-2 text-fd-muted-foreground text-sm">
             Click, drag, or zoom the map to see events
           </span>
           <button

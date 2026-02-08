@@ -43,14 +43,14 @@ function OverlayControls() {
       </SphereMap>
       <div className="flex flex-wrap items-center gap-2 bg-fd-card p-3">
         <button
-          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 text-[0.8125rem] text-fd-secondary-foreground hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
           onClick={handleAdd}
           type="button"
         >
           Add Marker
         </button>
         <button
-          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 text-[0.8125rem] text-fd-secondary-foreground hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
           disabled={items.length === 0}
           onClick={handleRemoveLast}
           type="button"
@@ -58,7 +58,7 @@ function OverlayControls() {
           Remove Last
         </button>
         <button
-          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 text-[0.8125rem] text-fd-secondary-foreground hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
           disabled={items.length === 0}
           onClick={clear}
           type="button"

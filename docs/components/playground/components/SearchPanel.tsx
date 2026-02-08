@@ -5,7 +5,6 @@ import { useSearch } from "gistda-sphere-react";
 import { MapPin, Search, X } from "lucide-react";
 import { useState } from "react";
 import type { SearchMarkerData } from "../types";
-import "./SearchPanel.css";
 
 interface SearchPanelProps {
   onResultSelect: (marker: SearchMarkerData) => void;
@@ -65,14 +64,18 @@ export function SearchPanel({ onResultSelect }: SearchPanelProps) {
   };
 
   return (
-    <div className="pg-panel-section">
-      <div className="pg-section-header">Search Places</div>
-      <div className="pg-input-group">
+    <div className="mb-4">
+      <div className="mb-2.5 font-semibold text-fd-muted-foreground text-xs uppercase tracking-wider">
+        Search Places
+      </div>
+      <div className="flex gap-2">
         <input
-          className="pg-input"
+          className="w-full flex-1 rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-foreground text-xs placeholder:text-fd-muted-foreground focus:border-fd-ring focus:outline-none"
           onChange={(e) => handleSuggest(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") handleSearch();
+            if (e.key === "Enter") {
+              handleSearch();
+            }
           }}
           placeholder="Search for places..."
           type="text"
@@ -80,7 +83,7 @@ export function SearchPanel({ onResultSelect }: SearchPanelProps) {
         />
         <button
           aria-label="Search"
-          className="pg-btn pg-btn-primary pg-btn-icon"
+          className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-md border border-fd-primary bg-fd-primary p-0 text-fd-primary-foreground hover:border-white hover:bg-white disabled:cursor-not-allowed disabled:opacity-40"
           disabled={loading || !isReady}
           onClick={handleSearch}
           type="button"
@@ -90,12 +93,12 @@ export function SearchPanel({ onResultSelect }: SearchPanelProps) {
       </div>
 
       {suggestions.length > 0 && (
-        <div className="pg-suggestions-list">
+        <div className="mt-2 overflow-hidden rounded-md border border-fd-border bg-fd-secondary">
           {suggestions.map((s, i) => {
             const name = (s as { name?: string }).name ?? "";
             return (
               <button
-                className="pg-suggestion-item"
+                className="w-full cursor-pointer border-0 border-fd-border border-b bg-transparent px-2 py-1.5 text-left text-fd-foreground text-xs last:border-b-0 hover:bg-fd-accent"
                 key={name || `suggestion-${i}`}
                 onClick={() => {
                   setKeyword(name);
@@ -111,12 +114,12 @@ export function SearchPanel({ onResultSelect }: SearchPanelProps) {
       )}
 
       {results.length > 0 && (
-        <div className="pg-results-list">
+        <div className="mt-2.5 flex flex-col gap-1.5">
           {results.slice(0, 5).map((r, i) => {
             const item = r as { name?: string; id?: string };
             return (
               <button
-                className="pg-result-item"
+                className="flex w-full cursor-pointer items-center gap-2 rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-left text-fd-foreground text-xs hover:border-fd-ring hover:bg-fd-accent"
                 key={item.id || item.name || `result-${i}`}
                 onClick={() => handleResultClick(r)}
                 type="button"
@@ -127,7 +130,7 @@ export function SearchPanel({ onResultSelect }: SearchPanelProps) {
             );
           })}
           <button
-            className="pg-btn pg-btn-sm"
+            className="inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-fd-border bg-fd-secondary px-2.5 py-1.5 font-medium text-fd-foreground text-xs hover:border-fd-ring hover:bg-fd-accent"
             onClick={handleClear}
             type="button"
           >

@@ -3,7 +3,6 @@
 import { TAG_CATEGORIES, useTags } from "gistda-sphere-react";
 import { Eye, EyeOff, Trash2 } from "lucide-react";
 import { useState } from "react";
-import "./TagsPanel.css";
 
 /** POI tag toggle panel with category grouping and popup control. */
 export function TagsPanel() {
@@ -36,17 +35,27 @@ export function TagsPanel() {
   };
 
   return (
-    <div className="pg-panel-section">
-      <div className="pg-section-header">POI Tags</div>
-      <p className="pg-tool-hint">Toggle tags to show points of interest</p>
+    <div className="mb-4">
+      <div className="mb-2.5 font-semibold text-[11px] text-fd-muted-foreground uppercase tracking-wider">
+        POI Tags
+      </div>
+      <p className="mt-2 text-fd-secondary-foreground text-xs">
+        Toggle tags to show points of interest
+      </p>
 
       {TAG_CATEGORIES.map((category) => (
-        <div className="pg-tag-category" key={category.name}>
-          <div className="pg-category-name">{category.name}</div>
-          <div className="pg-tag-grid">
+        <div className="mb-3" key={category.name}>
+          <div className="mb-1.5 font-semibold text-[11px] text-fd-secondary-foreground">
+            {category.name}
+          </div>
+          <div className="flex flex-wrap gap-1">
             {category.tags.map((tag) => (
               <button
-                className={`pg-tag-btn ${activeTags.has(tag.id) ? "active" : ""}`}
+                className={`cursor-pointer rounded border px-2 py-1 text-[11px] disabled:cursor-not-allowed disabled:opacity-40 ${
+                  activeTags.has(tag.id)
+                    ? "border-fd-primary bg-fd-primary text-fd-primary-foreground"
+                    : "border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:border-fd-ring hover:text-fd-foreground"
+                }`}
                 disabled={!isReady}
                 key={tag.id}
                 onClick={() => handleToggleTag(tag.id)}
@@ -59,18 +68,24 @@ export function TagsPanel() {
         </div>
       ))}
 
-      <div className="pg-tags-footer">
-        <span className="pg-tags-count">{activeTags.size} active</span>
-        <div className="pg-button-row">
+      <div className="mt-3 flex items-center justify-between border-fd-border border-t pt-3">
+        <span className="text-[11px] text-fd-muted-foreground">
+          {activeTags.size} active
+        </span>
+        <div className="flex flex-wrap gap-1.5">
           <button
-            className={`pg-btn pg-btn-sm ${popupEnabled ? "pg-btn-primary" : ""}`}
+            className={`inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-2.5 py-1.5 font-medium text-xs ${
+              popupEnabled
+                ? "border-fd-primary bg-fd-primary text-fd-primary-foreground hover:border-white hover:bg-white"
+                : "border-fd-border bg-fd-secondary text-fd-foreground hover:border-fd-ring hover:bg-fd-accent"
+            }`}
             onClick={handleTogglePopup}
             type="button"
           >
             {popupEnabled ? <Eye size={14} /> : <EyeOff size={14} />}
           </button>
           <button
-            className="pg-btn pg-btn-sm"
+            className="inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-fd-border bg-fd-secondary px-2.5 py-1.5 font-medium text-fd-foreground text-xs hover:border-fd-ring hover:bg-fd-accent"
             onClick={handleClear}
             type="button"
           >

@@ -24,7 +24,9 @@ function SearchControls() {
   const [selectedMarker, setSelectedMarker] = useState<Location | null>(null);
 
   const handleSearch = async () => {
-    if (!(keyword.trim() && isReady)) return;
+    if (!(keyword.trim() && isReady)) {
+      return;
+    }
     setLoading(true);
     try {
       const result = await search(keyword, { limit: 5 });
@@ -66,17 +68,19 @@ function SearchControls() {
       </SphereMap>
       <div className="flex flex-wrap items-center gap-2 bg-fd-card p-3">
         <input
-          className="flex-1 rounded-md border border-fd-border bg-fd-secondary px-3 text-[0.8125rem] text-fd-secondary-foreground placeholder:text-fd-muted-foreground focus:border-fd-ring focus:outline-none"
+          className="flex-1 rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs placeholder:text-fd-muted-foreground focus:border-fd-ring focus:outline-none"
           onChange={(e) => setKeyword(e.target.value)}
           onKeyDown={(e) => {
-            if (e.key === "Enter") handleSearch();
+            if (e.key === "Enter") {
+              handleSearch();
+            }
           }}
           placeholder="Search for places (e.g. พระบรมมหาราชวัง, สวนกุหลาบวิทยาลัย)..."
           type="text"
           value={keyword}
         />
         <button
-          className="cursor-pointer rounded-md border border-fd-primary bg-fd-primary px-3 text-[0.8125rem] text-fd-primary-foreground disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-md border border-fd-primary bg-fd-primary px-2 py-1.5 text-fd-primary-foreground text-xs disabled:cursor-not-allowed disabled:opacity-50"
           disabled={loading || !isReady}
           onClick={handleSearch}
           type="button"
@@ -85,7 +89,7 @@ function SearchControls() {
         </button>
         {results.length > 0 && (
           <button
-            className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-3 text-[0.8125rem] text-fd-secondary-foreground hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
             onClick={handleClear}
             type="button"
           >
@@ -97,7 +101,7 @@ function SearchControls() {
         <div className="flex flex-col gap-2 bg-fd-card p-3 pt-0">
           {results.map((r, i) => (
             <button
-              className="flex w-full cursor-pointer items-center gap-2 rounded-md border border-fd-border bg-fd-secondary px-3 text-left text-[0.8125rem] text-fd-foreground hover:bg-fd-accent"
+              className="flex w-full cursor-pointer items-center gap-2 rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-left text-fd-foreground text-xs hover:bg-fd-accent"
               key={r.name || `r-${i}`}
               onClick={() => handleSelect(r)}
               type="button"

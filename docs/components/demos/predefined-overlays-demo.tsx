@@ -39,7 +39,7 @@ function PredefinedControls() {
       <div className="flex flex-wrap items-center gap-2 border-fd-border border-b bg-fd-card p-3">
         {OVERLAYS.map((o) => (
           <button
-            className={`cursor-pointer rounded-md border px-3 py-1.5 text-[0.8125rem] disabled:cursor-not-allowed disabled:opacity-50 ${active.has(o.id) ? "border-fd-primary bg-fd-primary text-fd-primary-foreground" : "border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent"}`}
+            className={`cursor-pointer rounded-md border px-3 py-1.5 py-2 text-sm disabled:cursor-not-allowed disabled:opacity-50 ${active.has(o.id) ? "border-fd-primary bg-fd-primary text-fd-primary-foreground" : "border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent"}`}
             key={o.id}
             onClick={() => toggle(o.id)}
             type="button"

@@ -35,7 +35,7 @@ function Controls() {
     <div className="flex flex-wrap items-center gap-2 bg-fd-card p-3">
       {cities.map((city) => (
         <button
-          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-3 text-[0.8125rem] text-fd-secondary-foreground hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
           key={city.name}
           onClick={() => goTo({ center: city, zoom: 12 })}
           type="button"
@@ -44,7 +44,7 @@ function Controls() {
         </button>
       ))}
       <select
-        className="rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-[0.8125rem] text-fd-secondary-foreground"
+        className="rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs"
         name="base-layer"
         onChange={(e) => {
           setActiveLayer(e.target.value);
@@ -59,7 +59,7 @@ function Controls() {
         ))}
       </select>
       <select
-        className="rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-[0.8125rem] text-fd-secondary-foreground"
+        className="rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs"
         name="filter"
         onChange={(e) => {
           setActiveFilter(e.target.value);
