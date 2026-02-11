@@ -1,0 +1,48 @@
+---
+title: useMapControls
+description: ควบคุมแผนที่ผ่านโค้ดจากคอมโพเนนต์ใดก็ได้
+---
+
+ควบคุมแผนที่ผ่านโค้ดจากคอมโพเนนต์ใดก็ได้ที่อยู่ภายใน `SphereProvider`
+
+<ControlsDemo />
+
+```tsx
+import { useMapControls } from 'gistda-sphere-react';
+
+function Sidebar() {
+  const { goTo, setZoom, setFilter, setBaseLayer, isReady } = useMapControls();
+
+  return (
+    <div>
+      <button onClick={() => goTo({ center: { lon: 98.98, lat: 18.78 }, zoom: 12 })}>
+        ไปที่เชียงใหม่
+      </button>
+      <button onClick={() => setZoom(15)}>ซูมเข้า</button>
+      <button onClick={() => setFilter('Dark')}>โหมดมืด</button>
+      <button onClick={() => setBaseLayer('HYBRID')}>ดาวเทียม</button>
+    </div>
+  );
+}
+```
+
+## ฟังก์ชัน
+
+| Function | Parameters | Description |
+|----------|------------|-------------|
+| `isReady` | - | ค่า `boolean` ที่ระบุว่าแผนที่พร้อมใช้งานหรือยัง |
+| `goTo` | `(options: FlyToOptions, animate?: boolean)` | นำทางไปยังตำแหน่งที่กำหนด พร้อมตั้งค่าการซูม การหมุน ความชัน และ padding ได้ |
+| `setCenter` | `(location: Location, animate?: boolean)` | ตั้งค่าจุดกึ่งกลางของแผนที่ |
+| `setZoom` | `(zoom: number, animate?: boolean)` | ตั้งค่าระดับการซูม |
+| `setBound` | `(bound: Bound, options?: FitBoundsOptions)` | ปรับแผนที่ให้พอดีกับขอบเขตที่กำหนด |
+| `setRotate` | `(angle: number, animate?: boolean)` | ตั้งค่ามุมการหมุนเป็นองศา |
+| `setPitch` | `(angle: number)` | ตั้งค่ามุมความชัน (pitch) เป็นองศา |
+| `setFilter` | `(filter: FilterType \| false)` | ใช้ตัวกรองสี หรือ `false` เพื่อลบออก |
+| `setLanguage` | `(language: Language)` | เปลี่ยนภาษาแผนที่: `"th"` หรือ `"en"` |
+| `setBaseLayer` | `(layer: BuiltInLayer)` | เปลี่ยนเลเยอร์ฐานของแผนที่ |
+| `addLayer` | `(layer: BuiltInLayer)` | เพิ่มเลเยอร์ข้อมูล |
+| `removeLayer` | `(layer: BuiltInLayer)` | ลบเลเยอร์ข้อมูล |
+| `loadPredefinedOverlay` | `(overlay: PredefinedOverlay)` | โหลดโอเวอร์เลย์ที่กำหนดไว้ล่วงหน้า |
+| `unloadPredefinedOverlay` | `(overlay: PredefinedOverlay)` | ลบโอเวอร์เลย์ที่กำหนดไว้ล่วงหน้า |
+| `resize` | `()` | ปรับขนาดแผนที่ให้พอดีกับคอนเทนเนอร์ |
+| `repaint` | `()` | บังคับให้แผนที่วาดใหม่ |

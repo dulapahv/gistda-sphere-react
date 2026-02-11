@@ -1,0 +1,36 @@
+---
+title: Dot (จุด)
+description: รูปทรงเรขาคณิตแบบจุดอย่างง่ายบนแผนที่
+---
+
+<MapDemo height="400px" zoom={12} center={{ lon: 100.5, lat: 13.75 }} language="en">
+  <Dot position={{ lon: 100.49, lat: 13.76 }} lineWidth={12} lineColor="red" />
+</MapDemo>
+
+```tsx
+<Dot
+  position={{ lon: 100.49, lat: 13.76 }}
+  lineWidth={12}
+  lineColor="red"
+  draggable
+  onDrop={(dot, location) => console.log('วางที่:', location)}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | พิกัดของจุด |
+| `ref` | `Ref<DotRef>` | No | - | Ref สำหรับการควบคุมผ่านโค้ด (Imperative control) |
+| `title` | `string` | No | - | ข้อความ Tooltip เมื่อโฮเวอร์ |
+| `detail` | `string` | No | - | ข้อความ Pop-up เมื่อคลิก |
+| `visibleRange` | `Range` | No | All zoom levels | ระยะการซูมที่มองเห็นได้ |
+| `lineWidth` | `number` | No | `3` | ขนาดของจุดเป็นพิกเซล |
+| `lineColor` | `string` | No | Preset color | สีของจุด |
+| `clickable` | `boolean` | No | `false` | แสดงเคอร์เซอร์แบบตัวชี้ |
+| `draggable` | `boolean` | No | `false` | อนุญาตให้ลากได้ |
+| `zIndex` | `number` | No | `0` | ลำดับการซ้อน |
+| `onClick` | `(dot: SphereDot) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อคลิก |
+| `onDrag` | `(dot: SphereDot) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อกำลังลาก |
+| `onDrop` | `(dot: SphereDot, location: Location) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อปล่อย (สิ้นสุดการลาก) |

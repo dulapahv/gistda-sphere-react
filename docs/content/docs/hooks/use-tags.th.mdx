@@ -1,0 +1,91 @@
+---
+title: useTags
+description: แสดงหมุด POI ตามหมวดหมู่บนแผนที่
+---
+
+แสดงหมุด POI ตามหมวดหมู่บนแผนที่ โดย Tags คือกลุ่มของ POI ที่กำหนดไว้ล่วงหน้าจากฐานข้อมูล Sphere
+
+<TagsDemo />
+
+```tsx
+import { useTags } from 'gistda-sphere-react';
+
+function TagsComponent() {
+  const { add, remove, clear, list, isReady } = useTags();
+
+  const showRestaurants = () => {
+    add('อาหารไทย');
+    add('อาหารญี่ปุ่น');
+  };
+
+  return (
+    <div>
+      <button onClick={showRestaurants}>แสดงร้านอาหาร</button>
+      <button onClick={clear}>ล้างทั้งหมด</button>
+      <p>ใช้งานอยู่: {list().join(', ')}</p>
+    </div>
+  );
+}
+```
+
+## ฟังก์ชัน
+
+| Function | Parameters | Returns | Description |
+|----------|------------|---------|-------------|
+| `isReady` | - | `boolean` | บริการ Tag ถูกสร้างแล้ว |
+| `set` | `(tag, options?)` | `void` | ล้างทั้งหมดแล้วตั้งค่า tag ใหม่ |
+| `add` | `(tag, options?)` | `void` | เพิ่ม tag |
+| `remove` | `(tag)` | `void` | ลบ tag |
+| `clear` | `()` | `void` | ลบ tag ทั้งหมด |
+| `list` | `()` | `string[]` | ชื่อ tag ที่ใช้งานอยู่ |
+| `size` | `()` | `number` | จำนวน tag ที่ใช้งานอยู่ |
+| `enablePopup` | `(state)` | `void` | เปิด/ปิดป๊อปอัป |
+| `setLanguage` | `(lang: Language)` | `void` | ตั้งค่าภาษาที่แสดง: `"th"` หรือ `"en"` |
+
+<Callout title="เคล็ดลับ" type="tip">
+  ใช้ `"%"` เป็นชื่อ tag เพื่อโหลด POI ทั้งหมดที่มีอยู่
+</Callout>
+
+## หมวดหมู่ Tag ที่มีให้ใช้งาน
+
+| หมวดหมู่ | Tag ID | ชื่อภาษาอังกฤษ |
+|----------|--------|---------------|
+| อาหาร | `อาหารไทย` | Thai Food |
+| อาหาร | `อาหารญี่ปุ่น` | Japanese |
+| อาหาร | `อาหารจีน` | Chinese |
+| อาหาร | `อาหารเกาหลี` | Korean |
+| อาหาร | `อาหารอินเดีย` | Indian |
+| อาหาร | `อาหารอิตาลี` | Italian |
+| บริการ | `ธนาคาร` | Bank |
+| บริการ | `ATM` | ATM |
+| บริการ | `โรงพยาบาล` | Hospital |
+| บริการ | `ปั๊มน้ำมัน` | Gas Station |
+| ท่องเที่ยว | `โรงแรม` | Hotel |
+| ท่องเที่ยว | `วัด` | Temple |
+| ท่องเที่ยว | `พิพิธภัณฑ์` | Museum |
+| ท่องเที่ยว | `ห้างสรรพสินค้า` | Shopping Mall |
+
+## การใช้งาน TAG_CATEGORIES
+
+```tsx
+import { TAG_CATEGORIES } from 'gistda-sphere-react';
+
+function TagSelector() {
+  const { add } = useTags();
+
+  return (
+    <div>
+      {TAG_CATEGORIES.map((category) => (
+        <div key={category.name}>
+          <h3>{category.name}</h3>
+          {category.tags.map((tag) => (
+            <button key={tag.id} onClick={() => add(tag.id)}>
+              {tag.label}
+            </button>
+          ))}
+        </div>
+      ))}
+    </div>
+  );
+}
+```

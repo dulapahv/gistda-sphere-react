@@ -5,6 +5,7 @@ import {
   type BaseLayer,
   DEFAULT_UI_CONTROLS,
   LOCATIONS,
+  type MapLanguage,
   type OverlayLayer,
   type PredefinedOverlay,
   type UiControlId,
@@ -18,6 +19,7 @@ export interface UseMapSettingsReturn {
   uiControls: Record<UiControlId, boolean>;
   zoom: number;
   center: Location | null;
+  language: MapLanguage;
   setLayer: (layer: BaseLayer) => void;
   toggleOverlay: (layer: OverlayLayer) => void;
   togglePredefined: (overlay: PredefinedOverlay) => void;
@@ -25,6 +27,7 @@ export interface UseMapSettingsReturn {
   navigateTo: (location: Location, zoom?: number) => void;
   setZoom: (zoom: number) => void;
   setCenter: (center: Location) => void;
+  setLanguage: (language: MapLanguage) => void;
 }
 
 /** Manages map settings including layers, overlays, UI controls, and navigation. */
@@ -50,6 +53,7 @@ export function useMapSettings(): UseMapSettingsReturn {
     useState<Record<UiControlId, boolean>>(DEFAULT_UI_CONTROLS);
   const [zoom, setZoom] = useState(10);
   const [center, setCenter] = useState<Location | null>(LOCATIONS.Bangkok);
+  const [language, setLanguage] = useState<MapLanguage>("th");
 
   useEffect(() => {
     if (!(mapReady && map)) {
@@ -120,6 +124,7 @@ export function useMapSettings(): UseMapSettingsReturn {
     uiControls,
     zoom,
     center,
+    language,
     setLayer,
     toggleOverlay,
     togglePredefined,
@@ -127,5 +132,6 @@ export function useMapSettings(): UseMapSettingsReturn {
     navigateTo,
     setZoom,
     setCenter,
+    setLanguage,
   };
 }

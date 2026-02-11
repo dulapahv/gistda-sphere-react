@@ -4,10 +4,7 @@ import {
   type Location,
   SphereMap,
   SphereProvider,
-  useMapClick,
-  useMapLocation,
-  useMapReady,
-  useMapZoom,
+  useMapEvent,
 } from "gistda-sphere-react";
 import { useCallback, useState } from "react";
 
@@ -20,19 +17,19 @@ interface LogEntry {
 }
 
 function EventListener({ onLog }: { onLog: (message: string) => void }) {
-  useMapReady(() => {
+  useMapEvent("ready", () => {
     onLog("Map is ready");
   });
 
-  useMapClick((location: Location) => {
+  useMapEvent("click", (location: Location) => {
     onLog(`Click: ${location.lat.toFixed(4)}, ${location.lon.toFixed(4)}`);
   });
 
-  useMapZoom(() => {
+  useMapEvent("zoom", () => {
     onLog("Zoom changed");
   });
 
-  useMapLocation(() => {
+  useMapEvent("location", () => {
     onLog("Center changed");
   });
 

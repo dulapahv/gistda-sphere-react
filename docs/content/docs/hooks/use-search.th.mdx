@@ -1,0 +1,95 @@
+---
+title: useSearch
+description: ค้นหาสถานที่ (POI) และแปลงพิกัดกลับเป็นที่อยู่
+---
+
+ค้นหาจุดสนใจ (POI) และแปลงพิกัดกลับเป็นที่อยู่ (Reverse Geocoding)
+
+<SearchDemo />
+
+```tsx
+import { useSearch } from 'gistda-sphere-react';
+
+function SearchComponent() {
+  const { search, suggest, address, nearPoi, isReady } = useSearch();
+
+  const searchPlace = async () => {
+    const results = await search('พระบรมมหาราชวัง', { limit: 10 });
+    console.log(results.data);
+  };
+
+  const getSuggestions = async () => {
+    const results = await suggest('สวนกุหลาบวิทยาลัย', { limit: 5 });
+    console.log(results.data);
+  };
+
+  const reverseGeocode = async (location) => {
+    const addr = await address(location);
+    console.log(addr.address, addr.province);
+  };
+
+  return <button onClick={searchPlace}>ค้นหาสถานที่</button>;
+}
+```
+
+## ฟังก์ชัน
+
+| Function | Parameters | Returns | Description |
+|----------|------------|---------|-------------|
+| `isReady` | - | `boolean` | บริการค้นหาถูกสร้างแล้ว |
+| `suggest` | `(keyword, options?)` | `Promise<SearchResult>` | คำแนะนำแบบเติมคำอัตโนมัติ |
+| `search` | `(keyword, options?)` | `Promise<SearchResult>` | ค้นหาจุดสนใจ (POI) |
+| `address` | `(location, options?)` | `Promise<AddressResult>` | แปลงพิกัดกลับเป็นที่อยู่ |
+| `nearPoi` | `(location, options?)` | `Promise<PoiResult[]>` | ค้นหาจุดสนใจใกล้เคียง |
+| `clear` | `()` | `void` | ล้างผลลัพธ์การค้นหา |
+| `enablePopup` | `(state)` | `void` | เปิด/ปิดป๊อปอัปสำหรับผลลัพธ์ |
+| `setLanguage` | `(lang: Language)` | `void` | ตั้งค่าภาษาการค้นหา: `"th"` หรือ `"en"` |
+
+## SuggestOptions
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `area` | `string` | Any | จำกัดพื้นที่การค้นหา |
+| `offset` | `number` | `0` | ตำแหน่งเริ่มต้นของผลลัพธ์ |
+| `limit` | `number` | `10` | จำนวนผลลัพธ์สูงสุด |
+| `dataset` | `string` | Default | ชุดข้อมูลสำหรับค้นหา |
+
+## SearchOptions
+
+| Option | Type | Default | Description |
+|--------|------|---------|-------------|
+| `area` | `string` | Any | จำกัดพื้นที่การค้นหา |
+| `tag` | `string` | Any | กรองด้วยแท็ก |
+| `span` | `string` | Anywhere | รัศมีการค้นหา (เช่น `"5km"`) |
+| `offset` | `number` | `0` | ตำแหน่งเริ่มต้นของผลลัพธ์ |
+| `limit` | `number` | `20` | จำนวนผลลัพธ์สูงสุด |
+| `dataset` | `string` | Default | ชุดข้อมูลสำหรับค้นหา |
+
+## ประเภทค่าที่ส่งกลับ (Return types)
+
+```typescript
+// SearchResult (ส่งกลับจาก suggest และ search)
+{
+  data: object[];
+  total?: number;
+}
+
+// AddressResult (ส่งกลับจาก address)
+{
+  address?: string;
+  subdistrict?: string;
+  district?: string;
+  province?: string;
+  postcode?: string;
+  geocode?: string;
+}
+
+// PoiResult (ส่งกลับจาก nearPoi)
+{
+  id: string;
+  name: string;
+  location: Location;
+  category?: string;
+  distance?: number;
+}
+```

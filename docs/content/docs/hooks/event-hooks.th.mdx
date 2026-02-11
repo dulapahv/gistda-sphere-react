@@ -1,0 +1,74 @@
+---
+title: useMapEvent
+description: รับฟังเหตุการณ์ของแผนที่จากคอมโพเนนต์ใดก็ได้
+---
+
+รับฟังเหตุการณ์ของแผนที่จากคอมโพเนนต์ใดก็ได้ที่อยู่ภายใน `SphereMap`
+
+<EventLogDemo />
+
+```tsx
+import { useMapEvent } from 'gistda-sphere-react';
+
+function MapEvents() {
+  useMapEvent('ready', () => {
+    console.log('แผนที่พร้อมใช้งาน');
+  });
+
+  useMapEvent('click', (location) => {
+    console.log('คลิกที่:', location.lon, location.lat);
+  });
+
+  useMapEvent('zoom', () => {
+    console.log('ระดับซูมเปลี่ยน');
+  });
+
+  useMapEvent('location', () => {
+    console.log('จุดศูนย์กลางแผนที่เปลี่ยน');
+  });
+
+  useMapEvent('overlayClick', ({ overlay, location }) => {
+    console.log('คลิกโอเวอร์เลย์ที่:', location);
+  });
+
+  useMapEvent('rotate', (angle) => {
+    console.log('หมุนไปที่:', angle);
+  });
+
+  return null;
+}
+```
+
+## API
+
+```tsx
+useMapEvent(eventName: EventName, handler: EventHandler<T>): void
+```
+
+รับฟัง Sphere Event ตามชื่อที่ระบุ Handler จะถูกผูกโดยอัตโนมัติเมื่อแผนที่พร้อม และถูกถอดออกเมื่อ Unmount
+
+## เหตุการณ์ที่รองรับ
+
+| ชื่อเหตุการณ์ | ข้อมูล | คำอธิบาย |
+|------------|------|-------------|
+| `"ready"` | - | แผนที่พร้อมใช้งาน |
+| `"resize"` | - | แผนที่ถูกปรับขนาด |
+| `"zoom"` | - | ระดับซูมเปลี่ยน |
+| `"location"` | - | จุดศูนย์กลางเปลี่ยน |
+| `"rotate"` | - | การหมุนเปลี่ยน |
+| `"pitch"` | - | ความชันเปลี่ยน |
+| `"click"` | `Location` | คลิกบนแผนที่ |
+| `"doubleClick"` | `Location` | ดับเบิลคลิกบนแผนที่ |
+| `"mousemove"` | `Location` | เลื่อนเมาส์บนแผนที่ |
+| `"drag"` | - | เริ่มลากแผนที่ |
+| `"drop"` | - | หยุดลากแผนที่ |
+| `"idle"` | - | แผนที่อยู่ในสถานะ Idle |
+| `"layerChange"` | `Layer` | เลเยอร์ถูกเพิ่มหรือลบ |
+| `"overlayClick"` | `{ overlay, location }` | คลิกโอเวอร์เลย์ |
+| `"overlayDrag"` | `Overlay` | กำลังลากโอเวอร์เลย์ |
+| `"overlayDrop"` | `Overlay` | ปล่อยโอเวอร์เลย์ |
+| `"overlayHover"` | `Overlay` | เมาส์เข้าสู่โอเวอร์เลย์ |
+| `"overlayLeave"` | `Overlay` | เมาส์ออกจากโอเวอร์เลย์ |
+| `"popupClose"` | `Popup` | ปิดป๊อปอัป |
+| `"routeComplete"` | `object[]` | คำนวณเส้นทางเสร็จ |
+| `"error"` | `object` | เกิดข้อผิดพลาด |

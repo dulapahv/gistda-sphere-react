@@ -1,0 +1,71 @@
+---
+title: Marker (หมุด)
+description: แสดงหมุดระบุพิกัดบนแผนที่
+---
+
+<MapDemo height="400px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }} language="en">
+  <Marker
+    position={{ lon: 100.5018, lat: 13.7563 }}
+    title="กรุงเทพมหานคร"
+    detail="เมืองหลวงของประเทศไทย"
+    draggable
+  />
+</MapDemo>
+
+```tsx
+<Marker
+  position={{ lon: 100.5018, lat: 13.7563 }}
+  title="กรุงเทพมหานคร"
+  detail="เมืองหลวงของประเทศไทย"
+  draggable
+  onDrop={(marker, newPosition) => console.log('ย้ายไปยัง:', newPosition)}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | พิกัดของหมุด (`{ lon, lat }`) |
+| `ref` | `Ref<MarkerRef>` | No | - | Ref สำหรับการควบคุมผ่านโค้ด (Imperative control) |
+| `icon` | `Icon` | No | Default red pin | ไอคอนที่ต้องการแสดงแทนหมุดปกติ |
+| `title` | `string` | No | - | ข้อความที่แสดงเมื่อโฮเวอร์ (tooltip) |
+| `detail` | `string` | No | - | ข้อความที่แสดงในป๊อปอัปเมื่อคลิก |
+| `popup` | `PopupOptions` | No | - | การกำหนดค่าป๊อปอัป (จะเขียนทับ `detail`) |
+| `visibleRange` | `Range` | No | All zoom levels | ระดับการซูมที่สามารถมองเห็นหมุดได้ |
+| `clickable` | `boolean` | No | `false` | แสดงเคอร์เซอร์แบบตัวชี้เมื่อโฮเวอร์ |
+| `draggable` | `boolean` | No | `false` | อนุญาตให้ลากหมุดได้ |
+| `zIndex` | `number` | No | `0` | ลำดับการซ้อน (Stacking order) |
+| `rotate` | `number` | No | `0` | มุมการหมุนเป็นองศา |
+| `onClick` | `(marker: SphereMarker) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อคลิก |
+| `onDrag` | `(marker: SphereMarker) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อกำลังลาก |
+| `onDrop` | `(marker: SphereMarker, location: Location) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อปล่อยหมุด (สิ้นสุดการลาก) |
+| `onHover` | `(marker: SphereMarker) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อเมาส์เข้าสู่พื้นที่ของหมุด |
+| `onLeave` | `(marker: SphereMarker) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อเมาส์ออกจากพื้นที่ของหมุด |
+
+## ไอคอนแบบกำหนดเอง
+
+### ไอคอนจาก URL
+
+```tsx
+<Marker
+  position={{ lon: 100.5, lat: 13.75 }}
+  icon={{
+    url: '/my-icon.png',
+    size: { width: 32, height: 32 },
+    offset: { x: 16, y: 32 }
+  }}
+/>
+```
+
+### ไอคอนจาก HTML
+
+```tsx
+<Marker
+  position={{ lon: 100.5, lat: 13.75 }}
+  icon={{
+    html: '<div style="background: red; width: 20px; height: 20px; border-radius: 50%;"></div>',
+    offset: { x: 10, y: 10 }
+  }}
+/>
+```

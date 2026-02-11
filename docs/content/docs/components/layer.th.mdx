@@ -1,0 +1,148 @@
+---
+title: Layer (เลเยอร์)
+description: เพิ่มเลเยอร์แผนที่แบบในตัวหรือแบบกำหนดเองลงในแผนที่
+---
+
+<LayerDemo />
+
+```tsx
+{/* เลเยอร์ข้อมูลในตัว */}
+<Layer preset="TRAFFIC" />
+
+{/* เลเยอร์ WMS แบบกำหนดเอง */}
+<Layer
+  name="my-wms-layer"
+  type="WMS"
+  url="https://example.com/wms"
+  zoomRange={{ min: 1, max: 18 }}
+  opacity={0.7}
+/>
+
+{/* เปลี่ยนเลเยอร์ฐาน */}
+<Layer preset="HYBRID" isBase />
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `preset` | `BuiltInLayer` | No | - | ใช้เลเยอร์ที่มีอยู่แล้ว |
+| `name` | `string` | Conditional | - | ชื่อเลเยอร์ (จำเป็นเมื่อไม่ได้ระบุ `preset`) |
+| `isBase` | `boolean` | No | `false` | ตั้งเป็นเลเยอร์ฐาน |
+| `type` | `LayerType` | No | `"Vector"` | ประเภทเลเยอร์ |
+| `url` | `string` | No | Sphere tile server | URL ของเซิร์ฟเวอร์ไทล์ |
+| `zoomRange` | `Range` | No | All zoom levels | ช่วงการซูมที่มองเห็นได้ |
+| `source` | `Range` | No | All zoom levels | ช่วงการซูมของไทล์ที่พร้อมใช้งาน |
+| `opacity` | `number` | No | `1` | ความทึบของเลเยอร์ (0-1) |
+| `zIndex` | `number` | No | `0` | ลำดับการซ้อน |
+| `bound` | `Bound` | No | World | ขอบเขตสำหรับไทล์ |
+| `attribution` | `string` | No | - | ข้อความระบุแหล่งที่มา |
+| `extraQuery` | `string` | No | - | สตริงคิวรีเพิ่มเติมสำหรับการร้องขอไทล์ |
+| `id` | `string` | No | Layer name | ตัวระบุเลเยอร์ที่ไม่ซ้ำกัน |
+| `format` | `string` | No | `"image/png"` / `"png"` | รูปแบบรูปภาพ |
+| `srs` | `string` | No | `"EPSG:3857"` | ระบบอ้างอิงเชิงพื้นที่ |
+| `tileMatrixPrefix` | `string` | No | - | คำนำหน้าเมทริกซ์ไทล์ WMTS |
+| `styles` | `string` | No | Default | สไตล์เลเยอร์ |
+| `version` | `string` | No | `"1.1.1"` | เวอร์ชัน WMS/WMTS |
+| `refresh` | `number` | No | - | ช่วงเวลาการรีเฟรชอัตโนมัติ (มิลลิวินาที) |
+| `zoomOffset` | `number` | No | - | ค่าชดเชยระดับการซูม |
+| `beforeId` | `string` | No | Symbol layer | แทรกก่อน ID เลเยอร์ |
+
+## ประเภทเลเยอร์
+
+| ประเภท | คำอธิบาย |
+|------|-------------|
+| `"Vector"` | Mapbox Vector Tiles (ค่าเริ่มต้น) |
+| `"XYZ"` | ไทล์แรสเตอร์แบบ XYZ |
+| `"WMS"` | Web Map Service |
+| `"WMTS"` | Web Map Tile Service (การเข้ารหัส KVP) |
+| `"WMTS_REST"` | Web Map Tile Service (การเข้ารหัส RESTful) |
+| `"TMS"` | Tile Map Service |
+| `"Tiles3D"` | OGC 3D Tiles |
+| `"I3S"` | Indexed 3D Scene Layer |
+
+## เลเยอร์ฐานที่มีให้ในตัว (Built-in base layers)
+
+เลเยอร์ฐานจะมาแทนที่แผนที่ฐานปัจจุบัน สามารถเปิดใช้งานได้เพียงเลเยอร์เดียวเท่านั้นในแต่ละครั้ง
+
+| เลเยอร์ | คำอธิบาย |
+|-------|-------------|
+| `"SIMPLE"` | เลเยอร์ฐานที่มีความซับซ้อนต่ำ |
+| `"STREETS"` | แผนที่ถนนมาตรฐาน (ค่าเริ่มต้น) |
+| `"STREETS_NIGHT"` | แผนที่ถนนในธีมสีเข้ม |
+| `"HYBRID"` | ภาพถ่ายดาวเทียมพร้อมป้ายกำกับ |
+| `"IMAGES"` | ภาพถ่ายดาวเทียมที่ไม่มีป้ายกำกับ |
+
+## เลเยอร์ข้อมูลที่มีให้ในตัว (Built-in data layers)
+
+เลเยอร์ข้อมูลจะถูกเพิ่มเหนือเลเยอร์ฐาน สามารถเปิดใช้งานได้หลายเลเยอร์พร้อมกัน
+
+| เลเยอร์ | คำอธิบาย |
+|-------|-------------|
+| `"TRAFFIC"` | ข้อมูลการจราจรแบบเรียลไทม์ (รีเฟรชอัตโนมัติทุก 3 นาที) |
+| `"PM25"` | แผนที่ความหนาแน่นของคุณภาพอากาศ (PM2.5) |
+| `"HOTSPOT"` | ตำแหน่งจุดความร้อน (ไฟป่า) |
+| `"FLOOD"` | พื้นที่ที่ได้รับผลกระทบจากน้ำท่วม |
+| `"DROUGHT"` | พื้นที่ที่ได้รับผลกระทบจากภัยแล้ง |
+
+## โอเวอร์เลย์ที่กำหนดไว้ล่วงหน้า (Predefined overlays)
+
+Sphere API มีโอเวอร์เลย์ที่กำหนดไว้ล่วงหน้าซึ่งแสดงข้อมูลแบบเรียลไทม์บนแผนที่
+
+<PredefinedOverlaysDemo />
+
+| โอเวอร์เลย์ | คำอธิบาย |
+|---------|-------------|
+| `"cameras"` | ฟีดกล้องวงจรปิดจราจรแบบเรียลไทม์พร้อมวิดีโอเคลื่อนไหว (เลือกได้) |
+| `"events"` | เหตุการณ์จราจรและถนนที่ใช้งานอยู่พร้อมรายละเอียดป๊อปอัป |
+| `"aqi"` | จุดข้อมูลดัชนีคุณภาพอากาศของไทยพร้อมรายละเอียดป๊อปอัป |
+
+```tsx
+const { loadPredefinedOverlay, unloadPredefinedOverlay } = useMapControls();
+
+loadPredefinedOverlay('cameras');
+loadPredefinedOverlay('events');
+loadPredefinedOverlay('aqi');
+unloadPredefinedOverlay('cameras');
+```
+
+## ตัวกรองสี (Color filters)
+
+ใช้ตัวกรองสีเพื่อปรับการแสดงผลแผนที่สำหรับความสามารถในการเข้าถึงหรือความสวยงาม
+
+<ControlsDemo />
+
+| ตัวกรอง | คำอธิบาย |
+|--------|-------------|
+| `"Dark"` | ตัวกรองโหมดมืด |
+| `"Light"` | สีแผนที่สว่างขึ้น |
+| `"Protanopia"` | ตัวกรองตาบอดสีแดง |
+| `"Deuteranopia"` | ตัวกรองตาบอดสีเขียว |
+| `"None"` | ไม่มีตัวกรอง (ค่าเริ่มต้น) |
+
+```tsx
+const { setFilter } = useMapControls();
+
+setFilter('Dark');
+setFilter('Protanopia');
+setFilter(false); // เหมือนกับ 'None'
+```
+
+หรือระบุผ่าน prop ของ `SphereMap`:
+
+```tsx
+<SphereMap filter="Dark" style={{ height: '500px' }}>
+  {/* children */}
+</SphereMap>
+```
+
+## การใช้งานเลเยอร์ด้วยโปรแกรม (Using layers programmatically)
+
+```tsx
+const { setBaseLayer, addLayer, removeLayer } = useMapControls();
+
+setBaseLayer('HYBRID');
+addLayer('TRAFFIC');
+addLayer('PM25');
+removeLayer('TRAFFIC');
+```

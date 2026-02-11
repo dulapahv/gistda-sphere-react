@@ -11,9 +11,11 @@ import { LLMCopyButton, ViewOptions } from "@/components/ai/page-actions";
 import { getPageImage, source } from "@/lib/source";
 import { getMDXComponents } from "@/mdx-components";
 
-export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
+export default async function Page(
+  props: PageProps<"/[lang]/docs/[[...slug]]">
+) {
   const params = await props.params;
-  const page = source.getPage(params.slug);
+  const page = source.getPage(params.slug, params.lang);
 
   if (!page) {
     notFound();
@@ -36,14 +38,12 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
         <LLMCopyButton markdownUrl={`${page.url}.mdx`} />
         <ViewOptions
           githubUrl={`https://github.com/${gitConfig.user}/${gitConfig.repo}/blob/${gitConfig.branch}/docs/content/docs/${page.path}`}
-          // update it to match your repo
           markdownUrl={`${page.url}.mdx`}
         />
       </div>
       <DocsBody>
         <MDX
           components={getMDXComponents({
-            // this allows you to link to other pages with relative file paths
             a: createRelativeLink(source, page),
           })}
         />
@@ -52,15 +52,15 @@ export default async function Page(props: PageProps<"/docs/[[...slug]]">) {
   );
 }
 
-export async function generateStaticParams() {
+export function generateStaticParams() {
   return source.generateParams();
 }
 
 export async function generateMetadata(
-  props: PageProps<"/docs/[[...slug]]">
+  props: PageProps<"/[lang]/docs/[[...slug]]">
 ): Promise<Metadata> {
   const params = await props.params;
-  const page = source.getPage(params.slug);
+  const page = source.getPage(params.slug, params.lang);
 
   if (!page) {
     notFound();

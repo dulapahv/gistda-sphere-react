@@ -2,17 +2,30 @@
 
 import type { Location } from "gistda-sphere-react";
 import { LOCATIONS } from "../constants";
+import { getTranslations } from "../translations";
 
 interface QuickNavProps {
   onNavigate: (location: Location, zoom?: number) => void;
+  lang: string;
 }
 
 /** Quick navigation buttons for common Thai cities. */
-export function QuickNav({ onNavigate }: QuickNavProps) {
+export function QuickNav({ onNavigate, lang }: QuickNavProps) {
+  const t = getTranslations(lang);
+
+  const locationLabels: Record<string, string> = {
+    Bangkok: t.locBangkok,
+    "Chiang Mai": t.locChiangMai,
+    Phuket: t.locPhuket,
+    Pattaya: t.locPattaya,
+    Ayutthaya: t.locAyutthaya,
+    Sukhothai: t.locSukhothai,
+  };
+
   return (
     <div className="mb-4">
       <div className="mb-2.5 font-semibold text-[11px] text-fd-muted-foreground uppercase tracking-wider">
-        Quick Navigation
+        {t.quickNavigation}
       </div>
       <div className="flex flex-wrap gap-1.5">
         {Object.entries(LOCATIONS).map(([name, loc]) => (
@@ -22,7 +35,7 @@ export function QuickNav({ onNavigate }: QuickNavProps) {
             onClick={() => onNavigate(loc)}
             type="button"
           >
-            {name}
+            {locationLabels[name] ?? name}
           </button>
         ))}
       </div>

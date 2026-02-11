@@ -3,9 +3,15 @@
 import { TAG_CATEGORIES, useTags } from "gistda-sphere-react";
 import { Eye, EyeOff, Trash2 } from "lucide-react";
 import { useState } from "react";
+import { getTranslations } from "../translations";
+
+interface TagsPanelProps {
+  lang: string;
+}
 
 /** POI tag toggle panel with category grouping and popup control. */
-export function TagsPanel() {
+export function TagsPanel({ lang }: TagsPanelProps) {
+  const t = getTranslations(lang);
   const { add, remove, clear, enablePopup, isReady } = useTags();
 
   const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
@@ -37,10 +43,10 @@ export function TagsPanel() {
   return (
     <div className="mb-4">
       <div className="mb-2.5 font-semibold text-[11px] text-fd-muted-foreground uppercase tracking-wider">
-        POI Tags
+        {t.poiTags}
       </div>
       <p className="mt-2 text-fd-secondary-foreground text-xs">
-        Toggle tags to show points of interest
+        {t.toggleTagsHint}
       </p>
 
       {TAG_CATEGORIES.map((category) => (
@@ -70,7 +76,7 @@ export function TagsPanel() {
 
       <div className="mt-3 flex items-center justify-between border-fd-border border-t pt-3">
         <span className="text-[11px] text-fd-muted-foreground">
-          {activeTags.size} active
+          {t.active(activeTags.size)}
         </span>
         <div className="flex flex-wrap gap-1.5">
           <button

@@ -1,0 +1,35 @@
+---
+title: การแสดง Tags บนแผนที่
+description: แสดงหมุด POI ตามหมวดหมู่
+---
+
+แสดงหมุด POI ตามหมวดหมู่:
+
+<TagsDemo />
+
+```tsx lineNumbers
+import { SphereProvider, SphereMap, useTags } from 'gistda-sphere-react';
+
+function TagPanel() {
+  const { add, clear, list, isReady } = useTags();
+
+  return (
+    <div>
+      <button onClick={() => add('โรงพยาบาล')} disabled={!isReady}>แสดงโรงพยาบาล</button>
+      <button onClick={() => add('ATM')} disabled={!isReady}>แสดง ATM</button>
+      <button onClick={() => add('วัด')} disabled={!isReady}>แสดงวัด</button>
+      <button onClick={clear}>ล้างทั้งหมด</button>
+      <p>Tag ที่ใช้งานอยู่: {list().join(', ')}</p>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <TagPanel />
+      <SphereMap style={{ width: '100%', height: '500px' }} />
+    </SphereProvider>
+  );
+}
+```

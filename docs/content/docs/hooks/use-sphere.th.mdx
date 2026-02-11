@@ -1,0 +1,28 @@
+---
+title: useSphere
+description: เข้าถึง Sphere API namespace โดยไม่ต้องใช้แผนที่
+---
+
+เข้าถึง Sphere API namespace โดยไม่จำเป็นต้องมีแผนที่
+
+```tsx
+import { useSphere } from 'gistda-sphere-react';
+
+function SphereInfo() {
+  const { sphere, isLoaded, error, apiKey } = useSphere();
+
+  if (!isLoaded) return <div>กำลังโหลด API...</div>;
+  if (error) return <div>เกิดข้อผิดพลาด: {error.message}</div>;
+
+  return <div>โหลด API สำเร็จด้วย key: {apiKey}</div>;
+}
+```
+
+## ค่าที่ส่งกลับ (Return value)
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `sphere` | `SphereNamespace \| null` | Namespace ของ `sphere` API แบบ global |
+| `isLoaded` | `boolean` | เป็น `true` เมื่อสคริปต์ API โหลดเสร็จแล้ว |
+| `error` | `Error \| null` | ข้อผิดพลาดหากโหลด API ไม่สำเร็จ |
+| `apiKey` | `string` | API key ที่ส่งให้ `SphereProvider` |

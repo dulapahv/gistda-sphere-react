@@ -1,0 +1,26 @@
+---
+title: useMap
+description: เข้าถึง Map instance และ Sphere API namespace โดยตรง
+---
+
+เข้าถึง Map instance และ Sphere API namespace โดยตรง
+
+```tsx
+import { useMap } from 'gistda-sphere-react';
+
+function MapInfo() {
+  const { map, sphere, isReady } = useMap();
+
+  if (!isReady) return <div>กำลังโหลด...</div>;
+
+  return <div>ระดับการซูม: {map.zoom()}</div>;
+}
+```
+
+## ค่าที่ส่งกลับ (Return value)
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `map` | `SphereMapInstance \| null` | Instance ของ Sphere map ที่อยู่เบื้องหลัง |
+| `sphere` | `SphereNamespace \| null` | Namespace ของ `sphere` API แบบ global |
+| `isReady` | `boolean` | เป็น `true` เมื่อแผนที่ถูกสร้างและพร้อมใช้งานแล้ว |

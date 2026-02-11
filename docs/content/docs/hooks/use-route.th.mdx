@@ -1,0 +1,157 @@
+---
+title: useRoute
+description: คำนวณและแสดงเส้นทางระหว่างตำแหน่งต่างๆ
+---
+
+คำนวณและแสดงเส้นทางระหว่างตำแหน่งต่างๆ
+
+<RouteDemo />
+
+```tsx
+import { useRoute } from 'gistda-sphere-react';
+
+function RouteComponent() {
+  const { addDestination, search, getDistance, getInterval, clear, isReady } = useRoute();
+
+  const calculateRoute = () => {
+    addDestination({ lon: 100.5018, lat: 13.7563 });
+    addDestination({ lon: 98.9853, lat: 18.7883 });
+    search();
+  };
+
+  return (
+    <div>
+      <button onClick={calculateRoute}>คำนวณเส้นทาง</button>
+      <button onClick={clear}>ล้าง</button>
+    </div>
+  );
+}
+```
+
+## ตัวเลือก (Options)
+
+`useRoute` รับ options object สำหรับ event ของเส้นทาง:
+
+| Option | Type | Description |
+|--------|------|-------------|
+| `onRouteComplete` | `(routes: unknown[]) => void` | เรียกเมื่อการคำนวณเส้นทางเสร็จสมบูรณ์ |
+| `onRouteError` | `(errorCode: number) => void` | เรียกเมื่อการคำนวณเส้นทางล้มเหลว |
+
+```tsx
+const { search, getDistance, getInterval, addDestination, clear } = useRoute({
+  onRouteComplete() {
+    console.log('ระยะทาง:', getDistance(true));
+    console.log('ระยะเวลา:', getInterval(true));
+  },
+  onRouteError(code) {
+    console.error('เกิดข้อผิดพลาดในการหาเส้นทาง:', code);
+  },
+});
+```
+
+## เส้นทางแบบทีละขั้นตอน (Turn-by-Turn Directions)
+
+ใช้ `getGuide()` เพื่อดึงคำแนะนำการนำทางแบบทีละขั้นตอนหลังจากคำนวณเส้นทางแล้ว
+
+- `getGuide()` ส่งกลับอาร์เรย์ของ `RouteGuideStep` objects
+- `getGuide(true)` ส่งกลับ `HTMLElement` ที่มีคำแนะนำในรูปแบบพร้อมแสดงผล
+
+```tsx
+import { useRoute, type RouteGuideStep } from 'gistda-sphere-react';
+
+function TurnByTurnRoute() {
+  const [steps, setSteps] = useState<RouteGuideStep[]>([]);
+
+  const { addDestination, search, getGuide } = useRoute({
+    onRouteComplete() {
+      const guide = getGuide();
+      if (Array.isArray(guide)) {
+        setSteps(guide as RouteGuideStep[]);
+      }
+    },
+  });
+
+  return (
+    <div>
+      <button onClick={() => {
+        addDestination({ lon: 100.5018, lat: 13.7563 });
+        addDestination({ lon: 98.9853, lat: 18.7883 });
+        search();
+      }}>
+        ดูเส้นทาง
+      </button>
+      <ol>
+        {steps.map((step, i) => (
+          <li key={i}>
+            <strong>{step.instruction}</strong>
+            <span> — {String(step.distance)}</span>
+            {step.duration && <span> · {String(step.duration)}</span>}
+          </li>
+        ))}
+      </ol>
+    </div>
+  );
+}
+```
+
+### RouteGuideStep
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `instruction` | `string` | ข้อความคำแนะนำการนำทางแบบทีละขั้นตอน |
+| `distance` | `number \| string` | ระยะทางของขั้นตอนนี้ |
+| `duration` | `number \| string` | ระยะเวลาของขั้นตอนนี้ |
+| `location` | `Location` | พิกัดทางภูมิศาสตร์ของขั้นตอนนี้ |
+
+## ฟังก์ชัน
+
+| Function | Parameters | Returns | Description |
+|----------|------------|---------|-------------|
+| `isReady` | - | `boolean` | บริการหาเส้นทางถูกสร้างแล้ว |
+| `addDestination` | `(destination, mode?)` | `void` | เพิ่มจุดหมาย |
+| `insertDestination` | `(index, destination, mode?)` | `void` | แทรกจุดหมายที่ตำแหน่งระบุ |
+| `removeDestination` | `(marker)` | `void` | ลบจุดหมายด้วย marker ref |
+| `removeDestinationAt` | `(index)` | `void` | ลบจุดหมายด้วยลำดับ |
+| `clearDestinations` | `()` | `void` | ลบจุดหมายทั้งหมด |
+| `clearPath` | `()` | `void` | ลบเฉพาะเส้นทาง |
+| `clear` | `()` | `void` | ลบเส้นทางทั้งหมด |
+| `reverse` | `()` | `void` | กลับทิศทาง |
+| `search` | `()` | `void` | คำนวณและแสดงเส้นทาง |
+| `getDistance` | `(format?)` | `number \| string` | ระยะทางรวม |
+| `getInterval` | `(format?)` | `number \| string` | เวลาเดินทางโดยประมาณ |
+| `getGuide` | `(format?)` | `RouteGuideStep[] \| HTMLElement` | คำแนะนำการนำทางแบบทีละขั้นตอน |
+| `exportRouteLine` | `(options?)` | `SpherePolyline \| null` | ส่งออกเป็น Polyline |
+| `listDestinations` | `()` | `SphereMarker[]` | รายการ marker ของจุดหมาย |
+| `size` | `()` | `number` | จำนวนจุดหมาย |
+| `setMode` | `(mode)` | `void` | ตั้งค่าโหมดการหาเส้นทาง |
+| `setModeAt` | `(index, mode)` | `void` | ตั้งค่าโหมดสำหรับช่วงเส้นทาง |
+| `enableRouteType` | `(routeType, state)` | `void` | เปิด/ปิดประเภทเส้นทาง |
+| `setLabel` | `(label)` | `void` | ตั้งค่าโหมดแสดงผลป้ายกำกับ |
+| `setAuto` | `(state)` | `void` | เปิด/ปิดการคำนวณซ้ำอัตโนมัติ |
+| `setLanguage` | `(lang: Language)` | `void` | ตั้งค่าภาษาเส้นทาง: `"th"` หรือ `"en"` |
+
+## RouteMode
+
+| Mode | Description |
+|------|-------------|
+| `"Traffic"` | เส้นทางเร็วที่สุดโดยใช้ข้อมูลจราจรแบบเรียลไทม์ |
+| `"Cost"` | เส้นทางเร็วที่สุดโดยไม่รวมข้อมูลจราจร |
+| `"Distance"` | เส้นทางสั้นที่สุดตามระยะทาง |
+| `"Fly"` | เส้นตรงโดยตรง |
+
+## RouteType
+
+| Type | Description |
+|------|-------------|
+| `"Road"` | ถนนปกติ |
+| `"Ferry"` | เส้นทางเรือข้ามฟาก |
+| `"Tollway"` | ทางด่วน |
+| `"All"` | ทุกประเภทเส้นทาง |
+
+## RouteLabelType
+
+| Label | Description |
+|-------|-------------|
+| `"Distance"` | แสดงป้ายกำกับระยะทาง |
+| `"Time"` | แสดงป้ายกำกับเวลา |
+| `"Hide"` | ซ่อนป้ายกำกับทั้งหมด |

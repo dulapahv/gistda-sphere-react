@@ -11,8 +11,9 @@ import {
   Rectangle,
   SphereMap,
 } from "gistda-sphere-react";
-import { getShapeColor, LOCATIONS } from "../constants";
+import { getShapeColor, LOCATIONS, type MapLanguage } from "../constants";
 import type { UseDrawingReturn } from "../hooks";
+import { getTranslations } from "../translations";
 import type { SearchMarkerData } from "../types";
 
 interface MapViewProps {
@@ -22,6 +23,8 @@ interface MapViewProps {
   searchMarker: SearchMarkerData | null;
   settingRoutePoint: "origin" | "destination" | null;
   center: Location | null;
+  language: MapLanguage;
+  lang: string;
   onZoom: (zoom: number) => void;
   onLocation: (center: Location) => void;
   onClick: (location: Location) => void;
@@ -36,15 +39,21 @@ export function MapView({
   searchMarker,
   settingRoutePoint,
   center,
+  language,
+  lang,
   onZoom,
   onLocation,
   onClick,
   onDoubleClick,
 }: MapViewProps) {
+  const t = getTranslations(lang);
+
   return (
     <div className="relative min-w-0 flex-1 max-md:h-[50vh]">
       <SphereMap
         center={center || LOCATIONS.Bangkok}
+        key={language}
+        language={language}
         onClick={onClick}
         onDoubleClick={onDoubleClick}
         onLocation={onLocation}
@@ -59,7 +68,7 @@ export function MapView({
             key={marker.id}
             onDrop={(_, newPos) => drawing.updateMarker(marker.id, newPos)}
             position={marker.position}
-            title={`Marker ${i + 1}`}
+            title={t.markerN(i + 1)}
           />
         ))}
 
@@ -71,7 +80,7 @@ export function MapView({
             lineWidth={15}
             onDrop={(_, newPos) => drawing.updateDot(dot.id, newPos)}
             position={dot.position}
-            title={`Dot ${i + 1}`}
+            title={t.dotN(i + 1)}
           />
         ))}
 
@@ -82,7 +91,7 @@ export function MapView({
             lineColor={getShapeColor(i).replace("0.6", "1")}
             lineWidth={2}
             positions={polygon.positions}
-            title={`Polygon ${i + 1}`}
+            title={t.polygonN(i + 1)}
           />
         ))}
 
@@ -100,7 +109,7 @@ export function MapView({
             lineColor={getShapeColor(i + 3).replace("0.6", "1")}
             lineWidth={3}
             positions={polyline.positions}
-            title={`Line ${i + 1}`}
+            title={t.lineN(i + 1)}
           />
         ))}
 
@@ -120,7 +129,7 @@ export function MapView({
             lineColor={getShapeColor(i + 2).replace("0.6", "1")}
             lineWidth={2}
             radius={circle.radius}
-            title={`Circle ${i + 1}`}
+            title={t.circleN(i + 1)}
           />
         ))}
 
@@ -132,30 +141,30 @@ export function MapView({
             lineWidth={2}
             position={rect.position}
             size={rect.size}
-            title={`Rectangle ${i + 1}`}
+            title={t.rectangleN(i + 1)}
           />
         ))}
 
         {drawing.circleCenter && (
           <Marker
-            detail="Click to set radius"
+            detail={t.clickToSetRadius}
             position={drawing.circleCenter}
-            title="Circle Center"
+            title={t.circleCenter}
           />
         )}
 
         {drawing.rectangleCorner && (
           <Marker
-            detail="Click opposite corner"
+            detail={t.clickOppositeCorner}
             position={drawing.rectangleCorner}
-            title="Rectangle Corner"
+            title={t.rectangleCorner}
           />
         )}
 
-        {routeOrigin && <Marker position={routeOrigin} title="Origin" />}
+        {routeOrigin && <Marker position={routeOrigin} title={t.origin} />}
 
         {routeDestination && (
-          <Marker position={routeDestination} title="Destination" />
+          <Marker position={routeDestination} title={t.destination} />
         )}
 
         {searchMarker && (
@@ -169,7 +178,7 @@ export function MapView({
               detail={`${drawing.selectedPopup.lat.toFixed(6)}, ${drawing.selectedPopup.lon.toFixed(6)}`}
               onClose={drawing.closePopup}
               position={drawing.selectedPopup}
-              title="Location"
+              title={t.location}
             />
           )}
       </SphereMap>

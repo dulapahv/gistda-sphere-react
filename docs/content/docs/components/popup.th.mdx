@@ -1,0 +1,55 @@
+---
+title: Popup (ป๊อปอัป)
+description: แสดงป๊อปอัปข้อมูลบนแผนที่
+---
+
+<MapDemo height="400px" zoom={12} center={{ lon: 100.5, lat: 13.75 }} language="en">
+  <Popup position={{ lon: 100.5, lat: 13.75 }} title="สวัสดี!" detail="นี่คือป๊อปอัปบนแผนที่" />
+</MapDemo>
+
+```tsx
+<Popup
+  position={{ lon: 100.5, lat: 13.75 }}
+  title="สวัสดี!"
+  detail="นี่คือป๊อปอัปบนแผนที่"
+  onClose={() => console.log('ปิดป๊อปอัปแล้ว')}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | พิกัดของป๊อปอัป |
+| `ref` | `Ref<PopupRef>` | No | - | Ref สำหรับการควบคุมผ่านโค้ด (Imperative control) |
+| `title` | `string` | No | - | ชื่อป๊อปอัป |
+| `detail` | `string` | No | - | ข้อความรายละเอียด (รองรับ HTML) |
+| `loadDetail` | `(element: HTMLElement) => void` | No | - | โหลดเนื้อหารายละเอียดแบบไดนามิก |
+| `html` | `string` | No | - | เนื้อหา HTML แบบกำหนดเอง (จะเขียนทับ `detail`) |
+| `loadHtml` | `(element: HTMLElement) => void` | No | - | โหลด HTML แบบกำหนดเองแบบไดนามิก |
+| `size` | `Size` | No | Auto | ขนาดของป๊อปอัป (`{ width, height }`) |
+| `closable` | `boolean` | No | `true` | แสดงปุ่มปิด |
+| `onClose` | `(popup: SpherePopup) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อปิด |
+
+## ป๊อปอัป HTML แบบกำหนดเอง
+
+```tsx
+<Popup
+  position={{ lon: 100.5, lat: 13.75 }}
+  html='<div style="background: #eeeeff; padding: 10px;">เนื้อหาที่กำหนดเอง</div>'
+/>
+```
+
+## การโหลดเนื้อหาแบบไดนามิก
+
+```tsx
+<Popup
+  position={{ lon: 100.5, lat: 13.75 }}
+  title="กำลังโหลด..."
+  loadDetail={(element) => {
+    fetch('/api/data')
+      .then(res => res.json())
+      .then(data => { element.innerHTML = data.description; });
+  }}
+/>
+```

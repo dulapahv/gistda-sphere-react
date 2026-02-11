@@ -1,0 +1,67 @@
+---
+title: การขอ API Key
+description: วิธีการขอรับ API Key สำหรับ GISTDA Sphere
+---
+
+## ขั้นตอน
+
+1. เข้าเว็บไซต์ [sphere.gistda.or.th](https://sphere.gistda.or.th/)
+2. ลงทะเบียนสร้างบัญชีผู้ใช้
+3. สร้าง API Key ใหม่และลงทะเบียนโดเมนที่ต้องการใช้งาน
+
+## การจำกัดโฮสต์
+
+เมื่อสร้าง API Key ให้ตั้งค่า **Allowed Hosts** เพื่อจำกัดการใช้งานเฉพาะโดเมนของคุณเท่านั้น นี่คือกลไกความปลอดภัยหลัก เนื่องจาก API Key จะถูกส่งเป็น Query Parameter และสามารถมองเห็นได้ในแท็บ Network ของเบราว์เซอร์
+
+ตัวอย่างเช่น หากเว็บไซต์ของคุณใช้งานอยู่ที่ `example.com` และคุณพัฒนาในเครื่อง:
+
+| โฮสต์ | วัตถุประสงค์ |
+|------|---------|
+| `localhost` | พัฒนาในเครื่อง |
+| `example.com` | ใช้งานจริง (Production) |
+
+<Callout>
+  อย่าลืมลงทะเบียน `localhost` เพื่อใช้งานในระหว่างการพัฒนา
+</Callout>
+
+## การใช้งาน
+
+ส่ง API Key ไปยัง `SphereProvider`:
+
+```tsx
+<SphereProvider apiKey="YOUR_API_KEY">
+  {/* แอปพลิเคชันของคุณ */}
+</SphereProvider>
+```
+
+## ตัวแปรสภาพแวดล้อม (Environment Variables)
+
+แม้ว่า API Key จะปรากฏใน Network Requests อยู่แล้ว (เนื่องจากต้องส่งเป็น Query Parameter เพื่อโหลด SDK) แต่การใช้ Environment Variables จะช่วยป้องกันไม่ให้ API Key หลุดเข้าไปในซอร์สโค้ดและระบบ Version Control:
+
+<Callout type="warning">
+  API Key จะถูกส่งเป็น Query Parameter และมองเห็นได้จากฝั่ง Client ดังนั้นควรใช้การจำกัดโฮสต์เป็นมาตรการหลักในการรักษาความปลอดภัย
+</Callout>
+
+สำหรับโปรเจกต์ Next.js:
+
+```bash title=".env.local"
+NEXT_PUBLIC_SPHERE_API_KEY=your_api_key_here
+```
+
+```tsx
+<SphereProvider apiKey={process.env.NEXT_PUBLIC_SPHERE_API_KEY!}>
+  {/* แอปพลิเคชันของคุณ */}
+</SphereProvider>
+```
+
+สำหรับโปรเจกต์ Vite:
+
+```bash title=".env"
+VITE_SPHERE_API_KEY=your_api_key_here
+```
+
+```tsx
+<SphereProvider apiKey={import.meta.env.VITE_SPHERE_API_KEY}>
+  {/* แอปพลิเคชันของคุณ */}
+</SphereProvider>
+```

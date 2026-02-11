@@ -1,0 +1,45 @@
+---
+title: gistda-sphere-react
+description: React wrapper สำหรับ GISTDA Sphere Map API พร้อมรองรับ TypeScript อย่างเต็มรูปแบบ
+---
+
+import { Cards, Card } from "fumadocs-ui/components/card";
+
+<Callout>
+  โปรเจกต์นี้เป็นโปรเจกต์ชุมชนแบบ<strong>ไม่เป็นทางการ</strong> ไม่มีความเกี่ยวข้อง ไม่ได้รับการรับรอง หรือสนับสนุนโดย GISTDA (สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ) สำหรับเอกสารและการสนับสนุนอย่างเป็นทางการ กรุณาเยี่ยมชม <a href="https://sphere.gistda.or.th/" target="_blank" rel="noopener noreferrer">sphere.gistda.or.th</a>
+</Callout>
+
+<Callout type="warn">
+  โปรเจกต์นี้อยู่ในระหว่างการพัฒนา API อาจมีการเปลี่ยนแปลงในแต่ละเวอร์ชัน
+</Callout>
+
+React wrapper สำหรับ [GISTDA Sphere Map API](https://sphere.gistda.or.th/) สร้างแผนที่ประเทศไทยแบบโต้ตอบได้ พร้อมรองรับ TypeScript อย่างเต็มรูปแบบ
+
+<MapDemo height="350px" zoom={7} center={{ lon: 100.5018, lat: 13.7563 }} language="th">
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" detail="เมืองหลวงของประเทศไทย" />
+  <Marker position={{ lon: 98.9853, lat: 18.7883 }} title="เชียงใหม่" />
+  <Marker position={{ lon: 98.3923, lat: 7.8804 }} title="ภูเก็ต" />
+</MapDemo>
+
+## คุณสมบัติเด่น
+
+- คอมโพเนนต์ React แบบ Declarative สำหรับแผนที่ หมุด รูปหลายเหลี่ยม และอื่น ๆ
+- รองรับ TypeScript เต็มรูปแบบพร้อม Export Types
+- Hooks สำหรับการค้นหา การหาเส้นทาง แท็ก และการควบคุมแผนที่
+- รองรับเลเยอร์ในตัวและเลเยอร์แบบกำหนดเอง
+- จัดการคอลเลกชันโอเวอร์เลย์
+
+## ติดตั้งด่วน
+
+```bash
+npm install gistda-sphere-react
+```
+
+<Cards>
+  <Card title="การติดตั้ง" href="/docs/getting-started/installation" />
+  <Card title="เริ่มต้นใช้งานด่วน" href="/docs/getting-started/quick-start" />
+  <Card title="คอมโพเนนต์" href="/docs/components/sphere-provider" />
+  <Card title="Hooks" href="/docs/hooks/use-map" />
+  <Card title="ตัวอย่าง" href="/docs/examples/programmatic-markers" />
+  <Card title="สนามทดลอง" href="/playground" />
+</Cards>

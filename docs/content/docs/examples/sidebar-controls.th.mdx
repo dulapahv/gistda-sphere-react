@@ -1,0 +1,54 @@
+---
+title: แถบด้านข้างควบคุมแผนที่
+description: ควบคุมแผนที่จากคอมโพเนนต์แถบด้านข้าง
+---
+
+ควบคุมแผนที่จากคอมโพเนนต์แถบด้านข้างด้วย `useMapControls`:
+
+<ControlsDemo />
+
+```tsx lineNumbers
+import { SphereProvider, SphereMap, Marker, useMapControls } from 'gistda-sphere-react';
+
+const cities = [
+  { name: 'กรุงเทพฯ', lon: 100.5018, lat: 13.7563 },
+  { name: 'เชียงใหม่', lon: 98.9853, lat: 18.7883 },
+  { name: 'ภูเก็ต', lon: 98.3923, lat: 7.8804 },
+];
+
+function Sidebar() {
+  const { goTo, setBaseLayer, setFilter } = useMapControls();
+
+  return (
+    <div style={{ padding: '1rem', width: '200px' }}>
+      <h3>เมือง</h3>
+      {cities.map((city) => (
+        <button key={city.name} onClick={() => goTo({ center: city, zoom: 12 })}>
+          {city.name}
+        </button>
+      ))}
+      <h3>เลเยอร์</h3>
+      <button onClick={() => setBaseLayer('STREETS')}>ถนน</button>
+      <button onClick={() => setBaseLayer('HYBRID')}>ดาวเทียม</button>
+      <h3>ตัวกรอง</h3>
+      <button onClick={() => setFilter('Dark')}>มืด</button>
+      <button onClick={() => setFilter(false)}>ไม่มี</button>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <div style={{ display: 'flex', height: '100vh' }}>
+        <Sidebar />
+        <SphereMap style={{ flex: 1 }}>
+          {cities.map((city) => (
+            <Marker key={city.name} position={city} title={city.name} />
+          ))}
+        </SphereMap>
+      </div>
+    </SphereProvider>
+  );
+}
+```

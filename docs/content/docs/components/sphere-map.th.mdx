@@ -1,0 +1,101 @@
+---
+title: SphereMap
+description: คอมโพเนนต์คอนเทนเนอร์สำหรับแสดงผลแผนที่
+---
+
+<SphereMapDemo />
+
+```tsx
+<SphereMap
+  center={{ lon: 100.5018, lat: 13.7563 }}
+  style={{ width: "100%", height: "300px" }}
+  zoom={10}
+  onClick={(e) => {
+    console.log(`คลิกที่ ${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`);
+  }}
+  onLocation={(e) => {
+    console.log(`เลื่อนไปที่ ${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`);
+  }}
+  onZoom={(e) => {
+    console.log(`ซูมไปที่ระดับ ${e.toFixed(2)}`);
+  }}
+>
+  {/* หมุด, รูปหลายเหลี่ยม ฯลฯ */}
+</SphereMap>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `center` | `Location` | No | กรุงเทพฯ (`{ lon: 100.49, lat: 13.72 }`) | พิกัดจุดศูนย์กลางเริ่มต้นของแผนที่ |
+| `zoom` | `number` | No | `7` | ระดับซูมเริ่มต้น (1-22) |
+| `zoomRange` | `Range` | No | ทุกระดับซูม | ช่วงซูมที่อนุญาต (`{ min, max }`) |
+| `language` | `Language` | No | `"th"` | ภาษาบนแผนที่: `"th"` (ไทย) หรือ `"en"` (อังกฤษ) |
+| `input` | `boolean` | No | `true` | อนุญาตให้ผู้ใช้โต้ตอบ (คลิก, ลาก, เลื่อน) |
+| `lastView` | `boolean` | No | `false` | จดจำตำแหน่งและระดับซูมล่าสุดจาก Local Storage |
+| `ui` | `"Full" \| "Mobile" \| "None"` | No | ปรับตามขนาดหน้าจอ | โหมด UI |
+| `filter` | `FilterType` | No | `"None"` | ฟิลเตอร์สีเริ่มต้น |
+| `rotate` | `number` | No | `0` | องศาการหมุนเริ่มต้น |
+| `pitch` | `number` | No | `0` | องศาความชันเริ่มต้น |
+| `style` | `CSSProperties` | No | - | สไตล์ CSS สำหรับคอนเทนเนอร์แผนที่ |
+| `className` | `string` | No | - | คลาส CSS สำหรับคอนเทนเนอร์แผนที่ |
+| `id` | `string` | No | - | แอตทริบิวต์ HTML id |
+| `ref` | `Ref<SphereMapRef>` | No | - | Ref สำหรับควบคุมแผนที่แบบ Imperative |
+| `children` | `ReactNode` | No | - | คอมโพเนนต์โอเวอร์เลย์ |
+
+## Event Callbacks
+
+| Prop | Type | Description |
+|------|------|-------------|
+| `onReady` | `(map: SphereMapInstance) => void` | แผนที่โหลดเสร็จและพร้อมใช้งาน |
+| `onClick` | `(location: Location) => void` | เมื่อคลิกบนแผนที่ |
+| `onDoubleClick` | `(location: Location) => void` | เมื่อดับเบิลคลิกบนแผนที่ |
+| `onZoom` | `(zoom: number) => void` | เมื่อระดับซูมเปลี่ยน |
+| `onLocation` | `(location: Location) => void` | เมื่อจุดศูนย์กลางแผนที่เปลี่ยน |
+| `onRotate` | `(angle: number) => void` | เมื่อมีการหมุนแผนที่ |
+| `onPitch` | `(angle: number) => void` | เมื่อองศาความชันเปลี่ยน |
+| `onDrag` | `() => void` | เมื่อเริ่มลากแผนที่ |
+| `onDrop` | `() => void` | เมื่อหยุดลากแผนที่ |
+| `onMouseMove` | `(location: Location) => void` | เมื่อเลื่อนเมาส์บนแผนที่ |
+| `onIdle` | `() => void` | เมื่อแผนที่หยุดเคลื่อนไหว |
+| `onError` | `(error: Error) => void` | เมื่อเกิดข้อผิดพลาด |
+
+<Callout type="info">
+  คอนเทนเนอร์ของแผนที่ต้องกำหนดความสูง (height) อย่างชัดเจน มิฉะนั้น `<div>` จะยุบเหลือ 0px
+</Callout>
+
+## โหมด UI
+
+Prop `ui` ใช้ควบคุมการแสดงผลองค์ประกอบ UI ในตัว:
+
+| โหมด | คำอธิบาย |
+|------|-------------|
+| `"Full"` | แสดงปุ่มควบคุมทั้งหมด: แถบซูม, ปุ่มทิศทาง, ระบุตำแหน่ง, แถบเครื่องมือ, ตัวเลือกเลเยอร์, เต็มหน้าจอ, มาตรส่วน |
+| `"Mobile"` | ปุ่มควบคุมแบบกะทัดรัดสำหรับหน้าจอขนาดเล็ก |
+| `"None"` | ไม่แสดงปุ่มควบคุม UI |
+
+โดยปกติระบบจะเลือกโหมดให้อัตโนมัติตามขนาดหน้าจอ
+
+### ปุ่มควบคุม UI ที่มีให้ใช้งาน
+
+| ปุ่มควบคุม | คำอธิบาย |
+|---------|-------------|
+| DPad | ปุ่มนำทางตามทิศทาง |
+| Zoombar | แถบสไลด์ซูมเข้า/ออก |
+| Geolocation | นำทางไปยังตำแหน่งปัจจุบันของผู้ใช้ |
+| Toolbar | เครื่องมือวาด (เฉพาะ Desktop) |
+| LayerSelector | ตัวเลือกเลเยอร์ฐาน |
+| Fullscreen | สลับเต็มหน้าจอ (เฉพาะ Desktop) |
+| Crosshair | เส้นเล็งกึ่งกลางแผนที่ |
+| Scale | แถบมาตรส่วนระยะทาง |
+
+สามารถเปิด/ปิดการแสดงผล UI แต่ละตัวผ่าน Map Instance:
+
+```tsx
+const { map } = useMap();
+
+map?.Ui.DPad.visible(false);    // ซ่อนปุ่มทิศทาง
+map?.Ui.Scale.visible(true);    // แสดงมาตรส่วน
+map?.Ui.Toolbar.visible(false); // ซ่อนแถบเครื่องมือ
+```

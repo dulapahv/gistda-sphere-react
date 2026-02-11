@@ -1,5 +1,5 @@
 ---
-title: Event Hooks
+title: useMapEvent
 description: Listen to map events from any component
 ---
 
@@ -8,37 +8,29 @@ Listen to map events from any component inside `SphereMap`.
 <EventLogDemo />
 
 ```tsx
-import {
-  useMapReady,
-  useMapClick,
-  useMapZoom,
-  useMapLocation,
-  useOverlayClick,
-  useMapEvent,
-} from 'gistda-sphere-react';
+import { useMapEvent } from 'gistda-sphere-react';
 
 function MapEvents() {
-  useMapReady(() => {
+  useMapEvent('ready', () => {
     console.log('Map is ready');
   });
 
-  useMapClick((location) => {
+  useMapEvent('click', (location) => {
     console.log('Clicked at:', location.lon, location.lat);
   });
 
-  useMapZoom(() => {
+  useMapEvent('zoom', () => {
     console.log('Zoom changed');
   });
 
-  useMapLocation(() => {
+  useMapEvent('location', () => {
     console.log('Map center changed');
   });
 
-  useOverlayClick(({ overlay, location }) => {
+  useMapEvent('overlayClick', ({ overlay, location }) => {
     console.log('Overlay clicked at:', location);
   });
 
-  // Generic event hook for any Sphere event
   useMapEvent('rotate', (angle) => {
     console.log('Rotated to:', angle);
   });
@@ -47,21 +39,15 @@ function MapEvents() {
 }
 ```
 
-## Specialized hooks
+## API
 
-| Hook | Handler Signature | Description |
-|------|-------------------|-------------|
-| `useMapReady` | `() => void` | Fires when the map is initialized |
-| `useMapClick` | `(location: Location) => void` | Fires when the map is clicked |
-| `useMapZoom` | `() => void` | Fires when the zoom level changes |
-| `useMapLocation` | `() => void` | Fires when the map center changes |
-| `useOverlayClick` | `(data: { overlay, location }) => void` | Fires when any overlay is clicked |
+```tsx
+useMapEvent(eventName: EventName, handler: EventHandler<T>): void
+```
 
-## Generic event hook
+Listens to any Sphere event by name. The handler is automatically bound when the map is ready and unbound on unmount.
 
-`useMapEvent(eventName, handler)` listens to any Sphere event by name.
-
-### Available events
+## Available events
 
 | Event Name | Data | Description |
 |------------|------|-------------|

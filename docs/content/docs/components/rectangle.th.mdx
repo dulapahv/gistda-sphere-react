@@ -1,0 +1,48 @@
+---
+title: Rectangle (สี่เหลี่ยมผืนผ้า)
+description: วาดสี่เหลี่ยมผืนผ้าบนแผนที่
+---
+
+<MapDemo height="400px" zoom={13} center={{ lon: 100.5, lat: 13.75 }} language="en">
+  <Rectangle
+    position={{ lon: 100.49, lat: 13.76 }}
+    size={{ width: 0.03, height: 0.02 }}
+    fillColor="rgba(0, 255, 0, 0.3)"
+    lineColor="green"
+    lineWidth={2}
+  />
+</MapDemo>
+
+```tsx
+<Rectangle
+  position={{ lon: 100.49, lat: 13.76 }}
+  size={{ width: 0.03, height: 0.02 }}
+  fillColor="rgba(0, 255, 0, 0.3)"
+  lineColor="green"
+  lineWidth={2}
+  editable
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `position` | `Location` | Yes | - | พิกัดมุมซ้ายบน |
+| `size` | `Size \| Location` | Yes | - | ขนาดเป็นองศาหรือพิกัดมุมล่างขวา |
+| `ref` | `Ref<RectangleRef>` | No | - | Ref สำหรับการควบคุมผ่านโค้ด (Imperative control) |
+| `title` | `string` | No | - | ข้อความ Tooltip เมื่อโฮเวอร์ |
+| `detail` | `string` | No | - | ข้อความ Pop-up เมื่อคลิก |
+| `popup` | `PopupOptions` | No | - | การกำหนดค่าป๊อปอัป |
+| `visibleRange` | `Range` | No | All zoom levels | ระยะการซูมที่มองเห็นได้ |
+| `lineWidth` | `number` | No | `3` | ความกว้างของเส้นขอบเป็นพิกเซล |
+| `lineColor` | `string` | No | Preset color | สีเส้นขอบ |
+| `fillColor` | `string` | No | Preset color | สีเติม |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | รูปแบบเส้นขอบ |
+| `clickable` | `boolean` | No | `false` | แสดงเคอร์เซอร์แบบตัวชี้ |
+| `draggable` | `boolean` | No | `false` | อนุญาตให้ลากได้ |
+| `editable` | `boolean` | No | `false` | อนุญาตให้แก้ไขมุม |
+| `zIndex` | `number` | No | `0` | ลำดับการซ้อน |
+| `onClick` | `(rectangle: SphereRectangle) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อคลิก |
+| `onDrag` | `(rectangle: SphereRectangle) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อกำลังลาก |
+| `onDrop` | `(rectangle: SphereRectangle) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อปล่อย (สิ้นสุดการลาก) |

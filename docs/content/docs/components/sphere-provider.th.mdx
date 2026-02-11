@@ -1,0 +1,20 @@
+---
+title: SphereProvider
+description: Provider หลักที่ทำหน้าที่โหลด Sphere API Script
+---
+
+```tsx
+<SphereProvider apiKey="YOUR_API_KEY" onLoad={() => console.log('โหลด API เสร็จแล้ว')}>
+  {/* แอปพลิเคชันของคุณ */}
+</SphereProvider>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `apiKey` | `string` | Yes | - | API Key สำหรับ GISTDA Sphere ของคุณ |
+| `children` | `ReactNode` | Yes | - | คอมโพเนนต์ลูกภายใต้ Provider |
+| `scriptUrl` | `string` | No | URL อย่างเป็นทางการของ Sphere API | URL สำหรับโหลด Sphere API Script (กรณีต้องการระบุเอง) |
+| `onLoad` | `() => void` | No | - | ฟังก์ชันที่เรียกเมื่อ API Script โหลดเสร็จ |
+| `onError` | `(error: Error) => void` | No | - | ฟังก์ชันที่เรียกเมื่อ API Script โหลดไม่สำเร็จ |

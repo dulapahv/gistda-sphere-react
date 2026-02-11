@@ -1,0 +1,56 @@
+---
+title: Polygon (รูปหลายเหลี่ยม)
+description: วาดรูปหลายเหลี่ยมแบบปิดบนแผนที่
+---
+
+<MapDemo height="400px" zoom={12} center={{ lon: 100.50, lat: 13.75 }} language="en">
+  <Polygon
+    positions={[
+      { lon: 100.475, lat: 13.775 },
+      { lon: 100.525, lat: 13.775 },
+      { lon: 100.50, lat: 13.725 },
+    ]}
+    fillColor="rgba(255, 0, 0, 0.3)"
+    lineColor="red"
+    lineWidth={2}
+  />
+</MapDemo>
+
+```tsx
+<Polygon
+  positions={[
+    { lon: 100.475, lat: 13.775 },
+    { lon: 100.525, lat: 13.775 },
+    { lon: 100.50, lat: 13.725 },
+  ]}
+  fillColor="rgba(255, 0, 0, 0.3)"
+  lineColor="red"
+  lineWidth={2}
+/>
+```
+
+## Props
+
+| Prop | Type | Required | Default | Description |
+|------|------|----------|---------|-------------|
+| `positions` | `Location[]` | Yes (min 3) | - | อาร์เรย์ของจุดยอด |
+| `ref` | `Ref<PolygonRef>` | No | - | Ref สำหรับการควบคุมผ่านโค้ด (Imperative control) |
+| `title` | `string` | No | - | ข้อความ Tooltip เมื่อโฮเวอร์ |
+| `detail` | `string` | No | - | ข้อความ Pop-up เมื่อคลิก |
+| `label` | `string` | No | - | ข้อความกำกับตรงกลางรูปหลายเหลี่ยม |
+| `labelOptions` | `MarkerOptions` | No | - | ตัวเลือกของ Marker สำหรับข้อความกำกับ |
+| `popup` | `PopupOptions` | No | - | การกำหนดค่าป๊อปอัป |
+| `visibleRange` | `Range` | No | All zoom levels | ระยะการซูมที่มองเห็นได้ |
+| `lineWidth` | `number` | No | `3` | ความกว้างของเส้นขอบเป็นพิกเซล |
+| `lineColor` | `string` | No | Preset color | สีเส้นขอบ |
+| `fillColor` | `string` | No | Preset color | สีเติม |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | รูปแบบเส้นขอบ |
+| `pivot` | `Location` | No | Center | จุดหมุนสำหรับการหมุน |
+| `clickable` | `boolean` | No | `false` | แสดงเคอร์เซอร์แบบตัวชี้ |
+| `draggable` | `boolean` | No | `false` | อนุญาตให้ลากได้ |
+| `pointer` | `boolean` | No | `false` | แสดงตัวชี้การลาก |
+| `editable` | `boolean` | No | `false` | อนุญาตให้แก้ไขจุดยอด |
+| `zIndex` | `number` | No | `0` | ลำดับการซ้อน |
+| `onClick` | `(polygon: SpherePolygon) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อคลิก |
+| `onDrag` | `(polygon: SpherePolygon) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อกำลังลาก |
+| `onDrop` | `(polygon: SpherePolygon) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อปล่อย (สิ้นสุดการลาก) |

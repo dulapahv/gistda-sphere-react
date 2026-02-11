@@ -1,0 +1,40 @@
+---
+title: การหาเส้นทางระหว่างตำแหน่ง
+description: คำนวณและแสดงเส้นทาง
+---
+
+คำนวณและแสดงเส้นทาง:
+
+<RouteDemo />
+
+```tsx lineNumbers
+import { SphereProvider, SphereMap, useRoute } from 'gistda-sphere-react';
+
+function RoutePanel() {
+  const { addDestination, search, getDistance, getInterval, setMode, clear, isReady } = useRoute();
+
+  const calculateRoute = () => {
+    clear();
+    addDestination({ lon: 100.5018, lat: 13.7563 });
+    addDestination({ lon: 98.9853, lat: 18.7883 });
+    setMode('Traffic');
+    search();
+  };
+
+  return (
+    <div>
+      <button onClick={calculateRoute} disabled={!isReady}>คำนวณเส้นทาง</button>
+      <button onClick={clear}>ล้างเส้นทาง</button>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <RoutePanel />
+      <SphereMap style={{ width: '100%', height: '500px' }} />
+    </SphereProvider>
+  );
+}
+```

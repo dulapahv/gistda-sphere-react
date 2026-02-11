@@ -8,6 +8,44 @@ import {
   PREDEFINED_OVERLAYS,
   type PredefinedOverlay,
 } from "../constants";
+import { getTranslations, type PlaygroundTranslations } from "../translations";
+
+/** Returns the localized label for a base layer. */
+function baseLayerLabel(t: PlaygroundTranslations, id: BaseLayer): string {
+  const map: Record<BaseLayer, string> = {
+    SIMPLE: t.layerSimple,
+    STREETS: t.layerStreets,
+    STREETS_NIGHT: t.layerNight,
+    HYBRID: t.layerHybrid,
+  };
+  return map[id];
+}
+
+/** Returns the localized label for an overlay layer. */
+function overlayLabel(t: PlaygroundTranslations, id: OverlayLayer): string {
+  const map: Record<OverlayLayer, string> = {
+    TRAFFIC: t.overlayTraffic,
+    IMAGES: t.overlayImages,
+    PM25: t.overlayPM25,
+    HOTSPOT: t.overlayHotspot,
+    FLOOD: t.overlayFlood,
+    DROUGHT: t.overlayDrought,
+  };
+  return map[id];
+}
+
+/** Returns the localized label for a predefined overlay. */
+function predefinedLabel(
+  t: PlaygroundTranslations,
+  id: PredefinedOverlay
+): string {
+  const map: Record<PredefinedOverlay, string> = {
+    cameras: t.predefinedCCTV,
+    events: t.predefinedEvents,
+    aqi: t.predefinedAQI,
+  };
+  return map[id];
+}
 
 interface LayerSelectorProps {
   currentLayer: BaseLayer;
@@ -16,6 +54,7 @@ interface LayerSelectorProps {
   onLayerChange: (layer: BaseLayer) => void;
   onOverlayToggle: (layer: OverlayLayer) => void;
   onPredefinedToggle: (overlay: PredefinedOverlay) => void;
+  lang: string;
 }
 
 /** Panel for selecting base layers, data layers, and predefined overlays. */
@@ -26,12 +65,15 @@ export function LayerSelector({
   onLayerChange,
   onOverlayToggle,
   onPredefinedToggle,
+  lang,
 }: LayerSelectorProps) {
+  const t = getTranslations(lang);
+
   return (
     <>
       <div className="mb-4">
         <div className="mb-2.5 font-semibold text-[11px] text-fd-muted-foreground uppercase tracking-wider">
-          Base Layer
+          {t.baseLayer}
         </div>
         <div className="flex flex-wrap gap-1.5">
           {BASE_LAYERS.map((layer) => (
@@ -46,14 +88,14 @@ export function LayerSelector({
               type="button"
             >
               <layer.icon className="h-3.5 w-3.5" size={14} />
-              <span className="font-medium">{layer.label}</span>
+              <span className="font-medium">{baseLayerLabel(t, layer.id)}</span>
             </button>
           ))}
         </div>
       </div>
       <div className="mb-4">
         <div className="mb-2.5 font-semibold text-[11px] text-fd-muted-foreground uppercase tracking-wider">
-          Data Layers
+          {t.dataLayers}
         </div>
         <div className="flex flex-wrap gap-1.5">
           {OVERLAY_LAYERS.map((layer) => (
@@ -68,14 +110,14 @@ export function LayerSelector({
               type="button"
             >
               <layer.icon className="h-3.5 w-3.5" size={14} />
-              <span className="font-medium">{layer.label}</span>
+              <span className="font-medium">{overlayLabel(t, layer.id)}</span>
             </button>
           ))}
         </div>
       </div>
       <div className="mb-4">
         <div className="mb-2.5 font-semibold text-[11px] text-fd-muted-foreground uppercase tracking-wider">
-          Live Overlays
+          {t.liveOverlays}
         </div>
         <div className="flex flex-wrap gap-1.5">
           {PREDEFINED_OVERLAYS.map((overlay) => (
@@ -90,7 +132,9 @@ export function LayerSelector({
               type="button"
             >
               <overlay.icon className="h-3.5 w-3.5" size={14} />
-              <span className="font-medium">{overlay.label}</span>
+              <span className="font-medium">
+                {predefinedLabel(t, overlay.id)}
+              </span>
             </button>
           ))}
         </div>

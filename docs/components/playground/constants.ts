@@ -13,6 +13,7 @@ import {
   Gamepad2,
   Hand,
   Image,
+  Languages,
   LocateFixed,
   Map as MapIcon,
   MapPin,
@@ -166,3 +167,10 @@ export const ROUTE_MODES: Array<{
 ];
 
 export type RouteMode = (typeof ROUTE_MODES)[number]["id"];
+
+export const LANGUAGES = [
+  { id: "th", label: "ไทย", icon: Languages },
+  { id: "en", label: "English", icon: Languages },
+] as const;
+
+export type MapLanguage = (typeof LANGUAGES)[number]["id"];

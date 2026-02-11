@@ -1,0 +1,74 @@
+---
+title: การเพิ่มหมุดผ่านโค้ด
+description: ใช้ React state เพื่อเพิ่มโอเวอร์เลย์แบบไดนามิก
+---
+
+ใช้ React state เพื่อเพิ่มหมุด, รูปหลายเหลี่ยม หรือโอเวอร์เลย์ใดก็ได้แบบไดนามิก
+
+<InteractiveMarkerDemo />
+
+```tsx tab="Component" lineNumbers
+import { useState } from 'react';
+import { SphereProvider, SphereMap, Marker, type Location } from 'gistda-sphere-react';
+
+function App() {
+  const [markers, setMarkers] = useState<Location[]>([]);
+
+  const addMarker = () => {
+    const newMarker = {
+      lon: 100.5 + (Math.random() - 0.5) * 0.2,
+      lat: 13.75 + (Math.random() - 0.5) * 0.2,
+    };
+    setMarkers([...markers, newMarker]);
+  };
+
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <button onClick={addMarker}>เพิ่มหมุด</button>
+      <button onClick={() => setMarkers([])}>ล้างทั้งหมด</button>
+      <SphereMap center={{ lon: 100.5, lat: 13.75 }} zoom={11} style={{ height: '500px' }}>
+        {markers.map((position) => (
+          <Marker key={`${position.lon}-${position.lat}`} position={position} />
+        ))}
+      </SphereMap>
+    </SphereProvider>
+  );
+}
+```
+
+```tsx tab="Hook" lineNumbers
+import { SphereProvider, SphereMap, Marker, useMarkers, type Location } from 'gistda-sphere-react';
+
+function MarkerManager() {
+  const { items: markers, add, clear } = useMarkers();
+
+  const addMarker = () => {
+    add({
+      position: {
+        lon: 100.5 + (Math.random() - 0.5) * 0.2,
+        lat: 13.75 + (Math.random() - 0.5) * 0.2,
+      },
+    });
+  };
+
+  return (
+    <>
+      <button onClick={addMarker}>เพิ่มหมุด</button>
+      <button onClick={clear}>ล้างทั้งหมด</button>
+      {markers.map((m) => (
+        <Marker key={m.id} position={m.position} />
+      ))}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <SphereMap center={{ lon: 100.5, lat: 13.75 }} zoom={11} style={{ height: '500px' }}>
+        <MarkerManager />
+      </SphereMap>
+    </SphereProvider>
+  );
+}
+```

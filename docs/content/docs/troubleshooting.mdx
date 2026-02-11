@@ -27,7 +27,7 @@ Wrap your component tree with `<SphereProvider>`:
 
 ## Hooks returning `isReady: false`
 
-Hooks like `useSearch`, `useRoute`, and `useTags` depend on the map being fully initialized. Wait for `isReady` to become `true` before calling their methods. You can also use the `onReady` prop on `SphereMap` or the `useMapReady` hook.
+Hooks like `useSearch`, `useRoute`, and `useTags` depend on the map being fully initialized. Wait for `isReady` to become `true` before calling their methods. You can also use the `onReady` prop on `SphereMap` or `useMapEvent('ready', handler)`.
 
 ## Overlays not appearing
 

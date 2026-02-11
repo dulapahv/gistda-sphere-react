@@ -1,0 +1,64 @@
+---
+title: การวางหมุดแบบโต้ตอบ
+description: คลิกบนแผนที่เพื่อเพิ่มหมุด
+---
+
+คลิกบนแผนที่เพื่อเพิ่มหมุด:
+
+<InteractiveMarkerDemo />
+
+```tsx tab="Component" lineNumbers
+import { useState } from 'react';
+import { SphereProvider, SphereMap, Marker, type Location } from 'gistda-sphere-react';
+
+function App() {
+  const [markers, setMarkers] = useState<Location[]>([]);
+
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <button onClick={() => setMarkers([])}>ล้าง</button>
+      <SphereMap
+        center={{ lon: 100.5, lat: 13.75 }}
+        zoom={10}
+        style={{ height: '500px' }}
+        onClick={(location) => setMarkers([...markers, location])}
+      >
+        {markers.map((pos) => (
+          <Marker key={`${pos.lon}-${pos.lat}`} position={pos} />
+        ))}
+      </SphereMap>
+    </SphereProvider>
+  );
+}
+```
+
+```tsx tab="Hook" lineNumbers
+import { SphereProvider, SphereMap, Marker, useMarkers, useMapEvent } from 'gistda-sphere-react';
+
+function MarkerPlacer() {
+  const { items: markers, add, clear } = useMarkers();
+
+  useMapEvent('click', (location) => {
+    add({ position: location });
+  });
+
+  return (
+    <>
+      <button onClick={clear}>ล้าง</button>
+      {markers.map((m) => (
+        <Marker key={m.id} position={m.position} />
+      ))}
+    </>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <SphereMap center={{ lon: 100.5, lat: 13.75 }} zoom={10} style={{ height: '500px' }}>
+        <MarkerPlacer />
+      </SphereMap>
+    </SphereProvider>
+  );
+}
+```

@@ -1,0 +1,86 @@
+---
+title: เริ่มต้นใช้งานด่วน
+description: แสดงผลแผนที่แรกของคุณด้วย gistda-sphere-react
+---
+
+## ตัวอย่างเบื้องต้น
+
+ครอบแอปพลิเคชันด้วย `SphereProvider` จากนั้นใช้ `SphereMap` เพื่อแสดงผลแผนที่:
+
+<MapDemo height="400px" zoom={10} center={{ lon: 100.5018, lat: 13.7563 }} language="th">
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" detail="เมืองหลวงของประเทศไทย" />
+</MapDemo>
+
+```tsx lineNumbers
+import { SphereProvider, SphereMap, Marker } from 'gistda-sphere-react';
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <SphereMap
+        center={{ lon: 100.5018, lat: 13.7563 }}
+        zoom={10}
+        style={{ width: '100%', height: '500px' }}
+      >
+        <Marker
+          position={{ lon: 100.5018, lat: 13.7563 }}
+          title="กรุงเทพมหานคร"
+          detail="เมืองหลวงของประเทศไทย"
+        />
+      </SphereMap>
+    </SphereProvider>
+  );
+}
+```
+
+## แนวคิดสำคัญ
+
+1. **`SphereProvider`** ต้องครอบคอมโพเนนต์ Sphere ทั้งหมด ทำหน้าที่โหลด API Script
+2. **`SphereMap`** คือคอนเทนเนอร์ของแผนที่ **ต้องกำหนดความสูง (height) อย่างชัดเจน** มิฉะนั้น `<div>` จะยุบเหลือ 0px
+3. **คอมโพเนนต์โอเวอร์เลย์** (Marker, Polygon ฯลฯ) วางภายใน `SphereMap` เป็น JSX Children
+4. **Overlay Hooks** (`useMarkers`, `useOverlays` ฯลฯ) ใช้เพิ่ม/ลบ/อัปเดตโอเวอร์เลย์ผ่านโค้ดจากคอมโพเนนต์ใดก็ได้
+5. **API Hooks** (`useSearch`, `useRoute`, `useTags`) เข้าถึงบริการของ Sphere API จากคอมโพเนนต์ใดก็ได้ภายใต้ `SphereProvider`
+
+## การเพิ่มโอเวอร์เลย์
+
+วางคอมโพเนนต์โอเวอร์เลย์เป็น Children ของ `SphereMap`:
+
+<MapDemo height="400px" zoom={11} center={{ lon: 100.5018, lat: 13.7563 }} language="th">
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" />
+  <Polygon
+    positions={[
+      { lon: 100.41, lat: 13.78 },
+      { lon: 100.47, lat: 13.78 },
+      { lon: 100.44, lat: 13.73 },
+    ]}
+    fillColor="rgba(255, 0, 0, 0.3)"
+    lineColor="red"
+  />
+  <Circle
+    center={{ lon: 100.58, lat: 13.75 }}
+    radius={0.03}
+    fillColor="rgba(0, 100, 255, 0.3)"
+    lineColor="blue"
+  />
+</MapDemo>
+
+```tsx lineNumbers
+<SphereMap style={{ width: '100%', height: '500px' }}>
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" />
+  <Polygon
+    positions={[
+      { lon: 100.41, lat: 13.78 },
+      { lon: 100.47, lat: 13.78 },
+      { lon: 100.44, lat: 13.73 },
+    ]}
+    fillColor="rgba(255, 0, 0, 0.3)"
+    lineColor="red"
+  />
+  <Circle
+    center={{ lon: 100.58, lat: 13.75 }}
+    radius={0.03}
+    fillColor="rgba(0, 100, 255, 0.3)"
+    lineColor="blue"
+  />
+</SphereMap>
+```

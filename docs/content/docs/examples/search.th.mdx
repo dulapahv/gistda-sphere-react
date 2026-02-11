@@ -1,0 +1,42 @@
+---
+title: การค้นหาจุดสนใจ (POI)
+description: ค้นหาจุดสนใจและแปลงพิกัดกลับเป็นที่อยู่
+---
+
+ค้นหาจุดสนใจและแปลงพิกัดกลับเป็นที่อยู่ (Reverse Geocode):
+
+<SearchDemo />
+
+```tsx lineNumbers
+import { SphereProvider, SphereMap, useSearch } from 'gistda-sphere-react';
+
+function SearchPanel() {
+  const { search, address, nearPoi, isReady } = useSearch();
+
+  const searchCoffee = async () => {
+    const results = await search('coffee', { limit: 10 });
+    console.log('พบ:', results.data);
+  };
+
+  const reverseGeocode = async () => {
+    const addr = await address({ lon: 100.5018, lat: 13.7563 });
+    console.log('ที่อยู่:', addr.address, addr.province);
+  };
+
+  return (
+    <div>
+      <button onClick={searchCoffee} disabled={!isReady}>ค้นหาร้านกาแฟ</button>
+      <button onClick={reverseGeocode} disabled={!isReady}>แปลงพิกัดเป็นที่อยู่</button>
+    </div>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <SearchPanel />
+      <SphereMap style={{ width: '100%', height: '500px' }} />
+    </SphereProvider>
+  );
+}
+```

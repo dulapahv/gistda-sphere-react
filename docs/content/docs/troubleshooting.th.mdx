@@ -1,0 +1,34 @@
+---
+title: การแก้ไขปัญหา
+description: ปัญหาที่พบบ่อยและวิธีแก้ไข
+---
+
+## แผนที่ไม่แสดงผล
+
+คอนเทนเนอร์ของแผนที่ต้องมีการกำหนดความสูง (height) ที่ชัดเจน มิฉะนั้น `<div>` จะยุบตัวเหลือ 0px:
+
+```tsx
+<SphereMap style={{ width: '100%', height: '500px' }} />
+```
+
+## API key ใช้งานไม่ได้
+
+ตรวจสอบให้แน่ใจว่าโดเมนของคุณได้ลงทะเบียนกับ API key แล้วที่ [sphere.gistda.or.th](https://sphere.gistda.or.th/) สำหรับการพัฒนาในเครื่อง ให้ลงทะเบียน `localhost` ด้วย
+
+## "useSphereContext must be used within a SphereProvider"
+
+ครอบ component tree ของคุณด้วย `<SphereProvider>`:
+
+```tsx
+<SphereProvider apiKey="YOUR_API_KEY">
+  <App />
+</SphereProvider>
+```
+
+## Hooks ส่งกลับ `isReady: false`
+
+Hook อย่าง `useSearch`, `useRoute` และ `useTags` ต้องรอให้แผนที่สร้างเสร็จก่อน รอให้ `isReady` เป็น `true` ก่อนเรียกใช้เมธอดต่างๆ คุณสามารถใช้ prop `onReady` ของ `SphereMap` หรือ `useMapEvent('ready', handler)` ก็ได้
+
+## โอเวอร์เลย์ไม่แสดงผล
+
+ตรวจสอบให้แน่ใจว่าคอมโพเนนต์โอเวอร์เลย์ (Marker, Polygon เป็นต้น) วางอยู่ **ภายใน** คอมโพเนนต์ `<SphereMap>` ไม่ใช่วางไว้ข้างนอก

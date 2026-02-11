@@ -1,0 +1,62 @@
+---
+title: Overlay Collection Hooks
+description: จัดการคอลเลกชันของโอเวอร์เลย์ผ่านโค้ด
+---
+
+จัดการคอลเลกชันของโอเวอร์เลย์ผ่านโค้ดด้วย hook เหล่านี้
+
+<OverlayDemo />
+
+## useMarkers
+
+```tsx
+import { useMarkers } from 'gistda-sphere-react';
+
+function MarkerManager() {
+  const { items, add, update, remove, clear, get } = useMarkers();
+
+  const addMarker = () => {
+    const id = add({
+      position: { lon: 100.5, lat: 13.75 },
+      title: 'หมุดใหม่',
+      draggable: true,
+    });
+    console.log('เพิ่มหมุด ID:', id);
+  };
+
+  return (
+    <div>
+      <button onClick={addMarker}>เพิ่ม</button>
+      <button onClick={clear}>ล้างทั้งหมด</button>
+      <p>จำนวน: {items.length}</p>
+    </div>
+  );
+}
+```
+
+## usePolygons, usePolylines, useCircles
+
+Hook เหล่านี้ใช้รูปแบบเดียวกับ `useMarkers` แต่สำหรับโอเวอร์เลย์ประเภทอื่นๆ
+
+## useOverlays
+
+รวม overlay collection hook ทั้งหมดไว้ใน hook เดียว
+
+```tsx
+import { useOverlays } from 'gistda-sphere-react';
+
+const { markers, polygons, polylines, circles, clearAll } = useOverlays();
+```
+
+## ค่าที่ส่งกลับร่วม (Shared return value)
+
+Overlay collection hook ทุกตัวส่งกลับ:
+
+| Property | Type | Description |
+|----------|------|-------------|
+| `items` | `T[]` | อาร์เรย์ข้อมูลโอเวอร์เลย์ปัจจุบัน |
+| `add` | `(data) => string` | เพิ่มโอเวอร์เลย์ ส่งกลับ ID |
+| `update` | `(id, data) => void` | อัปเดตโอเวอร์เลย์ด้วย ID |
+| `remove` | `(id) => void` | ลบโอเวอร์เลย์ด้วย ID |
+| `clear` | `() => void` | ลบโอเวอร์เลย์ประเภทนี้ทั้งหมด |
+| `get` | `(id) => T \| undefined` | ดึงข้อมูลโอเวอร์เลย์ด้วย ID |

@@ -1,0 +1,98 @@
+---
+title: TypeScript
+description: Type definitions และ exports ที่มีให้ใช้งาน
+---
+
+Type ทั้งหมดถูก export จากแพ็กเกจ:
+
+```tsx
+import type {
+  // Type พื้นฐานทางเรขาคณิต
+  Location,          // { lon: number, lat: number }
+  Point,             // { x: number, y: number }
+  Size,              // { width: number, height: number }
+  Range,             // { min: number, max: number }
+  Bound,             // { minLon, minLat, maxLon, maxLat }
+  Tile,              // { x: number, y: number, z: number }
+  Icon,              // { url?, urlHD?, html?, offset?, size? }
+
+  // Type แบบ enum
+  BuiltInLayer,
+  LayerType,
+  FilterType,
+  LineStyleType,
+  PredefinedOverlay,
+  UiComponentMode,
+
+  // Type สำหรับ options
+  PopupOptions,
+  GeometryOptions,
+  MarkerOptions,
+  TagOptions,
+  SearchOptions,
+  SuggestOptions,
+  AddressOptions,
+  NearPoiOptions,
+
+  // Type สำหรับเส้นทาง
+  RouteMode,
+  RouteType,
+  RouteLabelType,
+  RouteGuideStep,
+
+  // Type สำหรับ instance
+  SphereMapInstance,
+  SphereMarker,
+  SpherePolygon,
+  SpherePolyline,
+  SphereCircle,
+  SphereDot,
+  SphereRectangle,
+  SpherePopup,
+  SphereOverlay,
+  SphereNamespace,
+
+  // Type สำหรับ ref
+  SphereMapRef,
+  MarkerRef,
+  PolygonRef,
+  PolylineRef,
+  CircleRef,
+  PopupRef,
+  DotRef,
+  RectangleRef,
+} from 'gistda-sphere-react';
+```
+
+## Icon type
+
+```typescript
+// ไอคอนจาก URL
+{
+  url: string;
+  urlHD?: string;
+  size?: Size;
+  offset?: Point;
+}
+
+// ไอคอนจาก HTML (จะเขียนทับ url)
+{
+  html: string;
+  offset?: Point;
+  size?: Size;
+}
+```
+
+## PopupOptions type
+
+```typescript
+{
+  title?: string;
+  detail?: string;
+  loadDetail?: (element: HTMLElement) => void;
+  html?: string;
+  loadHtml?: (element: HTMLElement) => void;
+  size?: Size;
+  closable?: boolean;
+}
+```

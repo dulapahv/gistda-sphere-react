@@ -12,7 +12,18 @@ import {
 } from "lucide-react";
 import { useCallback, useEffect, useState } from "react";
 import { ROUTE_MODES, type RouteMode } from "../constants";
+import { getTranslations, type PlaygroundTranslations } from "../translations";
 import type { RouteInfoData } from "../types";
+
+/** Returns the localized label for a route mode. */
+function routeModeLabel(t: PlaygroundTranslations, id: RouteMode): string {
+  const map: Record<RouteMode, string> = {
+    Traffic: t.modeTraffic,
+    Distance: t.modeShortest,
+    Cost: t.modeCheapest,
+  };
+  return map[id];
+}
 
 interface RoutePanelProps {
   origin: Location | null;
@@ -21,6 +32,7 @@ interface RoutePanelProps {
   onSetOrigin: (location: Location | null) => void;
   onSetDestination: (location: Location | null) => void;
   onSettingPointChange: (point: "origin" | "destination" | null) => void;
+  lang: string;
 }
 
 /** Route planning panel with origin/destination selection and mode picker. */
@@ -31,7 +43,9 @@ export function RoutePanel({
   onSetOrigin,
   onSetDestination,
   onSettingPointChange,
+  lang,
 }: RoutePanelProps) {
+  const t = getTranslations(lang);
   const [routeMode, setRouteMode] = useState<RouteMode>("Traffic");
   const [routeInfo, setRouteInfo] = useState<RouteInfoData | null>(null);
   const [guide, setGuide] = useState<RouteGuideStep[]>([]);
@@ -125,25 +139,29 @@ export function RoutePanel({
     onSettingPointChange(settingPoint === point ? null : point);
   };
 
+  /** Returns the localized label for a setting point type. */
+  const pointLabel = (point: "origin" | "destination"): string =>
+    point === "origin" ? t.origin : t.destination;
+
   return (
     <div className="mb-4">
       <div className="mb-2.5 font-semibold text-[11px] text-fd-muted-foreground uppercase tracking-wider">
-        Route Planning
+        {t.routePlanning}
       </div>
       <div className="mb-3 flex flex-col gap-2">
         <div className="flex items-center gap-2 rounded-md border border-fd-border bg-fd-secondary px-2.5 py-2">
           <span className="w-17.5 shrink-0 font-semibold text-[11px] text-fd-secondary-foreground">
-            Origin
+            {t.origin}
           </span>
           <span
             className={`flex-1 text-[11px] tabular-nums ${origin ? "text-fd-foreground" : "text-fd-muted-foreground"}`}
           >
             {origin
               ? `${origin.lat.toFixed(4)}, ${origin.lon.toFixed(4)}`
-              : "Not set"}
+              : t.notSet}
           </span>
           <button
-            aria-label="Set origin on map"
+            aria-label={t.setOriginOnMap}
             className={`inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-2.5 py-1.5 font-medium text-xs ${
               settingPoint === "origin"
                 ? "border-fd-primary bg-fd-primary text-fd-primary-foreground hover:border-white hover:bg-white"
@@ -157,17 +175,17 @@ export function RoutePanel({
         </div>
         <div className="flex items-center gap-2 rounded-md border border-fd-border bg-fd-secondary px-2.5 py-2">
           <span className="w-17.5 shrink-0 font-semibold text-[11px] text-fd-secondary-foreground">
-            Destination
+            {t.destination}
           </span>
           <span
             className={`flex-1 text-[11px] tabular-nums ${destination ? "text-fd-foreground" : "text-fd-muted-foreground"}`}
           >
             {destination
               ? `${destination.lat.toFixed(4)}, ${destination.lon.toFixed(4)}`
-              : "Not set"}
+              : t.notSet}
           </span>
           <button
-            aria-label="Set destination on map"
+            aria-label={t.setDestinationOnMap}
             className={`inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md border px-2.5 py-1.5 font-medium text-xs ${
               settingPoint === "destination"
                 ? "border-fd-primary bg-fd-primary text-fd-primary-foreground hover:border-white hover:bg-white"
@@ -183,7 +201,7 @@ export function RoutePanel({
 
       {settingPoint && (
         <p className="mt-2 text-fd-secondary-foreground text-xs">
-          Click on the map to set {settingPoint}
+          {t.clickMapToSet(pointLabel(settingPoint))}
         </p>
       )}
 
@@ -200,7 +218,7 @@ export function RoutePanel({
             type="button"
           >
             <mode.icon size={14} />
-            {mode.label}
+            {routeModeLabel(t, mode.id)}
           </button>
         ))}
       </div>
@@ -212,10 +230,10 @@ export function RoutePanel({
           onClick={handleCalculateRoute}
           type="button"
         >
-          <Route size={14} /> {calculating ? "Calculating..." : "Calculate"}
+          <Route size={14} /> {calculating ? t.calculating : t.calculate}
         </button>
         <button
-          aria-label="Reverse route"
+          aria-label={t.reverseRoute}
           className="inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-fd-border bg-fd-secondary px-2.5 py-1.5 font-medium text-fd-foreground text-xs hover:border-fd-ring hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-40"
           disabled={!(origin && destination)}
           onClick={handleReverseRoute}
@@ -224,7 +242,7 @@ export function RoutePanel({
           <ArrowLeftRight size={14} />
         </button>
         <button
-          aria-label="Clear route"
+          aria-label={t.clearRoute}
           className="inline-flex cursor-pointer items-center justify-center gap-1.5 whitespace-nowrap rounded-md border border-fd-border bg-fd-secondary px-2.5 py-1.5 font-medium text-fd-foreground text-xs hover:border-fd-ring hover:bg-fd-accent"
           onClick={handleClearRoute}
           type="button"
@@ -236,13 +254,13 @@ export function RoutePanel({
       {routeInfo && (
         <div className="mt-3 rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5">
           <div className="flex justify-between py-1 text-xs">
-            <span className="text-fd-secondary-foreground">Distance</span>
+            <span className="text-fd-secondary-foreground">{t.distance}</span>
             <span className="font-medium text-fd-foreground">
               {routeInfo.distance}
             </span>
           </div>
           <div className="flex justify-between py-1 text-xs">
-            <span className="text-fd-secondary-foreground">Duration</span>
+            <span className="text-fd-secondary-foreground">{t.duration}</span>
             <span className="font-medium text-fd-foreground">
               {routeInfo.time}
             </span>
@@ -255,11 +273,11 @@ export function RoutePanel({
             >
               {showGuide ? (
                 <>
-                  Hide Directions <ChevronUp size={12} />
+                  {t.hideDirections} <ChevronUp size={12} />
                 </>
               ) : (
                 <>
-                  Turn-by-Turn ({guide.length} steps) <ChevronDown size={12} />
+                  {t.turnByTurn(guide.length)} <ChevronDown size={12} />
                 </>
               )}
             </button>

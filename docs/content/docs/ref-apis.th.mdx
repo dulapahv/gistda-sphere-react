@@ -1,0 +1,106 @@
+---
+title: Ref APIs
+description: การควบคุมแบบ imperative ผ่าน React refs
+---
+
+คอมโพเนนต์โอเวอร์เลย์ทั้งหมดรองรับ React refs สำหรับการควบคุมแบบ imperative
+
+## SphereMapRef
+
+```tsx
+const mapRef = useRef<SphereMapRef>(null);
+
+<SphereMap ref={mapRef} style={{ height: '500px' }} />
+
+mapRef.current?.setZoom(15);
+mapRef.current?.goTo({ center: { lon: 100.5, lat: 13.75 }, zoom: 12 });
+```
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getMap` | `()` | ดึง map instance ที่อยู่เบื้องหลัง |
+| `setZoom` | `(zoom, animate?)` | ตั้งค่าระดับการซูม |
+| `setCenter` | `(location, animate?)` | ตั้งค่าจุดกึ่งกลางแผนที่ |
+| `setBound` | `(bound, options?)` | ปรับแผนที่ให้พอดีกับขอบเขต |
+| `goTo` | `(target, animate?)` | เคลื่อนที่ไปยังเป้าหมายพร้อมแอนิเมชัน |
+| `setRotate` | `(angle, animate?)` | ตั้งค่าการหมุน |
+| `setPitch` | `(angle)` | ตั้งค่าความชัน |
+| `setFilter` | `(filter)` | ใช้ตัวกรองสี |
+| `resize` | `()` | ปรับขนาดให้พอดีกับคอนเทนเนอร์ |
+| `repaint` | `()` | บังคับวาดใหม่ |
+
+## MarkerRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getMarker` | `()` | ดึง marker ที่อยู่เบื้องหลัง |
+| `togglePopup` | `(show?)` | แสดงหรือซ่อนป๊อปอัป |
+| `setPosition` | `(location, animate?)` | ย้ายตำแหน่งหมุด |
+| `setRotation` | `(angle)` | ตั้งค่าการหมุน |
+
+## PolygonRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getPolygon` | `()` | ดึง polygon ที่อยู่เบื้องหลัง |
+| `togglePopup` | `(show?, location?)` | แสดงหรือซ่อนป๊อปอัป |
+| `getPivot` | `()` | ดึงจุดบนพื้นผิว |
+| `getCentroid` | `()` | ดึงจุดกึ่งกลางทางเรขาคณิต |
+| `getBound` | `()` | ดึงขอบเขต (bounding box) |
+| `getArea` | `(language?)` | ดึงพื้นที่ |
+| `rotate` | `(angle)` | หมุนรูปหลายเหลี่ยม |
+| `updateStyle` | `(options)` | อัปเดตสไตล์เส้นขอบ/สีเติม |
+| `toGeoJSON` | `()` | แปลงเป็น GeoJSON |
+
+## PolylineRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getPolyline` | `()` | ดึง polyline ที่อยู่เบื้องหลัง |
+| `togglePopup` | `(show?, location?)` | แสดงหรือซ่อนป๊อปอัป |
+| `getPivot` | `()` | ดึงจุดบนเส้น |
+| `getCentroid` | `()` | ดึงจุดกึ่งกลางทางเรขาคณิต |
+| `getBound` | `()` | ดึงขอบเขต (bounding box) |
+| `getLength` | `(language?)` | ดึงความยาว |
+| `rotate` | `(angle)` | หมุนเส้น |
+| `updateStyle` | `(options)` | อัปเดตสไตล์เส้น |
+
+## CircleRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getCircle` | `()` | ดึง circle ที่อยู่เบื้องหลัง |
+| `togglePopup` | `(show?, location?)` | แสดงหรือซ่อนป๊อปอัป |
+| `getCenter` | `()` | ดึงจุดศูนย์กลาง |
+| `getBound` | `()` | ดึงขอบเขต (bounding box) |
+| `getArea` | `(language?)` | ดึงพื้นที่ |
+| `getRadius` | `(language?)` | ดึงรัศมี |
+| `updateStyle` | `(options)` | อัปเดตสไตล์วงกลม |
+
+## PopupRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getPopup` | `()` | ดึง popup ที่อยู่เบื้องหลัง |
+| `setPosition` | `(location)` | ย้ายตำแหน่งป๊อปอัป |
+| `setTitle` | `(title)` | เปลี่ยนชื่อป๊อปอัป |
+| `setDetail` | `(detail)` | เปลี่ยนรายละเอียด |
+| `getElement` | `()` | ดึง DOM element |
+
+## DotRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getDot` | `()` | ดึง dot ที่อยู่เบื้องหลัง |
+| `setPosition` | `(location)` | ย้ายตำแหน่งจุด |
+| `getPosition` | `()` | ดึงตำแหน่ง |
+
+## RectangleRef
+
+| Method | Parameters | Description |
+|--------|------------|-------------|
+| `getRectangle` | `()` | ดึง rectangle ที่อยู่เบื้องหลัง |
+| `togglePopup` | `(show?, location?)` | แสดงหรือซ่อนป๊อปอัป |
+| `getBound` | `()` | ดึงขอบเขต (bounding box) |
+| `getArea` | `(language?)` | ดึงพื้นที่ |
+| `updateStyle` | `(options)` | อัปเดตสไตล์สี่เหลี่ยม |
