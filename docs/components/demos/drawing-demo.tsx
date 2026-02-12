@@ -9,12 +9,14 @@ import {
   SphereProvider,
 } from "gistda-sphere-react";
 import { useCallback, useState } from "react";
+import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
 export function DrawingDemo() {
   const [points, setPoints] = useState<Location[]>([]);
   const [polygons, setPolygons] = useState<Location[][]>([]);
+  const language = useDocLanguage();
 
   const handleClick = useCallback((location: Location) => {
     setPoints((prev) => [...prev, location]);
@@ -41,7 +43,7 @@ export function DrawingDemo() {
       <SphereProvider apiKey={API_KEY}>
         <SphereMap
           center={{ lon: 100.5, lat: 13.75 }}
-          language="en"
+          language={language}
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
           style={{ width: "100%", height: "400px" }}

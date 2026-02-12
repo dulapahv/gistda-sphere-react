@@ -35,7 +35,6 @@ export interface UseDrawingReturn extends DrawingState {
   totalShapes: number;
 }
 
-/** Manages drawing state for markers, polygons, polylines, circles, dots, and rectangles. */
 export function useDrawing(): UseDrawingReturn {
   const [mode, setMode] = useState<DrawingMode>("none");
   const [markers, setMarkers] = useState<MarkerData[]>([]);

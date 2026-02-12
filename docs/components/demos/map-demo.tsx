@@ -4,7 +4,6 @@
 import {
   Circle,
   Dot,
-  type Language,
   type Location,
   Marker,
   Polygon,
@@ -15,6 +14,7 @@ import {
   SphereProvider,
 } from "gistda-sphere-react";
 import type { ReactNode } from "react";
+import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
@@ -23,7 +23,6 @@ interface MapDemoProps {
   height?: string;
   center?: Location;
   zoom?: number;
-  language?: Language;
 }
 
 export function MapDemo({
@@ -31,8 +30,9 @@ export function MapDemo({
   height = "400px",
   center = { lon: 100.5018, lat: 13.7563 },
   zoom = 10,
-  language,
 }: MapDemoProps) {
+  const language = useDocLanguage();
+
   if (!API_KEY) {
     return (
       <div

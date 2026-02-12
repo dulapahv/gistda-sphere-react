@@ -2,6 +2,7 @@
 
 import { SphereMap, SphereProvider } from "gistda-sphere-react";
 import { useCallback, useState } from "react";
+import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
@@ -13,6 +14,7 @@ interface LogEntry {
 
 export function SphereMapDemo() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const language = useDocLanguage();
 
   const addLog = useCallback((message: string) => {
     const now = new Date();
@@ -31,7 +33,7 @@ export function SphereMapDemo() {
       <SphereProvider apiKey={API_KEY}>
         <SphereMap
           center={{ lon: 100.5018, lat: 13.7563 }}
-          language="en"
+          language={language}
           onClick={(e) => {
             addLog(`Clicked at ${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`);
           }}

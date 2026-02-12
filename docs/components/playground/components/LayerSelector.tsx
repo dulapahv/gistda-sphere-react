@@ -10,7 +10,6 @@ import {
 } from "../constants";
 import { getTranslations, type PlaygroundTranslations } from "../translations";
 
-/** Returns the localized label for a base layer. */
 function baseLayerLabel(t: PlaygroundTranslations, id: BaseLayer): string {
   const map: Record<BaseLayer, string> = {
     SIMPLE: t.layerSimple,
@@ -21,7 +20,6 @@ function baseLayerLabel(t: PlaygroundTranslations, id: BaseLayer): string {
   return map[id];
 }
 
-/** Returns the localized label for an overlay layer. */
 function overlayLabel(t: PlaygroundTranslations, id: OverlayLayer): string {
   const map: Record<OverlayLayer, string> = {
     TRAFFIC: t.overlayTraffic,
@@ -34,7 +32,6 @@ function overlayLabel(t: PlaygroundTranslations, id: OverlayLayer): string {
   return map[id];
 }
 
-/** Returns the localized label for a predefined overlay. */
 function predefinedLabel(
   t: PlaygroundTranslations,
   id: PredefinedOverlay
@@ -57,7 +54,6 @@ interface LayerSelectorProps {
   lang: string;
 }
 
-/** Panel for selecting base layers, data layers, and predefined overlays. */
 export function LayerSelector({
   currentLayer,
   activeOverlays,

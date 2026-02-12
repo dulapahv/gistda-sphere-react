@@ -7,6 +7,7 @@ import {
   useMapControls,
 } from "gistda-sphere-react";
 import { useState } from "react";
+import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
@@ -25,7 +26,6 @@ const filters = [
 ] as const;
 const layers = ["STREETS", "HYBRID", "STREETS_NIGHT", "SIMPLE"] as const;
 
-/** Inner controls component that uses map hooks. */
 function Controls() {
   const { goTo, setFilter, setBaseLayer } = useMapControls();
   const [activeFilter, setActiveFilter] = useState("None");
@@ -79,8 +79,9 @@ function Controls() {
   );
 }
 
-/** Interactive demo for useMapControls hook. */
 export function ControlsDemo() {
+  const language = useDocLanguage();
+
   if (!API_KEY) {
     return null;
   }
@@ -90,7 +91,7 @@ export function ControlsDemo() {
       <SphereProvider apiKey={API_KEY}>
         <SphereMap
           center={{ lon: 100.5018, lat: 13.7563 }}
-          language="en"
+          language={language}
           style={{ width: "100%", height: "400px" }}
           zoom={10}
         />

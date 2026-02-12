@@ -12,7 +12,6 @@ interface SearchPanelProps {
   lang: string;
 }
 
-/** Search panel with autocomplete suggestions and result display. */
 export function SearchPanel({ onResultSelect, lang }: SearchPanelProps) {
   const t = getTranslations(lang);
   const { search: searchPlaces, suggest, clear, isReady } = useSearch();

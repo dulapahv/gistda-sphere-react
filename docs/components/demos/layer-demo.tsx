@@ -2,6 +2,7 @@
 
 import { SphereMap, SphereProvider, useMapControls } from "gistda-sphere-react";
 import { useState } from "react";
+import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
@@ -14,7 +15,6 @@ const baseLayers = [
 ] as const;
 const dataLayers = ["TRAFFIC", "PM25", "HOTSPOT", "FLOOD", "DROUGHT"] as const;
 
-/** Inner layer controls that use map hooks. */
 function LayerControls() {
   const { setBaseLayer, addLayer, removeLayer } = useMapControls();
   const [activeBase, setActiveBase] = useState("STREETS");
@@ -73,8 +73,9 @@ function LayerControls() {
   );
 }
 
-/** Interactive demo for Layer component and built-in layers. */
 export function LayerDemo() {
+  const language = useDocLanguage();
+
   if (!API_KEY) {
     return null;
   }
@@ -84,7 +85,7 @@ export function LayerDemo() {
       <SphereProvider apiKey={API_KEY}>
         <SphereMap
           center={{ lon: 100.5018, lat: 13.7563 }}
-          language="en"
+          language={language}
           style={{ width: "100%", height: "400px" }}
           zoom={8}
         />

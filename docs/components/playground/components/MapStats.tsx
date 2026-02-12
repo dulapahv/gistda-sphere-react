@@ -10,7 +10,6 @@ interface MapStatsProps {
   lang: string;
 }
 
-/** Displays current map zoom, center coordinates, and shape count. */
 export function MapStats({ zoom, center, totalShapes, lang }: MapStatsProps) {
   const t = getTranslations(lang);
 

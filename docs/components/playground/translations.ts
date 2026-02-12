@@ -250,7 +250,7 @@ const en: PlaygroundTranslations = {
 };
 
 const th: PlaygroundTranslations = {
-  interactivePlayground: "สนามทดลอง",
+  interactivePlayground: "ทดลองเล่น",
   docs: "เอกสาร",
   backToDocs: "กลับไปยังเอกสาร",
 
@@ -366,12 +366,10 @@ const th: PlaygroundTranslations = {
 
 const translations: Record<string, PlaygroundTranslations> = { en, th };
 
-/** Returns translations for the given locale, falling back to English. */
 export function getTranslations(lang: string): PlaygroundTranslations {
   return translations[lang] ?? translations.en;
 }
 
-/** Returns the drawing hint for the given mode. */
 export function getDrawingHint(
   t: PlaygroundTranslations,
   mode: DrawingMode

@@ -9,7 +9,6 @@ interface TagsPanelProps {
   lang: string;
 }
 
-/** POI tag toggle panel with category grouping and popup control. */
 export function TagsPanel({ lang }: TagsPanelProps) {
   const t = getTranslations(lang);
   const { add, remove, clear, enablePopup, isReady } = useTags();

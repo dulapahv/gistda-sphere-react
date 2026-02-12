@@ -7,12 +7,13 @@ import {
   SphereProvider,
 } from "gistda-sphere-react";
 import { useState } from "react";
+import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
-/** Interactive demo: click map to place markers. */
 export function InteractiveMarkerDemo() {
   const [markers, setMarkers] = useState<Location[]>([]);
+  const language = useDocLanguage();
 
   if (!API_KEY) {
     return null;
@@ -23,7 +24,7 @@ export function InteractiveMarkerDemo() {
       <SphereProvider apiKey={API_KEY}>
         <SphereMap
           center={{ lon: 100.5018, lat: 13.7563 }}
-          language="en"
+          language={language}
           onClick={(location) => setMarkers((prev) => [...prev, location])}
           style={{ width: "100%", height: "400px" }}
           zoom={10}

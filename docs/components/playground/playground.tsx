@@ -4,6 +4,7 @@ import { type Location, SphereProvider } from "gistda-sphere-react";
 import { useCallback, useState } from "react";
 import {
   DrawingPanel,
+  LanguageSelector,
   LayerSelector,
   MapControlsPanel,
   MapStats,
@@ -14,7 +15,6 @@ import {
   Sidebar,
   TagsPanel,
 } from "./components";
-import { LANGUAGES, type MapLanguage } from "./constants";
 import { useDrawing, useMapSettings } from "./hooks";
 import { getTranslations } from "./translations";
 import type { SearchMarkerData } from "./types";
@@ -25,9 +25,7 @@ interface PlaygroundContentProps {
   lang: string;
 }
 
-/** Main playground content with sidebar and map. */
 function PlaygroundContent({ lang }: PlaygroundContentProps) {
-  const t = getTranslations(lang);
   const mapSettings = useMapSettings();
   const drawing = useDrawing();
   const { handleClick: drawingClick } = drawing;
@@ -96,30 +94,11 @@ function PlaygroundContent({ lang }: PlaygroundContentProps) {
           uiControls={mapSettings.uiControls}
         />
 
-        <div className="flex flex-col gap-1.5">
-          <span className="font-medium text-[11px] text-fd-muted-foreground uppercase tracking-wider">
-            {t.language}
-          </span>
-          <div className="flex gap-1">
-            {LANGUAGES.map((mapLang) => (
-              <button
-                className={`flex items-center gap-1.5 rounded-md border px-3 py-1.5 text-xs transition-colors ${
-                  mapSettings.language === mapLang.id
-                    ? "border-fd-primary bg-fd-primary/10 text-fd-primary"
-                    : "border-fd-border hover:bg-fd-accent"
-                }`}
-                key={mapLang.id}
-                onClick={() =>
-                  mapSettings.setLanguage(mapLang.id as MapLanguage)
-                }
-                type="button"
-              >
-                <mapLang.icon className="size-3.5" />
-                {mapLang.label}
-              </button>
-            ))}
-          </div>
-        </div>
+        <LanguageSelector
+          lang={lang}
+          language={mapSettings.language}
+          onLanguageChange={mapSettings.setLanguage}
+        />
 
         <QuickNav lang={lang} onNavigate={mapSettings.navigateTo} />
 
@@ -175,10 +154,6 @@ interface StandalonePlaygroundProps {
   lang: string;
 }
 
-/**
- * Standalone full-page playground component.
- * Renders at 100vh without docs chrome.
- */
 export function StandalonePlayground({ lang }: StandalonePlaygroundProps) {
   const t = getTranslations(lang);
 

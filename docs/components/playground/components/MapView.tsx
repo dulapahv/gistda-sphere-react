@@ -31,7 +31,6 @@ interface MapViewProps {
   onDoubleClick: () => void;
 }
 
-/** Map view with all drawn shapes, route markers, and search results. */
 export function MapView({
   drawing,
   routeOrigin,

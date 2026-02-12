@@ -30,7 +30,6 @@ export interface UseMapSettingsReturn {
   setLanguage: (language: MapLanguage) => void;
 }
 
-/** Manages map settings including layers, overlays, UI controls, and navigation. */
 export function useMapSettings(): UseMapSettingsReturn {
   const { map, isReady: mapReady } = useMap();
   const {

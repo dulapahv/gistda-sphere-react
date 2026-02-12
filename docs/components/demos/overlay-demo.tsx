@@ -6,6 +6,7 @@ import {
   SphereProvider,
   useMarkers,
 } from "gistda-sphere-react";
+import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
@@ -13,6 +14,7 @@ const CENTER = { lon: 100.5018, lat: 13.7563 };
 
 function OverlayControls() {
   const { items, add, remove, clear } = useMarkers();
+  const language = useDocLanguage();
 
   const handleAdd = () => {
     const offset = () => (Math.random() - 0.5) * 0.1;
@@ -33,7 +35,7 @@ function OverlayControls() {
     <>
       <SphereMap
         center={CENTER}
-        language="en"
+        language={language}
         style={{ width: "100%", height: "350px" }}
         zoom={12}
       >

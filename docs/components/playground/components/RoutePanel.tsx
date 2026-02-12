@@ -15,7 +15,6 @@ import { ROUTE_MODES, type RouteMode } from "../constants";
 import { getTranslations, type PlaygroundTranslations } from "../translations";
 import type { RouteInfoData } from "../types";
 
-/** Returns the localized label for a route mode. */
 function routeModeLabel(t: PlaygroundTranslations, id: RouteMode): string {
   const map: Record<RouteMode, string> = {
     Traffic: t.modeTraffic,
@@ -35,7 +34,6 @@ interface RoutePanelProps {
   lang: string;
 }
 
-/** Route planning panel with origin/destination selection and mode picker. */
 export function RoutePanel({
   origin,
   destination,
@@ -139,7 +137,6 @@ export function RoutePanel({
     onSettingPointChange(settingPoint === point ? null : point);
   };
 
-  /** Returns the localized label for a setting point type. */
   const pointLabel = (point: "origin" | "destination"): string =>
     point === "origin" ? t.origin : t.destination;
 

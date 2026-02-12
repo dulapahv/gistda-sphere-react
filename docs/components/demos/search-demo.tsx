@@ -9,10 +9,10 @@ import {
   useSearch,
 } from "gistda-sphere-react";
 import { useState } from "react";
+import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
-/** Inner search component that uses hooks. */
 function SearchControls() {
   const { search, clear, isReady } = useSearch();
   const { goTo } = useMapControls();
@@ -22,6 +22,7 @@ function SearchControls() {
   >([]);
   const [loading, setLoading] = useState(false);
   const [selectedMarker, setSelectedMarker] = useState<Location | null>(null);
+  const language = useDocLanguage();
 
   const handleSearch = async () => {
     if (!(keyword.trim() && isReady)) {
@@ -58,7 +59,7 @@ function SearchControls() {
     <>
       <SphereMap
         center={{ lon: 100.5018, lat: 13.7563 }}
-        language="en"
+        language={language}
         style={{ width: "100%", height: "400px" }}
         zoom={10}
       >
@@ -68,7 +69,7 @@ function SearchControls() {
       </SphereMap>
       <div className="flex flex-wrap items-center gap-2 bg-fd-card p-3">
         <input
-          className="flex-1 rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs placeholder:text-fd-muted-foreground focus:border-fd-ring focus:outline-none"
+          className="flex-1 rounded-md border border-fd-border bg-fd-secondary px-2 py-2 text-fd-secondary-foreground text-xs placeholder:text-fd-muted-foreground focus:border-fd-ring focus:outline-none"
           onChange={(e) => setKeyword(e.target.value)}
           onKeyDown={(e) => {
             if (e.key === "Enter") {
@@ -80,7 +81,7 @@ function SearchControls() {
           value={keyword}
         />
         <button
-          className="cursor-pointer rounded-md border border-fd-primary bg-fd-primary px-2 py-1.5 text-fd-primary-foreground text-xs disabled:cursor-not-allowed disabled:opacity-50"
+          className="cursor-pointer rounded-md border border-fd-primary bg-fd-primary px-2 py-2 text-fd-primary-foreground text-xs disabled:cursor-not-allowed disabled:opacity-50"
           disabled={loading || !isReady}
           onClick={handleSearch}
           type="button"
@@ -89,7 +90,7 @@ function SearchControls() {
         </button>
         {results.length > 0 && (
           <button
-            className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
+            className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-2 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
             onClick={handleClear}
             type="button"
           >
@@ -102,7 +103,7 @@ function SearchControls() {
           {results.map((r, i) => (
             <button
               className="flex w-full cursor-pointer items-center gap-2 rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-left text-fd-foreground text-xs hover:bg-fd-accent"
-              key={r.name || `r-${i}`}
+              key={`${r.name}-${i}`}
               onClick={() => handleSelect(r)}
               type="button"
             >
@@ -115,7 +116,6 @@ function SearchControls() {
   );
 }
 
-/** Interactive search demo with input, results list, and map. */
 export function SearchDemo() {
   if (!API_KEY) {
     return null;

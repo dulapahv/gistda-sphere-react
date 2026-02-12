@@ -11,7 +11,6 @@ interface SidebarProps {
   lang: string;
 }
 
-/** Playground sidebar with header and scrollable content area. */
 export function Sidebar({ children, lang }: SidebarProps) {
   const t = getTranslations(lang);
   const docsHref = lang === "en" ? "/docs" : `/${lang}/docs`;

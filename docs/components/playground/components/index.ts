@@ -1,4 +1,5 @@
 export { DrawingPanel } from "./DrawingPanel";
+export { LanguageSelector } from "./LanguageSelector";
 export { LayerSelector } from "./LayerSelector";
 export { MapControlsPanel } from "./MapControlsPanel";
 export { MapStats } from "./MapStats";

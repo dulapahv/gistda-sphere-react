@@ -6,7 +6,6 @@ const navLabels: Record<string, { docs: string; playground: string }> = {
   th: { docs: "เอกสาร", playground: "ทดลองเล่น" },
 };
 
-/** Returns shared layout options, localized for the given language. */
 export function baseOptions(lang?: string): BaseLayoutProps {
   const prefix = lang && lang !== i18n.defaultLanguage ? `/${lang}` : "";
   const labels = navLabels[lang ?? "en"] ?? navLabels.en;
@@ -14,6 +13,7 @@ export function baseOptions(lang?: string): BaseLayoutProps {
   return {
     nav: {
       title: "gistda-sphere-react",
+      url: `${prefix}`,
     },
     links: [
       {

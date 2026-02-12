@@ -59,7 +59,6 @@ export const SHAPE_COLORS = [
   "rgba(255, 159, 64, 0.6)",
 ];
 
-/** Returns a color from the palette by cycling through the array. */
 export function getShapeColor(index: number): string {
   return SHAPE_COLORS[index % SHAPE_COLORS.length];
 }

@@ -9,7 +9,6 @@ interface QuickNavProps {
   lang: string;
 }
 
-/** Quick navigation buttons for common Thai cities. */
 export function QuickNav({ onNavigate, lang }: QuickNavProps) {
   const t = getTranslations(lang);
 

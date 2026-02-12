@@ -8,7 +8,6 @@ import {
   type PlaygroundTranslations,
 } from "../translations";
 
-/** Returns the localized label for a drawing tool. */
 function toolLabel(t: PlaygroundTranslations, id: DrawingMode): string {
   const map: Record<DrawingMode, string> = {
     none: t.toolPan,
@@ -29,7 +28,6 @@ interface DrawingPanelProps {
   lang: string;
 }
 
-/** Panel for selecting drawing tools and clearing all shapes. */
 export function DrawingPanel({
   mode,
   onModeChange,
@@ -46,7 +44,7 @@ export function DrawingPanel({
       <div className="flex flex-wrap gap-1.5">
         {DRAWING_TOOLS.map((tool) => (
           <button
-            className={`flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-md border ${
+            className={`flex size-9.5 cursor-pointer items-center justify-center rounded-md border ${
               mode === tool.id
                 ? "border-fd-primary bg-fd-primary text-fd-primary-foreground"
                 : "border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:border-fd-ring hover:bg-fd-accent hover:text-fd-foreground"
@@ -60,7 +58,7 @@ export function DrawingPanel({
           </button>
         ))}
         <button
-          className="flex h-[38px] w-[38px] cursor-pointer items-center justify-center rounded-md border border-fd-border bg-fd-secondary text-fd-error hover:border-fd-error hover:bg-fd-error/10"
+          className="flex size-9.5 cursor-pointer items-center justify-center rounded-md border border-fd-border bg-fd-secondary text-fd-error hover:border-fd-error hover:bg-fd-error/10"
           onClick={onClear}
           title={t.clearAll}
           type="button"

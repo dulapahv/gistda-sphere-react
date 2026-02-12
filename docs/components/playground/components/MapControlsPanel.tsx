@@ -3,7 +3,6 @@
 import { UI_CONTROLS, type UiControlId } from "../constants";
 import { getTranslations, type PlaygroundTranslations } from "../translations";
 
-/** Returns the localized label for a UI control. */
 function controlLabel(t: PlaygroundTranslations, id: string): string {
   const map: Record<string, string> = {
     DPad: t.controlDPad,
@@ -24,7 +23,6 @@ interface MapControlsPanelProps {
   lang: string;
 }
 
-/** Panel for toggling map UI controls visibility. */
 export function MapControlsPanel({
   uiControls,
   mapReady,

@@ -9,6 +9,7 @@ import {
   useRoute,
 } from "gistda-sphere-react";
 import { useCallback, useEffect, useState } from "react";
+import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
@@ -24,6 +25,7 @@ function RouteControls() {
   const [showGuide, setShowGuide] = useState(false);
   const [calculating, setCalculating] = useState(false);
   const [routeCompleted, setRouteCompleted] = useState(false);
+  const language = useDocLanguage();
 
   const handleRouteComplete = useCallback(() => {
     setCalculating(false);
@@ -97,7 +99,7 @@ function RouteControls() {
     <>
       <SphereMap
         center={{ lon: 99.75, lat: 16.27 }}
-        language="en"
+        language={language}
         style={{ width: "100%", height: "400px" }}
         zoom={7}
       >
@@ -120,7 +122,7 @@ function RouteControls() {
           {routeInfo && (
             <>
               <button
-                className={`cursor-pointer rounded-md border px-2 py-2 text-sm transition-colors ${
+                className={`cursor-pointer rounded-md border px-2 py-1.5 text-xs transition-colors ${
                   showGuide
                     ? "border-fd-primary bg-fd-primary text-fd-primary-foreground"
                     : "border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent"
@@ -131,7 +133,7 @@ function RouteControls() {
                 {showGuide ? "Hide Directions" : "Turn-by-Turn"}
               </button>
               <button
-                className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-2 text-fd-secondary-foreground text-sm transition-colors hover:bg-fd-accent"
+                className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs transition-colors hover:bg-fd-accent"
                 onClick={handleClear}
                 type="button"
               >

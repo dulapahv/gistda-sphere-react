@@ -7,6 +7,7 @@ import {
   useMapEvent,
 } from "gistda-sphere-react";
 import { useCallback, useState } from "react";
+import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
@@ -38,6 +39,7 @@ function EventListener({ onLog }: { onLog: (message: string) => void }) {
 
 export function EventLogDemo() {
   const [logs, setLogs] = useState<LogEntry[]>([]);
+  const language = useDocLanguage();
 
   const addLog = useCallback((message: string) => {
     const now = new Date();
@@ -56,7 +58,7 @@ export function EventLogDemo() {
       <SphereProvider apiKey={API_KEY}>
         <SphereMap
           center={{ lon: 100.5018, lat: 13.7563 }}
-          language="en"
+          language={language}
           style={{ width: "100%", height: "300px" }}
           zoom={10}
         >
