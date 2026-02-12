@@ -19,9 +19,7 @@ export interface RouteGuideStep {
 }
 
 export interface UseRouteOptions {
-  /** Called when route calculation completes. */
   onRouteComplete?: (routes: unknown[]) => void;
-  /** Called when route calculation fails. */
   onRouteError?: (errorCode: number) => void;
 }
 
