@@ -45,13 +45,13 @@ function predefinedLabel(
 }
 
 interface LayerSelectorProps {
-  currentLayer: BaseLayer;
   activeOverlays: Set<OverlayLayer>;
   activePredefined: Set<PredefinedOverlay>;
+  currentLayer: BaseLayer;
+  lang: string;
   onLayerChange: (layer: BaseLayer) => void;
   onOverlayToggle: (layer: OverlayLayer) => void;
   onPredefinedToggle: (overlay: PredefinedOverlay) => void;
-  lang: string;
 }
 
 export function LayerSelector({

@@ -68,7 +68,7 @@ function OverlayControls() {
           Clear All
         </button>
         <span className="text-fd-muted-foreground text-xs">
-          {items.length} marker{items.length !== 1 ? "s" : ""}
+          {items.length} marker{items.length === 1 ? "" : "s"}
         </span>
       </div>
     </>

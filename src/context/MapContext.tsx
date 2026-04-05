@@ -2,16 +2,16 @@ import { createContext, type ReactNode, useContext, useMemo } from "react";
 import type { SphereMap } from "../types";
 
 interface MapContextValue {
-  map: SphereMap | null;
   isReady: boolean;
+  map: SphereMap | null;
 }
 
 const MapContext = createContext<MapContextValue | null>(null);
 
 interface MapProviderProps {
-  map: SphereMap | null;
-  isReady: boolean;
   children: ReactNode;
+  isReady: boolean;
+  map: SphereMap | null;
 }
 
 export function MapProvider({
@@ -37,5 +37,5 @@ export function useMapContext(): MapContextValue {
   return context;
 }
 
-export { MapContext };
 export type { MapContextValue };
+export { MapContext };

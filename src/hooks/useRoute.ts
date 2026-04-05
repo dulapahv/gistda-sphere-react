@@ -12,9 +12,9 @@ import type {
 } from "../types";
 
 export interface RouteGuideStep {
-  instruction: string;
   distance: number | string;
   duration: number | string;
+  instruction: string;
   location: Location;
 }
 
@@ -24,35 +24,35 @@ export interface UseRouteOptions {
 }
 
 export interface UseRouteReturn {
-  isReady: boolean;
   addDestination: (
     destination: SphereMarker | Location,
     mode?: RouteMode
   ) => void;
+  clear: () => void;
+  clearDestinations: () => void;
+  clearPath: () => void;
+  enableRouteType: (routeType: RouteType, state: boolean) => void;
+  exportRouteLine: (options?: GeometryOptions) => SpherePolyline | null;
+  getDistance: (format?: boolean) => number | string;
+  getGuide: (format?: boolean) => RouteGuideStep[] | HTMLElement;
+  getInterval: (format?: boolean) => number | string;
   insertDestination: (
     index: number,
     destination: SphereMarker | Location,
     mode?: RouteMode
   ) => void;
+  isReady: boolean;
+  listDestinations: () => SphereMarker[];
   removeDestination: (destination: SphereMarker) => void;
   removeDestinationAt: (index: number) => void;
-  clearDestinations: () => void;
-  clearPath: () => void;
-  clear: () => void;
   reverse: () => void;
   search: () => void;
-  getDistance: (format?: boolean) => number | string;
-  getInterval: (format?: boolean) => number | string;
-  getGuide: (format?: boolean) => RouteGuideStep[] | HTMLElement;
-  exportRouteLine: (options?: GeometryOptions) => SpherePolyline | null;
-  listDestinations: () => SphereMarker[];
-  size: () => number;
+  setAuto: (state: boolean) => void;
+  setLabel: (label: RouteLabelType) => void;
+  setLanguage: (lang: Language) => void;
   setMode: (mode: RouteMode) => void;
   setModeAt: (index: number, mode: RouteMode) => void;
-  enableRouteType: (routeType: RouteType, state: boolean) => void;
-  setLabel: (label: RouteLabelType) => void;
-  setAuto: (state: boolean) => void;
-  setLanguage: (lang: Language) => void;
+  size: () => number;
 }
 
 export function useRoute(options?: UseRouteOptions): UseRouteReturn {

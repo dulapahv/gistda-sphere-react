@@ -13,32 +13,32 @@ import type {
 } from "../types";
 
 export interface RectangleRef {
+  getArea(language?: string): number | string | null;
+  getBound(): Bound | null;
   getRectangle(): SphereRectangle | null;
   togglePopup(show?: boolean, location?: Location): void;
-  getBound(): Bound | null;
-  getArea(language?: string): number | string | null;
   updateStyle(options: Partial<GeometryOptions>): void;
 }
 
 export interface RectangleProps {
-  position: Location;
-  size: Size | Location;
-  ref?: Ref<RectangleRef>;
-  title?: string;
-  detail?: string;
-  popup?: PopupOptions;
-  visibleRange?: Range;
-  lineWidth?: number;
-  lineColor?: string;
-  fillColor?: string;
-  lineStyle?: LineStyleType;
   clickable?: boolean;
+  detail?: string;
   draggable?: boolean;
   editable?: boolean;
-  zIndex?: number;
+  fillColor?: string;
+  lineColor?: string;
+  lineStyle?: LineStyleType;
+  lineWidth?: number;
   onClick?: (rectangle: SphereRectangle) => void;
   onDrag?: (rectangle: SphereRectangle) => void;
   onDrop?: (rectangle: SphereRectangle) => void;
+  popup?: PopupOptions;
+  position: Location;
+  ref?: Ref<RectangleRef>;
+  size: Size | Location;
+  title?: string;
+  visibleRange?: Range;
+  zIndex?: number;
 }
 
 export function Rectangle({

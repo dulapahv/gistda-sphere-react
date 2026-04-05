@@ -5,8 +5,8 @@ import { LOCATIONS } from "../constants";
 import { getTranslations } from "../translations";
 
 interface QuickNavProps {
-  onNavigate: (location: Location, zoom?: number) => void;
   lang: string;
+  onNavigate: (location: Location, zoom?: number) => void;
 }
 
 export function QuickNav({ onNavigate, lang }: QuickNavProps) {

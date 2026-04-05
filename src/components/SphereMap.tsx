@@ -21,45 +21,45 @@ import type {
 
 export interface SphereMapRef {
   getMap(): SphereMapInstance | null;
-  setZoom(zoom: number, animate?: boolean): void;
-  setCenter(location: Location, animate?: boolean): void;
-  setBound(bound: Bound, options?: object): void;
   goTo(target: FlyToOptions, animate?: boolean): void;
-  setRotate(angle: number, animate?: boolean): void;
-  setPitch(angle: number): void;
-  setFilter(filter: FilterType): void;
-  resize(): void;
   repaint(): void;
+  resize(): void;
+  setBound(bound: Bound, options?: object): void;
+  setCenter(location: Location, animate?: boolean): void;
+  setFilter(filter: FilterType): void;
+  setPitch(angle: number): void;
+  setRotate(angle: number, animate?: boolean): void;
+  setZoom(zoom: number, animate?: boolean): void;
 }
 
 export interface SphereMapProps {
-  children?: ReactNode;
-  ref?: Ref<SphereMapRef>;
-  zoom?: number;
-  zoomRange?: Range;
   center?: Location;
-  language?: "th" | "en";
-  input?: boolean;
-  lastView?: boolean;
-  ui?: "Full" | "Mobile" | "None";
-  filter?: FilterType;
-  rotate?: number;
-  pitch?: number;
+  children?: ReactNode;
   className?: string;
-  style?: CSSProperties;
+  filter?: FilterType;
   id?: string;
-  onReady?: (map: SphereMapInstance) => void;
-  onZoom?: (zoom: number) => void;
-  onLocation?: (location: Location) => void;
+  input?: boolean;
+  language?: "th" | "en";
+  lastView?: boolean;
   onClick?: (location: Location) => void;
   onDoubleClick?: (location: Location) => void;
-  onRotate?: (angle: number) => void;
-  onPitch?: (angle: number) => void;
   onDrag?: () => void;
   onDrop?: () => void;
-  onIdle?: () => void;
-  onMouseMove?: (location: Location) => void;
   onError?: (error: Error) => void;
+  onIdle?: () => void;
+  onLocation?: (location: Location) => void;
+  onMouseMove?: (location: Location) => void;
+  onPitch?: (angle: number) => void;
+  onReady?: (map: SphereMapInstance) => void;
+  onRotate?: (angle: number) => void;
+  onZoom?: (zoom: number) => void;
+  pitch?: number;
+  ref?: Ref<SphereMapRef>;
+  rotate?: number;
+  style?: CSSProperties;
+  ui?: "Full" | "Mobile" | "None";
+  zoom?: number;
+  zoomRange?: Range;
 }
 
 export function SphereMap({

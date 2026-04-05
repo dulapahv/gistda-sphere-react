@@ -1,137 +1,137 @@
 import type { DrawingMode } from "./constants";
 
 interface PlaygroundTranslations {
-  /** Sidebar */
-  interactivePlayground: string;
-  docs: string;
-  backToDocs: string;
+  active: (count: number) => string;
 
-  /** MapStats */
-  zoom: string;
-  center: string;
-  shapes: string;
+  /** Error */
+  apiKeyError: string;
+  backToDocs: string;
 
   /** LayerSelector */
   baseLayer: string;
+  calculate: string;
+  calculating: string;
+  center: string;
+  circleCenter: string;
+  circleN: (n: number) => string;
+  clearAll: string;
+  clearResults: string;
+  clearRoute: string;
+  clickMapToSet: (point: string) => string;
+  clickOppositeCorner: string;
+  clickToSetRadius: string;
+  controlCrosshair: string;
+
+  /** UI control labels */
+  controlDPad: string;
+  controlFullscreen: string;
+  controlGeolocation: string;
+  controlScale: string;
+  controlToolbar: string;
+  controlZoomBar: string;
   dataLayers: string;
-  liveOverlays: string;
+  destination: string;
+  distance: string;
+  docs: string;
+  dotN: (n: number) => string;
+
+  /** DrawingPanel */
+  drawingTools: string;
+  duration: string;
+  hideDirections: string;
+  hintCircle: string;
+  hintDot: string;
+  hintMarker: string;
+
+  /** Drawing hints */
+  hintNone: string;
+  hintPolygon: string;
+  hintPolyline: string;
+  hintRectangle: string;
+  /** Sidebar */
+  interactivePlayground: string;
+
+  /** Language section */
+  language: string;
+  layerHybrid: string;
+  layerNight: string;
 
   /** Base layer labels */
   layerSimple: string;
   layerStreets: string;
-  layerNight: string;
-  layerHybrid: string;
-
-  /** Overlay layer labels */
-  overlayTraffic: string;
-  overlayImages: string;
-  overlayPM25: string;
-  overlayHotspot: string;
-  overlayFlood: string;
-  overlayDrought: string;
-
-  /** Predefined overlay labels */
-  predefinedCCTV: string;
-  predefinedEvents: string;
-  predefinedAQI: string;
-
-  /** MapControlsPanel */
-  mapControls: string;
-
-  /** UI control labels */
-  controlDPad: string;
-  controlGeolocation: string;
-  controlZoomBar: string;
-  controlToolbar: string;
-  controlFullscreen: string;
-  controlCrosshair: string;
-  controlScale: string;
-
-  /** Language section */
-  language: string;
-
-  /** QuickNav */
-  quickNavigation: string;
+  lineN: (n: number) => string;
+  liveOverlays: string;
+  locAyutthaya: string;
+  location: string;
 
   /** Location labels */
   locBangkok: string;
   locChiangMai: string;
-  locPhuket: string;
   locPattaya: string;
-  locAyutthaya: string;
+  locPhuket: string;
   locSukhothai: string;
 
-  /** DrawingPanel */
-  drawingTools: string;
-  clearAll: string;
-
-  /** Drawing tool labels */
-  toolPan: string;
-  toolMarker: string;
-  toolDot: string;
-  toolPolygon: string;
-  toolLine: string;
-  toolCircle: string;
-  toolRect: string;
-
-  /** Drawing hints */
-  hintNone: string;
-  hintMarker: string;
-  hintDot: string;
-  hintPolygon: string;
-  hintPolyline: string;
-  hintCircle: string;
-  hintRectangle: string;
-
-  /** SearchPanel */
-  searchPlaces: string;
-  searchPlaceholder: string;
-  searchResult: string;
-  clearResults: string;
-  resultN: (n: number) => string;
-
-  /** RoutePanel */
-  routePlanning: string;
-  origin: string;
-  destination: string;
-  notSet: string;
-  setOriginOnMap: string;
-  setDestinationOnMap: string;
-  clickMapToSet: (point: string) => string;
-  calculating: string;
-  calculate: string;
-  reverseRoute: string;
-  clearRoute: string;
-  distance: string;
-  duration: string;
-  hideDirections: string;
-  turnByTurn: (steps: number) => string;
-
-  /** Route mode labels */
-  modeTraffic: string;
-  modeShortest: string;
-  modeCheapest: string;
-
-  /** TagsPanel */
-  poiTags: string;
-  toggleTagsHint: string;
-  active: (count: number) => string;
+  /** MapControlsPanel */
+  mapControls: string;
 
   /** MapView shape labels */
   markerN: (n: number) => string;
-  dotN: (n: number) => string;
-  polygonN: (n: number) => string;
-  lineN: (n: number) => string;
-  circleN: (n: number) => string;
-  rectangleN: (n: number) => string;
-  circleCenter: string;
-  clickToSetRadius: string;
-  rectangleCorner: string;
-  clickOppositeCorner: string;
-  location: string;
+  modeCheapest: string;
+  modeShortest: string;
 
-  /** Error */
-  apiKeyError: string;
+  /** Route mode labels */
+  modeTraffic: string;
+  notSet: string;
+  origin: string;
+  overlayDrought: string;
+  overlayFlood: string;
+  overlayHotspot: string;
+  overlayImages: string;
+  overlayPM25: string;
+
+  /** Overlay layer labels */
+  overlayTraffic: string;
+
+  /** TagsPanel */
+  poiTags: string;
+  polygonN: (n: number) => string;
+  predefinedAQI: string;
+
+  /** Predefined overlay labels */
+  predefinedCCTV: string;
+  predefinedEvents: string;
+
+  /** QuickNav */
+  quickNavigation: string;
+  rectangleCorner: string;
+  rectangleN: (n: number) => string;
+  resultN: (n: number) => string;
+  reverseRoute: string;
+
+  /** RoutePanel */
+  routePlanning: string;
+  searchPlaceholder: string;
+
+  /** SearchPanel */
+  searchPlaces: string;
+  searchResult: string;
+  setDestinationOnMap: string;
+  setOriginOnMap: string;
+  shapes: string;
+  toggleTagsHint: string;
+  toolCircle: string;
+  toolDot: string;
+  toolLine: string;
+  toolMarker: string;
+
+  /** Drawing tool labels */
+  toolPan: string;
+  toolPolygon: string;
+  toolRect: string;
+  turnByTurn: (steps: number) => string;
+
+  /** MapStats */
+  zoom: string;
 }
 
 const en: PlaygroundTranslations = {

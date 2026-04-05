@@ -13,8 +13,8 @@ const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
 interface LogEntry {
   id: number;
-  time: string;
   message: string;
+  time: string;
 }
 
 function EventListener({ onLog }: { onLog: (message: string) => void }) {

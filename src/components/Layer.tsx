@@ -11,27 +11,27 @@ import type {
 } from "../types";
 
 export interface LayerProps {
-  name?: string;
-  preset?: BuiltInLayer;
+  attribution?: string;
+  beforeId?: string;
+  bound?: Bound;
+  extraQuery?: string;
+  format?: string;
+  id?: string;
   isBase?: boolean;
+  name?: string;
+  opacity?: number;
+  preset?: BuiltInLayer;
+  refresh?: number;
+  source?: Range;
+  srs?: string;
+  styles?: string;
+  tileMatrixPrefix?: string;
   type?: LayerType;
   url?: string;
-  zoomRange?: Range;
-  source?: Range;
-  opacity?: number;
-  zIndex?: number;
-  bound?: Bound;
-  attribution?: string;
-  extraQuery?: string;
-  id?: string;
-  format?: string;
-  srs?: string;
-  tileMatrixPrefix?: string;
-  styles?: string;
   version?: string;
-  refresh?: number;
+  zIndex?: number;
   zoomOffset?: number;
-  beforeId?: string;
+  zoomRange?: Range;
 }
 
 export function Layer({

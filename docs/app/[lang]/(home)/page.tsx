@@ -35,7 +35,7 @@ export default async function HomePage({
   params: Promise<{ lang: string }>;
 }) {
   const { lang } = await params;
-  const prefix = lang !== i18n.defaultLanguage ? `/${lang}` : "";
+  const prefix = lang === i18n.defaultLanguage ? "" : `/${lang}`;
   const t = translations[lang as keyof typeof translations] ?? translations.en;
 
   return (

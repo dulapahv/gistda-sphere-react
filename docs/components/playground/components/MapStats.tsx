@@ -4,10 +4,10 @@ import type { Location } from "gistda-sphere-react";
 import { getTranslations } from "../translations";
 
 interface MapStatsProps {
-  zoom: number;
   center: Location | null;
-  totalShapes: number;
   lang: string;
+  totalShapes: number;
+  zoom: number;
 }
 
 export function MapStats({ zoom, center, totalShapes, lang }: MapStatsProps) {

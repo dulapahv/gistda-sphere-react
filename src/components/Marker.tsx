@@ -12,28 +12,28 @@ import type {
 
 export interface MarkerRef {
   getMarker(): SphereMarker | null;
-  togglePopup(show?: boolean): void;
   setPosition(location: Location, animate?: boolean): void;
   setRotation(angle: number): void;
+  togglePopup(show?: boolean): void;
 }
 
 export interface MarkerProps {
-  position: Location;
-  ref?: Ref<MarkerRef>;
-  icon?: Icon;
-  title?: string;
-  detail?: string;
-  popup?: PopupOptions;
-  visibleRange?: Range;
   clickable?: boolean;
+  detail?: string;
   draggable?: boolean;
-  zIndex?: number;
-  rotate?: number;
+  icon?: Icon;
   onClick?: (marker: SphereMarker) => void;
   onDrag?: (marker: SphereMarker) => void;
   onDrop?: (marker: SphereMarker, location: Location) => void;
   onHover?: (marker: SphereMarker) => void;
   onLeave?: (marker: SphereMarker) => void;
+  popup?: PopupOptions;
+  position: Location;
+  ref?: Ref<MarkerRef>;
+  rotate?: number;
+  title?: string;
+  visibleRange?: Range;
+  zIndex?: number;
 }
 
 export function Marker({

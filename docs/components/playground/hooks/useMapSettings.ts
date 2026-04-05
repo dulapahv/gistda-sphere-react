@@ -12,22 +12,22 @@ import {
 } from "../constants";
 
 export interface UseMapSettingsReturn {
-  mapReady: boolean;
-  currentLayer: BaseLayer;
   activeOverlays: Set<OverlayLayer>;
   activePredefined: Set<PredefinedOverlay>;
-  uiControls: Record<UiControlId, boolean>;
-  zoom: number;
   center: Location | null;
+  currentLayer: BaseLayer;
   language: MapLanguage;
+  mapReady: boolean;
+  navigateTo: (location: Location, zoom?: number) => void;
+  setCenter: (center: Location) => void;
+  setLanguage: (language: MapLanguage) => void;
   setLayer: (layer: BaseLayer) => void;
+  setZoom: (zoom: number) => void;
   toggleOverlay: (layer: OverlayLayer) => void;
   togglePredefined: (overlay: PredefinedOverlay) => void;
   toggleUiControl: (controlId: UiControlId) => void;
-  navigateTo: (location: Location, zoom?: number) => void;
-  setZoom: (zoom: number) => void;
-  setCenter: (center: Location) => void;
-  setLanguage: (language: MapLanguage) => void;
+  uiControls: Record<UiControlId, boolean>;
+  zoom: number;
 }
 
 export function useMapSettings(): UseMapSettingsReturn {
