@@ -4,13 +4,18 @@ const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
-  reactCompiler: true,
   poweredByHeader: false,
+  reactCompiler: true,
   typedRoutes: true,
+  logging: {
+    browserToTerminal: true,
+  },
   experimental: {
     typedEnv: true,
     viewTransition: true,
-    turbopackFileSystemCacheForDev: true,
+    inlineCss: true,
+    turbopackFileSystemCacheForBuild: true,
+    optimizePackageImports: ["@phosphor-icons/react"],
   },
   async rewrites() {
     return [
