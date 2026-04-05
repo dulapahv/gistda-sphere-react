@@ -4,24 +4,24 @@ import { useSphereContext } from "../context/SphereContext";
 import type { Location, PopupOptions, Size, SpherePopup } from "../types";
 
 export interface PopupRef {
+  getElement(): HTMLElement | null;
   getPopup(): SpherePopup | null;
+  setDetail(detail: string): void;
   setPosition(location: Location): void;
   setTitle(title: string): void;
-  setDetail(detail: string): void;
-  getElement(): HTMLElement | null;
 }
 
 export interface PopupProps {
+  closable?: boolean;
+  detail?: string;
+  html?: string;
+  loadDetail?: (element: HTMLElement) => void;
+  loadHtml?: (element: HTMLElement) => void;
+  onClose?: (popup: SpherePopup) => void;
   position: Location;
   ref?: Ref<PopupRef>;
-  title?: string;
-  detail?: string;
-  loadDetail?: (element: HTMLElement) => void;
-  html?: string;
-  loadHtml?: (element: HTMLElement) => void;
   size?: Size;
-  closable?: boolean;
-  onClose?: (popup: SpherePopup) => void;
+  title?: string;
 }
 
 export function Popup({

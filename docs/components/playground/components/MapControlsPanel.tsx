@@ -17,10 +17,10 @@ function controlLabel(t: PlaygroundTranslations, id: string): string {
 }
 
 interface MapControlsPanelProps {
-  uiControls: Record<UiControlId, boolean>;
+  lang: string;
   mapReady: boolean;
   onToggle: (controlId: UiControlId) => void;
-  lang: string;
+  uiControls: Record<UiControlId, boolean>;
 }
 
 export function MapControlsPanel({

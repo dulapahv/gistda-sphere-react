@@ -15,86 +15,86 @@ type EventHandler = (data?: unknown) => void;
 
 interface MockEvent {
   bind: Mock;
-  unbind: Mock;
   fire: Mock;
+  unbind: Mock;
 }
 
 interface MockOverlays {
   add: Mock;
-  remove: Mock;
-  load: Mock;
-  unload: Mock;
   clear: Mock;
-  list: Mock;
-  size: Mock;
   lastOpenPopup: Mock;
+  list: Mock;
+  load: Mock;
+  remove: Mock;
+  size: Mock;
+  unload: Mock;
 }
 
 interface MockLayers {
-  setBase: Mock;
   add: Mock;
-  remove: Mock;
   clear: Mock;
-  list: Mock;
-  size: Mock;
   language: Mock;
+  list: Mock;
+  remove: Mock;
+  setBase: Mock;
+  size: Mock;
 }
 
 interface MockMap {
-  Event: MockEvent;
-  Overlays: MockOverlays;
-  Layers: MockLayers;
-  Ui: Record<string, never>;
-  Search: Record<string, never>;
-  Tags: Record<string, never>;
-  Route: Record<string, never>;
-  Renderer: { on: Mock };
-  id: Mock;
-  resize: Mock;
-  repaint: Mock;
-  placeholder: Mock;
-  zoom: Mock;
-  zoomRange: Mock;
-  location: Mock;
+  _triggerClick: (location: object) => void;
+  _triggerReady: () => void;
+  _triggerZoom: () => void;
   bound: Mock;
-  move: Mock;
-  language: Mock;
-  rotate: Mock;
-  pitch: Mock;
+  Event: MockEvent;
   enableFilter: Mock;
   goTo: Mock;
-  _triggerReady: () => void;
-  _triggerClick: (location: object) => void;
-  _triggerZoom: () => void;
+  id: Mock;
+  Layers: MockLayers;
+  language: Mock;
+  location: Mock;
+  move: Mock;
+  Overlays: MockOverlays;
+  pitch: Mock;
+  placeholder: Mock;
+  Renderer: { on: Mock };
+  Route: Record<string, never>;
+  repaint: Mock;
+  resize: Mock;
+  rotate: Mock;
+  Search: Record<string, never>;
+  Tags: Record<string, never>;
+  Ui: Record<string, never>;
+  zoom: Mock;
+  zoomRange: Mock;
 }
 
 interface MockSphere {
-  Map: Mock;
-  Marker: Mock;
-  Popup: Mock;
-  Polyline: Mock;
-  Polygon: Mock;
   Circle: Mock;
   Dot: Mock;
-  Rectangle: Mock;
+  EventName: Record<string, never>;
+  Filter: Record<string, string>;
   Layer: Mock;
   Layers: Record<string, object>;
   LayerType: Record<string, string>;
   LineStyle: Record<string, string>;
-  Filter: Record<string, string>;
-  EventName: Record<string, never>;
-  TagType: Record<string, string>;
-  RouteMode: Record<string, string>;
-  RouteType: Record<string, string>;
-  RouteLabel: Record<string, string>;
-  Util: Record<string, never>;
+  Map: Mock;
+  Marker: Mock;
   Math: Record<string, never>;
   Overlays: Record<string, never>;
+  Polygon: Mock;
+  Polyline: Mock;
+  Popup: Mock;
+  Rectangle: Mock;
+  RouteLabel: Record<string, string>;
+  RouteMode: Record<string, string>;
+  RouteType: Record<string, string>;
+  TagType: Record<string, string>;
+  Util: Record<string, never>;
 }
 
 interface MockSphereApi {
-  mockSphere: MockSphere;
   mockMap: MockMap;
+  mockSphere: MockSphere;
 }
 
 export function createMockSphereApi(): MockSphereApi {
@@ -159,13 +159,13 @@ export function createMockSphereApi(): MockSphereApi {
     zoom: vi
       .fn()
       .mockImplementation((value?: number) =>
-        value !== undefined ? mockMap : 10
+        value === undefined ? 10 : mockMap
       ),
     zoomRange: vi.fn().mockReturnThis(),
     location: vi
       .fn()
       .mockImplementation((value?: object) =>
-        value !== undefined ? mockMap : { lon: 100.5, lat: 13.75 }
+        value === undefined ? { lon: 100.5, lat: 13.75 } : mockMap
       ),
     bound: vi.fn().mockReturnThis(),
     move: vi.fn().mockReturnThis(),
@@ -173,12 +173,12 @@ export function createMockSphereApi(): MockSphereApi {
     rotate: vi
       .fn()
       .mockImplementation((value?: number) =>
-        value !== undefined ? mockMap : 0
+        value === undefined ? 0 : mockMap
       ),
     pitch: vi
       .fn()
       .mockImplementation((value?: number) =>
-        value !== undefined ? mockMap : 0
+        value === undefined ? 0 : mockMap
       ),
     enableFilter: vi.fn().mockReturnThis(),
     goTo: vi.fn().mockReturnThis(),

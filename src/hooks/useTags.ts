@@ -5,15 +5,15 @@ import type { Language, TagOptions, Tile } from "../types";
 export type TagDataFunction = (tile: Tile) => object[];
 
 export interface UseTagsReturn {
-  isReady: boolean;
-  set: (tag: string | TagDataFunction, options?: TagOptions) => void;
   add: (tag: string | TagDataFunction, options?: TagOptions) => void;
-  remove: (tag: string) => void;
   clear: () => void;
-  list: () => string[];
-  size: () => number;
   enablePopup: (state: boolean) => void;
+  isReady: boolean;
+  list: () => string[];
+  remove: (tag: string) => void;
+  set: (tag: string | TagDataFunction, options?: TagOptions) => void;
   setLanguage: (lang: Language) => void;
+  size: () => number;
 }
 
 export interface TagDefinition {

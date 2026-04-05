@@ -22,10 +22,10 @@ function toolLabel(t: PlaygroundTranslations, id: DrawingMode): string {
 }
 
 interface DrawingPanelProps {
-  mode: DrawingMode;
-  onModeChange: (mode: DrawingMode) => void;
-  onClear: () => void;
   lang: string;
+  mode: DrawingMode;
+  onClear: () => void;
+  onModeChange: (mode: DrawingMode) => void;
 }
 
 export function DrawingPanel({

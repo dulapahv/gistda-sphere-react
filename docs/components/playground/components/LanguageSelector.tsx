@@ -4,9 +4,9 @@ import { LANGUAGES, type MapLanguage } from "../constants";
 import { getTranslations } from "../translations";
 
 interface LanguageSelectorProps {
+  lang: string;
   language: MapLanguage;
   onLanguageChange: (language: MapLanguage) => void;
-  lang: string;
 }
 
 export function LanguageSelector({

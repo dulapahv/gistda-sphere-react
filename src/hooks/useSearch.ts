@@ -16,36 +16,36 @@ export interface SearchResult {
 
 export interface AddressResult {
   address?: string;
-  subdistrict?: string;
   district?: string;
-  province?: string;
-  postcode?: string;
   geocode?: string;
+  postcode?: string;
+  province?: string;
+  subdistrict?: string;
 }
 
 export interface PoiResult {
-  id: string;
-  name: string;
-  location: Location;
   category?: string;
   distance?: number;
+  id: string;
+  location: Location;
+  name: string;
 }
 
 export interface UseSearchReturn {
-  isReady: boolean;
-  suggest: (keyword: string, options?: SuggestOptions) => Promise<SearchResult>;
-  search: (keyword: string, options?: SearchOptions) => Promise<SearchResult>;
   address: (
     location: Location,
     options?: AddressOptions
   ) => Promise<AddressResult>;
+  clear: () => void;
+  enablePopup: (state: boolean) => void;
+  isReady: boolean;
   nearPoi: (
     location: Location,
     options?: NearPoiOptions
   ) => Promise<PoiResult[]>;
-  clear: () => void;
-  enablePopup: (state: boolean) => void;
+  search: (keyword: string, options?: SearchOptions) => Promise<SearchResult>;
   setLanguage: (lang: Language) => void;
+  suggest: (keyword: string, options?: SuggestOptions) => Promise<SearchResult>;
 }
 
 export function useSearch(): UseSearchReturn {

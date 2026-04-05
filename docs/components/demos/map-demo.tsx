@@ -19,9 +19,9 @@ import { useDocLanguage } from "./use-doc-language";
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
 interface MapDemoProps {
+  center?: Location;
   children?: ReactNode;
   height?: string;
-  center?: Location;
   zoom?: number;
 }
 

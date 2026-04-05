@@ -6,74 +6,74 @@ interface BaseOverlay {
 }
 
 export interface MarkerData extends BaseOverlay {
-  position: Location;
-  icon?: Icon;
-  title?: string;
-  detail?: string;
-  popup?: PopupOptions;
-  visibleRange?: Range;
   clickable?: boolean;
+  detail?: string;
   draggable?: boolean;
-  zIndex?: number;
+  icon?: Icon;
+  popup?: PopupOptions;
+  position: Location;
   rotate?: number;
+  title?: string;
+  visibleRange?: Range;
+  zIndex?: number;
 }
 
 export interface PolygonData extends BaseOverlay {
-  positions: Location[];
-  title?: string;
-  detail?: string;
-  lineWidth?: number;
-  lineColor?: string;
-  fillColor?: string;
-  lineStyle?: "Solid" | "Dashed" | "Dot";
-  popup?: PopupOptions;
-  visibleRange?: Range;
   clickable?: boolean;
+  detail?: string;
   draggable?: boolean;
   editable?: boolean;
+  fillColor?: string;
+  lineColor?: string;
+  lineStyle?: "Solid" | "Dashed" | "Dot";
+  lineWidth?: number;
+  popup?: PopupOptions;
+  positions: Location[];
+  title?: string;
+  visibleRange?: Range;
   zIndex?: number;
 }
 
 export interface PolylineData extends BaseOverlay {
-  positions: Location[];
-  title?: string;
-  detail?: string;
-  lineWidth?: number;
-  lineColor?: string;
-  lineStyle?: "Solid" | "Dashed" | "Dot";
-  popup?: PopupOptions;
-  visibleRange?: Range;
   clickable?: boolean;
+  detail?: string;
   draggable?: boolean;
   editable?: boolean;
+  lineColor?: string;
+  lineStyle?: "Solid" | "Dashed" | "Dot";
+  lineWidth?: number;
+  popup?: PopupOptions;
+  positions: Location[];
+  title?: string;
+  visibleRange?: Range;
   zIndex?: number;
 }
 
 export interface CircleData extends BaseOverlay {
   center: Location;
+  clickable?: boolean;
+  detail?: string;
+  draggable?: boolean;
+  fillColor?: string;
+  lineColor?: string;
+  lineStyle?: "Solid" | "Dashed" | "Dot";
+  lineWidth?: number;
+  popup?: PopupOptions;
   radius: number;
   title?: string;
-  detail?: string;
-  lineWidth?: number;
-  lineColor?: string;
-  fillColor?: string;
-  lineStyle?: "Solid" | "Dashed" | "Dot";
-  popup?: PopupOptions;
   visibleRange?: Range;
-  clickable?: boolean;
-  draggable?: boolean;
   zIndex?: number;
 }
 
 type OverlayInput<T extends BaseOverlay> = Omit<T, "id"> & { id?: string };
 
 interface UseOverlaysResult<T extends BaseOverlay> {
-  items: T[];
   add: (data: OverlayInput<T>) => string;
-  update: (id: string, data: Partial<Omit<T, "id">>) => void;
-  remove: (id: string) => void;
   clear: () => void;
   get: (id: string) => T | undefined;
+  items: T[];
+  remove: (id: string) => void;
+  update: (id: string, data: Partial<Omit<T, "id">>) => void;
 }
 
 function generateId(): string {

@@ -8,8 +8,8 @@ import { getTranslations } from "../translations";
 import type { SearchMarkerData } from "../types";
 
 interface SearchPanelProps {
-  onResultSelect: (marker: SearchMarkerData) => void;
   lang: string;
+  onResultSelect: (marker: SearchMarkerData) => void;
 }
 
 export function SearchPanel({ onResultSelect, lang }: SearchPanelProps) {

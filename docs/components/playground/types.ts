@@ -11,8 +11,8 @@ export interface PolygonData {
 }
 
 export interface CircleData {
-  id: string;
   center: Location;
+  id: string;
   radius: number;
 }
 
@@ -28,8 +28,8 @@ export interface RectangleData {
 }
 
 export interface SearchMarkerData {
-  position: Location;
   name: string;
+  position: Location;
 }
 
 export interface RouteInfoData {

@@ -5,24 +5,24 @@ import type { GeometryOptions, Location, Range, SphereDot } from "../types";
 
 export interface DotRef {
   getDot(): SphereDot | null;
-  setPosition(location: Location): void;
   getPosition(): Location | null;
+  setPosition(location: Location): void;
 }
 
 export interface DotProps {
-  position: Location;
-  ref?: Ref<DotRef>;
-  title?: string;
-  detail?: string;
-  visibleRange?: Range;
-  lineWidth?: number;
-  lineColor?: string;
   clickable?: boolean;
+  detail?: string;
   draggable?: boolean;
-  zIndex?: number;
+  lineColor?: string;
+  lineWidth?: number;
   onClick?: (dot: SphereDot) => void;
   onDrag?: (dot: SphereDot) => void;
   onDrop?: (dot: SphereDot, location: Location) => void;
+  position: Location;
+  ref?: Ref<DotRef>;
+  title?: string;
+  visibleRange?: Range;
+  zIndex?: number;
 }
 
 export function Dot({

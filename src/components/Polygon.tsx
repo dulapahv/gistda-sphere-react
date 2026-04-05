@@ -13,39 +13,39 @@ import type {
 } from "../types";
 
 export interface PolygonRef {
-  getPolygon(): SpherePolygon | null;
-  togglePopup(show?: boolean, location?: Location): void;
-  getPivot(): Location | null;
-  getCentroid(): Location | null;
-  getBound(): Bound | null;
   getArea(language?: string): number | string | null;
+  getBound(): Bound | null;
+  getCentroid(): Location | null;
+  getPivot(): Location | null;
+  getPolygon(): SpherePolygon | null;
   rotate(angle: number): void;
-  updateStyle(options: Partial<GeometryOptions>): void;
   toGeoJSON(): object | null;
+  togglePopup(show?: boolean, location?: Location): void;
+  updateStyle(options: Partial<GeometryOptions>): void;
 }
 
 export interface PolygonProps {
-  positions: Location[];
-  ref?: Ref<PolygonRef>;
-  title?: string;
+  clickable?: boolean;
   detail?: string;
+  draggable?: boolean;
+  editable?: boolean;
+  fillColor?: string;
   label?: string;
   labelOptions?: MarkerOptions;
-  popup?: PopupOptions;
-  visibleRange?: Range;
-  lineWidth?: number;
   lineColor?: string;
-  fillColor?: string;
   lineStyle?: LineStyleType;
-  pivot?: Location;
-  clickable?: boolean;
-  draggable?: boolean;
-  pointer?: boolean;
-  zIndex?: number;
-  editable?: boolean;
+  lineWidth?: number;
   onClick?: (polygon: SpherePolygon) => void;
   onDrag?: (polygon: SpherePolygon) => void;
   onDrop?: (polygon: SpherePolygon) => void;
+  pivot?: Location;
+  pointer?: boolean;
+  popup?: PopupOptions;
+  positions: Location[];
+  ref?: Ref<PolygonRef>;
+  title?: string;
+  visibleRange?: Range;
+  zIndex?: number;
 }
 
 export function Polygon({

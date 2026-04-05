@@ -32,42 +32,42 @@ type BuiltInLayer =
   | "DROUGHT";
 
 interface MapControls {
-  isReady: boolean;
+  addLayer: (layer: BuiltInLayer) => void;
   goTo: (options: FlyToOptions, animate?: boolean) => void;
-  setCenter: (location: Location, animate?: boolean) => void;
-  setZoom: (zoom: number, animate?: boolean) => void;
+  isReady: boolean;
+  loadPredefinedOverlay: (overlay: PredefinedOverlay) => void;
+  removeLayer: (layer: BuiltInLayer) => void;
+  repaint: () => void;
+  resize: () => void;
+  setBaseLayer: (layer: BuiltInLayer) => void;
   setBound: (bound: Bound, options?: object) => void;
-  setRotate: (angle: number, animate?: boolean) => void;
-  setPitch: (angle: number) => void;
+  setCenter: (location: Location, animate?: boolean) => void;
   setFilter: (filter: FilterType | false) => void;
   setLanguage: (language: "th" | "en") => void;
-  setBaseLayer: (layer: BuiltInLayer) => void;
-  addLayer: (layer: BuiltInLayer) => void;
-  removeLayer: (layer: BuiltInLayer) => void;
-  loadPredefinedOverlay: (overlay: PredefinedOverlay) => void;
+  setPitch: (angle: number) => void;
+  setRotate: (angle: number, animate?: boolean) => void;
+  setZoom: (zoom: number, animate?: boolean) => void;
   unloadPredefinedOverlay: (overlay: PredefinedOverlay) => void;
-  resize: () => void;
-  repaint: () => void;
 }
 
 interface SphereContextValue {
-  isLoaded: boolean;
-  error: Error | null;
-  sphere: SphereNamespace | null;
   apiKey: string;
-  map: SphereMap | null;
-  isMapReady: boolean;
   controls: MapControls;
+  error: Error | null;
+  isLoaded: boolean;
+  isMapReady: boolean;
+  map: SphereMap | null;
   registerMap: (map: SphereMap) => void;
+  sphere: SphereNamespace | null;
   unregisterMap: () => void;
 }
 
 interface SphereProviderProps {
   apiKey: string;
   children: ReactNode;
-  scriptUrl?: string;
-  onLoad?: () => void;
   onError?: (error: Error) => void;
+  onLoad?: () => void;
+  scriptUrl?: string;
 }
 
 const SphereContext = createContext<SphereContextValue | null>(null);
@@ -361,7 +361,6 @@ export function useMapControls(): MapControls {
   return controls;
 }
 
-export { SphereContext };
 export type {
   BuiltInLayer,
   MapControls,
@@ -369,3 +368,4 @@ export type {
   SphereContextValue,
   SphereProviderProps,
 };
+export { SphereContext };

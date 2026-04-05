@@ -10,29 +10,29 @@ import type {
 } from "../types";
 
 export interface DrawingState {
-  mode: DrawingMode;
-  markers: MarkerData[];
-  polygons: PolygonData[];
-  polylines: PolygonData[];
+  circleCenter: Location | null;
   circles: CircleData[];
   dots: DotData[];
-  rectangles: RectangleData[];
+  markers: MarkerData[];
+  mode: DrawingMode;
   polygonPoints: Location[];
+  polygons: PolygonData[];
   polylinePoints: Location[];
-  circleCenter: Location | null;
+  polylines: PolygonData[];
   rectangleCorner: Location | null;
+  rectangles: RectangleData[];
   selectedPopup: Location | null;
 }
 
 export interface UseDrawingReturn extends DrawingState {
-  setMode: (mode: DrawingMode) => void;
+  clearAll: () => void;
+  closePopup: () => void;
   handleClick: (location: Location) => boolean;
   handleDoubleClick: () => void;
-  clearAll: () => void;
-  updateMarker: (id: string, position: Location) => void;
-  updateDot: (id: string, position: Location) => void;
-  closePopup: () => void;
+  setMode: (mode: DrawingMode) => void;
   totalShapes: number;
+  updateDot: (id: string, position: Location) => void;
+  updateMarker: (id: string, position: Location) => void;
 }
 
 export function useDrawing(): UseDrawingReturn {

@@ -13,36 +13,36 @@ import type {
 } from "../types";
 
 export interface PolylineRef {
-  getPolyline(): SpherePolyline | null;
-  togglePopup(show?: boolean, location?: Location): void;
-  getPivot(): Location | null;
-  getCentroid(): Location | null;
   getBound(): Bound | null;
+  getCentroid(): Location | null;
   getLength(language?: string): number | string | null;
+  getPivot(): Location | null;
+  getPolyline(): SpherePolyline | null;
   rotate(angle: number): void;
+  togglePopup(show?: boolean, location?: Location): void;
   updateStyle(options: Partial<GeometryOptions>): void;
 }
 
 export interface PolylineProps {
-  positions: Location[];
-  ref?: Ref<PolylineRef>;
-  title?: string;
+  clickable?: boolean;
   detail?: string;
+  draggable?: boolean;
   label?: string;
   labelOptions?: MarkerOptions;
-  popup?: PopupOptions;
-  visibleRange?: Range;
-  lineWidth?: number;
   lineColor?: string;
   lineStyle?: LineStyleType;
-  pivot?: Location;
-  clickable?: boolean;
-  draggable?: boolean;
-  pointer?: boolean;
-  zIndex?: number;
+  lineWidth?: number;
   onClick?: (polyline: SpherePolyline) => void;
   onDrag?: (polyline: SpherePolyline) => void;
   onDrop?: (polyline: SpherePolyline) => void;
+  pivot?: Location;
+  pointer?: boolean;
+  popup?: PopupOptions;
+  positions: Location[];
+  ref?: Ref<PolylineRef>;
+  title?: string;
+  visibleRange?: Range;
+  zIndex?: number;
 }
 
 export function Polyline({

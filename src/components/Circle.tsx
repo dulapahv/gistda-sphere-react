@@ -12,33 +12,33 @@ import type {
 } from "../types";
 
 export interface CircleRef {
-  getCircle(): SphereCircle | null;
-  togglePopup(show?: boolean, location?: Location): void;
-  getCenter(): Location | null;
-  getBound(): Bound | null;
   getArea(language?: string): number | string | null;
+  getBound(): Bound | null;
+  getCenter(): Location | null;
+  getCircle(): SphereCircle | null;
   getRadius(language?: string): number | string | null;
+  togglePopup(show?: boolean, location?: Location): void;
   updateStyle(options: Partial<GeometryOptions>): void;
 }
 
 export interface CircleProps {
   center: Location;
-  radius: number;
-  ref?: Ref<CircleRef>;
-  title?: string;
-  detail?: string;
-  popup?: PopupOptions;
-  visibleRange?: Range;
-  lineWidth?: number;
-  lineColor?: string;
-  fillColor?: string;
-  lineStyle?: LineStyleType;
   clickable?: boolean;
+  detail?: string;
   draggable?: boolean;
-  zIndex?: number;
+  fillColor?: string;
+  lineColor?: string;
+  lineStyle?: LineStyleType;
+  lineWidth?: number;
   onClick?: (circle: SphereCircle) => void;
   onDrag?: (circle: SphereCircle) => void;
   onDrop?: (circle: SphereCircle) => void;
+  popup?: PopupOptions;
+  radius: number;
+  ref?: Ref<CircleRef>;
+  title?: string;
+  visibleRange?: Range;
+  zIndex?: number;
 }
 
 export function Circle({

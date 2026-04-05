@@ -25,13 +25,13 @@ function routeModeLabel(t: PlaygroundTranslations, id: RouteMode): string {
 }
 
 interface RoutePanelProps {
-  origin: Location | null;
   destination: Location | null;
-  settingPoint: "origin" | "destination" | null;
-  onSetOrigin: (location: Location | null) => void;
-  onSetDestination: (location: Location | null) => void;
-  onSettingPointChange: (point: "origin" | "destination" | null) => void;
   lang: string;
+  onSetDestination: (location: Location | null) => void;
+  onSetOrigin: (location: Location | null) => void;
+  onSettingPointChange: (point: "origin" | "destination" | null) => void;
+  origin: Location | null;
+  settingPoint: "origin" | "destination" | null;
 }
 
 export function RoutePanel({

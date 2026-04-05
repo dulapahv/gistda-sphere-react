@@ -1,6 +1,6 @@
 export interface Location {
-  lon: number;
   lat: number;
+  lon: number;
 }
 
 export interface Point {
@@ -9,20 +9,20 @@ export interface Point {
 }
 
 export interface Range {
-  min: number;
   max: number;
+  min: number;
 }
 
 export interface Bound {
-  minLon: number;
-  minLat: number;
-  maxLon: number;
   maxLat: number;
+  maxLon: number;
+  minLat: number;
+  minLon: number;
 }
 
 export interface Size {
-  width: number;
   height: number;
+  width: number;
 }
 
 export interface Tile {
@@ -32,11 +32,11 @@ export interface Tile {
 }
 
 export interface Icon {
-  url?: string;
-  urlHD?: string;
   html?: string;
   offset?: Point;
   size?: Size;
+  url?: string;
+  urlHD?: string;
 }
 
 export type LayerType =
@@ -83,15 +83,15 @@ export type RouteLabelType = "Distance" | "Time" | "Hide";
 export type TagType = "WFS" | "OGC";
 
 export interface MapOptions {
+  input?: boolean;
+  language?: Language;
+  lastView?: boolean;
   layer?: SphereLayer | string;
-  zoom?: number;
-  zoomRange?: Range;
   location?: Location;
   placeholder?: HTMLElement;
   ui?: UiComponentMode;
-  input?: boolean;
-  lastView?: boolean;
-  language?: Language;
+  zoom?: number;
+  zoomRange?: Range;
   [key: string]:
     | SphereLayer
     | string
@@ -105,104 +105,104 @@ export interface MapOptions {
 }
 
 export interface LayerOptions {
+  attribution?: string;
+  bound?: Bound;
+  extraQuery?: string;
+  format?: string;
+  id?: string;
+  opacity?: number;
+  refresh?: number;
+  source?: Range;
+  srs?: string;
+  styles?: string;
+  tileMatrixPrefix?: string;
   type?: LayerType;
   url?: string;
-  zoomRange?: Range;
-  source?: Range;
-  opacity?: number;
-  zIndex?: number;
-  bound?: Bound;
-  attribution?: string;
-  extraQuery?: string;
-  id?: string;
-  format?: string;
-  srs?: string;
-  tileMatrixPrefix?: string;
-  styles?: string;
   version?: string;
-  refresh?: number;
+  zIndex?: number;
   zoomOffset?: number;
+  zoomRange?: Range;
 }
 
 export interface MarkerOptions {
-  icon?: Icon;
-  title?: string;
-  detail?: string;
-  popup?: PopupOptions;
-  visibleRange?: Range;
   clickable?: boolean;
+  detail?: string;
   draggable?: boolean;
-  zIndex?: number;
+  icon?: Icon;
+  popup?: PopupOptions;
   rotate?: number;
+  title?: string;
+  visibleRange?: Range;
+  zIndex?: number;
 }
 
 export interface PopupOptions {
-  title?: string;
+  closable?: boolean;
   detail?: string;
-  loadDetail?: (element: HTMLElement) => void;
   html?: string;
+  loadDetail?: (element: HTMLElement) => void;
   loadHtml?: (element: HTMLElement) => void;
   size?: Size;
-  closable?: boolean;
+  title?: string;
 }
 
 export interface GeometryOptions {
-  title?: string;
+  clickable?: boolean;
   detail?: string;
+  draggable?: boolean;
+  editable?: boolean;
+  fillColor?: string;
   label?: string;
   labelOptions?: MarkerOptions;
-  popup?: PopupOptions;
-  visibleRange?: Range;
-  lineWidth?: number;
   lineColor?: string;
-  fillColor?: string;
   lineStyle?: LineStyleType;
+  lineWidth?: number;
   pivot?: Location | (() => Location);
-  clickable?: boolean;
-  draggable?: boolean;
   pointer?: boolean;
+  popup?: PopupOptions;
+  title?: string;
+  visibleRange?: Range;
   zIndex?: number;
-  editable?: boolean;
 }
 
 export interface TagOptions {
-  source?: string;
-  type?: TagType;
-  icon?: Icon | "big" | "small";
-  visibleRange?: Range;
-  label?: Range;
   area?: string;
   dataset?: string;
-  name?: string;
   extraQuery?: string;
+  icon?: Icon | "big" | "small";
+  label?: Range;
+  name?: string;
+  source?: string;
+  type?: TagType;
   version?: string;
+  visibleRange?: Range;
 }
 
 export interface SearchOptions {
   area?: string;
-  tag?: string;
-  span?: string;
-  offset?: number;
-  limit?: number;
   dataset?: string;
+  limit?: number;
+  offset?: number;
+  span?: string;
+  tag?: string;
 }
 
 export interface SuggestOptions {
   area?: string;
-  offset?: number;
-  limit?: number;
   dataset?: string;
+  limit?: number;
+  offset?: number;
 }
 
 export interface AddressOptions {
-  limit?: number;
   dataset?: string;
+  limit?: number;
 }
 
 export interface NearPoiOptions {
+  limit?: number;
   span?: number;
   zoom?: number;
-  limit?: number;
 }
 
 export type EventName =
@@ -248,8 +248,8 @@ export type EventName =
 export type EventHandler<T = void> = (data: T) => void | undefined | boolean;
 
 export interface OverlayClickEventData {
-  overlay: SphereOverlay;
   location?: Location;
+  overlay: SphereOverlay;
 }
 
 export type OverlayEventData = SphereOverlay;
@@ -267,64 +267,64 @@ export interface SphereLayer {
 }
 
 export interface SphereLayerCollection {
-  language(value?: Language): Language | this;
-  setBase(layer: SphereLayer | object | string): this;
   add(layer: SphereLayer | object, beforeId?: string): this;
-  remove(layer: SphereLayer | object): this;
   clear(): this;
+  language(value?: Language): Language | this;
   list(): object[];
+  remove(layer: SphereLayer | object): this;
+  setBase(layer: SphereLayer | object | string): this;
   size(): number;
 }
 
 export interface SphereOverlay {
-  location(
-    geojson?: Location | Location[] | object,
-    animate?: boolean
-  ): Location | Location[] | this;
-  visibleRange(): Range;
   active(): boolean;
-  shift(vector: Location): this;
+  contains(overlay: Location | SphereOverlay): boolean;
   distance(
     overlay: Location | SphereOverlay,
     language?: string
   ): number | string;
   intersects(overlay: Location | SphereOverlay): boolean;
-  contains(overlay: Location | SphereOverlay): boolean;
-  within(overlay: Location | SphereOverlay): boolean;
+  location(
+    geojson?: Location | Location[] | object,
+    animate?: boolean
+  ): Location | Location[] | this;
+  shift(vector: Location): this;
   toJSON(key?: string): object;
+  visibleRange(): Range;
+  within(overlay: Location | SphereOverlay): boolean;
 }
 
 export interface SphereMarker extends SphereOverlay {
-  popup(): SpherePopup;
   element(): HTMLElement;
   pop(mode?: boolean): this;
+  popup(): SpherePopup;
   update(newOptions: MarkerOptions): this;
 }
 
 export interface SpherePopup extends SphereOverlay {
+  detail(value?: string): HTMLElement | this;
   element(): HTMLElement;
   title(value?: string): HTMLElement | this;
-  detail(value?: string): HTMLElement | this;
 }
 
 export interface SpherePolyline extends SphereOverlay {
-  popup(): SpherePopup;
-  pop(mode?: boolean, location?: Location): this;
-  pivot(): Location;
-  centroid(): Location;
   bound(): Bound;
-  update(newOptions: GeometryOptions): this;
+  centroid(): Location;
+  pivot(): Location;
+  pop(mode?: boolean, location?: Location): this;
+  popup(): SpherePopup;
   rotate(angle: number): this;
   size(language?: string): number | string;
   union(overlay: SpherePolyline, options?: GeometryOptions): SpherePolyline;
+  update(newOptions: GeometryOptions): this;
 }
 
 export interface SpherePolygon extends SpherePolyline {
+  difference(overlay: SpherePolygon, options?: GeometryOptions): SpherePolygon;
   intersection(
     overlay: SpherePolygon,
     options?: GeometryOptions
   ): SpherePolygon;
-  difference(overlay: SpherePolygon, options?: GeometryOptions): SpherePolygon;
   split(splitter: SpherePolygon, options?: GeometryOptions): SpherePolygon[];
 }
 
@@ -338,13 +338,13 @@ export interface SphereRectangle extends SpherePolygon {}
 
 export interface SphereOverlayCollection {
   add(overlay: SphereOverlay): this;
-  remove(overlay: SphereOverlay): this;
-  load(mode: object): this;
-  unload(mode: object): this;
   clear(): this;
-  list(): SphereOverlay[];
-  size(): number;
   lastOpenPopup(): SpherePopup;
+  list(): SphereOverlay[];
+  load(mode: object): this;
+  remove(overlay: SphereOverlay): this;
+  size(): number;
+  unload(mode: object): this;
 }
 
 export interface SphereUiControl {
@@ -352,8 +352,8 @@ export interface SphereUiControl {
 }
 
 export interface SphereContextMenu {
-  enableNearPoi(state?: boolean): boolean | SphereContextMenu;
   enableAddress(state?: boolean): boolean | SphereContextMenu;
+  enableNearPoi(state?: boolean): boolean | SphereContextMenu;
 }
 
 export interface SphereKeyboard {
@@ -368,131 +368,114 @@ export interface SphereMouse {
 }
 
 export interface SphereUiCollection {
-  DPad: SphereUiControl;
-  Geolocation: SphereUiControl;
-  Zoombar: SphereUiControl;
-  Toolbar: SphereUiControl;
-  LayerSelector: SphereUiControl;
-  Fullscreen: SphereUiControl;
-  Crosshair: SphereUiControl;
-  Scale: SphereUiControl;
-  ContextMenu: SphereContextMenu;
-  Keyboard: SphereKeyboard;
-  Mouse: SphereMouse;
-  language(value?: Language): Language | SphereUiCollection;
   add(control: object): SphereUiCollection;
-  remove(control: object): SphereUiCollection;
+  ContextMenu: SphereContextMenu;
+  Crosshair: SphereUiControl;
+  DPad: SphereUiControl;
+  Fullscreen: SphereUiControl;
+  Geolocation: SphereUiControl;
+  Keyboard: SphereKeyboard;
+  LayerSelector: SphereUiControl;
+  language(value?: Language): Language | SphereUiCollection;
   lockMap(options?: object): SphereUiCollection;
+  Mouse: SphereMouse;
+  remove(control: object): SphereUiCollection;
+  Scale: SphereUiControl;
+  Toolbar: SphereUiControl;
+  Zoombar: SphereUiControl;
 }
 
 export interface SphereSearch {
-  language(value?: Language): Language | this;
-  placeholder(value?: HTMLElement, options?: object): HTMLElement | this;
-  suggest(keyword: string, options?: SuggestOptions): Promise<object>;
-  search(keyword: string, options?: SearchOptions): Promise<object>;
   address(location: Location, options?: AddressOptions): Promise<object>;
-  nearPoi(location: Location, options?: NearPoiOptions): Promise<object>;
   clear(): this;
   enablePopup(state?: boolean): boolean | this;
+  language(value?: Language): Language | this;
+  nearPoi(location: Location, options?: NearPoiOptions): Promise<object>;
+  placeholder(value?: HTMLElement, options?: object): HTMLElement | this;
+  search(keyword: string, options?: SearchOptions): Promise<object>;
+  suggest(keyword: string, options?: SuggestOptions): Promise<object>;
 }
 
 export interface SphereTagCollection {
-  language(value?: Language): Language | this;
-  set(tag: string | ((tile: Tile) => object[]), options?: TagOptions): this;
   add(tag: string | ((tile: Tile) => object[]), options?: TagOptions): this;
-  remove(tag: string): this;
   clear(): this;
-  list(): string[];
-  size(): number;
   enablePopup(state?: boolean): boolean | this;
+  language(value?: Language): Language | this;
+  list(): string[];
+  remove(tag: string): this;
+  set(tag: string | ((tile: Tile) => object[]), options?: TagOptions): this;
+  size(): number;
 }
 
 export interface SphereRoute {
-  language(value?: Language): Language | this;
-  placeholder(value?: HTMLElement): HTMLElement | this;
-  enableContextMenu(): this;
-  line(type: string, value?: GeometryOptions): GeometryOptions | this;
-  auto(state?: boolean): boolean | this;
-  mode(value?: RouteMode): RouteMode | this;
-  modeOf(index: number, value?: RouteMode): RouteMode | this;
-  enableRoute(routeType: RouteType, state?: boolean): boolean | this;
-  enableRestrict(routeRestrict: string, state?: boolean): boolean | this;
-  label(value?: RouteLabelType): RouteLabelType | this;
   add(destination: SphereMarker | Location, mode?: RouteMode): this;
+  auto(state?: boolean): boolean | this;
+  clear(): this;
+  clearDestination(): this;
+  clearPath(): this;
+  distance(format?: boolean): number | string;
+  enableContextMenu(): this;
+  enableRestrict(routeRestrict: string, state?: boolean): boolean | this;
+  enableRoute(routeType: RouteType, state?: boolean): boolean | this;
+  exportRouteLine(options?: GeometryOptions): SpherePolyline;
+  guide(format?: boolean): object[] | HTMLElement;
   insert(
     index: number,
     destination: SphereMarker | Location,
     mode?: RouteMode
   ): this;
+  interval(format?: boolean): number | string;
+  label(value?: RouteLabelType): RouteLabelType | this;
+  language(value?: Language): Language | this;
+  line(type: string, value?: GeometryOptions): GeometryOptions | this;
+  list(): SphereMarker[];
+  mode(value?: RouteMode): RouteMode | this;
+  modeOf(index: number, value?: RouteMode): RouteMode | this;
+  placeholder(value?: HTMLElement): HTMLElement | this;
   remove(destination: SphereMarker): this;
   removeAt(index: number): this;
-  clearDestination(): this;
-  clearPath(): this;
-  clear(): this;
-  list(): SphereMarker[];
-  size(): number;
   reverse(): this;
   search(): this;
-  distance(format?: boolean): number | string;
-  interval(format?: boolean): number | string;
-  guide(format?: boolean): object[] | HTMLElement;
-  exportRouteLine(options?: GeometryOptions): SpherePolyline;
+  size(): number;
 }
 
 export interface FlyToOptions {
-  center?: Location;
-  zoom?: number;
   bearing?: number;
-  pitch?: number;
+  center?: Location;
   padding?: { top?: number; bottom?: number; left?: number; right?: number };
+  pitch?: number;
+  zoom?: number;
 }
 
 export interface SphereMap {
+  bound(value?: Bound, options?: object): Bound | this;
   Event: SphereEvent;
+  enableFilter(filter?: FilterType | false): FilterType | false | this;
+  goTo(target: FlyToOptions, animate?: boolean): this;
+
+  id(): number;
   Layers: SphereLayerCollection;
+  language(value?: Language): Language | this;
+  location(value?: Location, animate?: boolean): Location | this;
+  move(offset: Point, animate?: boolean): this;
   Overlays: SphereOverlayCollection;
-  Ui: SphereUiCollection;
-  Search: SphereSearch;
-  Tags: SphereTagCollection;
-  Route: SphereRoute;
+  pitch(angle?: number): number | this;
+  placeholder(): HTMLElement;
   Renderer: {
     on(event: string, handler: () => void): void;
   };
-
-  id(): number;
-  resize(): this;
+  Route: SphereRoute;
   repaint(): this;
-  placeholder(): HTMLElement;
+  resize(): this;
+  rotate(angle?: number, animate?: boolean): number | this;
+  Search: SphereSearch;
+  Tags: SphereTagCollection;
+  Ui: SphereUiCollection;
   zoom(value?: number | boolean, animate?: boolean): number | this;
   zoomRange(value?: Range): Range | this;
-  location(value?: Location, animate?: boolean): Location | this;
-  bound(value?: Bound, options?: object): Bound | this;
-  move(offset: Point, animate?: boolean): this;
-  language(value?: Language): Language | this;
-  rotate(angle?: number, animate?: boolean): number | this;
-  pitch(angle?: number): number | this;
-  enableFilter(filter?: FilterType | false): FilterType | false | this;
-  goTo(target: FlyToOptions, animate?: boolean): this;
 }
 
 export interface SphereNamespace {
-  Map: new (options?: MapOptions) => SphereMap;
-  Marker: new (
-    location: Location | object,
-    options?: MarkerOptions
-  ) => SphereMarker;
-  Popup: new (
-    location: Location | object,
-    options?: PopupOptions
-  ) => SpherePopup;
-  Polyline: new (
-    locationList: Location[] | object,
-    options?: GeometryOptions
-  ) => SpherePolyline;
-  Polygon: new (
-    locationList: Location[] | object,
-    options?: GeometryOptions
-  ) => SpherePolygon;
   Circle: new (
     location: Location | object,
     radius: number,
@@ -502,11 +485,16 @@ export interface SphereNamespace {
     location: Location | object,
     options?: GeometryOptions
   ) => SphereDot;
-  Rectangle: new (
-    location: Location,
-    size: Size | Location,
-    options?: GeometryOptions
-  ) => SphereRectangle;
+
+  EventName: Record<EventName, EventName>;
+
+  Filter: {
+    Dark: FilterType;
+    Light: FilterType;
+    Protanopia: FilterType;
+    Deuteranopia: FilterType;
+    None: FilterType;
+  };
   Layer: new (name: string, options?: LayerOptions) => SphereLayer;
 
   Layers: {
@@ -538,20 +526,67 @@ export interface SphereNamespace {
     Dashed: string;
     Dot: string;
   };
+  Map: new (options?: MapOptions) => SphereMap;
+  Marker: new (
+    location: Location | object,
+    options?: MarkerOptions
+  ) => SphereMarker;
 
-  Filter: {
-    Dark: FilterType;
-    Light: FilterType;
-    Protanopia: FilterType;
-    Deuteranopia: FilterType;
-    None: FilterType;
+  Math: {
+    distance(dx: number, dy: number): number;
+    closestPointOnLine(
+      x: number,
+      y: number,
+      x1: number,
+      y1: number,
+      x2: number,
+      y2: number
+    ): Point;
+    lineIntersectPoint(
+      x1: number,
+      y1: number,
+      x2: number,
+      y2: number,
+      u1: number,
+      v1: number,
+      u2: number,
+      v2: number,
+      skipOverlap?: boolean
+    ): Point | number[] | null;
   };
 
-  EventName: Record<EventName, EventName>;
+  Overlays: {
+    cameras: { popup?: boolean; motion?: boolean };
+    events: { popup?: boolean };
+    aqi: { popup?: boolean };
+    Object: new (
+      id: string,
+      dataset?: string,
+      options?: object
+    ) => SphereOverlay;
+  };
+  Polygon: new (
+    locationList: Location[] | object,
+    options?: GeometryOptions
+  ) => SpherePolygon;
+  Polyline: new (
+    locationList: Location[] | object,
+    options?: GeometryOptions
+  ) => SpherePolyline;
+  Popup: new (
+    location: Location | object,
+    options?: PopupOptions
+  ) => SpherePopup;
+  Rectangle: new (
+    location: Location,
+    size: Size | Location,
+    options?: GeometryOptions
+  ) => SphereRectangle;
 
-  TagType: {
-    WFS: string;
-    OGC: string;
+  RouteLabel: {
+    Distance: string;
+    Time: string;
+    Hide: string;
   };
 
   RouteMode: {
@@ -568,10 +603,9 @@ export interface SphereNamespace {
     All: string;
   };
 
-  RouteLabel: {
-    Distance: string;
-    Time: string;
-    Hide: string;
+  TagType: {
+    WFS: string;
+    OGC: string;
   };
 
   Util: {
@@ -627,40 +661,6 @@ export interface SphereNamespace {
       name: string,
       language: string
     ) => PopupOptions;
-  };
-
-  Math: {
-    distance(dx: number, dy: number): number;
-    closestPointOnLine(
-      x: number,
-      y: number,
-      x1: number,
-      y1: number,
-      x2: number,
-      y2: number
-    ): Point;
-    lineIntersectPoint(
-      x1: number,
-      y1: number,
-      x2: number,
-      y2: number,
-      u1: number,
-      v1: number,
-      u2: number,
-      v2: number,
-      skipOverlap?: boolean
-    ): Point | number[] | null;
-  };
-
-  Overlays: {
-    cameras: { popup?: boolean; motion?: boolean };
-    events: { popup?: boolean };
-    aqi: { popup?: boolean };
-    Object: new (
-      id: string,
-      dataset?: string,
-      options?: object
-    ) => SphereOverlay;
   };
 }
 

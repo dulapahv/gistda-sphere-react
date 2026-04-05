@@ -17,18 +17,18 @@ import { getTranslations } from "../translations";
 import type { SearchMarkerData } from "../types";
 
 interface MapViewProps {
-  drawing: UseDrawingReturn;
-  routeOrigin: Location | null;
-  routeDestination: Location | null;
-  searchMarker: SearchMarkerData | null;
-  settingRoutePoint: "origin" | "destination" | null;
   center: Location | null;
-  language: MapLanguage;
+  drawing: UseDrawingReturn;
   lang: string;
-  onZoom: (zoom: number) => void;
-  onLocation: (center: Location) => void;
+  language: MapLanguage;
   onClick: (location: Location) => void;
   onDoubleClick: () => void;
+  onLocation: (center: Location) => void;
+  onZoom: (zoom: number) => void;
+  routeDestination: Location | null;
+  routeOrigin: Location | null;
+  searchMarker: SearchMarkerData | null;
+  settingRoutePoint: "origin" | "destination" | null;
 }
 
 export function MapView({
