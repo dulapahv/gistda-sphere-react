@@ -2,39 +2,6 @@
   "name": "gistda-sphere-react",
   "version": "1.3.3",
   "description": "React wrapper library for GISTDA Sphere Map API with TypeScript support",
-  "main": "dist/index.js",
-  "module": "dist/index.mjs",
-  "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "types": "./dist/index.d.ts",
-      "import": "./dist/index.mjs",
-      "require": "./dist/index.js"
-    }
-  },
-  "files": [
-    "dist"
-  ],
-  "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
-    "dev:docs": "pnpm --parallel --filter gistda-sphere-react --filter docs run dev",
-    "lint": "pnpm dlx ultracite check",
-    "lint:fix": "pnpm dlx ultracite fix",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest --watch=false",
-    "test:watch": "vitest --watch",
-    "test:ui": "vitest --ui",
-    "test:coverage": "vitest run --watch=false --coverage",
-    "prepublishOnly": "pnpm run build",
-    "prepare": "husky"
-  },
-  "lint-staged": {
-    "*.{js,jsx,ts,tsx,json,jsonc,css,scss,md,mdx}": [
-      "pnpm dlx ultracite fix",
-      "pnpm test"
-    ]
-  },
   "keywords": [
     "gistda",
     "sphere",
@@ -45,36 +12,63 @@
     "thailand",
     "gis"
   ],
-  "author": "dulapahv",
-  "license": "MIT",
-  "peerDependencies": {
-    "react": ">=19.0.0",
-    "react-dom": ">=19.0.0"
-  },
-  "devDependencies": {
-    "@biomejs/biome": "^2.4.10",
-    "@commitlint/config-conventional": "^20.5.0",
-    "@testing-library/jest-dom": "^6.9.1",
-    "@testing-library/react": "^16.3.2",
-    "@types/react": "^19.2.14",
-    "@types/react-dom": "^19.2.3",
-    "@vitest/coverage-v8": "^4.1.2",
-    "husky": "^9.1.7",
-    "jsdom": "^28.1.0",
-    "react": "^19.2.4",
-    "react-dom": "^19.2.4",
-    "tsup": "^8.5.1",
-    "typescript": "^5.9.3",
-    "ultracite": "^7.4.3",
-    "vitest": "^4.1.2"
+  "homepage": "https://github.com/dulapahv/gistda-sphere-react",
+  "bugs": {
+    "url": "https://github.com/dulapahv/gistda-sphere-react/issues"
   },
   "repository": {
     "type": "git",
     "url": "https://github.com/dulapahv/gistda-sphere-react.git"
   },
-  "bugs": {
-    "url": "https://github.com/dulapahv/gistda-sphere-react/issues"
+  "license": "MIT",
+  "author": "dulapahv",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
   },
-  "homepage": "https://github.com/dulapahv/gistda-sphere-react",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "dev:docs": "pnpm --parallel --filter gistda-sphere-react --filter docs run dev",
+    "lint": "pnpm dlx ultracite check",
+    "lint:fix": "pnpm dlx ultracite fix",
+    "prepare": "husky",
+    "prepublishOnly": "pnpm run build",
+    "test": "vitest --watch=false",
+    "test:coverage": "vitest run --watch=false --coverage",
+    "test:ui": "vitest --ui",
+    "test:watch": "vitest --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "^2.5.6",
+    "@commitlint/config-conventional": "^21.2.0",
+    "@testing-library/jest-dom": "^7.0.0",
+    "@testing-library/react": "^16.3.2",
+    "@types/react": "^19.2.18",
+    "@types/react-dom": "^19.2.4",
+    "@vitest/coverage-v8": "^4.1.10",
+    "husky": "^9.1.7",
+    "jsdom": "^30.0.1",
+    "react": "^19.2.8",
+    "react-dom": "^19.2.8",
+    "tsup": "^8.5.1",
+    "typescript": "^5.9.3",
+    "ultracite": "^7.10.0",
+    "vitest": "^4.1.10"
+  },
+  "peerDependencies": {
+    "react": ">=19.0.0",
+    "react-dom": ">=19.0.0"
+  },
   "packageManager": "pnpm@10.33.0+sha512.10568bb4a6afb58c9eb3630da90cc9516417abebd3fabbe6739f0ae795728da1491e9db5a544c76ad8eb7570f5c4bb3d6c637b2cb41bfdcdb47fa823c8649319"
 }
