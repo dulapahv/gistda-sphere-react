@@ -11,27 +11,26 @@ export function baseOptions(lang?: string): BaseLayoutProps {
   const labels = navLabels[lang ?? "en"] ?? navLabels.en;
 
   return {
+    links: [
+      {
+        active: "nested-url",
+        text: labels.docs,
+        url: `${prefix}/docs`,
+      },
+      {
+        external: true,
+        text: labels.playground,
+        url: `${prefix}/playground`,
+      },
+      {
+        external: true,
+        text: "GitHub",
+        url: "https://github.com/dulapahv/gistda-sphere-react",
+      },
+    ],
     nav: {
       title: "gistda-sphere-react",
       url: `${prefix}`,
     },
-    links: [
-      {
-        text: labels.docs,
-        url: `${prefix}/docs`,
-        active: "nested-url",
-      },
-      {
-        text: labels.playground,
-        url: `${prefix}/playground`,
-        external: true,
-      },
-      {
-        text: "GitHub",
-        url: "https://github.com/dulapahv/gistda-sphere-react",
-        external: true,
-      },
-    ],
-    i18n,
   };
 }
