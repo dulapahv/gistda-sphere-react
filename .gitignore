@@ -25,7 +25,8 @@ pnpm-debug.log*
 .env.*.local
 
 # Testing
-coverage/
+/coverage
+junit.xml
 
 # Cache
 .cache/
