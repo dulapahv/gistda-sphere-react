@@ -34,7 +34,7 @@ describe("useMapControls", () => {
       });
 
       // Should not throw
-      result.current.goTo({ center: { lon: 100, lat: 13 }, zoom: 12 });
+      result.current.goTo({ center: { lat: 13, lon: 100 }, zoom: 12 });
     });
 
     it("setCenter is a no-op when map is not ready", () => {
@@ -42,7 +42,7 @@ describe("useMapControls", () => {
         wrapper: createWrapper(),
       });
 
-      result.current.setCenter({ lon: 100, lat: 13 });
+      result.current.setCenter({ lat: 13, lon: 100 });
     });
 
     it("setZoom is a no-op when map is not ready", () => {
@@ -59,10 +59,10 @@ describe("useMapControls", () => {
       });
 
       result.current.setBound({
-        minLon: 100,
-        minLat: 13,
-        maxLon: 101,
         maxLat: 14,
+        maxLon: 101,
+        minLat: 13,
+        minLon: 100,
       });
     });
 

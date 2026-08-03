@@ -258,22 +258,22 @@ export function SphereProvider({
 
   const controls = useMemo<MapControls>(
     () => ({
-      isReady: isMapReady && sphere !== null,
+      addLayer,
       goTo,
-      setCenter,
-      setZoom,
+      isReady: isMapReady && sphere !== null,
+      loadPredefinedOverlay,
+      removeLayer,
+      repaint,
+      resize,
+      setBaseLayer,
       setBound,
-      setRotate,
-      setPitch,
+      setCenter,
       setFilter,
       setLanguage,
-      setBaseLayer,
-      addLayer,
-      removeLayer,
-      loadPredefinedOverlay,
+      setPitch,
+      setRotate,
+      setZoom,
       unloadPredefinedOverlay,
-      resize,
-      repaint,
     }),
     [
       isMapReady,
@@ -298,14 +298,14 @@ export function SphereProvider({
 
   const contextValue = useMemo<SphereContextValue>(
     () => ({
-      isLoaded,
-      error,
-      sphere,
       apiKey,
-      map,
-      isMapReady,
       controls,
+      error,
+      isLoaded,
+      isMapReady,
+      map,
       registerMap,
+      sphere,
       unregisterMap,
     }),
     [
@@ -344,7 +344,7 @@ export function useSphere(): {
   error: Error | null;
 } {
   const { sphere, isLoaded, error } = useSphereContext();
-  return { sphere, isLoaded, error };
+  return { error, isLoaded, sphere };
 }
 
 export function useMap(): {
@@ -353,7 +353,7 @@ export function useMap(): {
   isReady: boolean;
 } {
   const { map, isMapReady, sphere } = useSphereContext();
-  return { map, sphere, isReady: isMapReady && sphere !== null };
+  return { isReady: isMapReady && sphere !== null, map, sphere };
 }
 
 export function useMapControls(): MapControls {

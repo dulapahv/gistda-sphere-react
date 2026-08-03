@@ -116,21 +116,21 @@ export function useMapSettings(): UseMapSettingsReturn {
   };
 
   return {
-    mapReady,
-    currentLayer,
     activeOverlays,
     activePredefined,
-    uiControls,
-    zoom,
     center,
+    currentLayer,
     language,
+    mapReady,
+    navigateTo,
+    setCenter,
+    setLanguage,
     setLayer,
+    setZoom,
     toggleOverlay,
     togglePredefined,
     toggleUiControl,
-    navigateTo,
-    setZoom,
-    setCenter,
-    setLanguage,
+    uiControls,
+    zoom,
   };
 }

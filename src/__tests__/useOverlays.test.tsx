@@ -21,19 +21,19 @@ describe("useOverlays hooks", () => {
       let id = "";
       act(() => {
         id = result.current.add({
-          position: { lon: 100.5, lat: 13.75 },
+          position: { lat: 13.75, lon: 100.5 },
           title: "Test Marker",
         });
       });
 
       expect(result.current.items).toHaveLength(1);
 
-      const marker = result.current.items[0];
+      const [marker] = result.current.items;
       expect(marker).toBeDefined();
       expect(marker?.id).toBe(id);
       expect(marker?.position).toEqual({
-        lon: 100.5,
         lat: 13.75,
+        lon: 100.5,
       });
       expect(marker?.title).toBe("Test Marker");
     });
@@ -44,11 +44,11 @@ describe("useOverlays hooks", () => {
       act(() => {
         result.current.add({
           id: "custom-id",
-          position: { lon: 100.5, lat: 13.75 },
+          position: { lat: 13.75, lon: 100.5 },
         });
       });
 
-      const marker = result.current.items[0];
+      const [marker] = result.current.items;
       expect(marker).toBeDefined();
       expect(marker?.id).toBe("custom-id");
     });
@@ -59,7 +59,7 @@ describe("useOverlays hooks", () => {
       let id = "";
       act(() => {
         id = result.current.add({
-          position: { lon: 100.5, lat: 13.75 },
+          position: { lat: 13.75, lon: 100.5 },
           title: "Original",
         });
       });
@@ -68,12 +68,12 @@ describe("useOverlays hooks", () => {
         result.current.update(id, { title: "Updated" });
       });
 
-      const marker = result.current.items[0];
+      const [marker] = result.current.items;
       expect(marker).toBeDefined();
       expect(marker?.title).toBe("Updated");
       expect(marker?.position).toEqual({
-        lon: 100.5,
         lat: 13.75,
+        lon: 100.5,
       });
     });
 
@@ -83,7 +83,7 @@ describe("useOverlays hooks", () => {
       let id = "";
       act(() => {
         id = result.current.add({
-          position: { lon: 100.5, lat: 13.75 },
+          position: { lat: 13.75, lon: 100.5 },
         });
       });
 
@@ -100,9 +100,9 @@ describe("useOverlays hooks", () => {
       const { result } = renderHook(() => useMarkers());
 
       act(() => {
-        result.current.add({ position: { lon: 100.5, lat: 13.75 } });
-        result.current.add({ position: { lon: 101.5, lat: 14.75 } });
-        result.current.add({ position: { lon: 102.5, lat: 15.75 } });
+        result.current.add({ position: { lat: 13.75, lon: 100.5 } });
+        result.current.add({ position: { lat: 14.75, lon: 101.5 } });
+        result.current.add({ position: { lat: 15.75, lon: 102.5 } });
       });
 
       expect(result.current.items).toHaveLength(3);
@@ -120,7 +120,7 @@ describe("useOverlays hooks", () => {
       let id = "";
       act(() => {
         id = result.current.add({
-          position: { lon: 100.5, lat: 13.75 },
+          position: { lat: 13.75, lon: 100.5 },
           title: "Find Me",
         });
       });
@@ -140,18 +140,18 @@ describe("useOverlays hooks", () => {
       let id = "";
       act(() => {
         id = result.current.add({
-          positions: [
-            { lon: 100.4, lat: 13.8 },
-            { lon: 100.6, lat: 13.8 },
-            { lon: 100.5, lat: 13.6 },
-          ],
           fillColor: "rgba(255, 0, 0, 0.3)",
+          positions: [
+            { lat: 13.8, lon: 100.4 },
+            { lat: 13.8, lon: 100.6 },
+            { lat: 13.6, lon: 100.5 },
+          ],
         });
       });
 
       expect(result.current.items).toHaveLength(1);
 
-      const polygon = result.current.items[0];
+      const [polygon] = result.current.items;
       expect(polygon).toBeDefined();
       expect(polygon?.positions).toHaveLength(3);
 
@@ -170,11 +170,11 @@ describe("useOverlays hooks", () => {
       let id = "";
       act(() => {
         id = result.current.add({
-          positions: [
-            { lon: 100.4, lat: 13.8 },
-            { lon: 100.6, lat: 13.6 },
-          ],
           lineWidth: 2,
+          positions: [
+            { lat: 13.8, lon: 100.4 },
+            { lat: 13.6, lon: 100.6 },
+          ],
         });
       });
 
@@ -182,7 +182,7 @@ describe("useOverlays hooks", () => {
         result.current.update(id, { lineWidth: 5 });
       });
 
-      const polyline = result.current.items[0];
+      const [polyline] = result.current.items;
       expect(polyline).toBeDefined();
       expect(polyline?.lineWidth).toBe(5);
     });
@@ -194,19 +194,19 @@ describe("useOverlays hooks", () => {
 
       act(() => {
         result.current.add({
-          center: { lon: 100.5, lat: 13.75 },
-          radius: 0.01,
+          center: { lat: 13.75, lon: 100.5 },
           fillColor: "rgba(0, 0, 255, 0.3)",
+          radius: 0.01,
         });
       });
 
       expect(result.current.items).toHaveLength(1);
 
-      const circle = result.current.items[0];
+      const [circle] = result.current.items;
       expect(circle).toBeDefined();
       expect(circle?.center).toEqual({
-        lon: 100.5,
         lat: 13.75,
+        lon: 100.5,
       });
       expect(circle?.radius).toBe(0.01);
     });
@@ -227,22 +227,22 @@ describe("useOverlays hooks", () => {
       const { result } = renderHook(() => useOverlays());
 
       act(() => {
-        result.current.markers.add({ position: { lon: 100, lat: 13 } });
+        result.current.markers.add({ position: { lat: 13, lon: 100 } });
         result.current.polygons.add({
           positions: [
-            { lon: 100, lat: 13 },
-            { lon: 101, lat: 14 },
-            { lon: 100, lat: 14 },
+            { lat: 13, lon: 100 },
+            { lat: 14, lon: 101 },
+            { lat: 14, lon: 100 },
           ],
         });
         result.current.polylines.add({
           positions: [
-            { lon: 100, lat: 13 },
-            { lon: 101, lat: 14 },
+            { lat: 13, lon: 100 },
+            { lat: 14, lon: 101 },
           ],
         });
         result.current.circles.add({
-          center: { lon: 100, lat: 13 },
+          center: { lat: 13, lon: 100 },
           radius: 0.01,
         });
       });

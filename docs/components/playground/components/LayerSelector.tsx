@@ -12,22 +12,22 @@ import { getTranslations, type PlaygroundTranslations } from "../translations";
 
 function baseLayerLabel(t: PlaygroundTranslations, id: BaseLayer): string {
   const map: Record<BaseLayer, string> = {
+    HYBRID: t.layerHybrid,
     SIMPLE: t.layerSimple,
     STREETS: t.layerStreets,
     STREETS_NIGHT: t.layerNight,
-    HYBRID: t.layerHybrid,
   };
   return map[id];
 }
 
 function overlayLabel(t: PlaygroundTranslations, id: OverlayLayer): string {
   const map: Record<OverlayLayer, string> = {
-    TRAFFIC: t.overlayTraffic,
+    DROUGHT: t.overlayDrought,
+    FLOOD: t.overlayFlood,
+    HOTSPOT: t.overlayHotspot,
     IMAGES: t.overlayImages,
     PM25: t.overlayPM25,
-    HOTSPOT: t.overlayHotspot,
-    FLOOD: t.overlayFlood,
-    DROUGHT: t.overlayDrought,
+    TRAFFIC: t.overlayTraffic,
   };
   return map[id];
 }
@@ -37,9 +37,9 @@ function predefinedLabel(
   id: PredefinedOverlay
 ): string {
   const map: Record<PredefinedOverlay, string> = {
+    aqi: t.predefinedAQI,
     cameras: t.predefinedCCTV,
     events: t.predefinedEvents,
-    aqi: t.predefinedAQI,
   };
   return map[id];
 }

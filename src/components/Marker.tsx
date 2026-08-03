@@ -11,10 +11,10 @@ import type {
 } from "../types";
 
 export interface MarkerRef {
-  getMarker(): SphereMarker | null;
-  setPosition(location: Location, animate?: boolean): void;
-  setRotation(angle: number): void;
-  togglePopup(show?: boolean): void;
+  getMarker: () => SphereMarker | null;
+  setPosition: (location: Location, animate?: boolean) => void;
+  setRotation: (angle: number) => void;
+  togglePopup: (show?: boolean) => void;
 }
 
 export interface MarkerProps {
@@ -184,14 +184,14 @@ export function Marker({
     ref,
     () => ({
       getMarker: () => markerRef.current,
-      togglePopup: (show?: boolean) => {
-        markerRef.current?.pop(show);
-      },
       setPosition: (location: Location, animate = false) => {
         markerRef.current?.location(location, animate);
       },
       setRotation: (angle: number) => {
         markerRef.current?.update({ rotate: angle });
+      },
+      togglePopup: (show?: boolean) => {
+        markerRef.current?.pop(show);
       },
     }),
     []

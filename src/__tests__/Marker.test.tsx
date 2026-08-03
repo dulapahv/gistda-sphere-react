@@ -23,7 +23,7 @@ describe("Marker", () => {
     return render(
       <SphereProvider apiKey="test-key">
         <SphereMap>
-          <Marker position={{ lon: 100.5, lat: 13.75 }} {...markerProps} />
+          <Marker position={{ lat: 13.75, lon: 100.5 }} {...markerProps} />
         </SphereMap>
       </SphereProvider>
     );
@@ -40,14 +40,14 @@ describe("Marker", () => {
 
       await waitFor(() => {
         expect(mockSphere.Marker).toHaveBeenCalledWith(
-          { lon: 100.5, lat: 13.75 },
+          { lat: 13.75, lon: 100.5 },
           expect.any(Object)
         );
       });
     });
 
     it("creates a marker with title and detail", async () => {
-      renderMarker({ title: "Test Marker", detail: "Test Detail" });
+      renderMarker({ detail: "Test Detail", title: "Test Marker" });
 
       act(() => {
         mockMap._triggerReady();
@@ -57,8 +57,8 @@ describe("Marker", () => {
         expect(mockSphere.Marker).toHaveBeenCalledWith(
           expect.any(Object),
           expect.objectContaining({
-            title: "Test Marker",
             detail: "Test Detail",
+            title: "Test Marker",
           })
         );
       });

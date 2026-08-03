@@ -23,9 +23,9 @@ export default async function Page(
 
   const MDX = page.data.body;
   const gitConfig = {
-    user: "dulapahv",
-    repo: "gistda-sphere-react",
     branch: "main",
+    repo: "gistda-sphere-react",
+    user: "dulapahv",
   };
 
   return (
@@ -67,10 +67,10 @@ export async function generateMetadata(
   }
 
   return {
-    title: page.data.title,
     description: page.data.description,
     openGraph: {
       images: getPageImage(page).url,
     },
+    title: page.data.title,
   };
 }

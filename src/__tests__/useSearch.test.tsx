@@ -68,7 +68,7 @@ describe("useSearch", () => {
       });
 
       await expect(
-        result.current.address({ lon: 100.5, lat: 13.75 })
+        result.current.address({ lat: 13.75, lon: 100.5 })
       ).rejects.toThrow("Search API not available");
     });
 
@@ -78,7 +78,7 @@ describe("useSearch", () => {
       });
 
       await expect(
-        result.current.nearPoi({ lon: 100.5, lat: 13.75 })
+        result.current.nearPoi({ lat: 13.75, lon: 100.5 })
       ).rejects.toThrow("Search API not available");
     });
   });
@@ -86,24 +86,24 @@ describe("useSearch", () => {
   describe("when Search API is available", () => {
     beforeEach(() => {
       map.Search = {
-        suggest: vi
-          .fn()
-          .mockResolvedValue({ data: [{ name: "Coffee A" }], total: 1 }),
-        search: vi
-          .fn()
-          .mockResolvedValue({ data: [{ name: "Coffee B" }], total: 1 }),
         address: vi.fn().mockResolvedValue({
           address: "123 Street",
           province: "Bangkok",
         }),
-        nearPoi: vi.fn().mockResolvedValue({
-          data: [
-            { id: "1", name: "Coffee C", location: { lon: 100.5, lat: 13.75 } },
-          ],
-        }),
         clear: vi.fn(),
         enablePopup: vi.fn(),
         language: vi.fn(),
+        nearPoi: vi.fn().mockResolvedValue({
+          data: [
+            { id: "1", location: { lat: 13.75, lon: 100.5 }, name: "Coffee C" },
+          ],
+        }),
+        search: vi
+          .fn()
+          .mockResolvedValue({ data: [{ name: "Coffee B" }], total: 1 }),
+        suggest: vi
+          .fn()
+          .mockResolvedValue({ data: [{ name: "Coffee A" }], total: 1 }),
       };
     });
 
@@ -139,12 +139,12 @@ describe("useSearch", () => {
       });
 
       const addressResult = await result.current.address({
-        lon: 100.5,
         lat: 13.75,
+        lon: 100.5,
       });
 
       expect(map.Search.address).toHaveBeenCalledWith(
-        { lon: 100.5, lat: 13.75 },
+        { lat: 13.75, lon: 100.5 },
         undefined
       );
       expect(addressResult).toEqual({
@@ -159,16 +159,16 @@ describe("useSearch", () => {
       });
 
       const pois = await result.current.nearPoi(
-        { lon: 100.5, lat: 13.75 },
+        { lat: 13.75, lon: 100.5 },
         { limit: 5 }
       );
 
       expect(map.Search.nearPoi).toHaveBeenCalledWith(
-        { lon: 100.5, lat: 13.75 },
+        { lat: 13.75, lon: 100.5 },
         { limit: 5 }
       );
       expect(pois).toEqual([
-        { id: "1", name: "Coffee C", location: { lon: 100.5, lat: 13.75 } },
+        { id: "1", location: { lat: 13.75, lon: 100.5 }, name: "Coffee C" },
       ]);
     });
 

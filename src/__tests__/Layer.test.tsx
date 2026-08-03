@@ -41,7 +41,7 @@ describe("Layer", () => {
     });
 
     it("sets built-in layer as base when isBase is true", async () => {
-      renderLayer({ preset: "HYBRID", isBase: true });
+      renderLayer({ isBase: true, preset: "HYBRID" });
 
       act(() => {
         mockMap._triggerReady();
@@ -59,9 +59,9 @@ describe("Layer", () => {
     it("creates a custom layer with name and options", async () => {
       renderLayer({
         name: "my-wms-layer",
+        opacity: 0.7,
         type: "WMS",
         url: "https://example.com/wms",
-        opacity: 0.7,
       });
 
       act(() => {
@@ -72,9 +72,9 @@ describe("Layer", () => {
         expect(mockSphere.Layer).toHaveBeenCalledWith(
           "my-wms-layer",
           expect.objectContaining({
+            opacity: 0.7,
             type: "WMS",
             url: "https://example.com/wms",
-            opacity: 0.7,
           })
         );
       });
@@ -99,7 +99,7 @@ describe("Layer", () => {
     });
 
     it("does not remove base layer on unmount", async () => {
-      const { unmount } = renderLayer({ preset: "HYBRID", isBase: true });
+      const { unmount } = renderLayer({ isBase: true, preset: "HYBRID" });
 
       act(() => {
         mockMap._triggerReady();

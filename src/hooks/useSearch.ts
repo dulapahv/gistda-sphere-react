@@ -121,14 +121,14 @@ export function useSearch(): UseSearchReturn {
 
   return useMemo(
     () => ({
-      isReady,
-      suggest,
-      search,
       address,
-      nearPoi,
       clear,
       enablePopup,
+      isReady,
+      nearPoi,
+      search,
       setLanguage,
+      suggest,
     }),
     [
       isReady,

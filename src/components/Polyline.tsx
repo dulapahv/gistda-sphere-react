@@ -13,14 +13,14 @@ import type {
 } from "../types";
 
 export interface PolylineRef {
-  getBound(): Bound | null;
-  getCentroid(): Location | null;
-  getLength(language?: string): number | string | null;
-  getPivot(): Location | null;
-  getPolyline(): SpherePolyline | null;
-  rotate(angle: number): void;
-  togglePopup(show?: boolean, location?: Location): void;
-  updateStyle(options: Partial<GeometryOptions>): void;
+  getBound: () => Bound | null;
+  getCentroid: () => Location | null;
+  getLength: (language?: string) => number | string | null;
+  getPivot: () => Location | null;
+  getPolyline: () => SpherePolyline | null;
+  rotate: (angle: number) => void;
+  togglePopup: (show?: boolean, location?: Location) => void;
+  updateStyle: (options: Partial<GeometryOptions>) => void;
 }
 
 export interface PolylineProps {
@@ -183,17 +183,17 @@ export function Polyline({
   useImperativeHandle(
     ref,
     () => ({
-      getPolyline: () => polylineRef.current,
-      togglePopup: (show?: boolean, location?: Location) => {
-        polylineRef.current?.pop(show, location);
-      },
-      getPivot: () => polylineRef.current?.pivot() ?? null,
-      getCentroid: () => polylineRef.current?.centroid() ?? null,
       getBound: () => polylineRef.current?.bound() ?? null,
+      getCentroid: () => polylineRef.current?.centroid() ?? null,
       getLength: (language?: string) =>
         polylineRef.current?.size(language) ?? null,
+      getPivot: () => polylineRef.current?.pivot() ?? null,
+      getPolyline: () => polylineRef.current,
       rotate: (angle: number) => {
         polylineRef.current?.rotate(angle);
+      },
+      togglePopup: (show?: boolean, location?: Location) => {
+        polylineRef.current?.pop(show, location);
       },
       updateStyle: (options: Partial<GeometryOptions>) => {
         polylineRef.current?.update(options);

@@ -34,17 +34,17 @@ describe("SphereMap", () => {
 
     it("creates a map with correct initial options", async () => {
       renderMap({
-        zoom: 12,
-        center: { lon: 100.5, lat: 13.75 },
+        center: { lat: 13.75, lon: 100.5 },
         language: "en",
+        zoom: 12,
       });
 
       await waitFor(() => {
         expect(mockSphere.Map).toHaveBeenCalledWith(
           expect.objectContaining({
-            zoom: 12,
-            location: { lon: 100.5, lat: 13.75 },
             language: "en",
+            location: { lat: 13.75, lon: 100.5 },
+            zoom: 12,
           })
         );
       });
@@ -112,7 +112,7 @@ describe("SphereMap", () => {
       });
 
       // Simulate click event
-      const location = { lon: 100.5, lat: 13.75 };
+      const location = { lat: 13.75, lon: 100.5 };
       act(() => {
         mockMap._triggerClick(location);
       });
@@ -188,7 +188,7 @@ describe("SphereMap", () => {
         expect(ref.current).toBeTruthy();
       });
 
-      const location = { lon: 101, lat: 14 };
+      const location = { lat: 14, lon: 101 };
       act(() => {
         ref.current?.setCenter(location);
       });
@@ -229,7 +229,7 @@ describe("SphereMap", () => {
         expect(ref.current).toBeTruthy();
       });
 
-      const target = { center: { lon: 100, lat: 13 }, zoom: 12 };
+      const target = { center: { lat: 13, lon: 100 }, zoom: 12 };
       act(() => {
         ref.current?.goTo(target);
       });

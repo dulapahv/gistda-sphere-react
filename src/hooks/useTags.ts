@@ -90,13 +90,9 @@ export function useTags(): UseTagsReturn {
     map?.Tags?.clear();
   }, [map]);
 
-  const list = useCallback((): string[] => {
-    return map?.Tags?.list() ?? [];
-  }, [map]);
+  const list = useCallback((): string[] => map?.Tags?.list() ?? [], [map]);
 
-  const size = useCallback((): number => {
-    return map?.Tags?.size() ?? 0;
-  }, [map]);
+  const size = useCallback((): number => map?.Tags?.size() ?? 0, [map]);
 
   const enablePopup = useCallback(
     (state: boolean) => {
@@ -114,15 +110,15 @@ export function useTags(): UseTagsReturn {
 
   return useMemo(
     () => ({
-      isReady,
-      set,
       add,
-      remove,
       clear,
-      list,
-      size,
       enablePopup,
+      isReady,
+      list,
+      remove,
+      set,
       setLanguage,
+      size,
     }),
     [isReady, set, add, remove, clear, list, size, enablePopup, setLanguage]
   );

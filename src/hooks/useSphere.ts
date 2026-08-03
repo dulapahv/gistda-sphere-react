@@ -10,9 +10,9 @@ export function useSphere(): {
   const { sphere, isLoaded, error, apiKey } = useSphereContext();
 
   return {
-    sphere,
-    isLoaded,
-    error,
     apiKey,
+    error,
+    isLoaded,
+    sphere,
   };
 }

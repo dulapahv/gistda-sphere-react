@@ -40,7 +40,7 @@ describe("Geometry Components", () => {
     it("creates circle with center and radius", async () => {
       renderInMap(
         <Circle
-          center={{ lon: 100.5, lat: 13.75 }}
+          center={{ lat: 13.75, lon: 100.5 }}
           fillColor="rgba(0,100,255,0.3)"
           radius={0.05}
         />
@@ -52,7 +52,7 @@ describe("Geometry Components", () => {
 
       await waitFor(() => {
         expect(mockSphere.Circle).toHaveBeenCalledWith(
-          { lon: 100.5, lat: 13.75 },
+          { lat: 13.75, lon: 100.5 },
           0.05,
           expect.objectContaining({ fillColor: "rgba(0,100,255,0.3)" })
         );
@@ -60,7 +60,7 @@ describe("Geometry Components", () => {
     });
 
     it("adds circle to map overlays", async () => {
-      renderInMap(<Circle center={{ lon: 100.5, lat: 13.75 }} radius={0.05} />);
+      renderInMap(<Circle center={{ lat: 13.75, lon: 100.5 }} radius={0.05} />);
 
       act(() => {
         mockMap._triggerReady();
@@ -73,7 +73,7 @@ describe("Geometry Components", () => {
 
     it("removes circle on unmount", async () => {
       const { unmount } = renderInMap(
-        <Circle center={{ lon: 100.5, lat: 13.75 }} radius={0.05} />
+        <Circle center={{ lat: 13.75, lon: 100.5 }} radius={0.05} />
       );
 
       act(() => {
@@ -94,7 +94,7 @@ describe("Geometry Components", () => {
 
       renderInMap(
         <Circle
-          center={{ lon: 100.5, lat: 13.75 }}
+          center={{ lat: 13.75, lon: 100.5 }}
           onClick={onClick}
           radius={0.05}
         />
@@ -117,9 +117,9 @@ describe("Geometry Components", () => {
     let mockPolygonInstance: ReturnType<typeof mockSphere.Polygon>;
 
     const positions = [
-      { lon: 100.45, lat: 13.8 },
-      { lon: 100.55, lat: 13.8 },
-      { lon: 100.5, lat: 13.7 },
+      { lat: 13.8, lon: 100.45 },
+      { lat: 13.8, lon: 100.55 },
+      { lat: 13.7, lon: 100.5 },
     ];
 
     beforeEach(() => {
@@ -167,8 +167,8 @@ describe("Geometry Components", () => {
       renderInMap(
         <Polygon
           positions={[
-            { lon: 100.45, lat: 13.8 },
-            { lon: 100.55, lat: 13.8 },
+            { lat: 13.8, lon: 100.45 },
+            { lat: 13.8, lon: 100.55 },
           ]}
         />
       );
@@ -213,8 +213,8 @@ describe("Geometry Components", () => {
     let mockPolylineInstance: ReturnType<typeof mockSphere.Polyline>;
 
     const positions = [
-      { lon: 100.3, lat: 13.7 },
-      { lon: 100.5, lat: 13.8 },
+      { lat: 13.7, lon: 100.3 },
+      { lat: 13.8, lon: 100.5 },
     ];
 
     beforeEach(() => {
@@ -261,7 +261,7 @@ describe("Geometry Components", () => {
     });
 
     it("does not create polyline with fewer than 2 positions", async () => {
-      renderInMap(<Polyline positions={[{ lon: 100.3, lat: 13.7 }]} />);
+      renderInMap(<Polyline positions={[{ lat: 13.7, lon: 100.3 }]} />);
 
       act(() => {
         mockMap._triggerReady();
@@ -286,8 +286,8 @@ describe("Geometry Components", () => {
       renderInMap(
         <Rectangle
           fillColor="rgba(0,255,0,0.3)"
-          position={{ lon: 100.5, lat: 13.75 }}
-          size={{ width: 0.1, height: 0.05 }}
+          position={{ lat: 13.75, lon: 100.5 }}
+          size={{ height: 0.05, width: 0.1 }}
         />
       );
 
@@ -297,8 +297,8 @@ describe("Geometry Components", () => {
 
       await waitFor(() => {
         expect(mockSphere.Rectangle).toHaveBeenCalledWith(
-          { lon: 100.5, lat: 13.75 },
-          { width: 0.1, height: 0.05 },
+          { lat: 13.75, lon: 100.5 },
+          { height: 0.05, width: 0.1 },
           expect.objectContaining({ fillColor: "rgba(0,255,0,0.3)" })
         );
       });
@@ -307,8 +307,8 @@ describe("Geometry Components", () => {
     it("adds rectangle to map and removes on unmount", async () => {
       const { unmount } = renderInMap(
         <Rectangle
-          position={{ lon: 100.5, lat: 13.75 }}
-          size={{ width: 0.1, height: 0.05 }}
+          position={{ lat: 13.75, lon: 100.5 }}
+          size={{ height: 0.05, width: 0.1 }}
         />
       );
 
@@ -345,7 +345,7 @@ describe("Geometry Components", () => {
         <Dot
           lineColor="red"
           lineWidth={10}
-          position={{ lon: 100.5, lat: 13.75 }}
+          position={{ lat: 13.75, lon: 100.5 }}
         />
       );
 
@@ -355,15 +355,15 @@ describe("Geometry Components", () => {
 
       await waitFor(() => {
         expect(mockSphere.Dot).toHaveBeenCalledWith(
-          { lon: 100.5, lat: 13.75 },
-          expect.objectContaining({ lineWidth: 10, lineColor: "red" })
+          { lat: 13.75, lon: 100.5 },
+          expect.objectContaining({ lineColor: "red", lineWidth: 10 })
         );
       });
     });
 
     it("adds dot to map and removes on unmount", async () => {
       const { unmount } = renderInMap(
-        <Dot position={{ lon: 100.5, lat: 13.75 }} />
+        <Dot position={{ lat: 13.75, lon: 100.5 }} />
       );
 
       act(() => {
@@ -381,7 +381,7 @@ describe("Geometry Components", () => {
 
     it("binds drop event for draggable dot", async () => {
       renderInMap(
-        <Dot draggable onDrop={vi.fn()} position={{ lon: 100.5, lat: 13.75 }} />
+        <Dot draggable onDrop={vi.fn()} position={{ lat: 13.75, lon: 100.5 }} />
       );
 
       act(() => {
@@ -411,7 +411,7 @@ describe("Geometry Components", () => {
       renderInMap(
         <Popup
           detail="Details here"
-          position={{ lon: 100.5, lat: 13.75 }}
+          position={{ lat: 13.75, lon: 100.5 }}
           title="Info"
         />
       );
@@ -422,15 +422,15 @@ describe("Geometry Components", () => {
 
       await waitFor(() => {
         expect(mockSphere.Popup).toHaveBeenCalledWith(
-          { lon: 100.5, lat: 13.75 },
-          expect.objectContaining({ title: "Info", detail: "Details here" })
+          { lat: 13.75, lon: 100.5 },
+          expect.objectContaining({ detail: "Details here", title: "Info" })
         );
       });
     });
 
     it("adds popup to map and removes on unmount", async () => {
       const { unmount } = renderInMap(
-        <Popup position={{ lon: 100.5, lat: 13.75 }} title="Test" />
+        <Popup position={{ lat: 13.75, lon: 100.5 }} title="Test" />
       );
 
       act(() => {
@@ -448,7 +448,7 @@ describe("Geometry Components", () => {
 
     it("binds popupClose event", async () => {
       renderInMap(
-        <Popup onClose={vi.fn()} position={{ lon: 100.5, lat: 13.75 }} />
+        <Popup onClose={vi.fn()} position={{ lat: 13.75, lon: 100.5 }} />
       );
 
       act(() => {

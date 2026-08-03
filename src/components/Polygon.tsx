@@ -13,15 +13,15 @@ import type {
 } from "../types";
 
 export interface PolygonRef {
-  getArea(language?: string): number | string | null;
-  getBound(): Bound | null;
-  getCentroid(): Location | null;
-  getPivot(): Location | null;
-  getPolygon(): SpherePolygon | null;
-  rotate(angle: number): void;
-  toGeoJSON(): object | null;
-  togglePopup(show?: boolean, location?: Location): void;
-  updateStyle(options: Partial<GeometryOptions>): void;
+  getArea: (language?: string) => number | string | null;
+  getBound: () => Bound | null;
+  getCentroid: () => Location | null;
+  getPivot: () => Location | null;
+  getPolygon: () => SpherePolygon | null;
+  rotate: (angle: number) => void;
+  toGeoJSON: () => object | null;
+  togglePopup: (show?: boolean, location?: Location) => void;
+  updateStyle: (options: Partial<GeometryOptions>) => void;
 }
 
 export interface PolygonProps {
@@ -196,22 +196,22 @@ export function Polygon({
   useImperativeHandle(
     ref,
     () => ({
-      getPolygon: () => polygonRef.current,
-      togglePopup: (show?: boolean, location?: Location) => {
-        polygonRef.current?.pop(show, location);
-      },
-      getPivot: () => polygonRef.current?.pivot() ?? null,
-      getCentroid: () => polygonRef.current?.centroid() ?? null,
-      getBound: () => polygonRef.current?.bound() ?? null,
       getArea: (language?: string) =>
         polygonRef.current?.size(language) ?? null,
+      getBound: () => polygonRef.current?.bound() ?? null,
+      getCentroid: () => polygonRef.current?.centroid() ?? null,
+      getPivot: () => polygonRef.current?.pivot() ?? null,
+      getPolygon: () => polygonRef.current,
       rotate: (angle: number) => {
         polygonRef.current?.rotate(angle);
+      },
+      toGeoJSON: () => polygonRef.current?.toJSON() ?? null,
+      togglePopup: (show?: boolean, location?: Location) => {
+        polygonRef.current?.pop(show, location);
       },
       updateStyle: (options: Partial<GeometryOptions>) => {
         polygonRef.current?.update(options);
       },
-      toGeoJSON: () => polygonRef.current?.toJSON() ?? null,
     }),
     []
   );

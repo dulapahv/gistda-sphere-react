@@ -108,10 +108,6 @@ export function createMockSphereApi(): MockSphereApi {
       eventHandlers[eventName].add(handler);
       return mockEvent;
     }),
-    unbind: vi.fn((eventName: string, handler: EventHandler) => {
-      eventHandlers[eventName]?.delete(handler);
-      return mockEvent;
-    }),
     fire: vi.fn((eventName: string, data?: unknown) => {
       const handlers = eventHandlers[eventName];
       if (handlers) {
@@ -120,105 +116,109 @@ export function createMockSphereApi(): MockSphereApi {
         }
       }
     }),
+    unbind: vi.fn((eventName: string, handler: EventHandler) => {
+      eventHandlers[eventName]?.delete(handler);
+      return mockEvent;
+    }),
   };
 
   const mockOverlays = {
     add: vi.fn().mockReturnThis(),
-    remove: vi.fn().mockReturnThis(),
-    load: vi.fn().mockReturnThis(),
-    unload: vi.fn().mockReturnThis(),
     clear: vi.fn().mockReturnThis(),
-    list: vi.fn().mockReturnValue([]),
-    size: vi.fn().mockReturnValue(0),
     lastOpenPopup: vi.fn().mockReturnValue(null),
+    list: vi.fn().mockReturnValue([]),
+    load: vi.fn().mockReturnThis(),
+    remove: vi.fn().mockReturnThis(),
+    size: vi.fn().mockReturnValue(0),
+    unload: vi.fn().mockReturnThis(),
   };
 
   const mockLayers = {
-    setBase: vi.fn().mockReturnThis(),
     add: vi.fn().mockReturnThis(),
-    remove: vi.fn().mockReturnThis(),
     clear: vi.fn().mockReturnThis(),
-    list: vi.fn().mockReturnValue([]),
-    size: vi.fn().mockReturnValue(0),
     language: vi.fn().mockReturnThis(),
+    list: vi.fn().mockReturnValue([]),
+    remove: vi.fn().mockReturnThis(),
+    setBase: vi.fn().mockReturnThis(),
+    size: vi.fn().mockReturnValue(0),
   };
 
   const mockMap = {
+    _triggerClick: (location: object) => mockEvent.fire("click", location),
+    // Helper to trigger ready event in tests
+    _triggerReady: () => mockEvent.fire("ready"),
+    _triggerZoom: () => mockEvent.fire("zoom"),
+    bound: vi.fn().mockReturnThis(),
     Event: mockEvent,
-    Overlays: mockOverlays,
+    enableFilter: vi.fn().mockReturnThis(),
+    goTo: vi.fn().mockReturnThis(),
+    id: vi.fn().mockReturnValue(1),
     Layers: mockLayers,
-    Ui: {},
+    language: vi.fn().mockReturnValue("th"),
+    location: vi
+      .fn()
+      .mockImplementation((value?: object) =>
+        value === undefined ? { lat: 13.75, lon: 100.5 } : mockMap
+      ),
+    move: vi.fn().mockReturnThis(),
+    Overlays: mockOverlays,
+    pitch: vi
+      .fn()
+      .mockImplementation((value?: number) =>
+        value === undefined ? 0 : mockMap
+      ),
+    placeholder: vi.fn().mockReturnValue(document.createElement("div")),
+    Renderer: { on: vi.fn() },
+    Route: {},
+    repaint: vi.fn().mockReturnThis(),
+    resize: vi.fn().mockReturnThis(),
+    rotate: vi
+      .fn()
+      .mockImplementation((value?: number) =>
+        value === undefined ? 0 : mockMap
+      ),
     Search: {},
     Tags: {},
-    Route: {},
-    Renderer: { on: vi.fn() },
-    id: vi.fn().mockReturnValue(1),
-    resize: vi.fn().mockReturnThis(),
-    repaint: vi.fn().mockReturnThis(),
-    placeholder: vi.fn().mockReturnValue(document.createElement("div")),
+    Ui: {},
     zoom: vi
       .fn()
       .mockImplementation((value?: number) =>
         value === undefined ? 10 : mockMap
       ),
     zoomRange: vi.fn().mockReturnThis(),
-    location: vi
-      .fn()
-      .mockImplementation((value?: object) =>
-        value === undefined ? { lon: 100.5, lat: 13.75 } : mockMap
-      ),
-    bound: vi.fn().mockReturnThis(),
-    move: vi.fn().mockReturnThis(),
-    language: vi.fn().mockReturnValue("th"),
-    rotate: vi
-      .fn()
-      .mockImplementation((value?: number) =>
-        value === undefined ? 0 : mockMap
-      ),
-    pitch: vi
-      .fn()
-      .mockImplementation((value?: number) =>
-        value === undefined ? 0 : mockMap
-      ),
-    enableFilter: vi.fn().mockReturnThis(),
-    goTo: vi.fn().mockReturnThis(),
-    // Helper to trigger ready event in tests
-    _triggerReady: () => mockEvent.fire("ready"),
-    _triggerClick: (location: object) => mockEvent.fire("click", location),
-    _triggerZoom: () => mockEvent.fire("zoom"),
   };
 
   const overlayProps = () => ({
-    location: vi.fn().mockReturnValue({ lon: 100.5, lat: 13.75 }),
-    visibleRange: vi.fn().mockReturnValue({ min: 0, max: 22 }),
     active: vi.fn().mockReturnValue(true),
-    shift: vi.fn().mockReturnThis(),
-    distance: vi.fn().mockReturnValue(0),
-    intersects: vi.fn().mockReturnValue(false),
-    contains: vi.fn().mockReturnValue(false),
-    within: vi.fn().mockReturnValue(false),
-    toJSON: vi.fn().mockReturnValue({}),
-    popup: vi.fn().mockReturnValue(null),
-    element: vi.fn().mockReturnValue(document.createElement("div")),
-    pop: vi.fn().mockReturnThis(),
-    update: vi.fn().mockReturnThis(),
-    pivot: vi.fn().mockReturnValue({ lon: 100.5, lat: 13.75 }),
-    centroid: vi.fn().mockReturnValue({ lon: 100.5, lat: 13.75 }),
     bound: vi.fn().mockReturnValue({
-      minLon: 100,
-      minLat: 13,
-      maxLon: 101,
       maxLat: 14,
+      maxLon: 101,
+      minLat: 13,
+      minLon: 100,
     }),
-    rotate: vi.fn().mockReturnThis(),
-    size: vi.fn().mockReturnValue(100),
-    union: vi.fn().mockReturnThis(),
-    intersection: vi.fn().mockReturnThis(),
-    difference: vi.fn().mockReturnThis(),
-    split: vi.fn().mockReturnValue([]),
-    radius: vi.fn().mockReturnValue(100),
-    title: vi.fn().mockReturnThis(),
+    centroid: vi.fn().mockReturnValue({ lat: 13.75, lon: 100.5 }),
+    contains: vi.fn().mockReturnValue(false),
     detail: vi.fn().mockReturnThis(),
+    difference: vi.fn().mockReturnThis(),
+    distance: vi.fn().mockReturnValue(0),
+    element: vi.fn().mockReturnValue(document.createElement("div")),
+    intersection: vi.fn().mockReturnThis(),
+    intersects: vi.fn().mockReturnValue(false),
+    location: vi.fn().mockReturnValue({ lat: 13.75, lon: 100.5 }),
+    pivot: vi.fn().mockReturnValue({ lat: 13.75, lon: 100.5 }),
+    pop: vi.fn().mockReturnThis(),
+    popup: vi.fn().mockReturnValue(null),
+    radius: vi.fn().mockReturnValue(100),
+    rotate: vi.fn().mockReturnThis(),
+    shift: vi.fn().mockReturnThis(),
+    size: vi.fn().mockReturnValue(100),
+    split: vi.fn().mockReturnValue([]),
+    title: vi.fn().mockReturnThis(),
+    toJSON: vi.fn().mockReturnValue({}),
+    union: vi.fn().mockReturnThis(),
+    update: vi.fn().mockReturnThis(),
+    visibleRange: vi.fn().mockReturnValue({ max: 22, min: 0 }),
+    within: vi.fn().mockReturnValue(false),
   });
   const createMockOverlay = (_type: string) =>
     vi.fn().mockImplementation(function () {
@@ -229,67 +229,67 @@ export function createMockSphereApi(): MockSphereApi {
     return mockMap;
   };
   const mockSphere = {
-    Map: vi.fn().mockImplementation(mapConstructor),
-    Marker: createMockOverlay("Marker"),
-    Popup: createMockOverlay("Popup"),
-    Polyline: createMockOverlay("Polyline"),
-    Polygon: createMockOverlay("Polygon"),
     Circle: createMockOverlay("Circle"),
     Dot: createMockOverlay("Dot"),
-    Rectangle: createMockOverlay("Rectangle"),
+    EventName: {},
+    Filter: {
+      Dark: "Dark" as const,
+      Deuteranopia: "Deuteranopia" as const,
+      Light: "Light" as const,
+      None: "None" as const,
+      Protanopia: "Protanopia" as const,
+    },
     Layer: vi.fn().mockImplementation(function () {
       return {};
     }),
     Layers: {
+      DROUGHT: {},
+      FLOOD: {},
+      HOTSPOT: {},
+      HYBRID: {},
+      IMAGES: {},
+      PM25: {},
       SIMPLE: {},
       STREETS: {},
       STREETS_NIGHT: {},
-      HYBRID: {},
       TRAFFIC: {},
-      IMAGES: {},
-      PM25: {},
-      HOTSPOT: {},
-      FLOOD: {},
-      DROUGHT: {},
     },
     LayerType: {
+      I3S: "I3S",
+      Tiles3D: "Tiles3D",
+      TMS: "TMS",
       Vector: "Vector",
-      XYZ: "XYZ",
       WMS: "WMS",
       WMTS: "WMTS",
       WMTS_REST: "WMTS_REST",
-      TMS: "TMS",
-      Tiles3D: "Tiles3D",
-      I3S: "I3S",
+      XYZ: "XYZ",
     },
     LineStyle: {
-      Solid: "Solid",
       Dashed: "Dashed",
       Dot: "Dot",
+      Solid: "Solid",
     },
-    Filter: {
-      Dark: "Dark" as const,
-      Light: "Light" as const,
-      Protanopia: "Protanopia" as const,
-      Deuteranopia: "Deuteranopia" as const,
-      None: "None" as const,
-    },
-    EventName: {},
-    TagType: { WFS: "WFS", OGC: "OGC" },
+    Map: vi.fn().mockImplementation(mapConstructor),
+    Marker: createMockOverlay("Marker"),
+    Math: {},
+    Overlays: {},
+    Polygon: createMockOverlay("Polygon"),
+    Polyline: createMockOverlay("Polyline"),
+    Popup: createMockOverlay("Popup"),
+    Rectangle: createMockOverlay("Rectangle"),
+    RouteLabel: { Distance: "Distance", Hide: "Hide", Time: "Time" },
     RouteMode: {
-      Traffic: "Traffic",
       Cost: "Cost",
       Distance: "Distance",
       Fly: "Fly",
+      Traffic: "Traffic",
     },
-    RouteType: { Road: "Road", Ferry: "Ferry", Tollway: "Tollway", All: "All" },
-    RouteLabel: { Distance: "Distance", Time: "Time", Hide: "Hide" },
+    RouteType: { All: "All", Ferry: "Ferry", Road: "Road", Tollway: "Tollway" },
+    TagType: { OGC: "OGC", WFS: "WFS" },
     Util: {},
-    Math: {},
-    Overlays: {},
   };
 
-  return { mockSphere, mockMap };
+  return { mockMap, mockSphere };
 }
 
 export function setupSphereGlobal(): MockSphereApi {
@@ -305,5 +305,5 @@ export function setupSphereGlobal(): MockSphereApi {
     vi.clearAllMocks();
   });
 
-  return { mockSphere, mockMap };
+  return { mockMap, mockSphere };
 }

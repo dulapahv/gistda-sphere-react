@@ -20,7 +20,7 @@ export function SphereMapDemo() {
     const now = new Date();
     const time = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
     setLogs((prev) =>
-      [{ id: Math.random(), time, message }, ...prev].slice(0, 20)
+      [{ id: Math.random(), message, time }, ...prev].slice(0, 20)
     );
   }, []);
 
@@ -32,7 +32,7 @@ export function SphereMapDemo() {
     <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
       <SphereProvider apiKey={API_KEY}>
         <SphereMap
-          center={{ lon: 100.5018, lat: 13.7563 }}
+          center={{ lat: 13.7563, lon: 100.5018 }}
           language={language}
           onClick={(e) => {
             addLog(`Clicked at ${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`);
@@ -43,7 +43,7 @@ export function SphereMapDemo() {
           onZoom={(e) => {
             addLog(`Zoomed to level ${e.toFixed(2)}`);
           }}
-          style={{ width: "100%", height: "300px" }}
+          style={{ height: "300px", width: "100%" }}
           zoom={10}
         />
       </SphereProvider>

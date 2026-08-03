@@ -108,14 +108,12 @@ function useOverlayState<T extends BaseOverlay>(): UseOverlaysResult<T> {
   }, []);
 
   const get = useCallback(
-    (id: string): T | undefined => {
-      return items.find((item) => item.id === id);
-    },
+    (id: string): T | undefined => items.find((item) => item.id === id),
     [items]
   );
 
   return useMemo(
-    () => ({ items, add, update, remove, clear, get }),
+    () => ({ add, clear, get, items, remove, update }),
     [items, add, update, remove, clear, get]
   );
 }
@@ -270,7 +268,7 @@ export function useOverlays(): {
   }, [markers, polygons, polylines, circles]);
 
   return useMemo(
-    () => ({ markers, polygons, polylines, circles, clearAll }),
+    () => ({ circles, clearAll, markers, polygons, polylines }),
     [markers, polygons, polylines, circles, clearAll]
   );
 }

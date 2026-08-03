@@ -131,16 +131,12 @@ export function useRoute(options?: UseRouteOptions): UseRouteReturn {
   }, [map]);
 
   const getDistance = useCallback(
-    (format = false): number | string => {
-      return map?.Route?.distance(format) ?? 0;
-    },
+    (format = false): number | string => map?.Route?.distance(format) ?? 0,
     [map]
   );
 
   const getInterval = useCallback(
-    (format = false): number | string => {
-      return map?.Route?.interval(format) ?? 0;
-    },
+    (format = false): number | string => map?.Route?.interval(format) ?? 0,
     [map]
   );
 
@@ -153,19 +149,17 @@ export function useRoute(options?: UseRouteOptions): UseRouteReturn {
   );
 
   const exportRouteLine = useCallback(
-    (options?: GeometryOptions): SpherePolyline | null => {
-      return map?.Route?.exportRouteLine(options) ?? null;
-    },
+    (geometryOptions?: GeometryOptions): SpherePolyline | null =>
+      map?.Route?.exportRouteLine(geometryOptions) ?? null,
     [map]
   );
 
-  const listDestinations = useCallback((): SphereMarker[] => {
-    return map?.Route?.list() ?? [];
-  }, [map]);
+  const listDestinations = useCallback(
+    (): SphereMarker[] => map?.Route?.list() ?? [],
+    [map]
+  );
 
-  const size = useCallback((): number => {
-    return map?.Route?.size() ?? 0;
-  }, [map]);
+  const size = useCallback((): number => map?.Route?.size() ?? 0, [map]);
 
   const setMode = useCallback(
     (mode: RouteMode) => {
@@ -211,28 +205,28 @@ export function useRoute(options?: UseRouteOptions): UseRouteReturn {
 
   return useMemo(
     () => ({
-      isReady,
       addDestination,
-      insertDestination,
-      removeDestination,
-      removeDestinationAt,
+      clear,
       clearDestinations,
       clearPath,
-      clear,
+      enableRouteType,
+      exportRouteLine,
+      getDistance,
+      getGuide,
+      getInterval,
+      insertDestination,
+      isReady,
+      listDestinations,
+      removeDestination,
+      removeDestinationAt,
       reverse,
       search,
-      getDistance,
-      getInterval,
-      getGuide,
-      exportRouteLine,
-      listDestinations,
-      size,
+      setAuto,
+      setLabel,
+      setLanguage,
       setMode,
       setModeAt,
-      enableRouteType,
-      setLabel,
-      setAuto,
-      setLanguage,
+      size,
     }),
     [
       isReady,

@@ -4,31 +4,31 @@ const withMDX = createMDX();
 
 /** @type {import('next').NextConfig} */
 const config = {
-  poweredByHeader: false,
-  reactCompiler: true,
-  typedRoutes: true,
+  experimental: {
+    inlineCss: true,
+    optimizePackageImports: ["@phosphor-icons/react"],
+    turbopackFileSystemCacheForBuild: true,
+    typedEnv: true,
+    viewTransition: true,
+  },
   logging: {
     browserToTerminal: true,
   },
-  experimental: {
-    typedEnv: true,
-    viewTransition: true,
-    inlineCss: true,
-    turbopackFileSystemCacheForBuild: true,
-    optimizePackageImports: ["@phosphor-icons/react"],
-  },
+  poweredByHeader: false,
+  reactCompiler: true,
   async rewrites() {
     return [
       {
-        source: "/docs/:path*.mdx",
         destination: "/llms.mdx/docs/:path*",
+        source: "/docs/:path*.mdx",
       },
       {
-        source: "/:lang/docs/:path*.mdx",
         destination: "/llms.mdx/docs/:path*",
+        source: "/:lang/docs/:path*.mdx",
       },
     ];
   },
+  typedRoutes: true,
 };
 
 export default withMDX(config);

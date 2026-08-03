@@ -42,11 +42,11 @@ export function DrawingDemo() {
     <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
       <SphereProvider apiKey={API_KEY}>
         <SphereMap
-          center={{ lon: 100.5, lat: 13.75 }}
+          center={{ lat: 13.75, lon: 100.5 }}
           language={language}
           onClick={handleClick}
           onDoubleClick={handleDoubleClick}
-          style={{ width: "100%", height: "400px" }}
+          style={{ height: "400px", width: "100%" }}
           zoom={10}
         >
           {polygons.map((positions, i) => (

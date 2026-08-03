@@ -16,14 +16,14 @@ describe("useTags", () => {
     vi.clearAllMocks();
 
     map.Tags = {
-      set: vi.fn(),
       add: vi.fn(),
-      remove: vi.fn(),
       clear: vi.fn(),
-      list: vi.fn().mockReturnValue(["อาหารไทย", "ธนาคาร"]),
-      size: vi.fn().mockReturnValue(2),
       enablePopup: vi.fn(),
       language: vi.fn(),
+      list: vi.fn().mockReturnValue(["อาหารไทย", "ธนาคาร"]),
+      remove: vi.fn(),
+      set: vi.fn(),
+      size: vi.fn().mockReturnValue(2),
     };
   });
 

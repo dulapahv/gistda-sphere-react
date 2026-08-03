@@ -4,9 +4,9 @@ import { useSphereContext } from "../context/SphereContext";
 import type { GeometryOptions, Location, Range, SphereDot } from "../types";
 
 export interface DotRef {
-  getDot(): SphereDot | null;
-  getPosition(): Location | null;
-  setPosition(location: Location): void;
+  getDot: () => SphereDot | null;
+  getPosition: () => Location | null;
+  setPosition: (location: Location) => void;
 }
 
 export interface DotProps {
@@ -135,10 +135,11 @@ export function Dot({
     ref,
     () => ({
       getDot: () => dotRef.current,
+      getPosition: () =>
+        (dotRef.current?.location() ?? null) as Location | null,
       setPosition: (location: Location) => {
         dotRef.current?.location(location);
       },
-      getPosition: () => (dotRef.current?.location() as Location) ?? null,
     }),
     []
   );

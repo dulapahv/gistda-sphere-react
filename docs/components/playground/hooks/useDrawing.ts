@@ -77,7 +77,7 @@ export function useDrawing(): UseDrawingReturn {
             const radius = Math.sqrt(dx * dx + dy * dy);
             setCircles((prev) => [
               ...prev,
-              { id: `circle-${Date.now()}`, center: circleCenter, radius },
+              { center: circleCenter, id: `circle-${Date.now()}`, radius },
             ]);
             setCircleCenter(null);
           } else {
@@ -94,8 +94,8 @@ export function useDrawing(): UseDrawingReturn {
               ...prev,
               {
                 id: `rect-${Date.now()}`,
-                position: { lon: minLon, lat: maxLat },
-                size: { width, height },
+                position: { lat: maxLat, lon: minLon },
+                size: { height, width },
               },
             ]);
             setRectangleCorner(null);
@@ -164,25 +164,25 @@ export function useDrawing(): UseDrawingReturn {
     rectangles.length;
 
   return {
-    mode,
-    markers,
-    polygons,
-    polylines,
-    circles,
-    dots,
-    rectangles,
-    polygonPoints,
-    polylinePoints,
     circleCenter,
-    rectangleCorner,
-    selectedPopup,
-    setMode,
+    circles,
+    clearAll,
+    closePopup,
+    dots,
     handleClick,
     handleDoubleClick,
-    clearAll,
-    updateMarker,
-    updateDot,
-    closePopup,
+    markers,
+    mode,
+    polygonPoints,
+    polygons,
+    polylinePoints,
+    polylines,
+    rectangleCorner,
+    rectangles,
+    selectedPopup,
+    setMode,
     totalShapes,
+    updateDot,
+    updateMarker,
   };
 }

@@ -173,5 +173,3 @@ export function Layer({
 
   return null;
 }
-
-export default Layer;

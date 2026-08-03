@@ -25,26 +25,26 @@ import { TagsDemo } from "@/components/demos/tags-demo";
 export function getMDXComponents(components?: MDXComponents): MDXComponents {
   return {
     ...defaultMdxComponents,
+    Circle,
+    // Interactive demos
+    ControlsDemo,
+    Dot,
+    DrawingDemo,
+    EventLogDemo,
+    InteractiveMarkerDemo,
+    LayerDemo,
     // Map demo components
     MapDemo,
     Marker,
+    OverlayDemo,
     Polygon,
     Polyline,
-    Circle,
     Popup,
-    Dot,
-    Rectangle,
-    // Interactive demos
-    ControlsDemo,
-    DrawingDemo,
-    EventLogDemo,
-    SphereMapDemo,
-    InteractiveMarkerDemo,
-    LayerDemo,
-    OverlayDemo,
     PredefinedOverlaysDemo,
+    Rectangle,
     RouteDemo,
     SearchDemo,
+    SphereMapDemo,
     TagsDemo,
     ...components,
   };

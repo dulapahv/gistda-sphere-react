@@ -17,9 +17,9 @@ import type { RouteInfoData } from "../types";
 
 function routeModeLabel(t: PlaygroundTranslations, id: RouteMode): string {
   const map: Record<RouteMode, string> = {
-    Traffic: t.modeTraffic,
-    Distance: t.modeShortest,
     Cost: t.modeCheapest,
+    Distance: t.modeShortest,
+    Traffic: t.modeTraffic,
   };
   return map[id];
 }

@@ -28,7 +28,7 @@ interface MapDemoProps {
 export function MapDemo({
   children,
   height = "400px",
-  center = { lon: 100.5018, lat: 13.7563 },
+  center = { lat: 13.7563, lon: 100.5018 },
   zoom = 10,
 }: MapDemoProps) {
   const language = useDocLanguage();
@@ -51,7 +51,7 @@ export function MapDemo({
         <SphereMap
           center={center}
           language={language}
-          style={{ width: "100%", height }}
+          style={{ height, width: "100%" }}
           zoom={zoom}
         >
           {children}

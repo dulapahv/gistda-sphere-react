@@ -108,7 +108,7 @@ describe("Hooks", () => {
         (call: any) => call[0] === "click"
       )?.[1];
 
-      const eventData = { lon: 100.5, lat: 13.75 };
+      const eventData = { lat: 13.75, lon: 100.5 };
       act(() => {
         boundHandler?.(eventData);
       });

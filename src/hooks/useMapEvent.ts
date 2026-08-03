@@ -26,9 +26,7 @@ export function useMapEvent<T = unknown>(
     }
 
     // Stable reference avoids re-binding on every handler change
-    const stableHandler: EventHandler<T> = (data) => {
-      return handlerRef.current(data);
-    };
+    const stableHandler: EventHandler<T> = (data) => handlerRef.current(data);
 
     map.Event.bind(eventName, stableHandler);
 

@@ -17,26 +17,26 @@ describe("useRoute", () => {
 
     map.Route = {
       add: vi.fn(),
-      insert: vi.fn(),
-      remove: vi.fn(),
-      removeAt: vi.fn(),
+      auto: vi.fn(),
+      clear: vi.fn(),
       clearDestination: vi.fn(),
       clearPath: vi.fn(),
-      clear: vi.fn(),
-      reverse: vi.fn(),
-      search: vi.fn(),
       distance: vi.fn().mockReturnValue(450),
-      interval: vi.fn().mockReturnValue(19_800),
-      guide: vi.fn().mockReturnValue([]),
+      enableRoute: vi.fn(),
       exportRouteLine: vi.fn().mockReturnValue(null),
+      guide: vi.fn().mockReturnValue([]),
+      insert: vi.fn(),
+      interval: vi.fn().mockReturnValue(19_800),
+      label: vi.fn(),
+      language: vi.fn(),
       list: vi.fn().mockReturnValue([]),
-      size: vi.fn().mockReturnValue(0),
       mode: vi.fn(),
       modeOf: vi.fn(),
-      enableRoute: vi.fn(),
-      label: vi.fn(),
-      auto: vi.fn(),
-      language: vi.fn(),
+      remove: vi.fn(),
+      removeAt: vi.fn(),
+      reverse: vi.fn(),
+      search: vi.fn(),
+      size: vi.fn().mockReturnValue(0),
     };
   });
 
@@ -65,7 +65,7 @@ describe("useRoute", () => {
         wrapper: createWrapper(),
       });
 
-      const location = { lon: 100.5, lat: 13.75 };
+      const location = { lat: 13.75, lon: 100.5 };
       result.current.addDestination(location);
 
       expect(map.Route.add).toHaveBeenCalledWith(location, undefined);
@@ -76,7 +76,7 @@ describe("useRoute", () => {
         wrapper: createWrapper(),
       });
 
-      const location = { lon: 100.5, lat: 13.75 };
+      const location = { lat: 13.75, lon: 100.5 };
       result.current.insertDestination(1, location, "Traffic");
 
       expect(map.Route.insert).toHaveBeenCalledWith(1, location, "Traffic");

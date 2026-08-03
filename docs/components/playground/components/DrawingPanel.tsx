@@ -10,12 +10,12 @@ import {
 
 function toolLabel(t: PlaygroundTranslations, id: DrawingMode): string {
   const map: Record<DrawingMode, string> = {
-    none: t.toolPan,
-    marker: t.toolMarker,
+    circle: t.toolCircle,
     dot: t.toolDot,
+    marker: t.toolMarker,
+    none: t.toolPan,
     polygon: t.toolPolygon,
     polyline: t.toolLine,
-    circle: t.toolCircle,
     rectangle: t.toolRect,
   };
   return map[id];

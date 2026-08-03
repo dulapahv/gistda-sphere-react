@@ -13,8 +13,8 @@ import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
-const BANGKOK: Location = { lon: 100.5018, lat: 13.7563 };
-const CHIANG_MAI: Location = { lon: 98.9853, lat: 18.7883 };
+const BANGKOK: Location = { lat: 13.7563, lon: 100.5018 };
+const CHIANG_MAI: Location = { lat: 18.7883, lon: 98.9853 };
 
 function RouteControls() {
   const [routeInfo, setRouteInfo] = useState<{
@@ -98,9 +98,9 @@ function RouteControls() {
   return (
     <>
       <SphereMap
-        center={{ lon: 99.75, lat: 16.27 }}
+        center={{ lat: 16.27, lon: 99.75 }}
         language={language}
-        style={{ width: "100%", height: "400px" }}
+        style={{ height: "400px", width: "100%" }}
         zoom={7}
       >
         <Marker position={BANGKOK} title="Bangkok (Origin)" />

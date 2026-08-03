@@ -38,9 +38,9 @@ function PredefinedControls() {
   return (
     <>
       <SphereMap
-        center={{ lon: 100.5018, lat: 13.7563 }}
+        center={{ lat: 13.7563, lon: 100.5018 }}
         language={language}
-        style={{ width: "100%", height: "350px" }}
+        style={{ height: "350px", width: "100%" }}
         zoom={10}
       />
       <div className="flex flex-wrap items-center gap-2 bg-fd-card p-3">

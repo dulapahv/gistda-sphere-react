@@ -13,11 +13,11 @@ import type {
 } from "../types";
 
 export interface RectangleRef {
-  getArea(language?: string): number | string | null;
-  getBound(): Bound | null;
-  getRectangle(): SphereRectangle | null;
-  togglePopup(show?: boolean, location?: Location): void;
-  updateStyle(options: Partial<GeometryOptions>): void;
+  getArea: (language?: string) => number | string | null;
+  getBound: () => Bound | null;
+  getRectangle: () => SphereRectangle | null;
+  togglePopup: (show?: boolean, location?: Location) => void;
+  updateStyle: (options: Partial<GeometryOptions>) => void;
 }
 
 export interface RectangleProps {
@@ -171,13 +171,13 @@ export function Rectangle({
   useImperativeHandle(
     ref,
     () => ({
+      getArea: (language?: string) =>
+        rectangleRef.current?.size(language) ?? null,
+      getBound: () => rectangleRef.current?.bound() ?? null,
       getRectangle: () => rectangleRef.current,
       togglePopup: (show?: boolean, location?: Location) => {
         rectangleRef.current?.pop(show, location);
       },
-      getBound: () => rectangleRef.current?.bound() ?? null,
-      getArea: (language?: string) =>
-        rectangleRef.current?.size(language) ?? null,
       updateStyle: (options: Partial<GeometryOptions>) => {
         rectangleRef.current?.update(options);
       },

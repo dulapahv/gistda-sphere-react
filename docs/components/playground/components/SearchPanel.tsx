@@ -54,7 +54,7 @@ export function SearchPanel({ onResultSelect, lang }: SearchPanelProps) {
     const poi = item as { name?: string; lat?: number; lon?: number };
     if (poi.lat !== undefined && poi.lon !== undefined) {
       const position: Location = { lat: poi.lat, lon: poi.lon };
-      onResultSelect({ position, name: poi.name ?? t.searchResult });
+      onResultSelect({ name: poi.name ?? t.searchResult, position });
     }
   };
 

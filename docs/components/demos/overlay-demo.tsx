@@ -10,7 +10,7 @@ import { useDocLanguage } from "./use-doc-language";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
-const CENTER = { lon: 100.5018, lat: 13.7563 };
+const CENTER = { lat: 13.7563, lon: 100.5018 };
 
 function OverlayControls() {
   const { items, add, remove, clear } = useMarkers();
@@ -19,7 +19,7 @@ function OverlayControls() {
   const handleAdd = () => {
     const offset = () => (Math.random() - 0.5) * 0.1;
     add({
-      position: { lon: CENTER.lon + offset(), lat: CENTER.lat + offset() },
+      position: { lat: CENTER.lat + offset(), lon: CENTER.lon + offset() },
       title: `Marker ${items.length + 1}`,
     });
   };
@@ -36,7 +36,7 @@ function OverlayControls() {
       <SphereMap
         center={CENTER}
         language={language}
-        style={{ width: "100%", height: "350px" }}
+        style={{ height: "350px", width: "100%" }}
         zoom={12}
       >
         {items.map((m) => (

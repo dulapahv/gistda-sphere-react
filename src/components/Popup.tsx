@@ -4,11 +4,11 @@ import { useSphereContext } from "../context/SphereContext";
 import type { Location, PopupOptions, Size, SpherePopup } from "../types";
 
 export interface PopupRef {
-  getElement(): HTMLElement | null;
-  getPopup(): SpherePopup | null;
-  setDetail(detail: string): void;
-  setPosition(location: Location): void;
-  setTitle(title: string): void;
+  getElement: () => HTMLElement | null;
+  getPopup: () => SpherePopup | null;
+  setDetail: (detail: string) => void;
+  setPosition: (location: Location) => void;
+  setTitle: (title: string) => void;
 }
 
 export interface PopupProps {
@@ -108,17 +108,17 @@ export function Popup({
   useImperativeHandle(
     ref,
     () => ({
+      getElement: () => popupRef.current?.element() ?? null,
       getPopup: () => popupRef.current,
+      setDetail: (newDetail: string) => {
+        popupRef.current?.detail(newDetail);
+      },
       setPosition: (location: Location) => {
         popupRef.current?.location(location);
       },
       setTitle: (newTitle: string) => {
         popupRef.current?.title(newTitle);
       },
-      setDetail: (newDetail: string) => {
-        popupRef.current?.detail(newDetail);
-      },
-      getElement: () => popupRef.current?.element() ?? null,
     }),
     []
   );

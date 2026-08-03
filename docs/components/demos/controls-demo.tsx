@@ -12,9 +12,9 @@ import { useDocLanguage } from "./use-doc-language";
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
 const cities: Array<{ name: string } & Location> = [
-  { name: "Bangkok", lon: 100.5018, lat: 13.7563 },
-  { name: "Chiang Mai", lon: 98.9853, lat: 18.7883 },
-  { name: "Phuket", lon: 98.3923, lat: 7.8804 },
+  { lat: 13.7563, lon: 100.5018, name: "Bangkok" },
+  { lat: 18.7883, lon: 98.9853, name: "Chiang Mai" },
+  { lat: 7.8804, lon: 98.3923, name: "Phuket" },
 ];
 
 const filters = [
@@ -90,9 +90,9 @@ export function ControlsDemo() {
     <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
       <SphereProvider apiKey={API_KEY}>
         <SphereMap
-          center={{ lon: 100.5018, lat: 13.7563 }}
+          center={{ lat: 13.7563, lon: 100.5018 }}
           language={language}
-          style={{ width: "100%", height: "400px" }}
+          style={{ height: "400px", width: "100%" }}
           zoom={10}
         />
         <Controls />

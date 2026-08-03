@@ -20,16 +20,16 @@ import type {
 } from "../types";
 
 export interface SphereMapRef {
-  getMap(): SphereMapInstance | null;
-  goTo(target: FlyToOptions, animate?: boolean): void;
-  repaint(): void;
-  resize(): void;
-  setBound(bound: Bound, options?: object): void;
-  setCenter(location: Location, animate?: boolean): void;
-  setFilter(filter: FilterType): void;
-  setPitch(angle: number): void;
-  setRotate(angle: number, animate?: boolean): void;
-  setZoom(zoom: number, animate?: boolean): void;
+  getMap: () => SphereMapInstance | null;
+  goTo: (target: FlyToOptions, animate?: boolean) => void;
+  repaint: () => void;
+  resize: () => void;
+  setBound: (bound: Bound, options?: object) => void;
+  setCenter: (location: Location, animate?: boolean) => void;
+  setFilter: (filter: FilterType) => void;
+  setPitch: (angle: number) => void;
+  setRotate: (angle: number, animate?: boolean) => void;
+  setZoom: (zoom: number, animate?: boolean) => void;
 }
 
 export interface SphereMapProps {
@@ -97,48 +97,48 @@ export function SphereMap({
   const { sphere, isLoaded, registerMap, unregisterMap } = useSphereContext();
 
   const callbacksRef = useRef({
-    onReady,
-    onZoom,
-    onLocation,
     onClick,
     onDoubleClick,
-    onRotate,
-    onPitch,
     onDrag,
     onDrop,
-    onIdle,
-    onMouseMove,
     onError,
+    onIdle,
+    onLocation,
+    onMouseMove,
+    onPitch,
+    onReady,
+    onRotate,
+    onZoom,
   });
 
   useEffect(() => {
     callbacksRef.current = {
-      onReady,
-      onZoom,
-      onLocation,
       onClick,
       onDoubleClick,
-      onRotate,
-      onPitch,
       onDrag,
       onDrop,
-      onIdle,
-      onMouseMove,
       onError,
+      onIdle,
+      onLocation,
+      onMouseMove,
+      onPitch,
+      onReady,
+      onRotate,
+      onZoom,
     };
   });
 
   const initialPropsRef = useRef({
+    center,
+    filter,
+    input,
+    language,
+    lastView,
+    pitch,
+    rotate,
+    ui,
     zoom,
     zoomRange,
-    center,
-    language,
-    input,
-    lastView,
-    ui,
-    filter,
-    rotate,
-    pitch,
   });
 
   useEffect(() => {
@@ -150,11 +150,11 @@ export function SphereMap({
 
     try {
       const options: MapOptions = {
+        input: initialProps.input,
+        language: initialProps.language,
+        lastView: initialProps.lastView,
         placeholder: containerRef.current,
         zoom: initialProps.zoom,
-        language: initialProps.language,
-        input: initialProps.input,
-        lastView: initialProps.lastView,
       };
 
       if (initialProps.zoomRange) {
@@ -256,42 +256,42 @@ export function SphereMap({
     ref,
     () => ({
       getMap: () => mapRef.current,
-      setZoom: (newZoom: number, animate = true) => {
-        mapRef.current?.zoom(newZoom, animate);
+      goTo: (target: FlyToOptions, animate = true) => {
+        mapRef.current?.goTo(target, animate);
       },
-      setCenter: (location: Location, animate = true) => {
-        mapRef.current?.location(location, animate);
+      repaint: () => {
+        mapRef.current?.repaint();
+      },
+      resize: () => {
+        mapRef.current?.resize();
       },
       setBound: (bound: Bound, options?: object) => {
         mapRef.current?.bound(bound, options);
       },
-      goTo: (target: FlyToOptions, animate = true) => {
-        mapRef.current?.goTo(target, animate);
-      },
-      setRotate: (angle: number, animate = true) => {
-        mapRef.current?.rotate(angle, animate);
-      },
-      setPitch: (angle: number) => {
-        mapRef.current?.pitch(angle);
+      setCenter: (location: Location, animate = true) => {
+        mapRef.current?.location(location, animate);
       },
       setFilter: (newFilter: FilterType) => {
         if (mapRef.current && window.sphere) {
           mapRef.current.enableFilter(window.sphere.Filter[newFilter]);
         }
       },
-      resize: () => {
-        mapRef.current?.resize();
+      setPitch: (angle: number) => {
+        mapRef.current?.pitch(angle);
       },
-      repaint: () => {
-        mapRef.current?.repaint();
+      setRotate: (angle: number, animate = true) => {
+        mapRef.current?.rotate(angle, animate);
+      },
+      setZoom: (newZoom: number, animate = true) => {
+        mapRef.current?.zoom(newZoom, animate);
       },
     }),
     []
   );
 
   const containerStyle: CSSProperties = {
-    width: "100%",
     height: "100%",
+    width: "100%",
     ...style,
   };
 

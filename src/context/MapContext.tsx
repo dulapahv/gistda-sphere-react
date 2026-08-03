@@ -20,7 +20,7 @@ export function MapProvider({
   children,
 }: MapProviderProps): ReactNode {
   const value = useMemo<MapContextValue>(
-    () => ({ map, isReady }),
+    () => ({ isReady, map }),
     [map, isReady]
   );
 

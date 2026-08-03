@@ -1,6 +1,6 @@
 {
   "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
-  "extends": ["ultracite/core", "ultracite/next"],
+  "extends": ["ultracite/biome/core", "ultracite/biome/next"],
   "overrides": [
     {
       // Vitest 4 requires `function` (not arrow) for constructor mocks called with `new`
@@ -9,6 +9,18 @@
         "rules": {
           "complexity": {
             "useArrowFunction": "off"
+          }
+        }
+      }
+    },
+    {
+      // Inline handlers are idiomatic in the self-contained docs demos; the
+      // rerender cost is irrelevant for these and useCallback would obscure them
+      "includes": ["docs/**"],
+      "linter": {
+        "rules": {
+          "performance": {
+            "noJsxPropsBind": "off"
           }
         }
       }
@@ -40,6 +52,12 @@
       "suspicious": {
         // Array index keys are acceptable when items are not reordered
         "noArrayIndexKey": "warn",
+        // Type-aware, and both its assumptions are wrong here: it narrows
+        // useRef().current to its initial null (the refs are assigned in other
+        // effects), and it trusts our hand-written declarations of the external
+        // `sphere` global, whose submodules may be absent at runtime. Applying
+        // it would delete live code and real guards, so it stays advisory.
+        "noUnnecessaryConditions": "warn",
         // Iterator callback return is acceptable in test setup
         "useIterableCallbackReturn": "warn"
       }

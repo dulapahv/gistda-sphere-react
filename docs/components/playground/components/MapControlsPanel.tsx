@@ -5,13 +5,13 @@ import { getTranslations, type PlaygroundTranslations } from "../translations";
 
 function controlLabel(t: PlaygroundTranslations, id: string): string {
   const map: Record<string, string> = {
-    DPad: t.controlDPad,
-    Geolocation: t.controlGeolocation,
-    Zoombar: t.controlZoomBar,
-    Toolbar: t.controlToolbar,
-    Fullscreen: t.controlFullscreen,
     Crosshair: t.controlCrosshair,
+    DPad: t.controlDPad,
+    Fullscreen: t.controlFullscreen,
+    Geolocation: t.controlGeolocation,
     Scale: t.controlScale,
+    Toolbar: t.controlToolbar,
+    Zoombar: t.controlZoomBar,
   };
   return map[id] ?? id;
 }

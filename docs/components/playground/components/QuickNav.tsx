@@ -13,11 +13,11 @@ export function QuickNav({ onNavigate, lang }: QuickNavProps) {
   const t = getTranslations(lang);
 
   const locationLabels: Record<string, string> = {
+    Ayutthaya: t.locAyutthaya,
     Bangkok: t.locBangkok,
     "Chiang Mai": t.locChiangMai,
-    Phuket: t.locPhuket,
     Pattaya: t.locPattaya,
-    Ayutthaya: t.locAyutthaya,
+    Phuket: t.locPhuket,
     Sukhothai: t.locSukhothai,
   };
 

@@ -12,13 +12,13 @@ import type {
 } from "../types";
 
 export interface CircleRef {
-  getArea(language?: string): number | string | null;
-  getBound(): Bound | null;
-  getCenter(): Location | null;
-  getCircle(): SphereCircle | null;
-  getRadius(language?: string): number | string | null;
-  togglePopup(show?: boolean, location?: Location): void;
-  updateStyle(options: Partial<GeometryOptions>): void;
+  getArea: (language?: string) => number | string | null;
+  getBound: () => Bound | null;
+  getCenter: () => Location | null;
+  getCircle: () => SphereCircle | null;
+  getRadius: (language?: string) => number | string | null;
+  togglePopup: (show?: boolean, location?: Location) => void;
+  updateStyle: (options: Partial<GeometryOptions>) => void;
 }
 
 export interface CircleProps {
@@ -166,15 +166,16 @@ export function Circle({
   useImperativeHandle(
     ref,
     () => ({
+      getArea: (language?: string) => circleRef.current?.size(language) ?? null,
+      getBound: () => circleRef.current?.bound() ?? null,
+      getCenter: () =>
+        (circleRef.current?.location() ?? null) as Location | null,
       getCircle: () => circleRef.current,
+      getRadius: (language?: string) =>
+        circleRef.current?.radius(language) ?? null,
       togglePopup: (show?: boolean, location?: Location) => {
         circleRef.current?.pop(show, location);
       },
-      getCenter: () => (circleRef.current?.location() as Location) ?? null,
-      getBound: () => circleRef.current?.bound() ?? null,
-      getArea: (language?: string) => circleRef.current?.size(language) ?? null,
-      getRadius: (language?: string) =>
-        circleRef.current?.radius(language) ?? null,
       updateStyle: (options: Partial<GeometryOptions>) => {
         circleRef.current?.update(options);
       },

@@ -84,9 +84,9 @@ export function LayerDemo() {
     <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
       <SphereProvider apiKey={API_KEY}>
         <SphereMap
-          center={{ lon: 100.5018, lat: 13.7563 }}
+          center={{ lat: 13.7563, lon: 100.5018 }}
           language={language}
-          style={{ width: "100%", height: "400px" }}
+          style={{ height: "400px", width: "100%" }}
           zoom={8}
         />
         <LayerControls />

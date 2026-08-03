@@ -33,12 +33,12 @@ import {
 } from "lucide-react";
 
 export const LOCATIONS = {
-  Bangkok: { lon: 100.5018, lat: 13.7563 },
-  "Chiang Mai": { lon: 98.9853, lat: 18.7883 },
-  Phuket: { lon: 98.3923, lat: 7.8804 },
-  Pattaya: { lon: 100.8825, lat: 12.9236 },
-  Ayutthaya: { lon: 100.5877, lat: 14.3692 },
-  Sukhothai: { lon: 99.7963, lat: 17.0078 },
+  Ayutthaya: { lat: 14.3692, lon: 100.5877 },
+  Bangkok: { lat: 13.7563, lon: 100.5018 },
+  "Chiang Mai": { lat: 18.7883, lon: 98.9853 },
+  Pattaya: { lat: 12.9236, lon: 100.8825 },
+  Phuket: { lat: 7.8804, lon: 98.3923 },
+  Sukhothai: { lat: 17.0078, lon: 99.7963 },
 } as const;
 
 export type DrawingMode =
@@ -68,22 +68,22 @@ export const DRAWING_TOOLS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { id: "none", label: "Pan", icon: Hand },
-  { id: "marker", label: "Marker", icon: MapPin },
-  { id: "dot", label: "Dot", icon: Dot },
-  { id: "polygon", label: "Polygon", icon: VectorSquare },
-  { id: "polyline", label: "Line", icon: Pencil },
-  { id: "circle", label: "Circle", icon: CircleIcon },
-  { id: "rectangle", label: "Rect", icon: Square },
+  { icon: Hand, id: "none", label: "Pan" },
+  { icon: MapPin, id: "marker", label: "Marker" },
+  { icon: Dot, id: "dot", label: "Dot" },
+  { icon: VectorSquare, id: "polygon", label: "Polygon" },
+  { icon: Pencil, id: "polyline", label: "Line" },
+  { icon: CircleIcon, id: "circle", label: "Circle" },
+  { icon: Square, id: "rectangle", label: "Rect" },
 ];
 
 export const DRAWING_HINTS: Record<DrawingMode, string> = {
-  none: "Click and drag to pan the map",
-  marker: "Click on the map to place a marker",
+  circle: "Click center, then click to set radius",
   dot: "Click on the map to place a dot",
+  marker: "Click on the map to place a marker",
+  none: "Click and drag to pan the map",
   polygon: "Click to add points, double-click to complete",
   polyline: "Click to add points, double-click to complete",
-  circle: "Click center, then click to set radius",
   rectangle: "Click corner, then click opposite corner",
 };
 
@@ -94,10 +94,10 @@ export const BASE_LAYERS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { id: "SIMPLE", label: "Simple", icon: MapIcon },
-  { id: "STREETS", label: "Streets", icon: Navigation },
-  { id: "STREETS_NIGHT", label: "Night", icon: Moon },
-  { id: "HYBRID", label: "Hybrid", icon: Satellite },
+  { icon: MapIcon, id: "SIMPLE", label: "Simple" },
+  { icon: Navigation, id: "STREETS", label: "Streets" },
+  { icon: Moon, id: "STREETS_NIGHT", label: "Night" },
+  { icon: Satellite, id: "HYBRID", label: "Hybrid" },
 ];
 
 export type OverlayLayer =
@@ -113,12 +113,12 @@ export const OVERLAY_LAYERS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { id: "TRAFFIC", label: "Traffic", icon: Car },
-  { id: "IMAGES", label: "Images", icon: Image },
-  { id: "PM25", label: "PM2.5", icon: Wind },
-  { id: "HOTSPOT", label: "Hotspot", icon: Flame },
-  { id: "FLOOD", label: "Flood", icon: CloudRain },
-  { id: "DROUGHT", label: "Drought", icon: Sprout },
+  { icon: Car, id: "TRAFFIC", label: "Traffic" },
+  { icon: Image, id: "IMAGES", label: "Images" },
+  { icon: Wind, id: "PM25", label: "PM2.5" },
+  { icon: Flame, id: "HOTSPOT", label: "Hotspot" },
+  { icon: CloudRain, id: "FLOOD", label: "Flood" },
+  { icon: Sprout, id: "DROUGHT", label: "Drought" },
 ];
 
 export type PredefinedOverlay = "cameras" | "events" | "aqi";
@@ -128,31 +128,31 @@ export const PREDEFINED_OVERLAYS: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { id: "cameras", label: "CCTV", icon: Camera },
-  { id: "events", label: "Events", icon: Calendar },
-  { id: "aqi", label: "AQI", icon: CloudSun },
+  { icon: Camera, id: "cameras", label: "CCTV" },
+  { icon: Calendar, id: "events", label: "Events" },
+  { icon: CloudSun, id: "aqi", label: "AQI" },
 ];
 
 export const UI_CONTROLS = [
-  { id: "DPad", label: "D-Pad", icon: Gamepad2 },
-  { id: "Geolocation", label: "Geolocation", icon: LocateFixed },
-  { id: "Zoombar", label: "Zoom Bar", icon: ZoomIn },
-  { id: "Toolbar", label: "Toolbar", icon: Settings2 },
-  { id: "Fullscreen", label: "Fullscreen", icon: Fullscreen },
-  { id: "Crosshair", label: "Crosshair", icon: Plus },
-  { id: "Scale", label: "Scale", icon: Ruler },
+  { icon: Gamepad2, id: "DPad", label: "D-Pad" },
+  { icon: LocateFixed, id: "Geolocation", label: "Geolocation" },
+  { icon: ZoomIn, id: "Zoombar", label: "Zoom Bar" },
+  { icon: Settings2, id: "Toolbar", label: "Toolbar" },
+  { icon: Fullscreen, id: "Fullscreen", label: "Fullscreen" },
+  { icon: Plus, id: "Crosshair", label: "Crosshair" },
+  { icon: Ruler, id: "Scale", label: "Scale" },
 ] as const;
 
 export type UiControlId = (typeof UI_CONTROLS)[number]["id"];
 
 export const DEFAULT_UI_CONTROLS: Record<UiControlId, boolean> = {
-  DPad: true,
-  Geolocation: true,
-  Zoombar: true,
-  Toolbar: true,
-  Fullscreen: true,
   Crosshair: false,
+  DPad: true,
+  Fullscreen: true,
+  Geolocation: true,
   Scale: true,
+  Toolbar: true,
+  Zoombar: true,
 };
 
 export const ROUTE_MODES: Array<{
@@ -160,16 +160,16 @@ export const ROUTE_MODES: Array<{
   label: string;
   icon: LucideIcon;
 }> = [
-  { id: "Traffic", label: "Traffic", icon: Car },
-  { id: "Distance", label: "Shortest", icon: Zap },
-  { id: "Cost", label: "Cheapest", icon: DollarSign },
+  { icon: Car, id: "Traffic", label: "Traffic" },
+  { icon: Zap, id: "Distance", label: "Shortest" },
+  { icon: DollarSign, id: "Cost", label: "Cheapest" },
 ];
 
 export type RouteMode = (typeof ROUTE_MODES)[number]["id"];
 
 export const LANGUAGES = [
-  { id: "th", label: "ไทย", icon: Languages },
-  { id: "en", label: "English", icon: Languages },
+  { icon: Languages, id: "th", label: "ไทย" },
+  { icon: Languages, id: "en", label: "English" },
 ] as const;
 
 export type MapLanguage = (typeof LANGUAGES)[number]["id"];
