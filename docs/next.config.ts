@@ -1,15 +1,21 @@
 import { createMDX } from "fumadocs-mdx/next";
+import type { NextConfig } from "next";
 
 const withMDX = createMDX();
 
-/** @type {import('next').NextConfig} */
-const config = {
+const config: NextConfig = {
   experimental: {
-    inlineCss: true,
+    cssChunking: "graph",
     optimizePackageImports: ["@phosphor-icons/react"],
+    turbopackChunking: {
+      generateComponentChunks: true,
+    },
+    turbopackCjsTreeShaking: true,
     turbopackFileSystemCacheForBuild: true,
+    turbopackRustReactCompiler: true,
+    turbopackServerSideNestedAsyncChunking: true,
+    turbopackSharedRuntime: true,
     typedEnv: true,
-    viewTransition: true,
   },
   logging: {
     browserToTerminal: true,
