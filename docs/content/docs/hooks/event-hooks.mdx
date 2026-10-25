@@ -1,74 +1,73 @@
 ---
-title: useMapEvent
-description: Listen to map events from any component
+title: Event hooks
+description: Listen to any map event from a component, with typed arguments
 ---
 
-Listen to map events from any component inside `SphereMap`.
+Event hooks subscribe a component to map events and unsubscribe when it unmounts. They work inside `SphereMap` and anywhere else under `SphereProvider`, and the handler always sees your latest props and state.
 
 <EventLogDemo />
 
+## useMapEvent
+
 ```tsx
-import { useMapEvent } from 'gistda-sphere-react';
+import { useMapEvent } from "gistda-sphere-react";
 
-function MapEvents() {
-  useMapEvent('ready', () => {
-    console.log('Map is ready');
+function ClickLogger() {
+  useMapEvent("click", ({ lat, lon }) => {
+    console.log(`Clicked at ${lat}, ${lon}`);
   });
 
-  useMapEvent('click', (location) => {
-    console.log('Clicked at:', location.lon, location.lat);
-  });
-
-  useMapEvent('zoom', () => {
-    console.log('Zoom changed');
-  });
-
-  useMapEvent('location', () => {
-    console.log('Map center changed');
-  });
-
-  useMapEvent('overlayClick', ({ overlay, location }) => {
-    console.log('Overlay clicked at:', location);
-  });
-
-  useMapEvent('rotate', (angle) => {
-    console.log('Rotated to:', angle);
+  useMapEvent("overlayClick", (overlay, location) => {
+    console.log("Overlay clicked at", location);
   });
 
   return null;
 }
 ```
 
-## API
+The handler's arguments are typed per event (see `SphereEventMap`). The event names and what they pass are listed on the [`SphereMap` events table](/docs/components/sphere-map#events), for example `click` ↔ `onClick`.
+
+### Cancelling the context menu
+
+Handlers can return `false` to cancel cancellable events. Use it with `beforeContextmenu` to add your own menu items or hide the menu:
 
 ```tsx
-useMapEvent(eventName: EventName, handler: EventHandler<T>): void
+useMapEvent("beforeContextmenu", (menu) => {
+  const item = document.createElement("button");
+  item.textContent = "Add a stop here";
+  item.onclick = () => addStop(menu.location);
+  menu.add(item);
+});
 ```
 
-Listens to any Sphere event by name. The handler is automatically bound when the map is ready and unbound on unmount.
+## Shortcuts
 
-## Available events
+| Hook | Handler | Notes |
+| --- | --- | --- |
+| `useMapReady(handler)` | `(map) => void` | Runs once the map is ready, or right away if it already is. |
+| `useMapClick(handler)` | `({ lat, lon, x, y }) => void` | Map clicks (not fired for clicks on overlays). |
+| `useMapZoom(handler)` | `() => void` | Zoom changes. Read the level with `useMapControls().getZoom()`. |
+| `useMapLocation(handler)` | `() => void` | Center changes. Read it with `useMapControls().getCenter()`. |
+| `useOverlayClick(handler)` | `({ overlay, location }) => void` | Clicks on any overlay. |
 
-| Event Name | Data | Description |
-|------------|------|-------------|
-| `"ready"` | - | Map is ready |
-| `"resize"` | - | Map resized |
-| `"zoom"` | - | Zoom changed |
-| `"location"` | - | Center changed |
-| `"rotate"` | - | Rotation changed |
-| `"pitch"` | - | Pitch changed |
-| `"click"` | `Location` | Map clicked |
-| `"doubleClick"` | `Location` | Map double-clicked |
-| `"mousemove"` | `Location` | Mouse moved |
-| `"drag"` | - | Drag started |
-| `"drop"` | - | Drag ended |
-| `"idle"` | - | Map is idle |
-| `"layerChange"` | `Layer` | Layer added or removed |
-| `"overlayClick"` | `{ overlay, location }` | Overlay clicked |
-| `"overlayDrag"` | `Overlay` | Overlay dragged |
-| `"overlayDrop"` | `Overlay` | Overlay dropped |
-| `"overlayHover"` | `Overlay` | Mouse entered overlay |
-| `"overlayLeave"` | `Overlay` | Mouse left overlay |
-| `"popupClose"` | `Popup` | Popup closed |
-| `"routeComplete"` | `object[]` | Route calculated |
-| `"error"` | `object` | Error occurred |
+```tsx
+import { useMapControls, useMapReady, useMapZoom } from "gistda-sphere-react";
+
+function ZoomIndicator() {
+  const { getZoom } = useMapControls();
+  const [zoom, setZoom] = useState<number | null>(null);
+
+  useMapReady(() => setZoom(getZoom()));
+  useMapZoom(() => setZoom(getZoom()));
+
+  return <span>Zoom {zoom?.toFixed(1)}</span>;
+}
+```
+
+<Callout>
+  Events like `mousemove`, `zoom`, `location` and `repaint` fire many times per second while the map moves. Avoid heavy work in their handlers, or batch updates with `requestAnimationFrame`.
+</Callout>
+
+## Event props or event hooks?
+
+Both receive the same events. Use [`SphereMap`'s `on…` props](/docs/components/sphere-map#events) when the map's owner handles the event, and event hooks when a child or a sidebar component cares about it.

@@ -1,0 +1,32 @@
+---
+title: Population
+description: Estimate how many people live in an area
+---
+
+`population.get` estimates the population inside an area, from Meta's high-resolution population density maps.
+
+```ts
+const result = await services.population.get(
+  "POLYGON((100.49 13.76, 100.52 13.76, 100.52 13.73, 100.49 13.73, 100.49 13.76))",
+  { year: 2020 }
+);
+console.log(result.data, result.meta);
+```
+
+| Parameter | Type | Description |
+| --- | --- | --- |
+| `wkt` | `string` | The area as well-known text (WKT), up to 1,000 km². |
+| `year` | `number` | Year of the estimate. |
+
+## From a drawn shape
+
+Shapes drawn on the map can be turned into WKT. For a polygon ref:
+
+```ts
+const feature = polygonRef.current?.toGeoJSON() as GeoJSONFeature<GeoJSONPolygon>;
+const ring = feature.geometry.coordinates[0];
+const wkt = `POLYGON((${ring.map(([lon, lat]) => `${lon} ${lat}`).join(", ")}))`;
+const result = await services.population.get(wkt);
+```
+
+Large polygons make long requests; the client sends them as POST automatically.

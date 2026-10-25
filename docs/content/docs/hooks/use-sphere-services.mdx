@@ -1,0 +1,57 @@
+---
+title: useSphereServices
+description: A typed client for Sphere's REST web services, using the provider's API key
+---
+
+`useSphereServices` returns the [web services client](/docs/web-services) set up with your `SphereProvider` API key. Use it for routing, geocoding, elevation, static maps, agriculture, disaster and population data. No map is needed.
+
+<ServicesDemo />
+
+```tsx
+import { SphereServiceError, useSphereServices } from "gistda-sphere-react";
+
+function Elevation({ location }) {
+  const services = useSphereServices({ locale: "en" });
+  const [meters, setMeters] = useState<number | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    services.geo
+      .elevation(location, { signal: controller.signal })
+      .then((points) => setMeters(points[0]?.elevation ?? null))
+      .catch((error) => {
+        if (error instanceof SphereServiceError && error.code === "key") {
+          console.warn("Enable the elevation service for this API key.");
+        }
+      });
+    return () => controller.abort();
+  }, [services, location]);
+
+  return <span>{meters === null ? "…" : `${meters} m`}</span>;
+}
+```
+
+## Options
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `locale` | `"th" \| "en"` | `"th"` | Default language of results. |
+| `timeout` | `number` | `15000` | Milliseconds before a request fails with a `"timeout"` error. |
+| `method` | `"auto" \| "get" \| "post"` | `"auto"` | How requests are sent. See the [web services overview](/docs/web-services). |
+| `baseUrl` | `string` | `https://api.sphere.gistda.or.th/services` | Service URL, e.g. a proxy. |
+| `fetch` | `typeof fetch` | global `fetch` | Your own fetch implementation. |
+
+The client is memoized: it only changes when the options do.
+
+## Without React
+
+Outside React, or on a server, create the same client with `createSphereServices`:
+
+```ts
+import { createSphereServices } from "gistda-sphere-react";
+
+const services = createSphereServices({ apiKey: process.env.SPHERE_API_KEY! });
+const { data } = await services.search.search("โรงพยาบาล", { limit: 5 });
+```
+
+See [Web services](/docs/web-services) for every service, error handling and examples.

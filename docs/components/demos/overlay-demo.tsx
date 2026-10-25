@@ -1,34 +1,46 @@
 "use client";
 
+import { Marker, SphereMap, useMarkers } from "gistda-sphere-react";
 import {
-  Marker,
-  SphereMap,
-  SphereProvider,
-  useMarkers,
-} from "gistda-sphere-react";
+  DemoBar,
+  DemoButton,
+  DemoFrame,
+  DemoNote,
+  useDemoText,
+} from "./demo-ui";
 import { useDocLanguage } from "./use-doc-language";
-
-const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
 const CENTER = { lat: 13.7563, lon: 100.5018 };
 
-function OverlayControls() {
-  const { items, add, remove, clear } = useMarkers();
-  const language = useDocLanguage();
+const TEXT = {
+  en: {
+    add: "Add marker",
+    clear: "Clear all",
+    count: (count: number) => `${count} marker${count === 1 ? "" : "s"}`,
+    marker: (n: number) => `Marker ${n}`,
+    removeLast: "Remove last",
+  },
+  th: {
+    add: "เพิ่มหมุด",
+    clear: "ล้างทั้งหมด",
+    count: (count: number) => `${count} หมุด`,
+    marker: (n: number) => `หมุด ${n}`,
+    removeLast: "ลบหมุดล่าสุด",
+  },
+};
 
-  const handleAdd = () => {
+/** Markers managed as a collection with `useMarkers`. */
+function MarkerCollection() {
+  const language = useDocLanguage();
+  const text = useDemoText(TEXT);
+  const { items, add, remove, clear } = useMarkers();
+
+  const addRandom = () => {
     const offset = () => (Math.random() - 0.5) * 0.1;
     add({
       position: { lat: CENTER.lat + offset(), lon: CENTER.lon + offset() },
-      title: `Marker ${items.length + 1}`,
+      title: text.marker(items.length + 1),
     });
-  };
-
-  const handleRemoveLast = () => {
-    const last = items.at(-1);
-    if (last?.id) {
-      remove(last.id);
-    }
   };
 
   return (
@@ -39,52 +51,40 @@ function OverlayControls() {
         style={{ height: "350px", width: "100%" }}
         zoom={12}
       >
-        {items.map((m) => (
-          <Marker key={m.id} position={m.position} title={m.title} />
+        {items.map((marker) => (
+          <Marker
+            key={marker.id}
+            position={marker.position}
+            title={marker.title}
+          />
         ))}
       </SphereMap>
-      <div className="flex flex-wrap items-center gap-2 bg-fd-card p-3">
-        <button
-          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
-          onClick={handleAdd}
-          type="button"
-        >
-          Add Marker
-        </button>
-        <button
-          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
+      <DemoBar>
+        <DemoButton onClick={addRandom}>{text.add}</DemoButton>
+        <DemoButton
           disabled={items.length === 0}
-          onClick={handleRemoveLast}
-          type="button"
+          onClick={() => {
+            const last = items.at(-1);
+            if (last) {
+              remove(last.id);
+            }
+          }}
         >
-          Remove Last
-        </button>
-        <button
-          className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={items.length === 0}
-          onClick={clear}
-          type="button"
-        >
-          Clear All
-        </button>
-        <span className="text-fd-muted-foreground text-xs">
-          {items.length} marker{items.length === 1 ? "" : "s"}
-        </span>
-      </div>
+          {text.removeLast}
+        </DemoButton>
+        <DemoButton disabled={items.length === 0} onClick={clear}>
+          {text.clear}
+        </DemoButton>
+        <DemoNote>{text.count(items.length)}</DemoNote>
+      </DemoBar>
     </>
   );
 }
 
 export function OverlayDemo() {
-  if (!API_KEY) {
-    return null;
-  }
-
   return (
-    <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
-      <SphereProvider apiKey={API_KEY}>
-        <OverlayControls />
-      </SphereProvider>
-    </div>
+    <DemoFrame height="420px">
+      <MarkerCollection />
+    </DemoFrame>
   );
 }

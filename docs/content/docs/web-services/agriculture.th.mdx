@@ -1,0 +1,58 @@
+---
+title: การเกษตร
+description: แปลงเพาะปลูกจากข้อมูลดาวเทียม ราคาพืชเศรษฐกิจ และความเหมาะสมของพืชและที่ดิน
+---
+
+GISTDA จัดทำแผนที่พืชหลักของประเทศไทยจากภาพถ่ายดาวเทียม บริการเหล่านี้บอกว่า ณ จุดหรือในพื้นที่นั้นปลูกอะไร และที่ดินเหมาะสมเพียงใด
+
+## แปลงเพาะปลูก [#crop-plots]
+
+```ts
+const result = await services.agri.rice(
+  { lon: 100.3, lat: 14.5 },
+  { from: "2024-01-01", to: "2024-12-31" }
+);
+
+if (result.result === "found") {
+  console.log(result.area, "rai", result.yield_avg, "tons per rai", result.month);
+}
+```
+
+| เมธอด | พืช | ความถี่ในการอัปเดต | ตัวเลือก |
+| --- | --- | --- | --- |
+| `agri.rice(target, { from?, to? })` | ข้าว พร้อมผลผลิตเฉลี่ย | ทุกสองสัปดาห์ | ช่วงวันที่ |
+| `agri.maize(target, { from?, to? })` | ข้าวโพด | ทุกสองสัปดาห์ | ช่วงวันที่ |
+| `agri.cassava(target, { from?, to? })` | มันสำปะหลัง | ทุกสองสัปดาห์ | ช่วงวันที่ |
+| `agri.sugarcane(target, { from?, to? })` | อ้อย | ทุกสองสัปดาห์ | ช่วงวันที่ |
+| `agri.palm(target, { year? })` | ปาล์มน้ำมัน | รายปี | ปี |
+| `agri.rubber(target, { year? })` | ยางพารา | รายปี | ปี |
+
+`target` คือจุด `{ lon, lat }` หรือรูปหลายเหลี่ยมแบบ GeoJSON ผลลัพธ์มาจากกริดดาวเทียมขนาด 50 ม. ประกอบด้วย `result` (`"found"` หรือ `"not found"`), `area` เป็นไร่, `month`/`year`, `update` และ `geom` (รูปร่างของแปลง) เมื่อมีข้อมูล
+
+วันที่ใช้รูปแบบ ISO 8601 (`"YYYY-MM-DD"`)
+
+## พืชเศรษฐกิจ [#economic-crops]
+
+```ts
+const crops = await services.info.crop({ lon: 100.3, lat: 14.5 });
+// [{ type: "maize", cost: 4351.8, price: { unit: "บาท/กก.", min: 12.1, max: 12.15, status: 200 } }, …]
+```
+
+`cost` คือต้นทุนการผลิต และ `price` คือช่วงราคาตลาดปัจจุบัน `price.status` เป็น `200` เมื่อมีข้อมูลราคา
+
+## ความเหมาะสม [#suitability]
+
+```ts
+// Land suitability for major crops at a point
+const land = await services.info.landSuitability({ lon: 102.1, lat: 15.2 });
+// [{ type: "majorrice", suitability: "เหมาะสมมาก", cost: 3902.25 }, …]
+
+// Crop suitability within an area (or at a point)
+const crops = await services.info.cropSuitability({
+  type: "Polygon",
+  coordinates: [[[102.0, 15.1], [102.2, 15.1], [102.2, 15.3], [102.0, 15.1]]],
+});
+// [{ name: "ข้าว", suitability: "ไม่เหมาะสม", geom: { type: "Polygon", … } }, …]
+```
+
+ระดับความเหมาะสมเป็นข้อความภาษาไทย เช่น `"เหมาะสมมาก"`, `"ปานกลาง"`, `"ไม่เหมาะสม"` หรือ `"ไม่มีข้อมูล"`

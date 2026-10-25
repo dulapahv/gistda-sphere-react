@@ -1,0 +1,37 @@
+---
+title: SearchResults
+description: รายการผลการค้นหาในตัวของ Sphere พร้อมหมุดบนแผนที่
+---
+
+`<SearchResults>` แสดงรายการผลการค้นหาของ Sphere เอง หลังจากเรียก [`useSearch().search()`](/th/docs/hooks/use-search) ผลลัพธ์จะแสดงในรายการนี้และเป็นหมุดบนแผนที่ การคลิกผลลัพธ์จะซูมไปยังสถานที่นั้น
+
+```tsx
+import { SearchResults, useSearch } from "gistda-sphere-react";
+
+function SearchPanel() {
+  const { search } = useSearch();
+  return (
+    <aside>
+      <input
+        placeholder="Search places"
+        onKeyDown={(event) => {
+          if (event.key === "Enter") search(event.currentTarget.value);
+        }}
+      />
+      <SearchResults className="max-h-96 overflow-auto bg-white text-black" />
+    </aside>
+  );
+}
+```
+
+ลองใช้งานได้ใน[ตัวอย่างการค้นหา](/th/docs/examples/search) (ปุ่ม "รายการผลลัพธ์ของ Sphere")
+
+## Props
+
+| Prop | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `icon` | `Icon \| false` | ไอคอนหมุดของผลลัพธ์ หรือ `false` เพื่อแสดงรายการโดยไม่มีหมุด |
+| `className` | `string` | class ของคอนเทนเนอร์ |
+| `style` | `CSSProperties` | สไตล์ของคอนเทนเนอร์ |
+
+เมื่อ unmount รายการ ผลลัพธ์และหมุดจะถูกล้างด้วย หากต้องการรายการที่มีหน้าตาเหมือนแอปของคุณ ให้แสดงข้อมูลที่ `search()` คืนค่ามาเองแทน

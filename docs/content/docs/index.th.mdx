@@ -1,45 +1,50 @@
 ---
 title: gistda-sphere-react
-description: React wrapper สำหรับ GISTDA Sphere Map API พร้อมรองรับ TypeScript อย่างเต็มรูปแบบ
+description: React wrapper สำหรับ GISTDA Sphere Map API พร้อมรองรับ TypeScript เต็มรูปแบบ
 ---
 
 import { Cards, Card } from "fumadocs-ui/components/card";
 
 <Callout>
-  โปรเจกต์นี้เป็นโปรเจกต์ชุมชนแบบ<strong>ไม่เป็นทางการ</strong> ไม่มีความเกี่ยวข้อง ไม่ได้รับการรับรอง หรือสนับสนุนโดย GISTDA (สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ) สำหรับเอกสารและการสนับสนุนอย่างเป็นทางการ กรุณาเยี่ยมชม <a href="https://sphere.gistda.or.th/" target="_blank" rel="noopener noreferrer">sphere.gistda.or.th</a>
+  นี่คือโปรเจกต์โอเพนซอร์ส<strong>ที่ไม่เป็นทางการ</strong> โดยไม่มีส่วนเกี่ยวข้อง ไม่ได้รับการรับรอง และไม่ได้รับการสนับสนุนจาก GISTDA (สำนักงานพัฒนาเทคโนโลยีอวกาศและภูมิสารสนเทศ) ดูเอกสารและการสนับสนุนอย่างเป็นทางการได้ที่ <a href="https://sphere.gistda.or.th/" target="_blank" rel="noopener noreferrer">sphere.gistda.or.th</a>
 </Callout>
 
 <Callout type="warn">
-  โปรเจกต์นี้อยู่ในระหว่างการพัฒนา API อาจมีการเปลี่ยนแปลงในแต่ละเวอร์ชัน
+  โปรเจกต์นี้ยังอยู่ระหว่างการพัฒนา API อาจเปลี่ยนแปลงได้ในแต่ละเวอร์ชัน
 </Callout>
 
-React wrapper สำหรับ [GISTDA Sphere Map API](https://sphere.gistda.or.th/) สร้างแผนที่ประเทศไทยแบบโต้ตอบได้ พร้อมรองรับ TypeScript อย่างเต็มรูปแบบ
+React wrapper สำหรับ [GISTDA Sphere Map API](https://sphere.gistda.or.th/) ใช้สร้างแผนที่ประเทศไทยแบบโต้ตอบได้ พร้อมรองรับ TypeScript เต็มรูปแบบ
 
-<MapDemo height="350px" zoom={7} center={{ lon: 100.5018, lat: 13.7563 }} language="th">
+<MapDemo height="350px" zoom={7} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" detail="เมืองหลวงของประเทศไทย" />
   <Marker position={{ lon: 98.9853, lat: 18.7883 }} title="เชียงใหม่" />
   <Marker position={{ lon: 98.3923, lat: 7.8804 }} title="ภูเก็ต" />
 </MapDemo>
 
-## คุณสมบัติเด่น
+## ฟีเจอร์ [#features]
 
-- คอมโพเนนต์ React แบบ Declarative สำหรับแผนที่ หมุด รูปหลายเหลี่ยม และอื่น ๆ
-- รองรับ TypeScript เต็มรูปแบบพร้อม Export Types
-- Hooks สำหรับการค้นหา การหาเส้นทาง แท็ก และการควบคุมแผนที่
-- รองรับเลเยอร์ในตัวและเลเยอร์แบบกำหนดเอง
-- จัดการคอลเลกชันโอเวอร์เลย์
+- **ครอบคลุม Sphere API ทั้งหมด**: ทุกคลาส เหตุการณ์ และตัวเลือกของแผนที่ ดูรายละเอียดได้ที่หน้า[ความครอบคลุมของ API](/th/docs/api-coverage)
+- **คอมโพเนนต์แบบ declarative** สำหรับแผนที่ หมุด ป๊อปอัป รูปทรง GeoJSON ชั้นข้อมูล แท็กสถานที่ ข้อมูลสด และตัวควบคุม คืนทรัพยากรให้อัตโนมัติเมื่อเลิกใช้ และอัปเดตทันทีโดยไม่ต้องสร้างใหม่
+- **ใช้ React ได้ทุกที่**: ใส่เนื้อหา React ในไอคอนหมุด ป๊อปอัป และตัวควบคุมแผนที่ได้
+- **ระบบนำทางที่พร้อมใช้งานทันที**: สถานะเส้นทาง ระยะทางและเวลารวม พร้อมคำแนะนำการนำทางทีละขั้นที่อ่านเข้าใจง่ายในรูปแบบ React state
+- **การค้นหา สถานที่ และ POI**: ค้นหาพร้อมคำแนะนำอัตโนมัติ สถานที่ใกล้เคียง ที่อยู่ ขอบเขตพื้นที่ และแท็กสถานที่กว่า 250 รายการใน 20 หมวดหมู่
+- **ข้อมูลและการวิเคราะห์**: GeoJSON, KML, GPX และ WKT แผนที่ความร้อน การจัดกลุ่มจุด และ 3 มิติ การวัดขนาดและการดำเนินการกับรูปหลายเหลี่ยม
+- **บริการเว็บ**: ไคลเอนต์ที่มี type ครบถ้วนสำหรับการนำทาง การแปลงพิกัดเป็นที่อยู่ ความสูง แผนที่ภาพนิ่ง การเกษตร ภัยพิบัติ และประชากร ใช้งานได้ทั้งในเบราว์เซอร์และบนเซิร์ฟเวอร์
+- **ออกแบบมาเพื่อ TypeScript**: มี type ครบถ้วนทั้ง props, ref, ผลลัพธ์ และเหตุการณ์
 
-## ติดตั้งด่วน
+## ติดตั้ง [#quick-install]
 
 ```bash
 npm install gistda-sphere-react
 ```
 
 <Cards>
-  <Card title="การติดตั้ง" href="/docs/getting-started/installation" />
-  <Card title="เริ่มต้นใช้งานด่วน" href="/docs/getting-started/quick-start" />
-  <Card title="คอมโพเนนต์" href="/docs/components/sphere-provider" />
-  <Card title="Hooks" href="/docs/hooks/use-map" />
-  <Card title="ตัวอย่าง" href="/docs/examples/programmatic-markers" />
-  <Card title="ทดลองเล่น" href="/playground" />
+  <Card title="การติดตั้ง" href="/th/docs/getting-started/installation" />
+  <Card title="เริ่มต้นอย่างรวดเร็ว" href="/th/docs/getting-started/quick-start" />
+  <Card title="คอมโพเนนต์" href="/th/docs/components/sphere-provider" />
+  <Card title="Hooks" href="/th/docs/hooks/use-map" />
+  <Card title="บริการเว็บ" href="/th/docs/web-services" />
+  <Card title="ตัวอย่าง" href="/th/docs/examples/programmatic-markers" />
+  <Card title="ความครอบคลุมของ API" href="/th/docs/api-coverage" />
+  <Card title="ทดลองเล่น" href="/th/playground" />
 </Cards>

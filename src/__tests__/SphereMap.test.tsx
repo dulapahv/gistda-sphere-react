@@ -1,8 +1,8 @@
 import { act, render, screen, waitFor } from "@testing-library/react";
 import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SphereMap, type SphereMapRef } from "../components/SphereMap";
-import { SphereProvider } from "../context/SphereContext";
+import { SphereMap, type SphereMapRef } from "@/components/SphereMap";
+import { SphereProvider } from "@/context/SphereContext";
 import { createMockSphereApi } from "./setup";
 
 describe("SphereMap", () => {

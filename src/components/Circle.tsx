@@ -1,187 +1,66 @@
-import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
-import { useMapContext } from "../context/MapContext";
-import { useSphereContext } from "../context/SphereContext";
-import type {
-  Bound,
-  GeometryOptions,
-  LineStyleType,
-  Location,
-  PopupOptions,
-  Range,
-  SphereCircle,
-} from "../types";
+import { type ReactNode, type Ref, useImperativeHandle } from "react";
+import { useSphereContext } from "@/context/SphereContext";
+import {
+  createGeometryRefMethods,
+  type GeometryRefMethods,
+  readArea,
+} from "@/internal/geometryRef";
+import {
+  type GeometryComponentProps,
+  useGeometry,
+} from "@/internal/useGeometry";
+import type { Location, SphereCircle } from "@/types";
 
-export interface CircleRef {
+export interface CircleRef extends GeometryRefMethods {
+  /** Area in square meters, or formatted text when a language is given. */
   getArea: (language?: string) => number | string | null;
-  getBound: () => Bound | null;
+  /** Center of the circle. */
   getCenter: () => Location | null;
+  /** The underlying `sphere.Circle`. */
   getCircle: () => SphereCircle | null;
+  /** Radius in meters, or formatted text when a language is given. */
   getRadius: (language?: string) => number | string | null;
-  togglePopup: (show?: boolean, location?: Location) => void;
-  updateStyle: (options: Partial<GeometryOptions>) => void;
 }
 
-export interface CircleProps {
+export interface CircleProps extends GeometryComponentProps<SphereCircle> {
+  /** Center of the circle. */
   center: Location;
-  clickable?: boolean;
-  detail?: string;
-  draggable?: boolean;
-  fillColor?: string;
-  lineColor?: string;
-  lineStyle?: LineStyleType;
-  lineWidth?: number;
-  onClick?: (circle: SphereCircle) => void;
-  onDrag?: (circle: SphereCircle) => void;
-  onDrop?: (circle: SphereCircle) => void;
-  popup?: PopupOptions;
+  /** Radius in degrees (about 111 km per degree of latitude). */
   radius: number;
   ref?: Ref<CircleRef>;
-  title?: string;
-  visibleRange?: Range;
-  zIndex?: number;
 }
 
+/** A circle on the map. */
 export function Circle({
   center,
   radius,
   ref,
-  title,
-  detail,
-  popup,
-  visibleRange,
-  lineWidth,
-  lineColor,
-  fillColor,
-  lineStyle,
-  clickable,
-  draggable,
-  zIndex,
-  onClick,
-  onDrag,
-  onDrop,
-}: CircleProps) {
-  const { map, isReady } = useMapContext();
+  ...props
+}: CircleProps): ReactNode {
   const { sphere } = useSphereContext();
-  const circleRef = useRef<SphereCircle | null>(null);
-  const callbacksRef = useRef({ onClick, onDrag, onDrop });
-
-  useEffect(() => {
-    callbacksRef.current = { onClick, onDrag, onDrop };
-  }, [onClick, onDrag, onDrop]);
-
-  useEffect(() => {
-    if (!(isReady && map && sphere)) {
-      return;
-    }
-
-    const options: GeometryOptions = {};
-
-    if (title) {
-      options.title = title;
-    }
-    if (detail) {
-      options.detail = detail;
-    }
-    if (popup) {
-      options.popup = popup;
-    }
-    if (visibleRange) {
-      options.visibleRange = visibleRange;
-    }
-    if (typeof lineWidth === "number") {
-      options.lineWidth = lineWidth;
-    }
-    if (lineColor) {
-      options.lineColor = lineColor;
-    }
-    if (fillColor) {
-      options.fillColor = fillColor;
-    }
-    if (lineStyle) {
-      options.lineStyle = lineStyle;
-    }
-    if (typeof clickable === "boolean") {
-      options.clickable = clickable;
-    }
-    if (typeof draggable === "boolean") {
-      options.draggable = draggable;
-    }
-    if (typeof zIndex === "number") {
-      options.zIndex = zIndex;
-    }
-
-    const circle = new sphere.Circle(center, radius, options);
-    circleRef.current = circle;
-
-    map.Overlays.add(circle);
-
-    const handleOverlayClick = (data: { overlay: SphereCircle }) => {
-      if (data.overlay === circle) {
-        callbacksRef.current.onClick?.(circle);
-      }
-    };
-
-    const handleOverlayDrag = (overlay: SphereCircle) => {
-      if (overlay === circle) {
-        callbacksRef.current.onDrag?.(circle);
-      }
-    };
-
-    const handleOverlayDrop = (overlay: SphereCircle) => {
-      if (overlay === circle) {
-        callbacksRef.current.onDrop?.(circle);
-      }
-    };
-
-    map.Event.bind("overlayClick", handleOverlayClick);
-    map.Event.bind("overlayDrag", handleOverlayDrag);
-    map.Event.bind("overlayDrop", handleOverlayDrop);
-
-    return () => {
-      map.Event.unbind("overlayClick", handleOverlayClick);
-      map.Event.unbind("overlayDrag", handleOverlayDrag);
-      map.Event.unbind("overlayDrop", handleOverlayDrop);
-      map.Overlays.remove(circle);
-      circleRef.current = null;
-    };
-  }, [
-    isReady,
-    map,
-    sphere,
-    center,
-    radius,
-    title,
-    detail,
-    popup,
-    visibleRange,
-    lineWidth,
-    lineColor,
-    fillColor,
-    lineStyle,
-    clickable,
-    draggable,
-    zIndex,
-  ]);
+  const { overlayRef, portal } = useGeometry<SphereCircle>({
+    create: (api, options) => new api.Circle(center, radius, options),
+    props,
+    shape: { center, radius },
+  });
 
   useImperativeHandle(
     ref,
     () => ({
-      getArea: (language?: string) => circleRef.current?.size(language) ?? null,
-      getBound: () => circleRef.current?.bound() ?? null,
-      getCenter: () =>
-        (circleRef.current?.location() ?? null) as Location | null,
-      getCircle: () => circleRef.current,
-      getRadius: (language?: string) =>
-        circleRef.current?.radius(language) ?? null,
-      togglePopup: (show?: boolean, location?: Location) => {
-        circleRef.current?.pop(show, location);
+      ...createGeometryRefMethods(
+        () => sphere,
+        () => overlayRef.current
+      ),
+      getArea: (language) => readArea(sphere, overlayRef.current, language),
+      getCenter: () => {
+        const location = overlayRef.current?.location() as Location | undefined;
+        return location ? { lat: location.lat, lon: location.lon } : null;
       },
-      updateStyle: (options: Partial<GeometryOptions>) => {
-        circleRef.current?.update(options);
-      },
+      getCircle: () => overlayRef.current,
+      getRadius: (language) => overlayRef.current?.radius(language) ?? null,
     }),
-    []
+    [sphere, overlayRef]
   );
 
-  return null;
+  return portal;
 }

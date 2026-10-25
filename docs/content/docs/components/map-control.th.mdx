@@ -1,0 +1,52 @@
+---
+title: MapControl
+description: แสดงตัวควบคุม React ของคุณเองบนแผนที่ โดยวางตำแหน่งและมีหน้าตาเหมือนตัวควบคุมในตัว
+---
+
+`<MapControl>` วางเนื้อหา React ไว้ที่มุมใดมุมหนึ่งของแผนที่ในฐานะตัวควบคุมแผนที่จริง จึงเรียงตัวร่วมกับแถบซูมและตัวควบคุมในตัวอื่น ๆ และเลื่อนตำแหน่งไปด้วยกันบนจอขนาดเล็ก
+
+<MapControlDemo />
+
+```tsx
+import { MapControl, useMapControls } from "gistda-sphere-react";
+
+function HomeButton() {
+  const { goTo } = useMapControls();
+  return (
+    <MapControl position="top-left" group>
+      <button type="button" title="Back to Bangkok" onClick={() => goTo({ center: BANGKOK, zoom: 11 })}>
+        ⌂
+      </button>
+    </MapControl>
+  );
+}
+
+<SphereMap>
+  <HomeButton />
+</SphereMap>
+```
+
+## Props
+
+| Prop | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | – | เนื้อหาของตัวควบคุม ใช้ hooks, state และ events ได้ตามปกติ |
+| `position` | `"top-left" \| "top-right" \| "bottom-left" \| "bottom-right"` | `"top-right"` | มุมของแผนที่ |
+| `group` | `boolean` | `false` | ใช้หน้าตาแบบกลุ่มปุ่มเหมือนตัวควบคุมในตัว |
+| `className` | `string` | – | CSS class เพิ่มเติมของคอนเทนเนอร์ |
+| `visible` | `boolean` | `true` | แสดงหรือซ่อนตัวควบคุมโดยไม่ต้อง unmount |
+
+`<MapControl>` ต้องอยู่ภายใน `SphereMap`
+
+## การจัดสไตล์ [#styling]
+
+เมื่อใช้ `group` ปุ่มจะได้สไตล์ตัวควบคุมของ MapLibre (29 × 29 px พื้นขาว) หากไม่ใช้ คอนเทนเนอร์จะไม่มีสไตล์ จึงแสดงอะไรก็ได้ เช่น คำอธิบายสัญลักษณ์
+
+```tsx
+<MapControl position="bottom-right" className="rounded bg-white p-2 text-xs shadow">
+  <strong>PM2.5 (µg/m³)</strong>
+  <Legend />
+</MapControl>
+```
+
+หากต้องการแถวตัวเลือกแบบปุ่มแบ่งส่วน [`MenuBar`](/th/docs/components/menu-bar) ให้หน้าตาแบบในตัวของ Sphere

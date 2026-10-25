@@ -1,0 +1,82 @@
+---
+title: useUi
+description: Built-in controls, mouse and keyboard input, the right-click menu, geolocation and a scroll-friendly map lock
+---
+
+`useUi` manages Sphere's built-in UI and how users can interact with the map. It works inside `SphereMap` and anywhere else under `SphereProvider`.
+
+<UiDemo />
+
+```tsx
+import { useUi } from "gistda-sphere-react";
+
+function InputSettings() {
+  const ui = useUi();
+  return (
+    <>
+      <button onClick={() => ui.setMouseEnabled({ wheel: false })}>Disable wheel zoom</button>
+      <button onClick={() => ui.setKeyboardEnabled(false)}>Disable keyboard</button>
+      <button onClick={() => ui.locateUser()}>Where am I?</button>
+    </>
+  );
+}
+```
+
+## Return value
+
+| Method | Description |
+| --- | --- |
+| `setControlVisible(name, visible)` / `isControlVisible(name)` | Show or hide a [built-in control](/docs/components/sphere-map#built-in-controls). |
+| `setMouseEnabled(enabled)` | `true`/`false` for all mouse input, or `{ click, drag, wheel }` to set them one by one. |
+| `getMouseState()` | `{ click, drag, wheel }`. |
+| `setKeyboardEnabled(enabled)` / `isKeyboardEnabled()` | Keyboard navigation. |
+| `setContextMenuOptions({ address, nearPoi })` / `getContextMenuOptions()` | Show the address and nearby-places entries in the right-click menu. |
+| `locateUser()` | Ask for the user's location and show it on the map. |
+| `clearUserLocation()` | Hide the location marker. |
+| `lockMap(config?)` | Cover the map with a lock until the user clicks it. Returns a [`MapLockController`](#lock-the-map). |
+| `addControl(control)` / `removeControl(control)` | Add a MapLibre control or a `sphere.CustomControl`. For React content, use [`MapControl`](/docs/components/map-control). |
+| `setLanguage(language)` | Language of the built-in UI only. To change labels too, use `SphereMap`'s `language` prop. |
+| `isReady` | `true` once the map is ready. |
+
+## Lock the map
+
+A map that fills the screen width can trap scrolling: users scroll the page and pan the map instead. `lockMap` covers the map with a button until the user clicks it:
+
+```tsx
+function LockedMap() {
+  const ui = useUi();
+
+  useEffect(() => {
+    if (!ui.isReady) return;
+    const lock = ui.lockMap({ unlockLabel: "Click to use the map" });
+    return () => lock?.remove();
+  }, [ui]);
+
+  return null;
+}
+
+<SphereMap style={{ height: 400 }}>
+  <LockedMap />
+</SphereMap>
+```
+
+| `config` option | Description |
+| --- | --- |
+| `unlockLabel` / `lockLabel` | Button text while locked / unlocked. Defaults depend on the map language. |
+| `unlockClassName` / `lockClassName` | Button classes. Without them, a small default style is added. |
+
+| `MapLockController` | Description |
+| --- | --- |
+| `isLocked()` | Whether the map is locked. |
+| `lock()` / `unlock()` | Lock or unlock from code. |
+| `remove()` | Remove the lock entirely. |
+
+Calling `lockMap` again on the same map returns the existing lock instead of stacking a second one.
+
+## Disabling all input
+
+To make a static map, turn interaction off when creating it:
+
+```tsx
+<SphereMap input={false} controls={{ DPad: false, Zoombar: false }} />
+```

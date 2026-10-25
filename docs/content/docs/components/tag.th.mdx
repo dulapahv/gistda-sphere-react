@@ -1,0 +1,52 @@
+---
+title: Tag
+description: แสดงสถานที่ (POI) ตามหมวดหมู่ หรือข้อมูลจากบริการ WFS และ OGC API ของคุณเอง
+---
+
+`<Tag>` แสดงชั้นข้อมูลสถานที่ (POI) ขณะที่คอมโพเนนต์ถูก mount Sphere มีแท็กประมาณ 260 แท็กใน 20 หมวดหมู่ เช่น ธนาคาร โรงพยาบาล วัด และร้านกาแฟ
+
+<TagsDemo />
+
+```tsx
+<SphereMap>
+  <Tag name="โรงพยาบาล" />
+  <Tag name="วัด,พิพิธภัณฑ์" visibleRange={{ min: 12, max: 22 }} />
+</SphereMap>
+```
+
+แท็กระบุด้วยชื่อภาษาไทย เช่น `"โรงพยาบาล"` (โรงพยาบาล), `"ธนาคาร/สถาบันการเงิน"` (ธนาคาร) หรือ `"อาหารไทย"` (อาหารไทย) ดูรายการทั้งหมดพร้อมชื่อภาษาอังกฤษได้จาก [`useTagCategories`](/th/docs/hooks/use-tag-categories) บางแท็กรองรับชื่อภาษาอังกฤษด้วย เช่น `"ATM"` และ `"Hotel"`
+
+## Props [#props]
+
+| Prop | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `name` | `string` | **จำเป็น** ชื่อแท็ก หลายชื่อคั่นด้วยจุลภาค (เลเยอร์เดียว) หรือ `\|` (แยกเลเยอร์) หรือ `"%"` สำหรับ POI ทั้งหมด สำหรับแหล่งข้อมูล WFS/OGC คือชื่อชั้นข้อมูลหรือ collection |
+| `visibleRange` | `Range` | ช่วงระดับซูมที่แสดง POI |
+| `label` | `Range \| boolean` | ช่วงระดับซูมที่แสดงชื่อ หรือ `true` เพื่อแสดงตลอดช่วง `visibleRange` |
+| `icon` | `"big" \| "small" \| Icon` | ไอคอนเริ่มต้นขนาดใหญ่หรือเล็ก หรือไอคอนรูปภาพของคุณเอง |
+| `area` | `string` | แสดงเฉพาะ POI ในพื้นที่นี้ (รหัสพื้นที่) เช่น `"10"` สำหรับกรุงเทพฯ |
+| `dataset` | `string` | ชุดข้อมูล POI ที่จะใช้ |
+| `type` | `"WFS" \| "OGC"` | โหลดข้อมูลจากบริการ WFS หรือ OGC API ของคุณเองแทน |
+| `source` | `string` | URL ของบริการสำหรับ `type` หรือเซิร์ฟเวอร์แท็กอื่น |
+| `version` | `string` | เวอร์ชันของ WFS (ค่าเริ่มต้น `2.0.0`) |
+| `extraQuery` | `string` | query string เพิ่มเติมสำหรับคำขอ WFS/OGC |
+
+prop อื่น ๆ จะถูกส่งต่อให้ `Tags.add` ของ Sphere สำหรับแหล่งข้อมูล WFS/OGC คือ [props ของ `GeoJsonLayer` ใน deck.gl](https://deck.gl/docs/api-reference/layers/geojson-layer) เช่น `getLineWidth` หรือ `pickable`
+
+## ข้อมูล WFS หรือ OGC API ของคุณเอง [#your-own-wfs-or-ogc-api-data]
+
+```tsx
+<Tag
+  name="StructurePnt"
+  type="OGC"
+  source="https://services.interactive-instruments.de/t15/daraa"
+  getLineWidth={5}
+  lineWidthUnits="pixels"
+/>
+```
+
+## ป๊อปอัป [#popups]
+
+การคลิก POI จะเปิดป๊อปอัปรายละเอียดสถานที่ของ Sphere ปิดได้ด้วย `useTags().enablePopup(false)` หรือปรับแต่งด้วย [`formatPoi` ของ `SphereProvider`](/th/docs/components/sphere-provider#customizing-poi-popups)
+
+หากต้องการเพิ่มและลบแท็กจากโค้ด ดู [`useTags`](/th/docs/hooks/use-tags)

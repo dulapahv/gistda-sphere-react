@@ -1,0 +1,26 @@
+{
+  "title": "คอมโพเนนต์",
+  "pages": [
+    "sphere-provider",
+    "sphere-map",
+    "---โอเวอร์เลย์---",
+    "marker",
+    "popup",
+    "polygon",
+    "polyline",
+    "circle",
+    "rectangle",
+    "dot",
+    "geojson",
+    "object-overlay",
+    "---เลเยอร์และข้อมูล---",
+    "layer",
+    "tag",
+    "predefined-overlay",
+    "---ตัวควบคุม---",
+    "map-control",
+    "menu-bar",
+    "route-guide",
+    "search-results"
+  ]
+}

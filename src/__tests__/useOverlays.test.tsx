@@ -6,7 +6,7 @@ import {
   useOverlays,
   usePolygons,
   usePolylines,
-} from "../hooks/useOverlays";
+} from "@/hooks/useOverlays";
 
 describe("useOverlays hooks", () => {
   describe("useMarkers", () => {

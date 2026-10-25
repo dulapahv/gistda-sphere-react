@@ -1,0 +1,173 @@
+---
+title: API coverage
+description: Every part of the GISTDA Sphere JavaScript API and web services, and where to find it in this library
+---
+
+This page maps the [Sphere API reference](https://api.sphere.gistda.or.th/map/doc.html) and the [web services](https://api.sphere.gistda.or.th/services/api) to this library. Anything not wrapped is still reachable through [`useMap()`](/docs/hooks/use-map), which gives you the raw `sphere.Map`.
+
+## Map
+
+| Sphere | Library |
+| --- | --- |
+| `new sphere.Map(options)` | [`<SphereMap>`](/docs/components/sphere-map) |
+| `MapOptions.layer`, `zoom`, `zoomRange`, `location`, `ui`, `input`, `lastView`, `language` | `baseLayer`, `zoom`, `zoomRange`, `center`, `ui`, `input`, `lastView`, `language` props |
+| MapLibre map options | `options` prop |
+| `map.zoom()` | `zoom` prop, `setZoom`, `getZoom`, `zoomIn`, `zoomOut`, `onZoom` |
+| `map.zoomRange()` | `zoomRange` prop, `setZoomRange`, `getZoomRange`, `onZoomRange` |
+| `map.location()` | `center` prop, `setCenter`, `getCenter`, `onLocation` |
+| `map.bound()` | `setBound`, `getBound` |
+| `map.move()` | `panBy` |
+| `map.goTo()` | `goTo` |
+| `map.rotate()`, `map.pitch()` | `rotate`/`pitch` props, `setRotate`/`getRotate`, `setPitch`/`getPitch`, `onRotate`/`onPitch` |
+| `map.language()` | `language` prop, `setLanguage`, `getLanguage` |
+| `map.enableFilter()`, `sphere.Filter` | `filter` prop, `setFilter`, `getFilter` |
+| `map.resize()`, `map.repaint()` | `resize`, `repaint` |
+| `map.id()`, `map.placeholder()` | `useMap().map` |
+| `map.Renderer` (MapLibre) | `useMap().map.Renderer`, `ref.getMap().Renderer` |
+
+The methods in the right column are on [`useMapControls`](/docs/hooks/use-map-controls) and the `SphereMap` ref.
+
+## Events
+
+| Sphere | Library |
+| --- | --- |
+| `map.Event.bind()`, `unbind()` | `on…` props on `SphereMap`, [`useMapEvent`](/docs/hooks/event-hooks) |
+| All 37 `sphere.EventName` events | One prop each, from `onReady` to `onZoomRange`. See the [events table](/docs/components/sphere-map#events). |
+| `Ready` | `onReady`, `useMapReady` |
+| `Click`, `OverlayClick` | `onClick`, `onOverlayClick`, `useMapClick`, `useOverlayClick`, and `onClick` on every overlay |
+| `BeforeContextmenu` (return `false` to cancel) | `onBeforeContextMenu`, `useMapEvent("beforeContextmenu")` |
+
+## Layers
+
+| Sphere | Library |
+| --- | --- |
+| `new sphere.Layer(name, options)`, `LayerOptions` | [`<Layer>`](/docs/components/layer) props |
+| `sphere.LayerType` (Vector, XYZ, WMS, WMTS, WMTS_REST, TMS, Tiles3D, I3S) | `type` prop |
+| `sphere.Layers` (built-in layers) | `<Layer preset>`, `baseLayer` prop |
+| `map.Layers.setBase()` | `baseLayer` prop, `setBaseLayer` |
+| `map.Layers.add()`, `insert()`, `remove()`, `clear()` | `<Layer>` (with `beforeId`), `addLayer`, `removeLayer`, `clearLayers` |
+| `map.Layers.list()`, `size()` | `getLayers()` |
+| `map.Layers.language()` | `language` prop |
+| Vector styles, custom MapLibre layers | `<Layer style>`, `<Layer layer>` |
+| 3D tile options (`loadOptions`, `onTilesetLoad`, point size) | `loadOptions`, `onTilesetLoad`, `pointSize` props |
+
+## Overlays
+
+| Sphere | Library |
+| --- | --- |
+| `sphere.Marker`, `MarkerOptions` | [`<Marker>`](/docs/components/marker) |
+| `sphere.Popup`, `PopupOptions` | [`<Popup>`](/docs/components/popup) |
+| `sphere.Polyline`, `Polygon`, `Circle`, `Dot`, `Rectangle`, `GeometryOptions` | [`<Polyline>`](/docs/components/polyline), [`<Polygon>`](/docs/components/polygon), [`<Circle>`](/docs/components/circle), [`<Dot>`](/docs/components/dot), [`<Rectangle>`](/docs/components/rectangle) |
+| `sphere.LineStyle` | `lineStyle="Solid" \| "Dashed" \| "Dot"` |
+| GeoJSON input | `positions`/`position` accept GeoJSON; [`<GeoJson>`](/docs/components/geojson) for whole documents |
+| `overlay.location()` | `position` props, `setPosition`, `getPosition` |
+| `overlay.visibleRange()` | `visibleRange` prop |
+| `overlay.shift()` | ref `shift` |
+| `overlay.distance()`, `intersects()`, `contains()`, `within()` | ref `distanceTo`, `intersects`, `contains`, `within` |
+| `overlay.toJSON()` | ref `toGeoJSON` |
+| `overlay.active()` | `ref.getMarker().active()` and other `get…()` objects |
+| `marker.popup()`, `pop()` / geometry `popup()`, `pop()` | ref `togglePopup`, `popupContent` prop |
+| `marker.element()`, `popup.element()` | ref `getElement` |
+| `marker.update()` | `draggable` and `rotate` props, ref `setRotation` |
+| `popup.title()`, `detail()` | `title`/`detail` props, ref `setTitle`/`setDetail` |
+| `geometry.update()` | live style props, ref `updateStyle` |
+| `geometry.pivot()`, `centroid()`, `bound()`, `rotate()` | ref `getPivot`, `getCentroid`, `getBound`, `rotate` |
+| `polyline.size()`, `polygon.size()`, `circle.size()`, `circle.radius()` | ref `getLength`, `getArea`, `getRadius` |
+| `union()`, `intersection()`, `difference()`, `split()` | ref methods of the same name |
+| `map.Overlays.add()`, `remove()` | mounting and unmounting components |
+| `map.Overlays.load()`, `unload()` | `<PredefinedOverlay>`, `<ObjectOverlay>`, `loadPredefinedOverlay` |
+| `map.Overlays.clear()`, `list()`, `size()`, `lastOpenPopup()` | `useMap().map.Overlays` |
+| `sphere.Overlays.cameras`, `events`, `aqi` | [`<PredefinedOverlay>`](/docs/components/predefined-overlay) |
+| `sphere.Overlays.Object`, `ObjectOptions`, `sphere.ObjectLabel` | [`<ObjectOverlay>`](/docs/components/object-overlay) (`label` for `ObjectLabel.Title`) |
+
+## Routing
+
+| Sphere | Library ([`useRoute`](/docs/hooks/use-route)) |
+| --- | --- |
+| `add()`, `insert()`, `remove()`, `removeAt()`, `list()`, `size()` | `addDestination`, `insertDestination`, `removeDestination`, `removeDestinationAt`, `listDestinations`, `size` |
+| `clearDestination()`, `clearPath()`, `clear()`, `reverse()`, `search()` | `clearDestinations`, `clearPath`, `clear`, `reverse`, `search` |
+| `distance()`, `interval()` | `summary`, `getDistance`, `getInterval` |
+| `guide()` | `steps`, `routes`, `getSteps`, `getGuide` |
+| `exportRouteLine()` | `exportRouteLine` |
+| `mode()`, `modeOf()`, `sphere.RouteMode` | `setMode`/`getMode`, `setModeAt`/`getModeAt` |
+| `enableRoute()`, `sphere.RouteType` | `enableRouteType`, `isRouteTypeEnabled` |
+| `enableRestrict()`, `sphere.RouteRestrict` | `setRestrict`, `isRestrictEnabled` |
+| `label()`, `sphere.RouteLabel` | `setLabel`, `getLabel` |
+| `line()`, `sphere.RouteLine` | `setLineStyle`, `getLineStyle` |
+| `auto()` | `setAuto`, `getAuto` |
+| `enableContextMenu()` | `enableContextMenu` |
+| `placeholder()` | [`<RouteGuide>`](/docs/components/route-guide), `setPlaceholder` |
+| `language()` | `setLanguage`, `getLanguage` |
+| `RouteComplete`, `RouteError` events | `status`, `error`, `onRouteComplete`, `onRouteError`, `onError` |
+
+## Search and tags
+
+| Sphere | Library |
+| --- | --- |
+| `map.Search.search()`, `suggest()`, `address()`, `nearPoi()` | [`useSearch`](/docs/hooks/use-search) methods of the same name |
+| `map.Search.placeholder()`, `SearchUiOptions` | [`<SearchResults>`](/docs/components/search-results), `setPlaceholder` |
+| `map.Search.clear()`, `enablePopup()`, `language()` | `clear`, `enablePopup`/`isPopupEnabled`, `setLanguage`/`getLanguage` |
+| `map.Tags.add()`, `set()`, `remove()`, `clear()`, `list()`, `size()` | [`<Tag>`](/docs/components/tag), [`useTags`](/docs/hooks/use-tags) |
+| `map.Tags.enablePopup()`, `language()` | `useTags` |
+| `sphere.TagType`, `TagOptions` | `<Tag>` props |
+| Tag list | [`useTagCategories`](/docs/hooks/use-tag-categories) |
+
+## UI
+
+| Sphere | Library |
+| --- | --- |
+| `sphere.UiComponent` | `ui` prop |
+| `map.Ui.DPad`, `Geolocation`, `Zoombar`, `Toolbar`, `LayerSelector`, `Fullscreen`, `Crosshair`, `Scale`, `ContextMenu` (`visible()`) | `controls` prop, [`useUi`](/docs/hooks/use-ui) `setControlVisible`/`isControlVisible` |
+| `map.Ui.Geolocation` (locate, remove marker) | `locateUser`, `clearUserLocation` |
+| `map.Ui.ContextMenu.enableAddress()`, `enableNearPoi()` | `setContextMenuOptions`, `getContextMenuOptions` |
+| `map.Ui.Keyboard.enable()` | `setKeyboardEnabled`, `isKeyboardEnabled` |
+| `map.Ui.Mouse.enable()`, `enableClick()`, `enableDrag()`, `enableWheel()` | `setMouseEnabled`, `getMouseState` |
+| `map.Ui.add()`, `remove()` | `addControl`, `removeControl`, [`<MapControl>`](/docs/components/map-control) |
+| `map.Ui.lockMap()` | `lockMap` (with `lock`, `unlock`, `remove`) |
+| `map.Ui.language()` | `setLanguage` |
+| `sphere.CustomControl` | [`<MapControl>`](/docs/components/map-control) |
+| `sphere.MenuBar`, `selectIndex()`, `MenuBarOptions`, `MenuItem` | [`<MenuBar>`](/docs/components/menu-bar) |
+
+## Utilities
+
+| Sphere | Library ([`useSphereUtils`](/docs/hooks/use-sphere-utils)) |
+| --- | --- |
+| `formatDistance`, `formatArea`, `formatThaiArea`, `formatInterval`, `formatDate`, `formatTime`, `formatDateTimeRange` | Functions of the same name |
+| `WKTToGeoJSON`, `KMLToGeoJSON`, `GPXToGeoJSON`, `GMLToGeoJSON`, `EsriJSONToGeoJSON`, `TopoJSONToGeoJSON` | `wktToGeoJSON`, `kmlToGeoJSON`, `gpxToGeoJSON`, `gmlToGeoJSON`, `esriJsonToGeoJSON`, `topoJsonToGeoJSON` (they load the library for you) |
+| `initLibrary` | Called automatically by the converters and `project` |
+| `project` | `project` |
+| `latitudeLength`, `longitudeLength` | Functions of the same name |
+| `formatPoi`, `poiPopupOptions` | [`SphereProvider`](/docs/components/sphere-provider#customizing-poi-popups) props |
+| `append`, `prepend`, `empty`, `loadStyle`, `loadScript`, `getJson`, `isHD`, `validateLocation`, `sameLocation`, `isAbsInRange`, `bound` | `useSphereUtils().util` |
+| `sphere.Math` (`distance`, `closestPointOnLine`, `lineIntersectPoint`) | `useSphereUtils().math` |
+
+## Web services
+
+| Service | Library ([web services client](/docs/web-services)) |
+| --- | --- |
+| `search/search`, `search/suggest` | `search.search`, `search.suggest` |
+| `poi/search`, `poi/get`, `poi/cluster` | `poi.nearby`, `poi.get`, `poi.cluster` |
+| `category/all` | `tags.categories` |
+| `route/route`, `route/matrix` | `route.route`, `route.matrix` |
+| `geo/address`, `geo/elevation` | `geo.address`, `geo.elevation` |
+| `snippet/static`, `snippet/embed` | `maps.staticMapUrl`, `maps.embedUrl` |
+| Raster, vector and WMTS tiles | `maps.rasterTileUrl`, `maps.vectorTileUrl`, `maps.vectorStyleUrl`, `maps.wmtsCapabilitiesUrl` |
+| `info/crop`, `info/land-suitability`, `info/crop-suitability` | `info.crop`, `info.landSuitability`, `info.cropSuitability` |
+| `info/disaster-flood`, `info/disaster-drought`, `info/disaster-hotspot` | `info.flood`, `info.drought`, `info.hotspot` |
+| `info/disaster-recurring` (and `/v2`) | `info.disasterRecurring` |
+| `info/disasters/flood-recurrence`, `drought-recurrence` | `info.floodRecurrence`, `info.droughtRecurrence` |
+| `agri/rice`, `maize`, `cassava`, `sugarcane` (bi-weekly), `palm`, `rubber` (yearly) | `agri.rice`, `agri.maize`, `agri.cassava`, `agri.sugarcane`, `agri.palm`, `agri.rubber` |
+| `population/facebook` | `population.get` |
+| GET and POST forms of every service | GET, switching to POST automatically for long requests (`method` option) |
+
+## Beyond the Sphere API
+
+The library also adds things the Sphere API doesn't have:
+
+- Declarative components that clean up after themselves, with props that update the map in place.
+- React content as marker icons, popups and map controls.
+- Route results as React state: `status`, `summary`, turn-by-turn `steps` with readable instructions, and a timeout for keys without routing.
+- `onError` for objects that never load, and errors with codes for every web service.
+- Spatial analysis and measurements on every shape ref.
+- A typed web services client that works on servers too.
+- Workarounds for Sphere quirks: `input={false}` disabling interaction, labels in Fly mode, removing `"a|b"` tags, plain-text areas, and more.

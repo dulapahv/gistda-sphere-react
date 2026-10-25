@@ -1,62 +1,65 @@
 ---
-title: Overlay Collection Hooks
-description: Manage collections of overlays programmatically
+title: Overlay collection hooks
+description: Keep lists of markers, polygons, lines and circles in state, and render them declaratively
 ---
 
-Manage collections of overlays programmatically using these hooks.
+These hooks keep a list of overlays in React state with stable IDs, so you can add, update and remove them from anywhere and render them with the matching components.
 
 <OverlayDemo />
 
 ## useMarkers
 
 ```tsx
-import { useMarkers } from 'gistda-sphere-react';
+import { Marker, SphereMap, useMarkers } from "gistda-sphere-react";
 
-function MarkerManager() {
-  const { items, add, update, remove, clear, get } = useMarkers();
-
-  const addMarker = () => {
-    const id = add({
-      position: { lon: 100.5, lat: 13.75 },
-      title: 'New Marker',
-      draggable: true,
-    });
-    console.log('Added marker with ID:', id);
-  };
+function Stores() {
+  const { items, add, remove } = useMarkers();
 
   return (
-    <div>
-      <button onClick={addMarker}>Add</button>
-      <button onClick={clear}>Clear All</button>
-      <p>Count: {items.length}</p>
-    </div>
+    <>
+      <button
+        onClick={() => add({ position: { lon: 100.5, lat: 13.75 }, title: "New store" })}
+      >
+        Add store
+      </button>
+      <SphereMap>
+        {items.map((marker) => (
+          <Marker
+            key={marker.id}
+            position={marker.position}
+            title={marker.title}
+            onClick={() => remove(marker.id)}
+          />
+        ))}
+      </SphereMap>
+    </>
   );
 }
 ```
 
-## usePolygons, usePolylines, useCircles
+## usePolygons, usePolylines and useCircles
 
-These hooks follow the same pattern as `useMarkers` but for their respective overlay types.
+These work the same way for `Polygon` (`positions`), `Polyline` (`positions`) and `Circle` (`center`, `radius`) data.
 
 ## useOverlays
 
-Combines all overlay collection hooks into a single hook.
+All four collections at once:
 
 ```tsx
-import { useOverlays } from 'gistda-sphere-react';
-
 const { markers, polygons, polylines, circles, clearAll } = useOverlays();
 ```
 
-## Shared return value
+## Return value
 
-All overlay collection hooks return:
+Each collection hook returns:
 
 | Property | Type | Description |
-|----------|------|-------------|
-| `items` | `T[]` | Current overlay data objects |
-| `add` | `(data) => string` | Add an overlay, returns ID |
-| `update` | `(id, data) => void` | Update overlay by ID |
-| `remove` | `(id) => void` | Remove overlay by ID |
-| `clear` | `() => void` | Remove all of this type |
-| `get` | `(id) => T \| undefined` | Get overlay data by ID |
+| --- | --- | --- |
+| `items` | `T[]` | The overlays, each with an `id`. |
+| `add(data)` | `string` | Add an overlay; returns its new ID. |
+| `update(id, changes)` | | Merge changes into an overlay. |
+| `remove(id)` | | Remove an overlay. |
+| `clear()` | | Remove all overlays of this type. |
+| `get(id)` | `T \| undefined` | Find an overlay by ID. |
+
+The data objects accept the same props as the components (`title`, `fillColor`, `draggable`…), so you can spread them: `<Polygon key={p.id} {...p} />`.

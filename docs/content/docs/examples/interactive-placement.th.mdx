@@ -1,9 +1,9 @@
 ---
-title: การวางหมุดแบบโต้ตอบ
+title: การวางหมุดด้วยการคลิก
 description: คลิกบนแผนที่เพื่อเพิ่มหมุด
 ---
 
-คลิกบนแผนที่เพื่อเพิ่มหมุด:
+คลิกบนแผนที่เพื่อเพิ่มหมุด
 
 <InteractiveMarkerDemo />
 
@@ -16,7 +16,7 @@ function App() {
 
   return (
     <SphereProvider apiKey="YOUR_API_KEY">
-      <button onClick={() => setMarkers([])}>ล้าง</button>
+      <button onClick={() => setMarkers([])}>Clear</button>
       <SphereMap
         center={{ lon: 100.5, lat: 13.75 }}
         zoom={10}
@@ -44,7 +44,7 @@ function MarkerPlacer() {
 
   return (
     <>
-      <button onClick={clear}>ล้าง</button>
+      <button onClick={clear}>Clear</button>
       {markers.map((m) => (
         <Marker key={m.id} position={m.position} />
       ))}

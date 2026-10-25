@@ -1,20 +1,90 @@
 ---
 title: SphereProvider
-description: Provider หลักที่ทำหน้าที่โหลด Sphere API Script
+description: โหลด Sphere API และส่งต่อให้แผนที่ hooks และคอมโพเนนต์ทั้งหมดที่อยู่ภายใน
 ---
 
+`SphereProvider` โหลดสคริปต์ GISTDA Sphere เพียงครั้งเดียวต่อหน้า แล้วส่งต่อให้ทุกอย่างที่อยู่ภายในใช้งาน ควรวางไว้ใกล้ราก (root) ของแอป เหนือ `SphereMap` ทุกตัวและทุกคอมโพเนนต์ที่ใช้ hooks
+
 ```tsx
-<SphereProvider apiKey="YOUR_API_KEY" onLoad={() => console.log('โหลด API เสร็จแล้ว')}>
-  {/* แอปพลิเคชันของคุณ */}
-</SphereProvider>
+"use client";
+
+import { SphereMap, SphereProvider } from "gistda-sphere-react";
+
+export function App() {
+  return (
+    <SphereProvider apiKey={process.env.NEXT_PUBLIC_SPHERE_API_KEY!}>
+      <SphereMap style={{ height: 400 }} />
+    </SphereProvider>
+  );
+}
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `apiKey` | `string` | Yes | - | API Key สำหรับ GISTDA Sphere ของคุณ |
-| `children` | `ReactNode` | Yes | - | คอมโพเนนต์ลูกภายใต้ Provider |
-| `scriptUrl` | `string` | No | URL อย่างเป็นทางการของ Sphere API | URL สำหรับโหลด Sphere API Script (กรณีต้องการระบุเอง) |
-| `onLoad` | `() => void` | No | - | ฟังก์ชันที่เรียกเมื่อ API Script โหลดเสร็จ |
-| `onError` | `(error: Error) => void` | No | - | ฟังก์ชันที่เรียกเมื่อ API Script โหลดไม่สำเร็จ |
+| Prop | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `apiKey` | `string` | **จำเป็น** | API key ของ Sphere ดู[การขอ API Key](/th/docs/getting-started/api-key) |
+| `children` | `ReactNode` | **จำเป็น** | แอปของคุณ |
+| `onLoad` | `() => void` | – | เรียกเมื่อโหลดสคริปต์ Sphere เสร็จ |
+| `onError` | `(error: Error) => void` | – | เรียกเมื่อโหลดสคริปต์ไม่สำเร็จ เช่น key ไม่ได้อนุญาตให้ใช้กับโดเมนนี้ |
+| `scriptUrl` | `string` | `https://api.sphere.gistda.or.th/map/?key=…` | โหลดสคริปต์จาก URL อื่น เช่น proxy |
+| `formatPoi` | `(poi: PoiResult, language: string) => HTMLElement` | – | สร้างเนื้อหาป๊อปอัปที่ Sphere แสดงสำหรับแท็ก POI และผลการค้นหา |
+| `poiPopupOptions` | `(source, id, name, language) => PopupOptions` | – | แทนที่ป๊อปอัป POI ทั้งหมด มีลำดับความสำคัญเหนือ `formatPoi` |
+
+## สถานะการโหลด [#loading-state]
+
+สคริปต์โหลดแบบ asynchronous โดย hooks จะรายงาน `isReady` และ `useSphere()` ให้สถานะการโหลดโดยตรง
+
+```tsx
+import { useSphere } from "gistda-sphere-react";
+
+function Status() {
+  const { isLoaded, error } = useSphere();
+  if (error) return <p>Couldn't load the map: {error.message}</p>;
+  return isLoaded ? null : <p>Loading map…</p>;
+}
+```
+
+## ปรับแต่งป๊อปอัปของ POI [#customizing-poi-popups]
+
+เมื่อผู้ใช้คลิก POI จาก [`<Tag>`](/th/docs/components/tag) หรือผลการค้นหา Sphere จะแสดงป๊อปอัปรายละเอียดของสถานที่ ใช้ `formatPoi` เพื่อแสดงเนื้อหาของคุณเอง
+
+```tsx
+<SphereProvider
+  apiKey={apiKey}
+  formatPoi={(poi) => {
+    const element = document.createElement("div");
+    element.innerHTML = `<strong>${poi.name}</strong><br>${poi.address ?? ""}`;
+    return element;
+  }}
+>
+```
+
+<Callout type="warn">
+  `formatPoi` คืนค่าเป็น DOM element จึงต้อง escape ข้อความที่แทรกเป็น HTML ทุกครั้ง การกำหนด `textContent` ปลอดภัยที่สุด
+</Callout>
+
+หากต้องการควบคุมป๊อปอัปทั้งหมด เช่น โหลดรายละเอียดจากบริการของคุณเอง ให้คืนค่า popup options จาก `poiPopupOptions`
+
+```tsx
+<SphereProvider
+  apiKey={apiKey}
+  poiPopupOptions={(source, id, name) => ({
+    title: name,
+    loadDetail: async (element) => {
+      const details = await fetch(`/api/places/${id}`).then((r) => r.json());
+      element.textContent = details.summary;
+    },
+  })}
+>
+```
+
+ทั้งสองฟังก์ชันจะถูกติดตั้งบน `sphere.Util` ขณะที่ provider ทำงานอยู่ และคืนค่าเดิมเมื่อ provider ถูก unmount
+
+## การใช้งานกับ Next.js [#using-it-with-nextjs]
+
+provider รวมถึงคอมโพเนนต์และ hooks ทั้งหมดในไลบรารีนี้ทำงานในเบราว์เซอร์ หากใช้ App Router ให้เรียกใช้จาก Client Component (ไฟล์ที่ขึ้นต้นด้วย `"use client"`) ส่วน[ไคลเอนต์บริการเว็บ](/th/docs/web-services)ไม่มีข้อจำกัดนี้และใช้งานบนเซิร์ฟเวอร์ได้ด้วย
+
+## แผนที่เดียวหรือหลายแผนที่ [#one-map-or-several]
+
+provider หนึ่งตัวรองรับแผนที่ได้หลายแผนที่ คอมโพเนนต์และ hooks ที่อยู่**ภายใน** `SphereMap` จะทำงานกับแผนที่นั้นเสมอ ส่วน hooks ที่อยู่**ภายนอก**แผนที่ เช่น ในแถบด้านข้าง จะทำงานกับแผนที่ปัจจุบันของ provider ซึ่งคือแผนที่ที่พร้อมใช้งานล่าสุด หากต้องการให้ hooks ในแถบด้านข้างทำงานกับหลายแผนที่พร้อมกัน ให้ใช้ `SphereProvider` แยกสำหรับแต่ละแผนที่

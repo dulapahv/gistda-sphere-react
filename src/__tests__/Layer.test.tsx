@@ -1,8 +1,8 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Layer } from "../components/Layer";
-import { SphereMap } from "../components/SphereMap";
-import { SphereProvider } from "../context/SphereContext";
+import { Layer } from "@/components/Layer";
+import { SphereMap } from "@/components/SphereMap";
+import { SphereProvider } from "@/context/SphereContext";
 import { createMockSphereApi } from "./setup";
 
 describe("Layer", () => {
@@ -96,6 +96,32 @@ describe("Layer", () => {
       unmount();
 
       expect(mockMap.Layers.remove).toHaveBeenCalled();
+    });
+
+    it("removes a layer unmounted while its style loads once Sphere adds it", async () => {
+      // Sphere adds style-URL layers only after fetching the style.
+      mockMap.Layers.add.mockImplementationOnce(() => mockMap.Layers);
+      const { unmount } = renderLayer({
+        style: "https://example.com/style.json",
+      });
+
+      act(() => {
+        mockMap._triggerReady();
+      });
+      await waitFor(() => {
+        expect(mockMap.Layers.add).toHaveBeenCalled();
+      });
+      const layer = mockMap.Layers.add.mock.calls[0]?.[0];
+
+      unmount();
+      expect(mockMap.Layers.remove).not.toHaveBeenCalled();
+
+      act(() => {
+        mockMap.Event.fire("layerChange", layer);
+      });
+      await waitFor(() => {
+        expect(mockMap.Layers.remove).toHaveBeenCalledWith(layer);
+      });
     });
 
     it("does not remove base layer on unmount", async () => {

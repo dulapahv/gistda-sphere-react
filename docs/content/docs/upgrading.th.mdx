@@ -1,0 +1,63 @@
+---
+title: การอัปเกรดจาก 1.4
+description: สิ่งที่เปลี่ยนไป สิ่งที่ต้องแก้ในโค้ด และสิ่งที่ได้เพิ่มโดยไม่ต้องทำอะไร
+---
+
+เวอร์ชันนี้ครอบคลุม Sphere API ทั้งหมดและแก้ไขบั๊กที่ค้างมานานหลายจุด แอปส่วนใหญ่อัปเกรดได้ทันทีโดยไม่ต้องแก้โค้ด แต่หากคุณใช้งานระบบนำทาง `getArea` hook สำหรับเหตุการณ์ของแผนที่ หรือ `TAG_CATEGORIES` ให้ตรวจสอบรายการด้านล่าง
+
+## การเปลี่ยนแปลงที่อาจต้องแก้โค้ด [#changes-that-may-need-code-updates]
+
+### ผลลัพธ์การนำทาง [#routing-results]
+
+`getGuide()` คืนค่าช่วงของเส้นทาง (route legs) จาก Sphere ไม่ใช่ขั้นตอนการเลี้ยว จึงเป็นสาเหตุที่การนำทางทีละขั้นเคยแสดงเป็น `undefined` ให้เปลี่ยนไปใช้ `steps` และ `summary` แทน:
+
+```tsx
+// Before
+const steps = getGuide() as RouteGuideStep[];
+steps.map((step) => step.instruction); // undefined
+
+// Now
+const { steps, summary, status, error } = useRoute();
+steps.map((step) => step.instruction); // "Turn right to Sathon Nuea Rd"
+```
+
+ตอนนี้ `RouteGuideStep` อธิบายข้อมูลขั้นตอนจริงของ Sphere ได้แก่ `distance`, `interval`, `name` และ `turn` ดู [useRoute](/th/docs/hooks/use-route)
+
+### อาร์กิวเมนต์ของ event handler [#event-handler-arguments]
+
+handler ของ `useMapEvent` จะได้รับทุกอาร์กิวเมนต์ที่ Sphere ส่งมาพร้อม type ตามแต่ละเหตุการณ์ เช่น handler ของ `overlayClick` จะได้รับ `(overlay, location)` ส่วนการระบุ generic เองแบบ `useMapEvent<T>(…)` ยังใช้งานได้แต่ไม่แนะนำให้ใช้แล้ว (deprecated)
+
+### พื้นที่เป็นข้อความ [#areas-as-text]
+
+`getArea(language)` ของรูปหลายเหลี่ยม สี่เหลี่ยม และวงกลม คืนค่าเป็นข้อความธรรมดา เช่น `"120 sq.km"` จากเดิมที่คืน HTML ของ Sphere (`"120 sq.km<br />74,995 rai…"`) หากต้องการหน่วยไทย ใช้ `formatThaiArea` จาก [useSphereUtils](/th/docs/hooks/use-sphere-utils)
+
+### ข้อผิดพลาดของการค้นหา [#search-errors]
+
+`search`, `suggest` และ `nearPoi` จะ throw ข้อผิดพลาดที่อธิบายสาเหตุเมื่อบริการไม่ส่งข้อมูลกลับมา และ `address` คืนค่า `null` เมื่อไม่มีที่อยู่ ให้ครอบการเรียกด้วย `try`/`catch`
+
+### รหัสแท็ก [#tag-ids]
+
+`TAG_CATEGORIES` เคยใช้รหัสสามตัวที่ไม่ตรงกับ POI ใดเลย ตอนนี้เปลี่ยนเป็น `"ธนาคาร/สถาบันการเงิน"` (ธนาคาร), `"เอทีเอ็ม"` (ตู้เอทีเอ็ม) และ `"สถานีบริการน้ำมัน"` (ปั๊มน้ำมัน) หากคุณเก็บรหัสเดิมไว้ ให้อัปเดตด้วย
+
+## สิ่งที่แก้ไขแล้ว [#fixed]
+
+- `onClick` ของหมุดและรูปทรงทำงานแล้ว (เดิมไม่เคยทำงาน) พร้อมตำแหน่งที่คลิก
+- `lineStyle` วาดเส้นประและเส้นจุดได้แล้ว `ui="None"` ซ่อนส่วนติดต่อผู้ใช้ได้แล้ว และ `input={false}` ปิดการโต้ตอบได้แล้ว
+- `useMapReady` เรียก handler แล้ว
+- `language` และ `filter` ของ `SphereMap` อัปเดตแผนที่ได้โดยไม่ต้องสร้างใหม่ ไม่ต้องใช้ `key={language}` เพื่อ remount แผนที่อีกต่อไป
+- รูปทรงยังคงอ็อบเจกต์เดิมเมื่อเปลี่ยนสีหรือความหนาเส้น แทนการถูกวาดใหม่
+- การลบ `<Tag name="a|b">` จะลบทั้งสองแท็ก
+- WebGL context ของแผนที่ถูกคืนเมื่อ `SphereMap` unmount
+
+## สิ่งที่เพิ่มเข้ามา [#new]
+
+- คอมโพเนนต์: [`GeoJson`](/th/docs/components/geojson), [`ObjectOverlay`](/th/docs/components/object-overlay), [`PredefinedOverlay`](/th/docs/components/predefined-overlay), [`Tag`](/th/docs/components/tag), [`MapControl`](/th/docs/components/map-control), [`MenuBar`](/th/docs/components/menu-bar), [`RouteGuide`](/th/docs/components/route-guide), [`SearchResults`](/th/docs/components/search-results)
+- Hooks: [`useUi`](/th/docs/hooks/use-ui), [`useTagCategories`](/th/docs/hooks/use-tag-categories), [`useSphereUtils`](/th/docs/hooks/use-sphere-utils), [`useSphereServices`](/th/docs/hooks/use-sphere-services)
+- [ไคลเอนต์บริการเว็บ](/th/docs/web-services) (`createSphereServices`) สำหรับบริการ REST ทุกตัว
+- `SphereMap`: `baseLayer`, `controls`, `options`, `zoomRange` ที่อัปเดตได้ทันที และ prop สำหรับทุกเหตุการณ์ของแผนที่
+- หมุดและป๊อปอัป: เนื้อหา React (`children`, `popupContent`) และการเคลื่อนที่อย่างนุ่มนวล (`animate`)
+- รูปทรง: ป้ายชื่อ การแก้ไข การตรวจสอบเชิงพื้นที่ การดำเนินการกับรูปหลายเหลี่ยม และการวัดขนาดผ่าน ref
+- `Layer`: สไตล์ MapLibre (แผนที่ความร้อน การจัดกลุ่มจุด ไทล์เวกเตอร์), 3D Tiles, I3S และชั้นข้อมูล deck.gl
+- `SphereProvider`: `formatPoi` และ `poiPopupOptions` สำหรับป๊อปอัปของ POI
+
+ดูภาพรวมทั้งหมดของ Sphere API ได้ที่[ความครอบคลุมของ API](/th/docs/api-coverage)

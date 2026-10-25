@@ -1,5 +1,5 @@
-import { useSphereContext } from "../context/SphereContext";
-import type { SphereNamespace } from "../types";
+import { useSphereContext } from "@/context/SphereContext";
+import type { SphereNamespace } from "@/types";
 
 export function useSphere(): {
   sphere: SphereNamespace | null;

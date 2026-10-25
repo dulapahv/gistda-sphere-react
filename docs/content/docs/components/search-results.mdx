@@ -1,0 +1,37 @@
+---
+title: SearchResults
+description: Sphere's built-in search result list, with markers on the map
+---
+
+`<SearchResults>` renders Sphere's own result list. After [`useSearch().search()`](/docs/hooks/use-search), the results appear in it and as markers on the map; clicking one zooms to the place.
+
+```tsx
+import { SearchResults, useSearch } from "gistda-sphere-react";
+
+function SearchPanel() {
+  const { search } = useSearch();
+  return (
+    <aside>
+      <input
+        placeholder="Search places"
+        onKeyDown={(event) => {
+          if (event.key === "Enter") search(event.currentTarget.value);
+        }}
+      />
+      <SearchResults className="max-h-96 overflow-auto bg-white text-black" />
+    </aside>
+  );
+}
+```
+
+Try it in the [search example](/docs/examples/search) (the "Sphere's result list" button).
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `icon` | `Icon \| false` | Marker icon for results, or `false` to list results without markers. |
+| `className` | `string` | Class for the container element. |
+| `style` | `CSSProperties` | Styles for the container element. |
+
+Unmounting the list also clears its results and markers. For a list styled like your app, render the data `search()` returns instead.

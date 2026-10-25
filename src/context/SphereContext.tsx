@@ -8,47 +8,14 @@ import {
   useRef,
   useState,
 } from "react";
+import { useLatest } from "@/internal/hooks";
+import { createMapControls, type MapControls } from "@/internal/mapControls";
 import type {
-  Bound,
-  FilterType,
-  FlyToOptions,
-  Location,
+  PoiResult,
+  PopupOptions,
   SphereMap,
   SphereNamespace,
-} from "../types";
-
-type PredefinedOverlay = "cameras" | "events" | "aqi";
-
-type BuiltInLayer =
-  | "SIMPLE"
-  | "STREETS"
-  | "STREETS_NIGHT"
-  | "HYBRID"
-  | "TRAFFIC"
-  | "IMAGES"
-  | "PM25"
-  | "HOTSPOT"
-  | "FLOOD"
-  | "DROUGHT";
-
-interface MapControls {
-  addLayer: (layer: BuiltInLayer) => void;
-  goTo: (options: FlyToOptions, animate?: boolean) => void;
-  isReady: boolean;
-  loadPredefinedOverlay: (overlay: PredefinedOverlay) => void;
-  removeLayer: (layer: BuiltInLayer) => void;
-  repaint: () => void;
-  resize: () => void;
-  setBaseLayer: (layer: BuiltInLayer) => void;
-  setBound: (bound: Bound, options?: object) => void;
-  setCenter: (location: Location, animate?: boolean) => void;
-  setFilter: (filter: FilterType | false) => void;
-  setLanguage: (language: "th" | "en") => void;
-  setPitch: (angle: number) => void;
-  setRotate: (angle: number, animate?: boolean) => void;
-  setZoom: (zoom: number, animate?: boolean) => void;
-  unloadPredefinedOverlay: (overlay: PredefinedOverlay) => void;
-}
+} from "@/types";
 
 interface SphereContextValue {
   apiKey: string;
@@ -59,14 +26,33 @@ interface SphereContextValue {
   map: SphereMap | null;
   registerMap: (map: SphereMap) => void;
   sphere: SphereNamespace | null;
-  unregisterMap: () => void;
+  /**
+   * Unregisters a map (the active one when omitted). When it was the active
+   * map, the most recently registered remaining map becomes active.
+   */
+  unregisterMap: (map?: SphereMap) => void;
 }
 
 interface SphereProviderProps {
   apiKey: string;
   children: ReactNode;
+  /**
+   * Customize the content of the POI popups Sphere shows for tags and
+   * search results. Return the element to display.
+   */
+  formatPoi?: (poi: PoiResult, language: string) => HTMLElement;
   onError?: (error: Error) => void;
   onLoad?: () => void;
+  /**
+   * Replace the popup options Sphere uses for POIs entirely (e.g. to load
+   * details from your own service). Takes priority over `formatPoi`.
+   */
+  poiPopupOptions?: (
+    source: string,
+    id: string,
+    name: string,
+    language: string
+  ) => PopupOptions;
   scriptUrl?: string;
 }
 
@@ -75,6 +61,7 @@ const SphereContext = createContext<SphereContextValue | null>(null);
 const SCRIPT_ID = "gistda-sphere-api-script";
 let scriptLoadingPromise: Promise<void> | null = null;
 
+/** Loads the Sphere script once per page and resolves when `window.sphere` exists. */
 function loadSphereScript(apiKey: string, customUrl?: string): Promise<void> {
   if (scriptLoadingPromise) {
     return scriptLoadingPromise;
@@ -127,12 +114,39 @@ function loadSphereScript(apiKey: string, customUrl?: string): Promise<void> {
   return scriptLoadingPromise;
 }
 
+/**
+ * Installs the POI popup customization hooks on `sphere.Util` and returns
+ * a function that restores the previous implementations.
+ */
+function installPoiHooks(
+  sphere: SphereNamespace,
+  formatPoi: SphereProviderProps["formatPoi"] | undefined,
+  poiPopupOptions: SphereProviderProps["poiPopupOptions"] | undefined
+): () => void {
+  const util = sphere.Util;
+  const previousFormat = util.formatPoi;
+  const previousOptions = util.poiPopupOptions;
+  if (formatPoi) {
+    util.formatPoi = formatPoi;
+  }
+  if (poiPopupOptions) {
+    util.poiPopupOptions = poiPopupOptions;
+  }
+  return () => {
+    util.formatPoi = previousFormat;
+    util.poiPopupOptions = previousOptions;
+  };
+}
+
+/** Loads the Sphere API and provides it (and the active map) to descendants. */
 export function SphereProvider({
   apiKey,
   children,
   scriptUrl,
   onLoad,
   onError,
+  formatPoi,
+  poiPopupOptions,
 }: SphereProviderProps): ReactNode {
   const [isLoaded, setIsLoaded] = useState(false);
   const [error, setError] = useState<Error | null>(null);
@@ -141,159 +155,109 @@ export function SphereProvider({
   const [isMapReady, setIsMapReady] = useState(false);
 
   const mapRef = useRef<SphereMap | null>(null);
+  /** Maps that are ready, in the order they became ready. */
+  const mapsRef = useRef<SphereMap[]>([]);
+  const onLoadRef = useLatest(onLoad);
+  const onErrorRef = useLatest(onError);
+  const formatPoiRef = useLatest(formatPoi);
+  const poiPopupOptionsRef = useLatest(poiPopupOptions);
+  const hasFormatPoi = formatPoi !== undefined;
+  const hasPoiPopupOptions = poiPopupOptions !== undefined;
 
-  const handleLoad = useCallback(() => {
-    setIsLoaded(true);
-    setSphere(window.sphere ?? null);
-    onLoad?.();
-  }, [onLoad]);
-
-  const handleError = useCallback(
-    (err: Error) => {
-      setError(err);
-      onError?.(err);
-    },
-    [onError]
-  );
-
+  // Callbacks are read through refs so that inline `onLoad`/`onError`
+  // functions don't reload the script or fire again on every render.
   useEffect(() => {
+    let isActive = true;
+    const handleLoad = () => {
+      if (!isActive) {
+        return;
+      }
+      setIsLoaded(true);
+      setSphere(window.sphere ?? null);
+      onLoadRef.current?.();
+    };
+
     if (window.sphere) {
       handleLoad();
+    } else {
+      loadSphereScript(apiKey, scriptUrl)
+        .then(handleLoad)
+        .catch((err: Error) => {
+          if (isActive) {
+            setError(err);
+            onErrorRef.current?.(err);
+          }
+        });
+    }
+
+    return () => {
+      isActive = false;
+    };
+  }, [apiKey, scriptUrl, onLoadRef, onErrorRef]);
+
+  useEffect(() => {
+    if (!(sphere && (hasFormatPoi || hasPoiPopupOptions))) {
       return;
     }
-
-    loadSphereScript(apiKey, scriptUrl).then(handleLoad).catch(handleError);
-  }, [apiKey, scriptUrl, handleLoad, handleError]);
-
-  const registerMap = useCallback((newMap: SphereMap) => {
-    mapRef.current = newMap;
-    setMap(newMap);
-    setIsMapReady(true);
-  }, []);
-
-  const unregisterMap = useCallback(() => {
-    mapRef.current = null;
-    setMap(null);
-    setIsMapReady(false);
-  }, []);
-
-  const goTo = useCallback((options: FlyToOptions, animate = true) => {
-    mapRef.current?.goTo(options, animate);
-  }, []);
-
-  const setCenter = useCallback((location: Location, animate = true) => {
-    mapRef.current?.location(location, animate);
-  }, []);
-
-  const setZoom = useCallback((zoom: number, animate = true) => {
-    mapRef.current?.zoom(zoom, animate);
-  }, []);
-
-  const setBound = useCallback((bound: Bound, options?: object) => {
-    mapRef.current?.bound(bound, options);
-  }, []);
-
-  const setRotate = useCallback((angle: number, animate = true) => {
-    mapRef.current?.rotate(angle, animate);
-  }, []);
-
-  const setPitch = useCallback((angle: number) => {
-    mapRef.current?.pitch(angle);
-  }, []);
-
-  const setFilter = useCallback((filter: FilterType | false) => {
-    if (mapRef.current && window.sphere) {
-      const filterValue =
-        filter === false ? false : window.sphere.Filter[filter];
-      mapRef.current.enableFilter(filterValue);
-    }
-  }, []);
-
-  const setLanguage = useCallback((language: "th" | "en") => {
-    mapRef.current?.language(language);
-  }, []);
-
-  const resize = useCallback(() => {
-    mapRef.current?.resize();
-  }, []);
-
-  const repaint = useCallback(() => {
-    mapRef.current?.repaint();
-  }, []);
-
-  const setBaseLayer = useCallback((layer: BuiltInLayer) => {
-    const layerValue = window.sphere?.Layers?.[layer];
-    if (mapRef.current && layerValue) {
-      mapRef.current.Layers.setBase(layerValue);
-    }
-  }, []);
-
-  const addLayer = useCallback((layer: BuiltInLayer) => {
-    const layerValue = window.sphere?.Layers?.[layer];
-    if (mapRef.current && layerValue) {
-      mapRef.current.Layers.add(layerValue);
-    }
-  }, []);
-
-  const removeLayer = useCallback((layer: BuiltInLayer) => {
-    const layerValue = window.sphere?.Layers?.[layer];
-    if (mapRef.current && layerValue) {
-      mapRef.current.Layers.remove(layerValue);
-    }
-  }, []);
-
-  const loadPredefinedOverlay = useCallback((overlay: PredefinedOverlay) => {
-    const predefined = window.sphere?.Overlays?.[overlay];
-    if (mapRef.current && predefined) {
-      mapRef.current.Overlays.load(predefined);
-    }
-  }, []);
-
-  const unloadPredefinedOverlay = useCallback((overlay: PredefinedOverlay) => {
-    const predefined = window.sphere?.Overlays?.[overlay];
-    if (mapRef.current && predefined) {
-      mapRef.current.Overlays.unload(predefined);
-    }
-  }, []);
-
-  const controls = useMemo<MapControls>(
-    () => ({
-      addLayer,
-      goTo,
-      isReady: isMapReady && sphere !== null,
-      loadPredefinedOverlay,
-      removeLayer,
-      repaint,
-      resize,
-      setBaseLayer,
-      setBound,
-      setCenter,
-      setFilter,
-      setLanguage,
-      setPitch,
-      setRotate,
-      setZoom,
-      unloadPredefinedOverlay,
-    }),
-    [
-      isMapReady,
+    return installPoiHooks(
       sphere,
-      goTo,
-      setCenter,
-      setZoom,
-      setBound,
-      setRotate,
-      setPitch,
-      setFilter,
-      setLanguage,
-      setBaseLayer,
-      addLayer,
-      removeLayer,
-      loadPredefinedOverlay,
-      unloadPredefinedOverlay,
-      resize,
-      repaint,
-    ]
+      hasFormatPoi
+        ? (poi, language) =>
+            formatPoiRef.current?.(poi, language) ??
+            document.createElement("div")
+        : undefined,
+      hasPoiPopupOptions
+        ? (source, id, name, language) =>
+            poiPopupOptionsRef.current?.(source, id, name, language) ?? {}
+        : undefined
+    );
+  }, [
+    sphere,
+    hasFormatPoi,
+    hasPoiPopupOptions,
+    formatPoiRef,
+    poiPopupOptionsRef,
+  ]);
+
+  const activateMap = useCallback((nextMap: SphereMap | null) => {
+    mapRef.current = nextMap;
+    setMap(nextMap);
+    setIsMapReady(nextMap !== null);
+  }, []);
+
+  const registerMap = useCallback(
+    (newMap: SphereMap) => {
+      mapsRef.current = [
+        ...mapsRef.current.filter((existing) => existing !== newMap),
+        newMap,
+      ];
+      activateMap(newMap);
+    },
+    [activateMap]
+  );
+
+  const unregisterMap = useCallback(
+    (oldMap?: SphereMap) => {
+      const target = oldMap ?? mapRef.current;
+      mapsRef.current = mapsRef.current.filter(
+        (existing) => existing !== target
+      );
+      if (mapRef.current === target) {
+        activateMap(mapsRef.current.at(-1) ?? null);
+      }
+    },
+    [activateMap]
+  );
+
+  const controlsReady = isMapReady && sphere !== null;
+  const controls = useMemo<MapControls>(
+    () =>
+      createMapControls(
+        () => mapRef.current,
+        () => window.sphere,
+        controlsReady
+      ),
+    [controlsReady]
   );
 
   const contextValue = useMemo<SphereContextValue>(
@@ -328,6 +292,7 @@ export function SphereProvider({
   );
 }
 
+/** Raw context access. Throws outside a `SphereProvider`. */
 export function useSphereContext(): SphereContextValue {
   const context = useContext(SphereContext);
 
@@ -338,6 +303,7 @@ export function useSphereContext(): SphereContextValue {
   return context;
 }
 
+/** The loaded `window.sphere` namespace and its loading state. */
 export function useSphere(): {
   sphere: SphereNamespace | null;
   isLoaded: boolean;
@@ -347,6 +313,7 @@ export function useSphere(): {
   return { error, isLoaded, sphere };
 }
 
+/** The active map instance and whether it is ready. */
 export function useMap(): {
   map: SphereMap | null;
   sphere: SphereNamespace | null;
@@ -356,16 +323,12 @@ export function useMap(): {
   return { isReady: isMapReady && sphere !== null, map, sphere };
 }
 
+/** Imperative controls for the active map. */
 export function useMapControls(): MapControls {
   const { controls } = useSphereContext();
   return controls;
 }
 
-export type {
-  BuiltInLayer,
-  MapControls,
-  PredefinedOverlay,
-  SphereContextValue,
-  SphereProviderProps,
-};
+export type { MapControls } from "@/internal/mapControls";
+export type { SphereContextValue, SphereProviderProps };
 export { SphereContext };

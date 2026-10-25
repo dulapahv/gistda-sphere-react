@@ -1,35 +1,61 @@
 ---
-title: Displaying Tags on the Map
-description: Show POI markers by category
+title: Points of interest by category
+description: Let users pick POI categories and show them on the map
 ---
 
-Show POI markers by category:
+Pick a category, then toggle tags to show those places on the map:
 
 <TagsDemo />
 
 ```tsx lineNumbers
-import { SphereProvider, SphereMap, useTags } from 'gistda-sphere-react';
+import { SphereMap, SphereProvider, Tag, useTagCategories } from "gistda-sphere-react";
+import { useState } from "react";
 
-function TagPanel() {
-  const { add, clear, list, isReady } = useTags();
+function TagPicker() {
+  const { categories } = useTagCategories("en");
+  const [active, setActive] = useState<string[]>([]);
+
+  const toggle = (id: string) =>
+    setActive((previous) =>
+      previous.includes(id) ? previous.filter((tag) => tag !== id) : [...previous, id]
+    );
 
   return (
-    <div>
-      <button onClick={() => add('โรงพยาบาล')} disabled={!isReady}>Show Hospitals</button>
-      <button onClick={() => add('ATM')} disabled={!isReady}>Show ATMs</button>
-      <button onClick={() => add('วัด')} disabled={!isReady}>Show Temples</button>
-      <button onClick={clear}>Clear All</button>
-      <p>Active tags: {list().join(', ')}</p>
-    </div>
+    <>
+      {categories.map((category) => (
+        <details key={category.name}>
+          <summary>{category.name}</summary>
+          {category.tags.map((tag) => (
+            <button key={tag.id} aria-pressed={active.includes(tag.id)} onClick={() => toggle(tag.id)}>
+              {tag.label}
+            </button>
+          ))}
+        </details>
+      ))}
+
+      <SphereMap style={{ height: 500 }} zoom={12}>
+        {active.map((tag) => (
+          <Tag key={tag} name={tag} />
+        ))}
+      </SphereMap>
+    </>
   );
 }
 
 function App() {
   return (
     <SphereProvider apiKey="YOUR_API_KEY">
-      <TagPanel />
-      <SphereMap style={{ width: '100%', height: '500px' }} />
+      <TagPicker />
     </SphereProvider>
   );
 }
+```
+
+Each `<Tag>` adds its layer when it mounts and removes it when it unmounts, so the map always matches `active`. To manage tags imperatively instead, use [`useTags`](/docs/hooks/use-tags):
+
+```tsx
+const { add, remove, clear } = useTags();
+add("โรงพยาบาล");
+add("เอทีเอ็ม");
+remove("โรงพยาบาล");
 ```

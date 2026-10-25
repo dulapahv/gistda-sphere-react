@@ -1,26 +1,52 @@
 ---
 title: useMap
-description: เข้าถึง Map instance และ Sphere API namespace โดยตรง
+description: เข้าถึงแผนที่ Sphere โดยตรง แผนที่ MapLibre ที่อยู่เบื้องหลัง และ namespace ของ sphere
 ---
 
-เข้าถึง Map instance และ Sphere API namespace โดยตรง
+`useMap` ใช้เข้าถึง Sphere API โดยตรงสำหรับส่วนที่ไลบรารีนี้ไม่ได้หุ้มไว้ ใช้งานได้ทุกที่ภายใต้ `SphereProvider`
 
 ```tsx
-import { useMap } from 'gistda-sphere-react';
+import { useMap } from "gistda-sphere-react";
 
-function MapInfo() {
-  const { map, sphere, isReady } = useMap();
-
-  if (!isReady) return <div>กำลังโหลด...</div>;
-
-  return <div>ระดับการซูม: {map.zoom()}</div>;
+function ZoomLabel() {
+  const { map, isReady } = useMap();
+  if (!isReady || !map) return null;
+  return <span>Zoom: {map.zoom()}</span>;
 }
 ```
 
-## ค่าที่ส่งกลับ (Return value)
+## ค่าที่คืนกลับ [#return-value]
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `map` | `SphereMapInstance \| null` | Instance ของ Sphere map ที่อยู่เบื้องหลัง |
-| `sphere` | `SphereNamespace \| null` | Namespace ของ `sphere` API แบบ global |
-| `isReady` | `boolean` | เป็น `true` เมื่อแผนที่ถูกสร้างและพร้อมใช้งานแล้ว |
+| Property | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `map` | `SphereMapInstance \| null` | อินสแตนซ์ของ `sphere.Map` |
+| `sphere` | `SphereNamespace \| null` | namespace `sphere` แบบ global (คลาส enum และ `Util`) |
+| `isReady` | `boolean` | เป็น `true` เมื่อแผนที่พร้อมใช้งาน |
+
+## แผนที่ MapLibre [#the-maplibre-map]
+
+Sphere แสดงผลด้วย [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) โดย `map.Renderer` คือแผนที่ MapLibre จึงใช้ฟีเจอร์และปลั๊กอินของ MapLibre ได้ด้วย
+
+```tsx
+const { map } = useMap();
+
+useEffect(() => {
+  const renderer = map?.Renderer;
+  if (!renderer) return;
+  const onMove = () => console.log(renderer.getBearing());
+  renderer.on("move", onMove);
+  return () => {
+    renderer.off("move", onMove);
+  };
+}, [map]);
+```
+
+ดูตัวอย่างฉบับเต็มที่[การใช้ปลั๊กอินของ MapLibre](/th/docs/examples/maplibre-plugins)
+
+## ภายในแผนที่ [#inside-a-map]
+
+ภายใน `SphereMap` นั้น `useMapContext()` จะคืนค่า `{ map, isReady }` ของแผนที่นั้นโดยเฉพาะ ซึ่งสำคัญเมื่อ provider เดียวมีหลายแผนที่
+
+<Callout>
+  แนะนำให้ใช้คอมโพเนนต์และ hooks ที่มี type กำกับหากมีให้ใช้ เพราะจะคืนทรัพยากรให้อัตโนมัติเมื่อ unmount ซึ่งการเรียกใช้ API โดยตรงไม่ได้จัดการให้
+</Callout>

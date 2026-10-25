@@ -1,64 +1,92 @@
-import { useEffect, useRef } from "react";
-import { useMapContext } from "../context/MapContext";
-import { useSphereContext } from "../context/SphereContext";
+import { useEffect } from "react";
+import { useLatest } from "@/internal/hooks";
+import { useActiveMap } from "@/internal/useActiveMap";
 import type {
   EventHandler,
   EventName,
-  Location,
+  OverlayClickEventData,
+  PointerLocation,
+  SphereEventHandler,
+  SphereMap,
   SphereOverlay,
-} from "../types";
+} from "@/types";
 
-export function useMapEvent<T = unknown>(
+/**
+ * Listens to a Sphere map event. Handler arguments are typed per event
+ * (see `SphereEventMap`), e.g. `overlayClick` receives `(overlay, location)`.
+ * Return `false` from a `beforeContextmenu` handler to cancel the menu.
+ *
+ * Works inside `SphereMap` and anywhere else under `SphereProvider`.
+ */
+export function useMapEvent<K extends EventName>(
+  eventName: K,
+  handler: SphereEventHandler<K>
+): void;
+/** @deprecated Use the event-typed form without an explicit type argument. */
+export function useMapEvent<T>(
   eventName: EventName,
   handler: EventHandler<T>
+): void;
+export function useMapEvent(
+  eventName: EventName,
+  handler: (...args: never[]) => unknown
 ): void {
-  const { map, isReady } = useMapContext();
-  const { sphere } = useSphereContext();
-  const handlerRef = useRef(handler);
+  const { map, isReady } = useActiveMap();
+  const handlerRef = useLatest(handler as (...args: unknown[]) => unknown);
 
   useEffect(() => {
-    handlerRef.current = handler;
-  }, [handler]);
-
-  useEffect(() => {
-    if (!(isReady && map && sphere)) {
+    if (!(isReady && map)) {
       return;
     }
-
-    // Stable reference avoids re-binding on every handler change
-    const stableHandler: EventHandler<T> = (data) => handlerRef.current(data);
-
-    map.Event.bind(eventName, stableHandler);
-
+    // Stable wrapper: forwards every argument and the return value, without
+    // re-binding when the handler identity changes.
+    const stableHandler = (...args: unknown[]) => handlerRef.current(...args);
+    map.Event.bind(eventName, stableHandler as never);
     return () => {
-      map.Event.unbind(eventName, stableHandler);
+      map.Event.unbind(eventName, stableHandler as never);
     };
-  }, [map, isReady, sphere, eventName]);
+  }, [map, isReady, eventName, handlerRef]);
 }
 
-export function useMapReady(handler: () => void): void {
-  useMapEvent("ready", handler);
+/**
+ * Runs once when the map is ready, or right away if it already is. Runs
+ * again only if a new map instance takes its place.
+ */
+export function useMapReady(handler: (map: SphereMap) => void): void {
+  const { map, isReady } = useActiveMap();
+  const handlerRef = useLatest(handler);
+
+  useEffect(() => {
+    // The "ready" event has already fired by the time `isReady` is true, so
+    // binding to it here would never run the handler.
+    if (isReady && map) {
+      handlerRef.current(map);
+    }
+  }, [map, isReady, handlerRef]);
 }
 
+/** Map clicks (not fired when an overlay was clicked). */
 export function useMapClick(
-  handler: EventHandler<{ lon: number; lat: number }>
+  handler: (location: PointerLocation) => void
 ): void {
   useMapEvent("click", handler);
 }
 
-export function useMapZoom(handler: EventHandler<void>): void {
+/** Zoom level changes. Read the zoom with `useMapControls().getZoom()`. */
+export function useMapZoom(handler: () => void): void {
   useMapEvent("zoom", handler);
 }
 
-export function useMapLocation(handler: EventHandler<void>): void {
+/** Map center changes. Read it with `useMapControls().getCenter()`. */
+export function useMapLocation(handler: () => void): void {
   useMapEvent("location", handler);
 }
 
+/** Overlay clicks, delivered as `{ overlay, location }`. */
 export function useOverlayClick(
-  handler: EventHandler<{
-    overlay: SphereOverlay;
-    location: Location;
-  }>
+  handler: (data: OverlayClickEventData) => void
 ): void {
-  useMapEvent("overlayClick", handler);
+  useMapEvent("overlayClick", (overlay: SphereOverlay, location) => {
+    handler({ location, overlay });
+  });
 }

@@ -1,35 +1,61 @@
 ---
-title: การแสดง Tags บนแผนที่
-description: แสดงหมุด POI ตามหมวดหมู่
+title: สถานที่ตามหมวดหมู่
+description: ให้ผู้ใช้เลือกหมวดหมู่สถานที่ (POI) แล้วแสดงบนแผนที่
 ---
 
-แสดงหมุด POI ตามหมวดหมู่:
+เลือกหมวดหมู่ แล้วเปิดหรือปิดแท็กเพื่อแสดงสถานที่เหล่านั้นบนแผนที่
 
 <TagsDemo />
 
 ```tsx lineNumbers
-import { SphereProvider, SphereMap, useTags } from 'gistda-sphere-react';
+import { SphereMap, SphereProvider, Tag, useTagCategories } from "gistda-sphere-react";
+import { useState } from "react";
 
-function TagPanel() {
-  const { add, clear, list, isReady } = useTags();
+function TagPicker() {
+  const { categories } = useTagCategories("en");
+  const [active, setActive] = useState<string[]>([]);
+
+  const toggle = (id: string) =>
+    setActive((previous) =>
+      previous.includes(id) ? previous.filter((tag) => tag !== id) : [...previous, id]
+    );
 
   return (
-    <div>
-      <button onClick={() => add('โรงพยาบาล')} disabled={!isReady}>แสดงโรงพยาบาล</button>
-      <button onClick={() => add('ATM')} disabled={!isReady}>แสดง ATM</button>
-      <button onClick={() => add('วัด')} disabled={!isReady}>แสดงวัด</button>
-      <button onClick={clear}>ล้างทั้งหมด</button>
-      <p>Tag ที่ใช้งานอยู่: {list().join(', ')}</p>
-    </div>
+    <>
+      {categories.map((category) => (
+        <details key={category.name}>
+          <summary>{category.name}</summary>
+          {category.tags.map((tag) => (
+            <button key={tag.id} aria-pressed={active.includes(tag.id)} onClick={() => toggle(tag.id)}>
+              {tag.label}
+            </button>
+          ))}
+        </details>
+      ))}
+
+      <SphereMap style={{ height: 500 }} zoom={12}>
+        {active.map((tag) => (
+          <Tag key={tag} name={tag} />
+        ))}
+      </SphereMap>
+    </>
   );
 }
 
 function App() {
   return (
     <SphereProvider apiKey="YOUR_API_KEY">
-      <TagPanel />
-      <SphereMap style={{ width: '100%', height: '500px' }} />
+      <TagPicker />
     </SphereProvider>
   );
 }
+```
+
+`<Tag>` แต่ละตัวจะเพิ่มชั้นข้อมูลเมื่อ mount และลบออกเมื่อ unmount แผนที่จึงตรงกับค่า `active` เสมอ หากต้องการจัดการแท็กแบบ imperative แทน ให้ใช้ [`useTags`](/th/docs/hooks/use-tags):
+
+```tsx
+const { add, remove, clear } = useTags();
+add("โรงพยาบาล");
+add("เอทีเอ็ม");
+remove("โรงพยาบาล");
 ```

@@ -1,23 +1,27 @@
 ---
-title: การแก้ไขปัญหา
-description: ปัญหาที่พบบ่อยและวิธีแก้ไข
+title: การแก้ปัญหา
+description: ปัญหาที่พบบ่อยและวิธีแก้
 ---
 
-## แผนที่ไม่แสดงผล
+## แผนที่ว่างเปล่าหรือสูง 0 px [#the-map-is-blank-or-0-px-tall]
 
-คอนเทนเนอร์ของแผนที่ต้องมีการกำหนดความสูง (height) ที่ชัดเจน มิฉะนั้น `<div>` จะยุบตัวเหลือ 0px:
+แผนที่จะขยายเต็มคอนเทนเนอร์ คอนเทนเนอร์จึงต้องมีความสูง
 
 ```tsx
-<SphereMap style={{ width: '100%', height: '500px' }} />
+<SphereMap style={{ width: "100%", height: 500 }} />
 ```
 
-## API key ใช้งานไม่ได้
+หากแผนที่อยู่ในแท็บ กล่องโต้ตอบ หรือแผงที่ยุบได้ซึ่งซ่อนอยู่ตอนเริ่มต้น ให้เรียก `resize()` (จาก [`useMapControls`](/th/docs/hooks/use-map-controls) หรือ ref ของแผนที่) เมื่อแผนที่แสดงขึ้นมา
 
-ตรวจสอบให้แน่ใจว่าโดเมนของคุณได้ลงทะเบียนกับ API key แล้วที่ [sphere.gistda.or.th](https://sphere.gistda.or.th/) สำหรับการพัฒนาในเครื่อง ให้ลงทะเบียน `localhost` ด้วย
+## แผนที่ไม่โหลดเลย [#the-map-doesnt-load-at-all]
 
-## "useSphereContext must be used within a SphereProvider"
+- ดูข้อผิดพลาดจาก `api.sphere.gistda.or.th` ในคอนโซลของเบราว์เซอร์
+- ตรวจสอบว่าโฮสต์ปัจจุบันได้รับอนุญาตให้ใช้ key แล้ว รวมถึงพอร์ตหากโฮสต์ที่ลงทะเบียนไว้ระบุพอร์ต ดู [API key](/th/docs/getting-started/api-key#allowed-hosts)
+- `onError` ของ `SphereProvider` จะรับข้อผิดพลาดที่เกิดจากการโหลด
 
-ครอบ component tree ของคุณด้วย `<SphereProvider>`:
+## "useSphereContext must be used within a SphereProvider" [#usespherecontext-must-be-used-within-a-sphereprovider]
+
+วาง `<SphereProvider>` ไว้เหนือทุกคอมโพเนนต์ที่ใช้คอมโพเนนต์หรือ hook ของแผนที่
 
 ```tsx
 <SphereProvider apiKey="YOUR_API_KEY">
@@ -25,10 +29,44 @@ description: ปัญหาที่พบบ่อยและวิธีแ�
 </SphereProvider>
 ```
 
-## Hooks ส่งกลับ `isReady: false`
+## Next.js: "hooks can only be used in Client Components" [#nextjs-hooks-can-only-be-used-in-client-components]
 
-Hook อย่าง `useSearch`, `useRoute` และ `useTags` ต้องรอให้แผนที่สร้างเสร็จก่อน รอให้ `isReady` เป็น `true` ก่อนเรียกใช้เมธอดต่างๆ คุณสามารถใช้ prop `onReady` ของ `SphereMap` หรือ `useMapEvent('ready', handler)` ก็ได้
+คอมโพเนนต์และ hook ทำงานในเบราว์เซอร์ ให้ใช้ในไฟล์ที่ขึ้นต้นด้วย `"use client"`
 
-## โอเวอร์เลย์ไม่แสดงผล
+## โอเวอร์เลย์ไม่แสดง [#overlays-dont-appear]
 
-ตรวจสอบให้แน่ใจว่าคอมโพเนนต์โอเวอร์เลย์ (Marker, Polygon เป็นต้น) วางอยู่ **ภายใน** คอมโพเนนต์ `<SphereMap>` ไม่ใช่วางไว้ข้างนอก
+- วางคอมโพเนนต์โอเวอร์เลย์ (`Marker`, `Polygon`…) ไว้**ภายใน** `<SphereMap>`
+- ตรวจสอบพิกัด: ตำแหน่งใช้รูปแบบ `{ lon, lat }` กรุงเทพฯ คือ `{ lon: 100.5, lat: 13.75 }` ไม่ใช่สลับกัน
+- รูปหลายเหลี่ยมต้องมีอย่างน้อยสามจุด และเส้นต้องมีอย่างน้อยสองจุด
+
+## แผนที่เด้งกลับเมื่อคอมโพเนนต์ render ใหม่ [#the-map-jumps-back-when-my-component-re-renders]
+
+`center`, `zoom`, `rotate` และ `pitch` กำหนดเฉพาะมุมมองเริ่มต้น หากต้องการเลื่อนแผนที่ ให้เรียก `goTo` หรือ `setCenter` จาก [`useMapControls`](/th/docs/hooks/use-map-controls) หรือ ref ของแผนที่
+
+## การคำนวณเส้นทางไม่เสร็จสิ้น [#routing-never-finishes]
+
+หากไม่มีการตอบกลับภายใน 20 วินาที `useRoute` จะแจ้งข้อผิดพลาด `"timeout"` ซึ่งมักเกิดจาก key ของคุณยังไม่ได้เปิดบริการนำทาง ส่วนโหมด Fly (เส้นตรง) ใช้งานได้โดยไม่ต้องเปิดบริการนี้
+
+## `address()` คืนค่า `null` [#address-returns-null]
+
+อาจไม่มีที่อยู่ ณ จุดนั้น หรือ key ของคุณยังไม่ได้เปิดบริการที่อยู่
+
+## ชั้นข้อมูลแท็กไม่แสดงข้อมูล [#a-tag-layer-shows-nothing]
+
+แท็กจับคู่ด้วยชื่อภาษาไทยแบบตรงตัว เช่น ธนาคารคือ `"ธนาคาร/สถาบันการเงิน"` ไม่ใช่ `"ธนาคาร"` ดูชื่อที่ถูกต้องได้จาก [`useTagCategories`](/th/docs/hooks/use-tag-categories)
+
+## `<ObjectOverlay>` ไม่วาดอะไรเลย [#objectoverlay-draws-nothing]
+
+อ็อบเจกต์ดึงมาจากบริการรายละเอียดสถานที่ (POI details) หาก key ของคุณยังไม่ได้เปิดบริการนี้ จะไม่มีอะไรแสดงผลและ `onError` จะทำงานเมื่อหมดเวลา นอกจากนี้ให้ตรวจสอบรูปแบบรหัสด้วย เช่น รหัสพื้นที่จะอยู่ในรูปแบบ `A10000000`
+
+## การเรียกบริการเว็บล้มเหลวด้วย code `"key"` [#web-service-calls-fail-with-code-key]
+
+เปิดบริการนั้นให้ key ของคุณ และตรวจสอบโฮสต์ที่อนุญาต การเรียกจากเซิร์ฟเวอร์ไม่มีโฮสต์ของเบราว์เซอร์ key จึงต้องอนุญาตการเรียกแบบนี้ด้วย
+
+## Hooks รายงาน `isReady: false` [#hooks-report-isready-false]
+
+hook อย่าง `useSearch`, `useRoute` และ `useTags` ใช้งานได้เมื่อแผนที่พร้อมแล้ว ให้ปิดปุ่มไว้จนกว่า `isReady` จะเป็น `true` หรือรันโค้ดใน [`useMapReady`](/th/docs/hooks/event-hooks#shortcuts)
+
+## การคลิกรูปทรงไม่ไปถึง `onClick` ของแผนที่ [#clicks-on-shapes-dont-reach-onclick-on-the-map]
+
+การคลิกโอเวอร์เลย์จะรายงานเป็น `onOverlayClick` (และ `onClick` ของโอเวอร์เลย์นั้น) ไม่ใช่การคลิกแผนที่ หากต้องการทั้งสองแบบ ให้จัดการ `onOverlayClick` ด้วย อาร์กิวเมนต์ตัวที่สองคือตำแหน่งที่คลิก

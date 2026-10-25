@@ -1,15 +1,47 @@
 "use client";
 
 import {
-  type Location,
+  Marker,
   SphereMap,
-  SphereProvider,
+  useMapControls,
   useMapEvent,
+  useMapReady,
 } from "gistda-sphere-react";
 import { useCallback, useState } from "react";
+import {
+  DemoBar,
+  DemoButton,
+  DemoFrame,
+  DemoNote,
+  useDemoText,
+} from "./demo-ui";
 import { useDocLanguage } from "./use-doc-language";
 
-const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
+const TEXT = {
+  en: {
+    center: (lat: string, lon: string) => `Center: ${lat}, ${lon}`,
+    clear: "Clear",
+    click: (lat: string, lon: string) => `Click: ${lat}, ${lon}`,
+    empty: "No events yet",
+    hint: "Click the map or the marker, drag, or zoom to see events",
+    marker: "Bangkok",
+    overlayClick: (lat: string, lon: string) =>
+      `Marker clicked at ${lat}, ${lon}`,
+    ready: "Map is ready",
+    zoom: (zoom: string) => `Zoom: ${zoom}`,
+  },
+  th: {
+    center: (lat: string, lon: string) => `กึ่งกลาง: ${lat}, ${lon}`,
+    clear: "ล้าง",
+    click: (lat: string, lon: string) => `คลิก: ${lat}, ${lon}`,
+    empty: "ยังไม่มีเหตุการณ์",
+    hint: "คลิกแผนที่หรือหมุด ลาก หรือซูมเพื่อดูเหตุการณ์",
+    marker: "กรุงเทพฯ",
+    overlayClick: (lat: string, lon: string) => `คลิกหมุดที่ ${lat}, ${lon}`,
+    ready: "แผนที่พร้อมใช้งาน",
+    zoom: (zoom: string) => `ซูม: ${zoom}`,
+  },
+};
 
 interface LogEntry {
   id: number;
@@ -17,71 +49,68 @@ interface LogEntry {
   time: string;
 }
 
+let nextId = 1;
+
+/** Subscribes to map events with the event hooks. */
 function EventListener({ onLog }: { onLog: (message: string) => void }) {
-  useMapEvent("ready", () => {
-    onLog("Map is ready");
-  });
+  const text = useDemoText(TEXT);
+  const { getCenter, getZoom } = useMapControls();
 
-  useMapEvent("click", (location: Location) => {
-    onLog(`Click: ${location.lat.toFixed(4)}, ${location.lon.toFixed(4)}`);
-  });
-
-  useMapEvent("zoom", () => {
-    onLog("Zoom changed");
-  });
-
-  useMapEvent("location", () => {
-    onLog("Center changed");
+  useMapReady(() => onLog(text.ready));
+  useMapEvent("click", (location) =>
+    onLog(text.click(location.lat.toFixed(4), location.lon.toFixed(4)))
+  );
+  useMapEvent("overlayClick", (_overlay, location) =>
+    onLog(text.overlayClick(location.lat.toFixed(4), location.lon.toFixed(4)))
+  );
+  useMapEvent("zoom", () => onLog(text.zoom((getZoom() ?? 0).toFixed(2))));
+  useMapEvent("drop", () => {
+    const center = getCenter();
+    if (center) {
+      onLog(text.center(center.lat.toFixed(4), center.lon.toFixed(4)));
+    }
   });
 
   return null;
 }
 
-export function EventLogDemo() {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+/** A map with a live event log. */
+function EventLog() {
   const language = useDocLanguage();
+  const text = useDemoText(TEXT);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
 
   const addLog = useCallback((message: string) => {
-    const now = new Date();
-    const time = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
-    setLogs((prev) =>
-      [{ id: Math.random(), message, time }, ...prev].slice(0, 20)
+    const time = new Date().toLocaleTimeString([], { hour12: false });
+    nextId += 1;
+    setLogs((previous) =>
+      [{ id: nextId, message, time }, ...previous].slice(0, 20)
     );
   }, []);
 
-  if (!API_KEY) {
-    return null;
-  }
-
   return (
-    <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
-      <SphereProvider apiKey={API_KEY}>
-        <SphereMap
-          center={{ lat: 13.7563, lon: 100.5018 }}
-          language={language}
-          style={{ height: "300px", width: "100%" }}
-          zoom={10}
-        >
-          <EventListener onLog={addLog} />
-        </SphereMap>
-      </SphereProvider>
-      <div className="flex flex-col gap-2 bg-fd-card p-3">
-        <div className="flex items-center justify-between">
-          <span className="py-2 text-fd-muted-foreground text-sm">
-            Click, drag, or zoom the map to see events
-          </span>
-          <button
-            className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => setLogs([])}
-            type="button"
-          >
-            Clear
-          </button>
-        </div>
-        <div className="max-h-30 overflow-y-auto rounded-md border border-fd-border bg-fd-muted p-2 font-mono text-fd-foreground text-xs">
+    <>
+      <SphereMap
+        center={{ lat: 13.7563, lon: 100.5018 }}
+        language={language}
+        style={{ height: "300px", width: "100%" }}
+        zoom={10}
+      >
+        <EventListener onLog={addLog} />
+        <Marker
+          position={{ lat: 13.7563, lon: 100.5018 }}
+          title={text.marker}
+        />
+      </SphereMap>
+      <DemoBar>
+        <DemoNote>{text.hint}</DemoNote>
+        <span className="ml-auto">
+          <DemoButton onClick={() => setLogs([])}>{text.clear}</DemoButton>
+        </span>
+        <div className="max-h-30 w-full overflow-y-auto rounded-md border border-fd-border bg-fd-muted p-2 font-mono text-fd-foreground text-xs">
           {logs.length === 0 ? (
             <span className="text-fd-muted-foreground italic">
-              No events yet
+              {text.empty}
             </span>
           ) : (
             logs.map((entry) => (
@@ -97,7 +126,15 @@ export function EventLogDemo() {
             ))
           )}
         </div>
-      </div>
-    </div>
+      </DemoBar>
+    </>
+  );
+}
+
+export function EventLogDemo() {
+  return (
+    <DemoFrame height="400px">
+      <EventLog />
+    </DemoFrame>
   );
 }

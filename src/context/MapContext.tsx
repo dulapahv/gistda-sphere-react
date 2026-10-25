@@ -1,5 +1,5 @@
 import { createContext, type ReactNode, useContext, useMemo } from "react";
-import type { SphereMap } from "../types";
+import type { SphereMap } from "@/types";
 
 interface MapContextValue {
   isReady: boolean;

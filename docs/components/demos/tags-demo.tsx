@@ -2,36 +2,52 @@
 
 import {
   SphereMap,
-  SphereProvider,
   TAG_CATEGORIES,
-  useTags,
+  Tag,
+  useTagCategories,
 } from "gistda-sphere-react";
 import { useState } from "react";
+import {
+  DemoBar,
+  DemoButton,
+  DemoFrame,
+  DemoNote,
+  useDemoText,
+} from "./demo-ui";
 import { useDocLanguage } from "./use-doc-language";
 
-const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
+const TEXT = {
+  en: {
+    active: (count: number) => `${count} on`,
+    category: "Category",
+    clear: "Clear",
+    loading: "Loading categories…",
+  },
+  th: {
+    active: (count: number) => `เปิด ${count}`,
+    category: "หมวดหมู่",
+    clear: "ล้าง",
+    loading: "กำลังโหลดหมวดหมู่…",
+  },
+};
 
-function TagsControls() {
-  const { add, remove, clear, isReady } = useTags();
-  const [activeTags, setActiveTags] = useState<Set<string>>(new Set());
+/** Tag categories loaded live; each selected tag is a `<Tag>` on the map. */
+function TagPicker() {
   const language = useDocLanguage();
+  const text = useDemoText(TEXT);
+  const { categories, isLoading } = useTagCategories(language);
+  const [categoryIndex, setCategoryIndex] = useState(0);
+  const [activeTags, setActiveTags] = useState<string[]>([]);
 
-  const handleToggle = (tagId: string) => {
-    const next = new Set(activeTags);
-    if (next.has(tagId)) {
-      next.delete(tagId);
-      remove(tagId);
-    } else {
-      next.add(tagId);
-      add(tagId);
-    }
-    setActiveTags(next);
-  };
+  const list = categories.length > 0 ? categories : TAG_CATEGORIES;
+  const category = list[Math.min(categoryIndex, list.length - 1)];
 
-  const handleClear = () => {
-    clear();
-    setActiveTags(new Set());
-  };
+  const toggle = (tag: string) =>
+    setActiveTags((previous) =>
+      previous.includes(tag)
+        ? previous.filter((existing) => existing !== tag)
+        : [...previous, tag]
+    );
 
   return (
     <>
@@ -39,56 +55,57 @@ function TagsControls() {
         center={{ lat: 13.7563, lon: 100.5018 }}
         language={language}
         style={{ height: "400px", width: "100%" }}
-        zoom={10}
-      />
-      <div className="flex flex-col gap-2 bg-fd-card p-3">
-        {TAG_CATEGORIES.map((category) => (
-          <div className="mb-2" key={category.name}>
-            <div className="mb-1 text-fd-muted-foreground text-xs">
-              {category.name}
-            </div>
-            <div className="flex flex-wrap gap-1">
-              {category.tags.map((tag) => (
-                <button
-                  className={`cursor-pointer rounded-md border px-2 py-1 text-xs disabled:cursor-not-allowed disabled:opacity-50 ${activeTags.has(tag.id) ? "border-fd-primary bg-fd-primary text-fd-primary-foreground" : "border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent"}`}
-                  disabled={!isReady}
-                  key={tag.id}
-                  onClick={() => handleToggle(tag.id)}
-                  type="button"
-                >
-                  {tag.label}
-                </button>
-              ))}
-            </div>
-          </div>
+        zoom={12}
+      >
+        {activeTags.map((tag) => (
+          <Tag key={tag} name={tag} />
         ))}
-        <div className="mt-2 flex items-center justify-between border-fd-border border-t pt-2">
-          <span className="text-fd-muted-foreground text-xs">
-            {activeTags.size} active
-          </span>
-          <button
-            className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={handleClear}
-            type="button"
+      </SphereMap>
+      <DemoBar>
+        <label className="flex items-center gap-1 text-fd-muted-foreground text-xs">
+          {text.category}
+          <select
+            className="rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs"
+            onChange={(event) => setCategoryIndex(Number(event.target.value))}
+            value={categoryIndex}
           >
-            Clear All
-          </button>
+            {list.map((item, index) => (
+              <option key={item.name} value={index}>
+                {item.name}
+              </option>
+            ))}
+          </select>
+        </label>
+        {isLoading ? <DemoNote>{text.loading}</DemoNote> : null}
+        <span className="ml-auto flex items-center gap-2">
+          <DemoNote>{text.active(activeTags.length)}</DemoNote>
+          <DemoButton
+            disabled={activeTags.length === 0}
+            onClick={() => setActiveTags([])}
+          >
+            {text.clear}
+          </DemoButton>
+        </span>
+        <div className="flex w-full flex-wrap gap-1">
+          {category?.tags.map((tag) => (
+            <DemoButton
+              active={activeTags.includes(tag.id)}
+              key={tag.id}
+              onClick={() => toggle(tag.id)}
+            >
+              {tag.label}
+            </DemoButton>
+          ))}
         </div>
-      </div>
+      </DemoBar>
     </>
   );
 }
 
 export function TagsDemo() {
-  if (!API_KEY) {
-    return null;
-  }
-
   return (
-    <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
-      <SphereProvider apiKey={API_KEY}>
-        <TagsControls />
-      </SphereProvider>
-    </div>
+    <DemoFrame height="520px">
+      <TagPicker />
+    </DemoFrame>
   );
 }

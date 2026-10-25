@@ -1,98 +1,78 @@
 ---
 title: TypeScript
-description: Type definitions and exports
+description: Every component, hook, result and Sphere object is typed
 ---
 
-All types are exported from the package:
+The library is written in TypeScript and exports all of its types from the package root:
 
 ```tsx
-import type {
-  // Core geometric types
-  Location,          // { lon: number, lat: number }
-  Point,             // { x: number, y: number }
-  Size,              // { width: number, height: number }
-  Range,             // { min: number, max: number }
-  Bound,             // { minLon, minLat, maxLon, maxLat }
-  Tile,              // { x: number, y: number, z: number }
-  Icon,              // { url?, urlHD?, html?, offset?, size? }
-
-  // Enum types
-  BuiltInLayer,
-  LayerType,
-  FilterType,
-  LineStyleType,
-  PredefinedOverlay,
-  UiComponentMode,
-
-  // Options types
-  PopupOptions,
-  GeometryOptions,
-  MarkerOptions,
-  TagOptions,
-  SearchOptions,
-  SuggestOptions,
-  AddressOptions,
-  NearPoiOptions,
-
-  // Route types
-  RouteMode,
-  RouteType,
-  RouteLabelType,
-  RouteGuideStep,
-
-  // Instance types
-  SphereMapInstance,
-  SphereMarker,
-  SpherePolygon,
-  SpherePolyline,
-  SphereCircle,
-  SphereDot,
-  SphereRectangle,
-  SpherePopup,
-  SphereOverlay,
-  SphereNamespace,
-
-  // Ref types
-  SphereMapRef,
-  MarkerRef,
-  PolygonRef,
-  PolylineRef,
-  CircleRef,
-  PopupRef,
-  DotRef,
-  RectangleRef,
-} from 'gistda-sphere-react';
+import type { Location, PoiResult, PolygonRef, RouteStep } from "gistda-sphere-react";
 ```
 
-## Icon type
+## Common types
 
-```typescript
-// URL-based icon
-{
-  url: string;
-  urlHD?: string;
-  size?: Size;
-  offset?: Point;
-}
+| Type | Shape |
+| --- | --- |
+| `Location` | `{ lon: number; lat: number }` |
+| `Point` | `{ x: number; y: number }` (pixels) |
+| `Size` | `{ width: number; height: number }` |
+| `Range` | `{ min: number; max: number }` |
+| `Bound` | `{ minLon; minLat; maxLon; maxLat }` |
+| `Icon` | `{ url?; urlHD?; html?; offset?; size? }` |
+| `GeoJSON`, `GeoJSONFeature`, `GeoJSONGeometry`… | GeoJSON objects (RFC 7946). |
 
-// HTML-based icon (overrides url)
-{
-  html: string;
-  offset?: Point;
-  size?: Size;
+## Names used by props
+
+These are string unions, so your editor completes them:
+
+| Type | Values |
+| --- | --- |
+| `BuiltInLayer` | `"SIMPLE"`, `"STREETS"`, `"STREETS_NIGHT"`, `"HYBRID"`, `"IMAGES"`, `"TRAFFIC"`, `"PM25"`, `"HOTSPOT"`, `"FLOOD"`, `"DROUGHT"` |
+| `LayerType` | `"Vector"`, `"XYZ"`, `"WMS"`, `"WMTS"`, `"WMTS_REST"`, `"TMS"`, `"Tiles3D"`, `"I3S"` |
+| `FilterType` | `"None"`, `"Dark"`, `"Light"`, `"Protanopia"`, `"Deuteranopia"` |
+| `LineStyleType` | `"Solid"`, `"Dashed"`, `"Dot"` |
+| `PredefinedOverlay` | `"cameras"`, `"events"`, `"aqi"` |
+| `UiControlName` | `"DPad"`, `"Zoombar"`, `"Geolocation"`, `"Toolbar"`, `"LayerSelector"`, `"Fullscreen"`, `"Crosshair"`, `"Scale"`, `"ContextMenu"` |
+| `UiComponentMode` | `"Full"`, `"Mobile"`, `"None"` |
+| `RouteMode` | `"Traffic"`, `"Cost"`, `"Distance"`, `"Fly"` |
+| `RouteType` | `"Road"`, `"Ferry"`, `"Tollway"`, `"All"` |
+| `RouteLabelType` | `"Distance"`, `"Time"`, `"Hide"` |
+| `Language` | `"th"`, `"en"` |
+
+The library converts these to the values Sphere expects at runtime, so you never deal with Sphere's internal enum values.
+
+## Results
+
+| Type | From |
+| --- | --- |
+| `PoiResult`, `SuggestResult`, `SearchResult`, `AddressResult` | `useSearch` |
+| `RouteStep`, `RouteSummary`, `RouteResult`, `RouteErrorInfo`, `RouteStatus` | `useRoute` |
+| `LocalizedTagCategory` | `useTagCategories` |
+| `SphereServices`, `SphereServiceError`, `RouteServiceResult`, `ElevationPoint`… | [Web services](/docs/web-services) |
+| `SphereEventMap`, `EventName` | Event names and their handler arguments |
+
+## Props and refs
+
+Each component exports its props and ref types, such as `SphereMapProps`, `SphereMapRef`, `MarkerProps`, `MarkerRef`, `PolygonProps` and `PolygonRef`. Wrap components with the props type:
+
+```tsx
+import { Marker, type MarkerProps } from "gistda-sphere-react";
+
+function StoreMarker({ open, ...props }: MarkerProps & { open: boolean }) {
+  return <Marker {...props} icon={{ url: open ? "/open.png" : "/closed.png" }} />;
 }
 ```
 
-## PopupOptions type
+## Sphere objects
 
-```typescript
-{
-  title?: string;
-  detail?: string;
-  loadDetail?: (element: HTMLElement) => void;
-  html?: string;
-  loadHtml?: (element: HTMLElement) => void;
-  size?: Size;
-  closable?: boolean;
+The raw Sphere objects are typed too: `SphereMapInstance` (`sphere.Map`), `SphereMarker`, `SpherePolygon`, `SpherePolyline`, `SphereCircle`, `SphereDot`, `SphereRectangle`, `SpherePopup`, `SphereOverlay`, `SphereLayer` and `SphereNamespace` (the global `sphere`). `MapLibreMap` covers the commonly used members of `map.Renderer`.
+
+```tsx
+import type { SphereMapInstance } from "gistda-sphere-react";
+
+function zoomOf(map: SphereMapInstance) {
+  return map.zoom() as number;
 }
 ```
+
+`window.sphere` is declared globally once you import the package.

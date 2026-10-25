@@ -1,0 +1,51 @@
+---
+title: useTagCategories
+description: หมวดหมู่แท็กสถานที่ (POI) ทั้งหมดทั้งภาษาไทยและอังกฤษ ดึงข้อมูลล่าสุดจาก Sphere
+---
+
+`useTagCategories` โหลดรายการแท็ก POI ของ Sphere ประมาณ 260 แท็กใน 20 หมวดหมู่ ใช้สร้างตัวเลือกแท็ก แล้วแสดงแท็กที่เลือกด้วย [`<Tag>`](/th/docs/components/tag)
+
+```tsx
+import { Tag, useTagCategories } from "gistda-sphere-react";
+
+function TagPicker() {
+  const { categories, isLoading, error } = useTagCategories("en");
+  const [tag, setTag] = useState<string | null>(null);
+
+  if (isLoading) return <p>Loading…</p>;
+  if (error) return <p>{error.message}</p>;
+
+  return (
+    <>
+      <select onChange={(event) => setTag(event.target.value)}>
+        {categories.map((category) => (
+          <optgroup key={category.name} label={category.name}>
+            {category.tags.map((item) => (
+              <option key={item.id} value={item.id}>{item.label}</option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+      <SphereMap>{tag && <Tag name={tag} />}</SphereMap>
+    </>
+  );
+}
+```
+
+## พารามิเตอร์ [#parameters]
+
+| พารามิเตอร์ | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `language` | `"th" \| "en"` | `"en"` | ภาษาของชื่อหมวดหมู่และแท็ก |
+
+## ค่าที่คืนกลับ [#return-value]
+
+| Property | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `categories` | `LocalizedTagCategory[]` | `{ name, icon, tags: [{ id, label }] }` ต่อหมวดหมู่ เป็นรายการว่างจนกว่าจะโหลดเสร็จ |
+| `isLoading` | `boolean` | เป็น `true` ระหว่างโหลด |
+| `error` | `Error \| null` | สาเหตุที่โหลดรายการไม่สำเร็จ |
+
+`id` ของแต่ละแท็กคือชื่อภาษาไทย ซึ่งเป็นค่าที่ `<Tag name>` และ `useTags().add()` ต้องการ รายการจะถูกโหลดเพียงครั้งเดียวต่อหน้าและใช้ร่วมกันทุกคอมโพเนนต์ที่เรียก hook นี้ และไม่ต้องใช้ API key
+
+หากโหลดไม่สำเร็จ สามารถใช้ `TAG_CATEGORIES` แทนได้ ซึ่งเป็นรายการในตัวขนาดเล็กที่มีโครงสร้างเดียวกัน

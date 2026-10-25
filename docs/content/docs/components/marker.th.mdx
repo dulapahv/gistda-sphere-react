@@ -1,9 +1,9 @@
 ---
 title: Marker (หมุด)
-description: แสดงหมุดระบุพิกัดบนแผนที่
+description: จุดบนแผนที่ ใช้ไอคอนแบบรูปภาพ HTML หรือ React ได้ พร้อมป๊อปอัป
 ---
 
-<MapDemo height="400px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }} language="en">
+<MapDemo height="400px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Marker
     position={{ lon: 100.5018, lat: 13.7563 }}
     title="กรุงเทพมหานคร"
@@ -15,57 +15,124 @@ description: แสดงหมุดระบุพิกัดบนแผน�
 ```tsx
 <Marker
   position={{ lon: 100.5018, lat: 13.7563 }}
-  title="กรุงเทพมหานคร"
-  detail="เมืองหลวงของประเทศไทย"
+  title="Bangkok"
+  detail="Capital of Thailand"
   draggable
-  onDrop={(marker, newPosition) => console.log('ย้ายไปยัง:', newPosition)}
+  onDrop={(marker, position) => console.log("Moved to", position)}
 />
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `position` | `Location` | Yes | - | พิกัดของหมุด (`{ lon, lat }`) |
-| `ref` | `Ref<MarkerRef>` | No | - | Ref สำหรับการควบคุมผ่านโค้ด (Imperative control) |
-| `icon` | `Icon` | No | Default red pin | ไอคอนที่ต้องการแสดงแทนหมุดปกติ |
-| `title` | `string` | No | - | ข้อความที่แสดงเมื่อโฮเวอร์ (tooltip) |
-| `detail` | `string` | No | - | ข้อความที่แสดงในป๊อปอัปเมื่อคลิก |
-| `popup` | `PopupOptions` | No | - | การกำหนดค่าป๊อปอัป (จะเขียนทับ `detail`) |
-| `visibleRange` | `Range` | No | All zoom levels | ระดับการซูมที่สามารถมองเห็นหมุดได้ |
-| `clickable` | `boolean` | No | `false` | แสดงเคอร์เซอร์แบบตัวชี้เมื่อโฮเวอร์ |
-| `draggable` | `boolean` | No | `false` | อนุญาตให้ลากหมุดได้ |
-| `zIndex` | `number` | No | `0` | ลำดับการซ้อน (Stacking order) |
-| `rotate` | `number` | No | `0` | มุมการหมุนเป็นองศา |
-| `onClick` | `(marker: SphereMarker) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อคลิก |
-| `onDrag` | `(marker: SphereMarker) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อกำลังลาก |
-| `onDrop` | `(marker: SphereMarker, location: Location) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อปล่อยหมุด (สิ้นสุดการลาก) |
-| `onHover` | `(marker: SphereMarker) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อเมาส์เข้าสู่พื้นที่ของหมุด |
-| `onLeave` | `(marker: SphereMarker) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อเมาส์ออกจากพื้นที่ของหมุด |
+| Prop | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `position` | `Location \| GeoJSON point` | **จำเป็น** | ตำแหน่งของหมุด เมื่อเปลี่ยนค่า หมุดจะย้ายโดยไม่ต้องสร้างใหม่ |
+| `title` | `string` | – | ข้อความเมื่อชี้เมาส์ และหัวเรื่องของป๊อปอัป |
+| `detail` | `string` | – | ข้อความในป๊อปอัปเมื่อคลิก |
+| `popup` | `PopupOptions` | – | ตั้งค่าป๊อปอัปแบบเต็ม (แทนที่ `detail`) |
+| `popupContent` | `ReactNode` | – | เนื้อหา React ภายในป๊อปอัป |
+| `children` | `ReactNode` | – | เนื้อหา React ที่ใช้เป็นไอคอน |
+| `icon` | `Icon` | หมุดของ Sphere | ไอคอนรูปภาพ (`url`, `urlHD`) หรือ HTML (`html`) พร้อม `size` และ `offset` |
+| `rotate` | `number` | `0` | **อัปเดตทันที** มุมหมุนตามเข็มนาฬิกาเป็นองศา |
+| `draggable` | `boolean` | `false` | **อัปเดตทันที** ให้ผู้ใช้ลากหมุดได้ |
+| `animate` | `boolean \| number` | – | เลื่อนไปตำแหน่งใหม่อย่างนุ่มนวล: `true` (150 ms) หรือระยะเวลาเป็น ms ใช้ได้กับไอคอน HTML/React เท่านั้น |
+| `clickable` | `boolean` | – | แสดงเคอร์เซอร์รูปมือเมื่อชี้ |
+| `visibleRange` | `Range` | ทุกระดับ | แสดงหมุดเฉพาะในช่วงระดับซูมนี้ |
+| `zIndex` | `number` | – | ลำดับการซ้อน |
+| `options` | `Record<string, unknown>` | – | ตัวเลือกเพิ่มเติมสำหรับ `new sphere.Marker()` ไอคอน HTML/React รองรับ[ตัวเลือกหมุดของ MapLibre](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MarkerOptions/) เช่น `anchor` |
+| `onClick` | `(marker, location) => void` | – | คลิกหมุด |
+| `onDrag` | `(marker) => void` | – | กำลังลากหมุด |
+| `onDrop` | `(marker, location) => void` | – | วางหมุดที่ `location` |
+| `onHover` / `onLeave` | `(marker) => void` | – | เมาส์เข้า / ออกจากหมุด |
+| `ref` | `Ref<MarkerRef>` | – | ดู [Ref](#ref) |
 
-## ไอคอนแบบกำหนดเอง
+## ไอคอนแบบ React [#react-icons]
 
-### ไอคอนจาก URL
+ส่งเนื้อหา React เป็น children เพื่อใช้เป็นไอคอน โดยใช้สไตล์ state และ event handlers ของแอปได้ตามปกติ
+
+<MapDemo height="300px" zoom={11} center={{ lon: 100.5018, lat: 13.7563 }}>
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร">
+    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 999, background: "#2563eb", color: "white", fontSize: 12, fontWeight: 600, boxShadow: "0 1px 4px rgba(0,0,0,.4)" }}>กรุงเทพฯ</span>
+  </Marker>
+</MapDemo>
+
+```tsx
+<Marker position={station.location} title={station.name}>
+  <span className="rounded-full bg-blue-600 px-2 text-white">
+    {station.available}
+  </span>
+</Marker>
+```
+
+ไอคอนจะอยู่กึ่งกลางตำแหน่ง หากต้องการให้ขอบล่างชี้ตำแหน่งแบบหมุดปักแผนที่ ให้ส่ง `options={{ anchor: "bottom" }}`
+
+## ป๊อปอัปแบบ React [#react-popups]
+
+`popupContent` แสดงเนื้อหา React ในป๊อปอัปที่เปิดเมื่อคลิก
+
+```tsx
+<Marker
+  position={cafe.location}
+  title={cafe.name}
+  popupContent={
+    <div>
+      <p>{cafe.address}</p>
+      <button onClick={() => addToFavorites(cafe.id)}>Save</button>
+    </div>
+  }
+/>
+```
+
+## ไอคอนแบบรูปภาพและ HTML [#image-and-html-icons]
 
 ```tsx
 <Marker
   position={{ lon: 100.5, lat: 13.75 }}
   icon={{
-    url: '/my-icon.png',
+    url: "/pin.png",
+    urlHD: "/pin@2x.png",
     size: { width: 32, height: 32 },
-    offset: { x: 16, y: 32 }
+    offset: { x: 16, y: 32 },
   }}
 />
-```
 
-### ไอคอนจาก HTML
-
-```tsx
 <Marker
   position={{ lon: 100.5, lat: 13.75 }}
-  icon={{
-    html: '<div style="background: red; width: 20px; height: 20px; border-radius: 50%;"></div>',
-    offset: { x: 10, y: 10 }
-  }}
+  icon={{ html: '<div class="dot"></div>', offset: { x: 8, y: 8 } }}
 />
 ```
+
+## การย้ายหมุด [#moving-markers]
+
+อัปเดต `position` เพื่อย้ายหมุด เมื่อใช้ `animate` ไอคอนแบบ HTML และ React จะเลื่อนไปยังตำแหน่งใหม่อย่างนุ่มนวล เหมาะกับตำแหน่งที่เปลี่ยนแบบเรียลไทม์ เช่น ยานพาหนะ
+
+```tsx
+<Marker position={bus.location} rotate={bus.heading} animate={1000}>
+  <BusIcon />
+</Marker>
+```
+
+## Ref
+
+```tsx
+const markerRef = useRef<MarkerRef>(null);
+
+<Marker ref={markerRef} position={start} draggable />
+
+markerRef.current?.setPosition({ lon: 100.6, lat: 13.8 }, true);
+markerRef.current?.togglePopup(true);
+```
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `getMarker()` | `sphere.Marker` ที่อยู่เบื้องหลัง |
+| `getElement()` | DOM element ของหมุด (เฉพาะไอคอน HTML และ React) |
+| `getPosition()` | ตำแหน่งปัจจุบัน |
+| `setPosition(location, animate?)` | ย้ายหมุด |
+| `setRotation(angle)` | หมุนไอคอน |
+| `togglePopup(show?)` | แสดง ซ่อน หรือสลับป๊อปอัป |
+| `contains(target)`, `intersects(target)`, `within(overlay)`, `distanceTo(target, language?)` | การทดสอบเชิงพื้นที่ ดู[การวิเคราะห์เชิงพื้นที่](/th/docs/examples/spatial-analysis) |
+| `toGeoJSON()` | หมุดในรูปแบบ GeoJSON feature |
+| `shift({ lon, lat })` | เลื่อนตามค่าองศาที่กำหนด |
+
+หากต้องการจัดการหมุดจำนวนมากเป็นรายการ ดู [`useMarkers`](/th/docs/hooks/overlay-hooks)

@@ -2,8 +2,8 @@ import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SphereProvider, useSphereContext } from "../context/SphereContext";
-import { useSearch } from "../hooks/useSearch";
+import { SphereProvider, useSphereContext } from "@/context/SphereContext";
+import { useSearch } from "@/hooks/useSearch";
 import { createMockSphereApi } from "./setup";
 
 describe("useSearch", () => {

@@ -1,56 +1,138 @@
 ---
 title: Polygon (รูปหลายเหลี่ยม)
-description: วาดรูปหลายเหลี่ยมแบบปิดบนแผนที่
+description: พื้นที่ปิด รองรับรู ป้ายชื่อ การแก้ไข การวัดพื้นที่ และการดำเนินการกับรูปหลายเหลี่ยม
 ---
 
-<MapDemo height="400px" zoom={12} center={{ lon: 100.50, lat: 13.75 }} language="en">
+<MapDemo height="400px" zoom={11} center={{ lon: 100.5, lat: 13.75 }}>
   <Polygon
     positions={[
-      { lon: 100.475, lat: 13.775 },
-      { lon: 100.525, lat: 13.775 },
-      { lon: 100.50, lat: 13.725 },
+      { lon: 100.45, lat: 13.8 },
+      { lon: 100.55, lat: 13.8 },
+      { lon: 100.55, lat: 13.7 },
+      { lon: 100.45, lat: 13.7 },
     ]}
     fillColor="rgba(255, 0, 0, 0.3)"
     lineColor="red"
     lineWidth={2}
+    label="โซน A"
+    title="โซน A"
   />
 </MapDemo>
 
 ```tsx
 <Polygon
   positions={[
-    { lon: 100.475, lat: 13.775 },
-    { lon: 100.525, lat: 13.775 },
-    { lon: 100.50, lat: 13.725 },
+    { lon: 100.45, lat: 13.8 },
+    { lon: 100.55, lat: 13.8 },
+    { lon: 100.55, lat: 13.7 },
+    { lon: 100.45, lat: 13.7 },
   ]}
   fillColor="rgba(255, 0, 0, 0.3)"
   lineColor="red"
   lineWidth={2}
+  label="Zone A"
 />
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `positions` | `Location[]` | Yes (min 3) | - | อาร์เรย์ของจุดยอด |
-| `ref` | `Ref<PolygonRef>` | No | - | Ref สำหรับการควบคุมผ่านโค้ด (Imperative control) |
-| `title` | `string` | No | - | ข้อความ Tooltip เมื่อโฮเวอร์ |
-| `detail` | `string` | No | - | ข้อความ Pop-up เมื่อคลิก |
-| `label` | `string` | No | - | ข้อความกำกับตรงกลางรูปหลายเหลี่ยม |
-| `labelOptions` | `MarkerOptions` | No | - | ตัวเลือกของ Marker สำหรับข้อความกำกับ |
-| `popup` | `PopupOptions` | No | - | การกำหนดค่าป๊อปอัป |
-| `visibleRange` | `Range` | No | All zoom levels | ระยะการซูมที่มองเห็นได้ |
-| `lineWidth` | `number` | No | `3` | ความกว้างของเส้นขอบเป็นพิกเซล |
-| `lineColor` | `string` | No | Preset color | สีเส้นขอบ |
-| `fillColor` | `string` | No | Preset color | สีเติม |
-| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | รูปแบบเส้นขอบ |
-| `pivot` | `Location` | No | Center | จุดหมุนสำหรับการหมุน |
-| `clickable` | `boolean` | No | `false` | แสดงเคอร์เซอร์แบบตัวชี้ |
-| `draggable` | `boolean` | No | `false` | อนุญาตให้ลากได้ |
-| `pointer` | `boolean` | No | `false` | แสดงตัวชี้การลาก |
-| `editable` | `boolean` | No | `false` | อนุญาตให้แก้ไขจุดยอด |
-| `zIndex` | `number` | No | `0` | ลำดับการซ้อน |
-| `onClick` | `(polygon: SpherePolygon) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อคลิก |
-| `onDrag` | `(polygon: SpherePolygon) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อกำลังลาก |
-| `onDrop` | `(polygon: SpherePolygon) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อปล่อย (สิ้นสุดการลาก) |
+| Prop | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `positions` | `Location[] \| GeoJSON` | **จำเป็น** มุมของรูปหลายเหลี่ยม (อย่างน้อย 3 จุด) ค่า `null` คั่นเพื่อเริ่มรู หรือใช้ GeoJSON `Polygon` / `MultiPolygon` (หรือ feature) ก็ได้ |
+
+รูปหลายเหลี่ยมรับ [props ของรูปทรง](#shape-props) ด้านล่างด้วย
+
+### Props ของรูปทรง [#shape-props]
+
+รูปทรงทุกแบบ ([`Polygon`](/th/docs/components/polygon), [`Polyline`](/th/docs/components/polyline), [`Circle`](/th/docs/components/circle), [`Rectangle`](/th/docs/components/rectangle) และ [`Dot`](/th/docs/components/dot)) ใช้ props เหล่านี้ร่วมกัน props ที่ระบุว่า **อัปเดตทันที** จะอัปเดตรูปทรงเดิม ส่วน props อื่นจะสร้างรูปทรงใหม่เมื่อค่าเปลี่ยน
+
+| Prop | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `lineColor` | `string` | **อัปเดตทันที** สีเส้นขอบ (สี CSS ใดก็ได้) |
+| `lineWidth` | `number` | **อัปเดตทันที** ความหนาเส้นขอบเป็นพิกเซล |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot" \| number[]` | **อัปเดตทันที** รูปแบบเส้น หรือรูปแบบเส้นประ `[dash, gap]` ที่กำหนดเอง |
+| `fillColor` | `string` | **อัปเดตทันที** สีพื้น สำหรับพื้นที่ |
+| `title` | `string` | หัวเรื่องของป๊อปอัป |
+| `detail` | `string` | ข้อความในป๊อปอัป |
+| `popup` | `PopupOptions` | ตั้งค่าป๊อปอัปแบบเต็ม |
+| `popupContent` | `ReactNode` | เนื้อหา React ในป๊อปอัป |
+| `label` | `string \| boolean` | ข้อความที่แสดงบนรูปทรง หรือ `true` เพื่อใช้ `title` |
+| `labelOptions` | `MarkerOptions` | ตัวเลือกของหมุดป้ายชื่อ |
+| `editable` | `boolean` | ให้ผู้ใช้ลากมุมของรูปทรงได้ (รูปหลายเหลี่ยมและสี่เหลี่ยม) |
+| `draggable` | `boolean` | ให้ผู้ใช้ลากย้ายทั้งรูปทรงได้ |
+| `clickable` | `boolean` | แสดงเคอร์เซอร์รูปมือเมื่อชี้ |
+| `pointer` | `boolean` | แสดงหมุดที่มุมต่าง ๆ |
+| `pivot` | `Location` | จุดที่ใช้วางป้ายชื่อและเป็นจุดหมุน |
+| `visibleRange` | `Range` | แสดงเฉพาะในช่วงระดับซูมนี้ |
+| `zIndex` | `number` | ลำดับการซ้อน |
+| `options` | `Record<string, unknown>` | ตัวเลือกเพิ่มเติมสำหรับ constructor ของ Sphere |
+| `onClick` | `(shape, location) => void` | คลิกรูปทรง |
+| `onHover` / `onLeave` | `(shape) => void` | เมาส์เข้า / ออกจากรูปทรง |
+| `onDrag` / `onDrop` | `(shape) => void` | กำลังลาก / วางรูปทรง |
+| `ref` | `Ref` | ดู [Ref](#ref) |
+
+## รู (holes) [#holes]
+
+ใส่ `null` คั่นระหว่างขอบนอกและรูแต่ละรู
+
+```tsx
+<Polygon
+  positions={[
+    { lon: 100.4, lat: 13.9 }, { lon: 100.7, lat: 13.9 },
+    { lon: 100.7, lat: 13.6 }, { lon: 100.4, lat: 13.6 },
+    null,
+    { lon: 100.5, lat: 13.8 }, { lon: 100.6, lat: 13.8 },
+    { lon: 100.6, lat: 13.7 }, { lon: 100.5, lat: 13.7 },
+  ]}
+/>
+```
+
+## ข้อมูลแบบ GeoJSON [#geojson-input]
+
+```tsx
+<Polygon
+  positions={{
+    type: "Polygon",
+    coordinates: [[[100.45, 13.8], [100.55, 13.8], [100.55, 13.7], [100.45, 13.8]]],
+  }}
+  fillColor="rgba(0, 128, 255, 0.3)"
+/>
+```
+
+หากต้องการแสดงเอกสาร GeoJSON ทั้งชุด (จุด เส้น และพื้นที่รวมกัน) ให้ใช้ [`<GeoJson>`](/th/docs/components/geojson)
+
+## เปลี่ยนสไตล์โดยไม่กะพริบ [#styling-without-flicker]
+
+การเปลี่ยนสี ความหนา และรูปแบบเส้นใช้ `update()` ของ Sphere รูปหลายเหลี่ยมจึงเปลี่ยนตาม state ได้โดยไม่ต้องวาดใหม่
+
+```tsx
+<Polygon
+  positions={zone}
+  fillColor={hovered ? "rgba(255,0,0,.5)" : "rgba(255,0,0,.2)"}
+  onHover={() => setHovered(true)}
+  onLeave={() => setHovered(false)}
+/>
+```
+
+## Ref
+
+```tsx
+const zoneRef = useRef<PolygonRef>(null);
+
+<Polygon ref={zoneRef} positions={zone} />
+
+zoneRef.current?.getArea();     // 120000000 (square meters)
+zoneRef.current?.getArea("en"); // "120 sq.km"
+```
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `getPolygon()` | `sphere.Polygon` ที่อยู่เบื้องหลัง |
+| `getArea(language?)` | พื้นที่เป็นตารางเมตร หรือข้อความ เช่น `"120 ตร.กม."` เมื่อระบุภาษา หากต้องการหน่วยไร่ งาน ตารางวา ให้ส่งพื้นที่ให้ [`formatThaiArea`](/th/docs/hooks/use-sphere-utils) |
+| `getBound()`, `getCentroid()`, `getPivot()` | ขอบเขต จุดศูนย์กลาง และจุดวางป้ายชื่อ |
+| `union(other)`, `intersection(other)`, `difference(other)`, `split(other)` | รูปหลายเหลี่ยมใหม่ (ไม่ถูกเพิ่มลงแผนที่) ดู[การวิเคราะห์เชิงพื้นที่](/th/docs/examples/spatial-analysis) |
+| `contains(target)`, `intersects(target)`, `within(overlay)`, `distanceTo(target, language?)` | ทดสอบเชิงพื้นที่กับตำแหน่งหรือโอเวอร์เลย์อื่น |
+| `rotate(angle)`, `shift({ lon, lat })` | หมุนรอบจุดหมุน หรือเลื่อนตามค่าที่กำหนด |
+| `updateStyle(style)` | เปลี่ยนสี ความหนา หรือรูปแบบเส้นจากโค้ด |
+| `togglePopup(show?, location?)` | แสดง ซ่อน หรือสลับป๊อปอัป |
+| `toGeoJSON()` | รูปหลายเหลี่ยมในรูปแบบ GeoJSON feature |

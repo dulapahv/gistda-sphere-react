@@ -1,0 +1,77 @@
+---
+title: หมุดและป๊อปอัปแบบกำหนดเอง
+description: ใช้คอมโพเนนต์ React เป็นไอคอนหมุดและเนื้อหาป๊อปอัป และปรับแต่งป๊อปอัปของ POI
+---
+
+หมุดและป๊อปอัปแสดงเนื้อหา React ได้ทุกแบบ โดยใช้สไตล์ state และ event handler ของแอปคุณได้ตามปกติ
+
+<MapDemo height="320px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }}>
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="อนุสาวรีย์ประชาธิปไตย">
+    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 999, background: "#7c3aed", color: "white", fontSize: 12, fontWeight: 600, boxShadow: "0 1px 4px rgba(0,0,0,.4)" }}>฿ 1,290</span>
+  </Marker>
+  <Marker position={{ lon: 100.53, lat: 13.745 }} title="สยาม">
+    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 999, background: "#7c3aed", color: "white", fontSize: 12, fontWeight: 600, boxShadow: "0 1px 4px rgba(0,0,0,.4)" }}>฿ 2,450</span>
+  </Marker>
+</MapDemo>
+
+## ไอคอนหมุดแบบ React [#react-marker-icons]
+
+```tsx lineNumbers
+function PriceMarker({ hotel }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <Marker
+      position={hotel.location}
+      title={hotel.name}
+      onHover={() => setHovered(true)}
+      onLeave={() => setHovered(false)}
+      options={{ anchor: "bottom" }}
+    >
+      <span className={hovered ? "price price--active" : "price"}>฿ {hotel.price}</span>
+    </Marker>
+  );
+}
+```
+
+## ป๊อปอัปแบบ React [#react-popups]
+
+```tsx lineNumbers
+<Marker
+  position={hotel.location}
+  title={hotel.name}
+  popupContent={
+    <div className="w-56">
+      <img src={hotel.photo} alt="" className="rounded" />
+      <p>{hotel.rating} ★ · {hotel.reviews} reviews</p>
+      <button onClick={() => book(hotel.id)}>Book</button>
+    </div>
+  }
+/>
+```
+
+รูปทรงต่าง ๆ ก็ใช้ `popupContent` ได้เช่นกัน
+
+```tsx
+<Polygon positions={district.outline} title={district.name} popupContent={<DistrictStats id={district.id} />} />
+```
+
+## ป๊อปอัปของ POI ของ Sphere [#popups-for-spheres-own-pois]
+
+ชั้นข้อมูลแท็กและผลการค้นหาจะเปิดป๊อปอัปของ Sphere สามารถปรับเปลี่ยนเนื้อหาที่แสดงได้ที่ `SphereProvider`:
+
+```tsx lineNumbers
+<SphereProvider
+  apiKey={apiKey}
+  formatPoi={(poi) => {
+    const element = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = poi.name;
+    const address = document.createElement("p");
+    address.textContent = poi.address ?? "";
+    element.append(name, address);
+    return element;
+  }}
+>
+```
+
+หากต้องการควบคุมทั้งหมด ให้คืนค่าตัวเลือกป๊อปอัปจาก `poiPopupOptions(source, id, name, language)` เช่น เพื่อโหลดรายละเอียดจาก API ของคุณเอง ดู [SphereProvider](/th/docs/components/sphere-provider#customizing-poi-popups)

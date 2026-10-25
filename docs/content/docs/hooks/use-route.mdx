@@ -1,91 +1,37 @@
 ---
 title: useRoute
-description: Calculate and display routes between locations
+description: Plan routes with several stops and travel modes, with status, totals and turn-by-turn directions
 ---
 
-Calculate and display routes between locations.
+`useRoute` plans a route on the map and keeps its result in React state: status, error, totals and ready-to-show turn-by-turn steps. It works inside `SphereMap` and anywhere else under `SphereProvider`.
 
 <RouteDemo />
 
 ```tsx
-import { useRoute } from 'gistda-sphere-react';
+import { useRoute } from "gistda-sphere-react";
 
-function RouteComponent() {
-  const { addDestination, search, getDistance, getInterval, clear, isReady } = useRoute();
+function Directions() {
+  const route = useRoute();
+  const { status, error, summary, steps } = route;
 
-  const calculateRoute = () => {
-    addDestination({ lon: 100.5018, lat: 13.7563 });
-    addDestination({ lon: 98.9853, lat: 18.7883 });
-    search();
+  const plan = () => {
+    route.clear();
+    route.addDestination({ lon: 100.5018, lat: 13.7563 }); // Bangkok
+    route.addDestination({ lon: 98.9853, lat: 18.7883 });  // Chiang Mai
+    route.search();
   };
 
   return (
     <div>
-      <button onClick={calculateRoute}>Calculate Route</button>
-      <button onClick={clear}>Clear</button>
-    </div>
-  );
-}
-```
-
-## Options
-
-`useRoute` accepts an optional options object for route events:
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `onRouteComplete` | `(routes: unknown[]) => void` | Called when route calculation finishes |
-| `onRouteError` | `(errorCode: number) => void` | Called when route calculation fails |
-
-```tsx
-const { search, getDistance, getInterval, addDestination, clear } = useRoute({
-  onRouteComplete() {
-    console.log('Distance:', getDistance(true));
-    console.log('Duration:', getInterval(true));
-  },
-  onRouteError(code) {
-    console.error('Route error:', code);
-  },
-});
-```
-
-## Turn-by-Turn Directions
-
-Use `getGuide()` to retrieve step-by-step navigation instructions after a route is calculated.
-
-- `getGuide()` returns an array of `RouteGuideStep` objects
-- `getGuide(true)` returns an `HTMLElement` with formatted directions
-
-```tsx
-import { useRoute, type RouteGuideStep } from 'gistda-sphere-react';
-
-function TurnByTurnRoute() {
-  const [steps, setSteps] = useState<RouteGuideStep[]>([]);
-
-  const { addDestination, search, getGuide } = useRoute({
-    onRouteComplete() {
-      const guide = getGuide();
-      if (Array.isArray(guide)) {
-        setSteps(guide as RouteGuideStep[]);
-      }
-    },
-  });
-
-  return (
-    <div>
-      <button onClick={() => {
-        addDestination({ lon: 100.5018, lat: 13.7563 });
-        addDestination({ lon: 98.9853, lat: 18.7883 });
-        search();
-      }}>
-        Get Directions
-      </button>
+      <button onClick={plan} disabled={status === "calculating"}>Plan route</button>
+      {error && <p>{error.message}</p>}
+      {summary && (
+        <p>{summary.distanceText} · {summary.intervalText}</p>
+      )}
       <ol>
-        {steps.map((step, i) => (
-          <li key={i}>
-            <strong>{step.instruction}</strong>
-            <span> — {String(step.distance)}</span>
-            {step.duration && <span> · {String(step.duration)}</span>}
+        {steps.map((step, index) => (
+          <li key={index}>
+            {step.instruction} ({step.distanceText})
           </li>
         ))}
       </ol>
@@ -94,64 +40,128 @@ function TurnByTurnRoute() {
 }
 ```
 
-### RouteGuideStep
+The route and its stop markers are drawn on the map by Sphere. Users can drag the stops, and click one to remove it.
+
+## Result state
 
 | Property | Type | Description |
-|----------|------|-------------|
-| `instruction` | `string` | Turn-by-turn instruction text |
-| `distance` | `number \| string` | Distance for this step |
-| `duration` | `number \| string` | Duration for this step |
-| `location` | `Location` | Geographic coordinates of this step |
+| --- | --- | --- |
+| `status` | `"idle" \| "calculating" \| "complete" \| "error"` | Where the calculation is. |
+| `isCalculating` | `boolean` | Shortcut for `status === "calculating"`. |
+| `summary` | `RouteSummary \| null` | Totals: `distance` (m), `distanceText`, `interval` (s), `intervalText`. |
+| `steps` | `RouteStep[]` | Turn-by-turn steps. |
+| `routes` | `RouteResult[]` | The raw legs from Sphere, one per pair of consecutive stops. |
+| `error` | `RouteErrorInfo \| null` | Why the last calculation failed. |
+| `isReady` | `boolean` | `true` once the map is ready. |
 
-## Functions
+## Turn-by-turn directions
 
-| Function | Parameters | Returns | Description |
-|----------|------------|---------|-------------|
-| `isReady` | - | `boolean` | Routing service initialized |
-| `addDestination` | `(destination, mode?)` | `void` | Add a destination |
-| `insertDestination` | `(index, destination, mode?)` | `void` | Insert at index |
-| `removeDestination` | `(marker)` | `void` | Remove by marker ref |
-| `removeDestinationAt` | `(index)` | `void` | Remove by index |
-| `clearDestinations` | `()` | `void` | Remove all destinations |
-| `clearPath` | `()` | `void` | Remove route path only |
-| `clear` | `()` | `void` | Remove entire route |
-| `reverse` | `()` | `void` | Reverse direction |
-| `search` | `()` | `void` | Calculate and display route |
-| `getDistance` | `(format?)` | `number \| string` | Total distance |
-| `getInterval` | `(format?)` | `number \| string` | Estimated travel time |
-| `getGuide` | `(format?)` | `RouteGuideStep[] \| HTMLElement` | Turn-by-turn directions |
-| `exportRouteLine` | `(options?)` | `SpherePolyline \| null` | Export as Polyline |
-| `listDestinations` | `()` | `SphereMarker[]` | List destination markers |
-| `size` | `()` | `number` | Number of destinations |
-| `setMode` | `(mode)` | `void` | Set routing mode |
-| `setModeAt` | `(index, mode)` | `void` | Set mode for segment |
-| `enableRouteType` | `(routeType, state)` | `void` | Enable/disable route type |
-| `setLabel` | `(label)` | `void` | Set label display mode |
-| `setAuto` | `(state)` | `void` | Toggle auto-recalculation |
-| `setLanguage` | `(lang: "th" \| "en")` | `void` | Set routing language: `"th"` or `"en"` |
+Each step is ready to display:
 
-## RouteMode
+| `RouteStep` field | Example | Description |
+| --- | --- | --- |
+| `instruction` | `"Turn right to Sathon Nuea Rd"` | Readable instruction in the route language. |
+| `distanceText` | `"640 m"` | Formatted step distance. |
+| `intervalText` | `"1 min"` | Formatted step time (empty in Fly mode). |
+| `turn` | `1` | Turn code; compare with [`ROUTE_TURN`](#turn-codes) to pick an icon. |
+| `name` | `"Sathon Nuea Rd"` | Road name. |
+| `distance`, `interval` | `640`, `60` | Raw meters and seconds. |
+| `legIndex` | `0` | Which leg (pair of stops) the step belongs to. |
 
-| Mode | Description |
-|------|-------------|
-| `"Traffic"` | Fastest route using real-time traffic data |
-| `"Cost"` | Fastest route without traffic |
-| `"Distance"` | Shortest route by distance |
-| `"Fly"` | Direct straight line |
+Instructions follow the route language, which you can change with `setLanguage("en")`. For Sphere's own styled panel instead, add [`<RouteGuide>`](/docs/components/route-guide).
 
-## RouteType
+Road names come from the routing service in the language used for the calculation, so after changing the language (with `setLanguage` or `SphereMap`'s `language` prop), call `search()` again to update them.
 
-| Type | Description |
-|------|-------------|
-| `"Road"` | Regular roads |
-| `"Ferry"` | Ferry routes |
-| `"Tollway"` | Toll roads |
-| `"All"` | All route types |
+### Turn codes
 
-## RouteLabelType
+```tsx
+import { ROUTE_TURN } from "gistda-sphere-react";
 
-| Label | Description |
-|-------|-------------|
-| `"Distance"` | Show distance labels |
-| `"Time"` | Show time labels |
-| `"Hide"` | Hide all labels |
+const icons = {
+  [ROUTE_TURN.TurnLeft]: "↰",
+  [ROUTE_TURN.TurnRight]: "↱",
+  [ROUTE_TURN.Straight]: "↑",
+  [ROUTE_TURN.UTurn]: "↶",
+  [ROUTE_TURN.Arrive]: "⚑",
+};
+```
+
+`ROUTE_TURN` has `TurnLeft`, `TurnRight`, `SlightLeft`, `SlightRight`, `HeadToward`, `Straight`, `EnterExpressway`, `UTurn`, `Arrive` and `Ferry`. `getTurnInstruction(turn, roadName, language)` builds an instruction yourself, e.g. for data from the [routing web service](/docs/web-services/routing).
+
+## Errors
+
+| `error.code` | Meaning |
+| --- | --- |
+| a number | Sphere's status code, e.g. `410` when there's no data for the selected time. |
+| `"timeout"` | The routing service didn't answer within `timeout` (20 s by default). This usually means your API key doesn't have the routing service enabled. |
+| `"exception"` | Sphere threw while planning the route. `error.message` has the details. |
+
+## Options
+
+```tsx
+const route = useRoute({
+  timeout: 15_000,
+  onRouteComplete: (routes) => console.log("Done", routes),
+  onError: (error) => toast(error.message),
+});
+```
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `timeout` | `number` | Milliseconds before reporting a `"timeout"` error. Default `20000`; `0` turns it off. |
+| `onRouteComplete` | `(routes) => void` | A route finished calculating. |
+| `onRouteError` | `(status) => void` | Sphere reported a routing error code. |
+| `onError` | `(error: RouteErrorInfo) => void` | Any failure, including timeouts. |
+
+## Stops
+
+| Method | Description |
+| --- | --- |
+| `addDestination(location, mode?)` | Add a stop (a location or a `sphere.Marker`), optionally with its own travel mode for the next leg. |
+| `insertDestination(index, location, mode?)` | Insert a stop at a position. |
+| `removeDestination(marker)` / `removeDestinationAt(index)` | Remove a stop. |
+| `listDestinations()` / `size()` | The stop markers / how many there are. |
+| `reverse()` | Reverse the order of the stops. |
+| `clearDestinations()` | Remove all stops. |
+| `clearPath()` | Remove the drawn route, keeping the stops. |
+| `clear()` | Remove stops and route, and reset the result state. |
+| `search()` | Calculate the route. |
+
+## Travel modes and options
+
+| Method | Description |
+| --- | --- |
+| `setMode(mode)` / `getMode()` | `"Traffic"` (fastest, avoiding traffic jams; the default), `"Cost"` (fastest by road, without traffic data), `"Distance"` (shortest) or `"Fly"` (straight lines). |
+| `setModeAt(index, mode)` / `getModeAt(index)` | Mode of the leg starting at a stop. |
+| `enableRouteType(type, state)` / `isRouteTypeEnabled(type)` | Allow or avoid `"Road"`, `"Ferry"`, `"Tollway"` or `"All"`. |
+| `setRestrict("Bike", state)` / `isRestrictEnabled("Bike")` | Avoid roads closed to motorcycles. |
+| `setLabel(label)` / `getLabel()` | Label on the route: `"Distance"`, `"Time"` or `"Hide"`. |
+| `setLineStyle(part, style)` / `getLineStyle(part)` | Style of `"Road"`, `"Ferry"`, `"Destination"` or `"Focus"` lines. |
+| `setAuto(state)` / `getAuto()` | Recalculate automatically when stops change. |
+| `enableContextMenu()` | Add a "Direction to here" item to the right-click menu, which adds a stop there. Also turns on `auto`. |
+| `setLanguage(language)` / `getLanguage()` | Language of instructions and labels. |
+
+```tsx
+route.setMode("Distance");
+route.enableRouteType("Tollway", false); // avoid tollways
+route.setRestrict("Bike", true);         // motorcycle-friendly roads
+route.setLineStyle("Road", { lineColor: "#2563eb", lineWidth: 6 });
+```
+
+<Callout>
+  Fly mode draws straight lines and works without the routing service. Sphere can't label straight-line legs (it throws), so `useRoute` hides route labels while Fly is used and restores your label setting afterwards.
+</Callout>
+
+## Data and export
+
+| Method | Description |
+| --- | --- |
+| `getSteps()` | Steps of the current route, read on demand. |
+| `getDistance(format?)` / `getInterval(format?)` | Totals in meters / seconds, or formatted text. |
+| `getGuide(format?)` | Raw legs, or Sphere's formatted guide as a `DocumentFragment`. |
+| `exportRouteLine(style?)` | The whole route as one `sphere.Polyline` (not added to the map). Call `.toJSON()` for GeoJSON. |
+| `setPlaceholder(element)` | Render Sphere's guide panel into an element. |
+
+<Callout type="warn">
+  Routing needs the routing service enabled for your API key. Without it, Sphere gives no error of its own; `useRoute` reports a `"timeout"` error instead of waiting forever.
+</Callout>

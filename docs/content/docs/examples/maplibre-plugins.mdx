@@ -1,0 +1,82 @@
+---
+title: Using MapLibre plugins
+description: Reach the MapLibre map behind Sphere for plugins, custom layers and anything else MapLibre supports
+---
+
+Every Sphere map is a [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) map underneath, available as `map.Renderer`. MapLibre plugins and APIs work on it directly.
+
+## Get the MapLibre map
+
+```tsx lineNumbers
+import { useMap } from "gistda-sphere-react";
+import { useEffect } from "react";
+
+function Terrain() {
+  const { map } = useMap();
+
+  useEffect(() => {
+    const renderer = map?.Renderer;
+    if (!renderer) return;
+    renderer.addSource("dem", { type: "raster-dem", url: "https://example.com/terrain.json", tileSize: 256 });
+    renderer.setTerrain({ source: "dem", exaggeration: 1.5 });
+    return () => {
+      renderer.setTerrain(null);
+      renderer.removeSource("dem");
+    };
+  }, [map]);
+
+  return null;
+}
+```
+
+With a ref: `mapRef.current?.getMap()?.Renderer`.
+
+## A MapLibre control
+
+```tsx
+import maplibregl from "maplibre-gl";
+
+const ui = useUi();
+useEffect(() => {
+  if (!ui.isReady) return;
+  const control = new maplibregl.NavigationControl({ visualizePitch: true });
+  ui.addControl(control);
+  return () => ui.removeControl(control);
+}, [ui]);
+```
+
+For controls built with React, [`<MapControl>`](/docs/components/map-control) is simpler.
+
+## Building shadows
+
+GISTDA's [building shadow example](https://sphere.gistda.or.th/docs/js/building-shadow) uses the third-party [ShadeMap](https://shademap.app) plugin, which needs its own API key and a Mapbox key for terrain and buildings. With this library:
+
+```tsx lineNumbers
+function Shadows({ date }: { date: Date }) {
+  const { map } = useMap();
+
+  useEffect(() => {
+    const renderer = map?.Renderer;
+    if (!renderer) return;
+    const shade = new (window as any).ShadeMap({
+      apiKey: SHADEMAP_KEY,
+      date,
+      color: "#01112f",
+      opacity: 0.7,
+      // terrainSource and getFeatures as in the ShadeMap documentation
+    });
+    shade.addTo(renderer);
+    return () => shade.remove();
+  }, [map, date]);
+
+  return null;
+}
+
+<SphereMap options={{ maxPitch: 45 }}>
+  <Shadows date={new Date()} />
+</SphereMap>
+```
+
+<Callout type="warn">
+  Clean up everything you add to the renderer when the component unmounts (layers, sources, controls, event listeners). The library only cleans up what its own components and hooks create.
+</Callout>

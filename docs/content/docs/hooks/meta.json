@@ -5,9 +5,15 @@
     "use-sphere",
     "use-map-controls",
     "event-hooks",
+    "use-ui",
+    "---Places and routes---",
     "use-search",
     "use-route",
     "use-tags",
+    "use-tag-categories",
+    "---Data---",
+    "use-sphere-utils",
+    "use-sphere-services",
     "overlay-hooks"
   ]
 }

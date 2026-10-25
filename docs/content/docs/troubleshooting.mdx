@@ -1,23 +1,27 @@
 ---
 title: Troubleshooting
-description: Common issues and solutions
+description: Common problems and how to fix them
 ---
 
-## Map not rendering
+## The map is blank or 0 px tall
 
-The map container needs an explicit height. Without it, the `<div>` collapses to 0px:
+The map fills its container, so the container needs a height:
 
 ```tsx
-<SphereMap style={{ width: '100%', height: '500px' }} />
+<SphereMap style={{ width: "100%", height: 500 }} />
 ```
 
-## API key not working
+If the map is inside a tab, dialog or collapsible panel that starts hidden, call `resize()` (from [`useMapControls`](/docs/hooks/use-map-controls) or the map ref) when it becomes visible.
 
-Make sure your domain is registered for the API key at [sphere.gistda.or.th](https://sphere.gistda.or.th/). For local development, register `localhost`.
+## The map doesn't load at all
+
+- Check the browser console for errors from `api.sphere.gistda.or.th`.
+- Make sure the current host is allowed for your key, including the port if your host entries use one. See [API key](/docs/getting-started/api-key#allowed-hosts).
+- `SphereProvider`'s `onError` receives the loading error.
 
 ## "useSphereContext must be used within a SphereProvider"
 
-Wrap your component tree with `<SphereProvider>`:
+Put `<SphereProvider>` above every component that uses the map components or hooks:
 
 ```tsx
 <SphereProvider apiKey="YOUR_API_KEY">
@@ -25,10 +29,44 @@ Wrap your component tree with `<SphereProvider>`:
 </SphereProvider>
 ```
 
-## Hooks returning `isReady: false`
+## Next.js: "hooks can only be used in Client Components"
 
-Hooks like `useSearch`, `useRoute`, and `useTags` depend on the map being fully initialized. Wait for `isReady` to become `true` before calling their methods. You can also use the `onReady` prop on `SphereMap` or `useMapEvent('ready', handler)`.
+The components and hooks run in the browser. Use them from a file that starts with `"use client"`.
 
-## Overlays not appearing
+## Overlays don't appear
 
-Make sure overlay components (Marker, Polygon, etc.) are placed **inside** the `<SphereMap>` component, not outside it.
+- Put overlay components (`Marker`, `Polygon`…) **inside** `<SphereMap>`.
+- Check coordinates: locations are `{ lon, lat }`. Bangkok is `{ lon: 100.5, lat: 13.75 }`, not the other way around.
+- Polygons need at least three points, lines at least two.
+
+## The map jumps back when my component re-renders
+
+`center`, `zoom`, `rotate` and `pitch` only set the initial view. To move the map, call `goTo` or `setCenter` from [`useMapControls`](/docs/hooks/use-map-controls) or the map ref.
+
+## Routing never finishes
+
+With no answer within 20 seconds, `useRoute` reports a `"timeout"` error. This almost always means your key doesn't have the routing service enabled. Fly (straight line) mode works without it.
+
+## `address()` returns `null`
+
+There may be no address at that point, or your key doesn't have the address service.
+
+## A tag layer shows nothing
+
+Tags are matched by their exact Thai names. For example, banks are `"ธนาคาร/สถาบันการเงิน"`, not `"ธนาคาร"`. Get the exact names from [`useTagCategories`](/docs/hooks/use-tag-categories).
+
+## `<ObjectOverlay>` draws nothing
+
+The object comes from the POI details service. If your key doesn't have it, nothing is drawn and `onError` fires after the timeout. Also check the ID: area IDs look like `A10000000`.
+
+## Web service calls fail with code `"key"`
+
+Enable that service for your key, and check the allowed hosts. Calls from a server have no browser host, so the key must allow them.
+
+## Hooks report `isReady: false`
+
+Hooks such as `useSearch`, `useRoute` and `useTags` work once the map is ready. Disable buttons until `isReady` is `true`, or run code in [`useMapReady`](/docs/hooks/event-hooks#shortcuts).
+
+## Clicks on shapes don't reach `onClick` on the map
+
+A click on an overlay is reported as `onOverlayClick` (and the overlay's own `onClick`), not as a map click. If you need both, handle `onOverlayClick` too; its second argument is the location.

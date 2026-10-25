@@ -1,95 +1,96 @@
 ---
 title: useSearch
-description: Search for POIs and perform reverse geocoding
+description: Search places, autocomplete, find nearby POIs and look up addresses
 ---
 
-Search for points of interest (POIs) and perform reverse geocoding.
+`useSearch` searches Sphere's place data through the map. It works inside `SphereMap` and anywhere else under `SphereProvider`. To search without a map, or on a server, use [`useSphereServices`](/docs/hooks/use-sphere-services).
 
 <SearchDemo />
 
 ```tsx
-import { useSearch } from 'gistda-sphere-react';
+import { useSearch } from "gistda-sphere-react";
 
-function SearchComponent() {
-  const { search, suggest, address, nearPoi, isReady } = useSearch();
+function PlaceSearch() {
+  const { search, isReady } = useSearch();
+  const [places, setPlaces] = useState<PoiResult[]>([]);
 
-  const searchPlace = async () => {
-    const results = await search('พระบรมมหาราชวัง', { limit: 10 });
-    console.log(results.data);
-  };
+  async function run(keyword: string) {
+    const { data } = await search(keyword, { limit: 10 });
+    setPlaces(data);
+  }
 
-  const getSuggestions = async () => {
-    const results = await suggest('สวนกุหลาบวิทยาลัย', { limit: 5 });
-    console.log(results.data);
-  };
-
-  const reverseGeocode = async (location) => {
-    const addr = await address(location);
-    console.log(addr.address, addr.province);
-  };
-
-  return <button onClick={searchPlace}>Search Coffee Shops</button>;
+  return (
+    <ul>
+      {places.map((place) => (
+        <li key={place.id}>{place.name}</li>
+      ))}
+    </ul>
+  );
 }
 ```
 
-## Functions
+## Return value
 
-| Function | Parameters | Returns | Description |
-|----------|------------|---------|-------------|
-| `isReady` | - | `boolean` | Search service initialized |
-| `suggest` | `(keyword, options?)` | `Promise<SearchResult>` | Auto-complete suggestions |
-| `search` | `(keyword, options?)` | `Promise<SearchResult>` | Search for POIs |
-| `address` | `(location, options?)` | `Promise<AddressResult>` | Reverse geocode a location |
-| `nearPoi` | `(location, options?)` | `Promise<PoiResult[]>` | Find nearby POIs |
-| `clear` | `()` | `void` | Clear search results |
-| `enablePopup` | `(state)` | `void` | Toggle popups for results |
-| `setLanguage` | `(lang: "th" \| "en")` | `void` | Set search language: `"th"` or `"en"` |
+| Method | Returns | Description |
+| --- | --- | --- |
+| `search(keyword, options?)` | `Promise<{ data: PoiResult[], meta }>` | Places matching a keyword. |
+| `suggest(keyword, options?)` | `Promise<{ data: SuggestResult[], meta }>` | Autocomplete suggestions for a partial keyword. |
+| `nearPoi(location, options?)` | `Promise<PoiResult[]>` | Places near a location. |
+| `address(location, options?)` | `Promise<AddressResult \| null>` | The address at a location, or `null` (see below). |
+| `clear()` | | Clear results shown by [`SearchResults`](/docs/components/search-results). |
+| `enablePopup(state)` / `isPopupEnabled()` | | Popups for result markers. |
+| `setPlaceholder(element, options?)` | | Render Sphere's result list into an element. `<SearchResults>` does this for you. |
+| `setLanguage(language)` / `getLanguage()` | | Language of results. |
+| `isReady` | `boolean` | `true` once the map is ready. |
 
-## SuggestOptions
+`search`, `suggest` and `nearPoi` throw if the service returns nothing, with a message that names the service, so wrap calls in `try`/`catch`.
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `area` | `string` | Any | Restrict to area |
-| `offset` | `number` | `0` | Result offset |
-| `limit` | `number` | `10` | Max results |
-| `dataset` | `string` | Default | Search dataset |
+### Options
 
-## SearchOptions
+| `search` option | Description |
+| --- | --- |
+| `limit`, `offset` | Paging. |
+| `span` | Search radius with a unit, e.g. `"5km"`, `"500m"`. |
+| `tag` | Only places with this tag, e.g. `"โรงพยาบาล"`. |
+| `area` | Only places in this area code, e.g. `"10"` for Bangkok. |
+| `dataset` | Dataset to search. |
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `area` | `string` | Any | Restrict to area |
-| `tag` | `string` | Any | Filter by tag |
-| `span` | `string` | Anywhere | Search radius (e.g. `"5km"`) |
-| `offset` | `number` | `0` | Result offset |
-| `limit` | `number` | `20` | Max results |
-| `dataset` | `string` | Default | Search dataset |
+`suggest` takes `limit`, `offset`, `area` and `dataset`. `nearPoi` takes `limit`, `span` (degrees) and `zoom`.
 
-## Return types
+## Results
 
-```typescript
-// SearchResult (returned by suggest and search)
-{
-  data: object[];
-  total?: number;
-}
+Each `PoiResult` has `id`, `name`, `lat`, `lon` and, when available, `address`, `tel`, `url`, `tag` (a list of tags), `distance` and more. The `id` also works with [`<ObjectOverlay>`](/docs/components/object-overlay) to draw the place's outline.
 
-// AddressResult (returned by address)
-{
-  address?: string;
-  subdistrict?: string;
-  district?: string;
-  province?: string;
-  postcode?: string;
-  geocode?: string;
-}
+## Autocomplete
 
-// PoiResult (returned by nearPoi)
-{
-  id: string;
-  name: string;
-  location: Location;
-  category?: string;
-  distance?: number;
+```tsx
+const { suggest } = useSearch();
+const [keyword, setKeyword] = useState("");
+const [suggestions, setSuggestions] = useState<SuggestResult[]>([]);
+
+useEffect(() => {
+  if (keyword.length < 2) {
+    setSuggestions([]);
+    return;
+  }
+  const timer = setTimeout(async () => {
+    const { data } = await suggest(keyword, { limit: 5 });
+    setSuggestions(data);
+  }, 250);
+  return () => clearTimeout(timer);
+}, [keyword, suggest]);
+```
+
+## Addresses
+
+```tsx
+const { address } = useSearch();
+const result = await address({ lon: 100.5018, lat: 13.7563 });
+if (result) {
+  console.log(result.province, result.district, result.subdistrict, result.road);
 }
 ```
+
+<Callout type="warn">
+  `address` resolves `null` when there's no address at the location, and also when your API key doesn't have the address service. Search, suggestions and nearby places use other services, so they can work while addresses don't.
+</Callout>

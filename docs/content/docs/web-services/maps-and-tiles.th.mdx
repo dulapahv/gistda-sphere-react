@@ -1,0 +1,67 @@
+---
+title: แผนที่และไทล์
+description: แผนที่ภาพนิ่ง แผนที่แบบฝัง รวมถึงไทล์แรสเตอร์ เวกเตอร์ และ WMTS ของ Sphere สำหรับเครื่องมืออื่น
+---
+
+ฟังก์ชันเหล่านี้สร้าง URL เท่านั้น ไม่ได้ส่งคำขอเอง
+
+## แผนที่ภาพนิ่ง [#static-map-images]
+
+```tsx
+const src = services.maps.staticMapUrl({
+  center: { lon: 100.5018, lat: 13.7563 },
+  zoom: 14,
+  width: 600,
+  height: 300,
+  map: "sphere_streets_en",
+  features: [
+    {
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [100.5018, 13.7563] },
+      properties: { text: "Here", linecolor: "#ffffff", fillcolor: "#2563eb" },
+    },
+  ],
+});
+
+<img src={src} width={600} height={300} alt="Map of the meeting point" />
+```
+
+| ตัวเลือก | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `center`, `zoom` | `Location`, `number` | มุมมอง หากไม่กำหนดจะปรับให้พอดีกับรูปทรงที่วาด |
+| `width`, `height` | `number` | ขนาดภาพเป็นพิกเซล (สูงสุด 2048) |
+| `map` | `string` | `"sphere_streets"` (ค่าเริ่มต้น), `"sphere_streets_en"`, `"sphere_hybrid"`, `"sphere_hybrid_en"` หรือ `"thailand_images"` |
+| `features` | `Feature \| Feature[]` | รูปทรงที่จะวาด กำหนดสไตล์ด้วย `properties`: `linecolor`, `linewidth`, `fillcolor`, `text`, `icon`, `offsetx`, `offsety` |
+
+แผนที่ภาพนิ่งเหมาะสำหรับใช้ในอีเมล PDF และตัวอย่างลิงก์ เนื่องจาก URL จะมี API key รวมอยู่ด้วย จึงควรใช้ key ที่จำกัดให้ใช้ได้เฉพาะโดเมนของคุณ
+
+## แผนที่แบบฝัง [#embedded-maps]
+
+```tsx
+<iframe
+  src={services.maps.embedUrl({ center: { lon: 100.5018, lat: 13.7563 }, zoom: 15, marker: true })}
+  width="100%"
+  height={400}
+  title="Map"
+/>
+```
+
+`embedUrl` ยังรับ `search` (คำค้นหาที่จะค้นหาและปักหมุด), `poi` (รหัสสถานที่), `route`, `tags`, `map` และ `locale`
+
+## ไทล์สำหรับเครื่องมืออื่น [#tiles-for-other-tools]
+
+ใช้แผนที่ฐานของ Sphere ใน MapLibre, Leaflet, OpenLayers, QGIS และเครื่องมืออื่น
+
+| เมธอด | คืนค่า |
+| --- | --- |
+| `rasterTileUrl(layer?)` | เทมเพลตแบบ XYZ `…/tiles/{layer}/EPSG3857/{z}/{x}/{y}.jpeg?key=…` ชั้นข้อมูล: `"sphere_streets"`, `"sphere_hybrid"`, `"thailand_images"`, `"sphere_protanopia"`, `"sphere_deuteranopia"` |
+| `vectorTileUrl()` | เทมเพลตของ Mapbox Vector Tiles `…/maps/sphere/{z}/{x}/{y}.pbf?key=…` |
+| `vectorStyleUrl(style?)` | สไตล์ MapLibre: `"streets"`, `"hybrid"`, `"protanopia"` หรือ `"deuteranopia"` |
+| `wmtsCapabilitiesUrl()` | WMTS capabilities สำหรับโปรแกรม GIS เช่น QGIS หรือ ArcGIS |
+
+```ts
+// Leaflet
+L.tileLayer(services.maps.rasterTileUrl("sphere_hybrid")).addTo(map);
+```
+
+สไตล์เวกเตอร์ของ Sphere ยังใช้เป็นแผนที่ฐานของ `SphereMap` ได้ด้วย: `<SphereMap baseLayer={services.maps.vectorStyleUrl("hybrid")} />`

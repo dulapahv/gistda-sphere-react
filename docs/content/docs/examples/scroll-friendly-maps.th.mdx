@@ -1,0 +1,52 @@
+---
+title: แผนที่ที่ไม่ขวางการเลื่อนหน้า
+description: ป้องกันไม่ให้แผนที่ในหน้าเว็บยาว ๆ แย่งการเลื่อนหน้าจอ รวมถึงการสร้างแผนที่ภาพนิ่ง
+---
+
+แผนที่ที่คั่นอยู่กลางบทความอาจแย่งการเลื่อนหน้าเว็บได้ เมื่อผู้ใช้เลื่อนหน้าจอลงแต่กลายเป็นเลื่อนแผนที่แทน ซึ่งสามารถหลีกเลี่ยงได้หลายวิธี
+
+<UiDemo />
+
+## ล็อกไว้จนกว่าจะคลิก [#lock-until-clicked]
+
+`useUi().lockMap()` วางปุ่มทับแผนที่ไว้ แผนที่จะตอบสนองหลังผู้ใช้คลิกเท่านั้น และล็อกใหม่ได้
+
+```tsx lineNumbers
+import { SphereMap, useUi } from "gistda-sphere-react";
+import { useEffect } from "react";
+
+function ScrollLock() {
+  const ui = useUi();
+  useEffect(() => {
+    if (!ui.isReady) return;
+    const lock = ui.lockMap();
+    return () => lock?.remove();
+  }, [ui]);
+  return null;
+}
+
+<SphereMap style={{ height: 400 }}>
+  <ScrollLock />
+</SphereMap>
+```
+
+ข้อความบนปุ่มเปลี่ยนตามภาษาของแผนที่ กำหนดเองได้ด้วย `lockMap({ unlockLabel, lockLabel })`
+
+## ปิดเฉพาะการซูมด้วยล้อเมาส์ [#turn-off-wheel-zoom-only]
+
+```tsx
+const ui = useUi();
+useEffect(() => {
+  if (ui.isReady) ui.setMouseEnabled({ wheel: false });
+}, [ui]);
+```
+
+ผู้ใช้ยังลากแผนที่ได้ และซูมได้ด้วยแถบซูมหรือการดับเบิลคลิก
+
+## แผนที่ภาพนิ่ง [#a-static-map]
+
+```tsx
+<SphereMap input={false} controls={{ DPad: false, Zoombar: false, Geolocation: false, LayerSelector: false }} />
+```
+
+หากต้องการเป็นไฟล์รูปภาพธรรมดา เช่น สำหรับใส่ในอีเมลหรือ PDF ให้ใช้ [URL ของแผนที่ภาพนิ่ง](/th/docs/web-services/maps-and-tiles#static-map-images) แทน

@@ -1,20 +1,90 @@
 ---
 title: SphereProvider
-description: Root provider that loads the Sphere API script
+description: Loads the Sphere API and shares it with every map, hook and component below it
 ---
 
+`SphereProvider` loads the GISTDA Sphere script once per page and makes it available to everything inside it. Put it near the root of your app, above every `SphereMap` and every component that uses the hooks.
+
 ```tsx
-<SphereProvider apiKey="YOUR_API_KEY" onLoad={() => console.log('API loaded')}>
-  {/* Your app */}
-</SphereProvider>
+"use client";
+
+import { SphereMap, SphereProvider } from "gistda-sphere-react";
+
+export function App() {
+  return (
+    <SphereProvider apiKey={process.env.NEXT_PUBLIC_SPHERE_API_KEY!}>
+      <SphereMap style={{ height: 400 }} />
+    </SphereProvider>
+  );
+}
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `apiKey` | `string` | Yes | - | Your GISTDA Sphere API key |
-| `children` | `ReactNode` | Yes | - | Child components |
-| `scriptUrl` | `string` | No | Official Sphere API URL | Custom URL for the Sphere API script |
-| `onLoad` | `() => void` | No | - | Called when the API script finishes loading |
-| `onError` | `(error: Error) => void` | No | - | Called if the API script fails to load |
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `apiKey` | `string` | **required** | Your Sphere API key. See [API key](/docs/getting-started/api-key). |
+| `children` | `ReactNode` | **required** | Your app. |
+| `onLoad` | `() => void` | – | Called once the Sphere script has loaded. |
+| `onError` | `(error: Error) => void` | – | Called when the script can't load, for example when the key isn't allowed on this domain. |
+| `scriptUrl` | `string` | `https://api.sphere.gistda.or.th/map/?key=…` | Load the script from another URL, such as a proxy. |
+| `formatPoi` | `(poi: PoiResult, language: string) => HTMLElement` | – | Build the content of the popups Sphere shows for POI tags and search results. |
+| `poiPopupOptions` | `(source, id, name, language) => PopupOptions` | – | Replace those POI popups entirely. Takes priority over `formatPoi`. |
+
+## Loading state
+
+The script loads asynchronously. Hooks report `isReady`, and `useSphere()` gives you the loading state directly:
+
+```tsx
+import { useSphere } from "gistda-sphere-react";
+
+function Status() {
+  const { isLoaded, error } = useSphere();
+  if (error) return <p>Couldn't load the map: {error.message}</p>;
+  return isLoaded ? null : <p>Loading map…</p>;
+}
+```
+
+## Customizing POI popups
+
+When users click a POI from [`<Tag>`](/docs/components/tag) or a search result, Sphere shows a popup with the place's details. Use `formatPoi` to render your own content:
+
+```tsx
+<SphereProvider
+  apiKey={apiKey}
+  formatPoi={(poi) => {
+    const element = document.createElement("div");
+    element.innerHTML = `<strong>${poi.name}</strong><br>${poi.address ?? ""}`;
+    return element;
+  }}
+>
+```
+
+<Callout type="warn">
+  `formatPoi` returns a DOM element, so escape any text you insert as HTML. Setting `textContent` is the safest option.
+</Callout>
+
+To take over the popup completely, for example to load details from your own service, return popup options from `poiPopupOptions`:
+
+```tsx
+<SphereProvider
+  apiKey={apiKey}
+  poiPopupOptions={(source, id, name) => ({
+    title: name,
+    loadDetail: async (element) => {
+      const details = await fetch(`/api/places/${id}`).then((r) => r.json());
+      element.textContent = details.summary;
+    },
+  })}
+>
+```
+
+Both hooks are installed on `sphere.Util` while the provider is mounted and restored when it unmounts.
+
+## Using it with Next.js
+
+The provider and every component and hook in this library run in the browser. In the App Router, use them from a Client Component (a file starting with `"use client"`). The [web services client](/docs/web-services) has no such limit and also works on the server.
+
+## One map or several
+
+One provider can hold any number of maps. Components and hooks used **inside** a `SphereMap` always work with that map. Hooks used **outside** a map, such as in a sidebar, work with the provider's current map, which is the one that became ready most recently. If you need sidebar hooks for several maps at once, give each map its own `SphereProvider`.

@@ -1,36 +1,36 @@
 ---
 title: Dot (จุด)
-description: รูปทรงเรขาคณิตแบบจุดอย่างง่ายบนแผนที่
+description: วงกลมขนาดเล็กสำหรับระบุตำแหน่ง กำหนดขนาดเป็นพิกเซล
 ---
 
-<MapDemo height="400px" zoom={12} center={{ lon: 100.5, lat: 13.75 }} language="en">
-  <Dot position={{ lon: 100.49, lat: 13.76 }} lineWidth={12} lineColor="red" />
+<MapDemo height="400px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }}>
+  <Dot position={{ lon: 100.5018, lat: 13.7563 }} lineColor="red" lineWidth={12} title="กรุงเทพมหานคร" />
+  <Dot position={{ lon: 100.52, lat: 13.77 }} lineColor="blue" lineWidth={8} title="จุด B" />
 </MapDemo>
 
 ```tsx
 <Dot
-  position={{ lon: 100.49, lat: 13.76 }}
-  lineWidth={12}
+  position={{ lon: 100.5018, lat: 13.7563 }}
   lineColor="red"
-  draggable
-  onDrop={(dot, location) => console.log('วางที่:', location)}
+  lineWidth={12}
 />
 ```
 
+ต่างจาก [`Circle`](/th/docs/components/circle) ที่รัศมีเป็นระยะทางบนพื้นโลก จุดจะมีขนาดบนหน้าจอเท่าเดิมทุกระดับซูม โดย `lineWidth` คือเส้นผ่านศูนย์กลางเป็นพิกเซล
+
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `position` | `Location` | Yes | - | พิกัดของจุด |
-| `ref` | `Ref<DotRef>` | No | - | Ref สำหรับการควบคุมผ่านโค้ด (Imperative control) |
-| `title` | `string` | No | - | ข้อความ Tooltip เมื่อโฮเวอร์ |
-| `detail` | `string` | No | - | ข้อความ Pop-up เมื่อคลิก |
-| `visibleRange` | `Range` | No | All zoom levels | ระยะการซูมที่มองเห็นได้ |
-| `lineWidth` | `number` | No | `3` | ขนาดของจุดเป็นพิกเซล |
-| `lineColor` | `string` | No | Preset color | สีของจุด |
-| `clickable` | `boolean` | No | `false` | แสดงเคอร์เซอร์แบบตัวชี้ |
-| `draggable` | `boolean` | No | `false` | อนุญาตให้ลากได้ |
-| `zIndex` | `number` | No | `0` | ลำดับการซ้อน |
-| `onClick` | `(dot: SphereDot) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อคลิก |
-| `onDrag` | `(dot: SphereDot) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อกำลังลาก |
-| `onDrop` | `(dot: SphereDot, location: Location) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อปล่อย (สิ้นสุดการลาก) |
+| Prop | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `position` | `Location` | **จำเป็น** ตำแหน่งของจุด เมื่อเปลี่ยนค่า จุดจะย้ายโดยไม่ต้องสร้างใหม่ |
+| `onDrop` | `(dot, location) => void` | วางจุดที่ลากได้ลงที่ `location` |
+
+จุดรับ [props ของรูปทรง](/th/docs/components/polygon#shape-props) ด้วย เช่น `lineColor`, `lineWidth`, `draggable` และ `title`
+
+## Ref
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `getDot()` | `sphere.Dot` ที่อยู่เบื้องหลัง |
+| `getPosition()` / `setPosition(location)` | อ่านหรือย้ายตำแหน่งจุด |
+| `contains`, `intersects`, `within`, `distanceTo`, `updateStyle`, `togglePopup`, `toGeoJSON` | เหมือนกับ[รูปหลายเหลี่ยม](/th/docs/components/polygon#ref) |

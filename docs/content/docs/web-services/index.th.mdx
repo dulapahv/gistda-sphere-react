@@ -1,0 +1,104 @@
+---
+title: ภาพรวม
+description: ไคลเอนต์ที่มี type กำกับสำหรับบริการเว็บ REST ทุกตัวของ Sphere ใช้งานได้ทั้งในเบราว์เซอร์และบนเซิร์ฟเวอร์
+---
+
+นอกจากแผนที่แล้ว Sphere ยังมีบริการเว็บแบบ REST สำหรับการค้นหา การนำทาง การแปลงพิกัดเป็นที่อยู่ ความสูง แผนที่ภาพนิ่ง การเกษตร ภัยพิบัติ และประชากร โดยไลบรารีนี้มีไคลเอนต์ที่มี type กำกับสำหรับบริการทั้งหมด
+
+<ServicesDemo />
+
+## การสร้างไคลเอนต์ [#getting-a-client]
+
+ใน React ภายใต้ `SphereProvider` ให้ใช้ key ของ provider
+
+```tsx
+import { useSphereServices } from "gistda-sphere-react";
+
+const services = useSphereServices({ locale: "en" });
+const { data } = await services.search.search("central world");
+```
+
+ที่อื่น ๆ รวมถึง Node.js 18 ขึ้นไปและ serverless functions
+
+```ts
+import { createSphereServices } from "gistda-sphere-react";
+
+const services = createSphereServices({
+  apiKey: process.env.SPHERE_API_KEY!,
+  locale: "en",
+});
+```
+
+| ตัวเลือก | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `apiKey` | `string` | **จำเป็น** (เฉพาะ `createSphereServices`) | API key ที่เปิดบริการที่จะเรียกใช้แล้ว |
+| `locale` | `"th" \| "en"` | `"th"` | ภาษาเริ่มต้นของผลลัพธ์ เมธอดส่วนใหญ่รับ `locale` ได้ด้วย |
+| `timeout` | `number` | `15000` | เวลารอ (มิลลิวินาที) ก่อนคำขอล้มเหลว ส่ง `0` เพื่อปิด |
+| `method` | `"auto" \| "get" \| "post"` | `"auto"` | `"auto"` ส่งแบบ GET และเปลี่ยนเป็น POST แบบฟอร์มเมื่อ URL ยาวเกินไป (รูปหลายเหลี่ยมขนาดใหญ่ เมทริกซ์ระยะทาง) |
+| `baseUrl` | `string` | `https://api.sphere.gistda.or.th/services` | URL ของบริการ เช่น proxy ของคุณ |
+| `fetch` | `typeof fetch` | `fetch` แบบ global | ฟังก์ชัน fetch ของคุณเอง |
+
+## บริการ [#services]
+
+| Namespace | เมธอด | หน้า |
+| --- | --- | --- |
+| `search` | `search`, `suggest` | [การค้นหาและสถานที่](/th/docs/web-services/search-and-places) |
+| `poi` | `nearby`, `get`, `cluster` | [การค้นหาและสถานที่](/th/docs/web-services/search-and-places) |
+| `tags` | `categories` | [การค้นหาและสถานที่](/th/docs/web-services/search-and-places#tag-categories) |
+| `route` | `route`, `matrix` | [การนำทาง](/th/docs/web-services/routing) |
+| `geo` | `address`, `elevation` | [ที่อยู่และความสูง](/th/docs/web-services/location-data) |
+| `maps` | `staticMapUrl`, `embedUrl`, `rasterTileUrl`, `vectorTileUrl`, `vectorStyleUrl`, `wmtsCapabilitiesUrl` | [แผนที่และไทล์](/th/docs/web-services/maps-and-tiles) |
+| `agri`, `info` (พืชและที่ดิน) | `rice`, `maize`, `cassava`, `sugarcane`, `palm`, `rubber`, `crop`, `cropSuitability`, `landSuitability` | [การเกษตร](/th/docs/web-services/agriculture) |
+| `info` (ภัยพิบัติ) | `flood`, `drought`, `hotspot`, `disasterRecurring`, `floodRecurrence`, `droughtRecurrence` | [ภัยพิบัติ](/th/docs/web-services/disasters) |
+| `population` | `get` | [ประชากร](/th/docs/web-services/population) |
+
+## ตำแหน่งและพื้นที่ [#locations-and-areas]
+
+เมธอดที่ใช้ดึงข้อมูลตามตำแหน่งจะรับค่า `{ lon, lat }` และหลายเมธอดยังรับ GeoJSON geometry เช่น รูปหลายเหลี่ยม เพื่อดึงข้อมูลทั้งพื้นที่แทนได้:
+
+```ts
+await services.agri.rice({ lon: 100.5, lat: 14.2 });
+await services.agri.rice({
+  type: "Polygon",
+  coordinates: [[[100.4, 14.1], [100.6, 14.1], [100.6, 14.3], [100.4, 14.1]]],
+});
+```
+
+## ข้อผิดพลาด [#errors]
+
+ทุกเมธอดจะ throw `SphereServiceError` เมื่อการเรียกล้มเหลว
+
+```ts
+import { SphereServiceError } from "gistda-sphere-react";
+
+try {
+  await services.route.route({ from, to });
+} catch (error) {
+  if (error instanceof SphereServiceError) {
+    console.log(error.code, error.service, error.status, error.message);
+  }
+}
+```
+
+| `code` | ความหมาย |
+| --- | --- |
+| `"key"` | API key ไม่ได้รับอนุญาตให้ใช้บริการนี้ ให้เปิดบริการให้กับ key (Sphere ตอบกลับด้วย HTTP 200 และข้อความแจ้งข้อผิดพลาด ซึ่งไคลเอนต์ตรวจจับให้) |
+| `"http"` | บริการตอบกลับด้วย HTTP error ดู `status` และ `body` |
+| `"timeout"` | ไม่มีการตอบกลับภายใน `timeout` |
+| `"aborted"` | คุณยกเลิกคำขอด้วย `signal` |
+| `"network"` | ส่งคำขอไม่ได้ เช่น ออฟไลน์หรือถูก CORS บล็อก |
+| `"parse"` | ข้อมูลที่ตอบกลับไม่ใช่ JSON |
+
+## ยกเลิกคำขอ [#cancelling-requests]
+
+ทุกเมธอดรับ `signal` และ `timeout`
+
+```ts
+const controller = new AbortController();
+const pending = services.search.suggest("วัดพ", { signal: controller.signal, timeout: 5000 });
+controller.abort(); // pending rejects with code "aborted"
+```
+
+<Callout type="warn">
+  ต้องเปิดบริการแต่ละตัวให้กับ API key ใน Sphere console และ key มักถูกจำกัดให้ใช้ได้บางโดเมน เมื่อเรียกบริการจากเซิร์ฟเวอร์จะไม่มีโดเมนของเบราว์เซอร์ให้ตรวจสอบ จึงต้องตรวจสอบว่า key อนุญาตการเรียกแบบนี้ และอย่านำ key ของเซิร์ฟเวอร์ไปไว้ในโค้ดฝั่งไคลเอนต์
+</Callout>

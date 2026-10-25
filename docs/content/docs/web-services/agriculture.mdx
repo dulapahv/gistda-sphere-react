@@ -1,0 +1,58 @@
+---
+title: Agriculture
+description: Crop plots from satellite data, economic crop prices, and crop and land suitability
+---
+
+GISTDA maps Thailand's main crops from satellite imagery. These services tell you what grows at a point or in an area, and how suitable the land is.
+
+## Crop plots
+
+```ts
+const result = await services.agri.rice(
+  { lon: 100.3, lat: 14.5 },
+  { from: "2024-01-01", to: "2024-12-31" }
+);
+
+if (result.result === "found") {
+  console.log(result.area, "rai", result.yield_avg, "tons per rai", result.month);
+}
+```
+
+| Method | Crop | Updates | Options |
+| --- | --- | --- | --- |
+| `agri.rice(target, { from?, to? })` | Rice, including average yield | Every two weeks | Date range |
+| `agri.maize(target, { from?, to? })` | Maize | Every two weeks | Date range |
+| `agri.cassava(target, { from?, to? })` | Cassava | Every two weeks | Date range |
+| `agri.sugarcane(target, { from?, to? })` | Sugarcane | Every two weeks | Date range |
+| `agri.palm(target, { year? })` | Oil palm | Yearly | Year |
+| `agri.rubber(target, { year? })` | Para rubber | Yearly | Year |
+
+`target` is a `{ lon, lat }` point or a GeoJSON polygon. Results come from 50 m satellite grids and include `result` (`"found"` or `"not found"`), `area` in rai, `month`/`year`, `update` and, where available, `geom` (the plot's shape).
+
+Dates are ISO 8601 strings (`"YYYY-MM-DD"`).
+
+## Economic crops
+
+```ts
+const crops = await services.info.crop({ lon: 100.3, lat: 14.5 });
+// [{ type: "maize", cost: 4351.8, price: { unit: "บาท/กก.", min: 12.1, max: 12.15, status: 200 } }, …]
+```
+
+`cost` is the production cost and `price` the current market price range. `price.status` is `200` when a price is available.
+
+## Suitability
+
+```ts
+// Land suitability for major crops at a point
+const land = await services.info.landSuitability({ lon: 102.1, lat: 15.2 });
+// [{ type: "majorrice", suitability: "เหมาะสมมาก", cost: 3902.25 }, …]
+
+// Crop suitability within an area (or at a point)
+const crops = await services.info.cropSuitability({
+  type: "Polygon",
+  coordinates: [[[102.0, 15.1], [102.2, 15.1], [102.2, 15.3], [102.0, 15.1]]],
+});
+// [{ name: "ข้าว", suitability: "ไม่เหมาะสม", geom: { type: "Polygon", … } }, …]
+```
+
+Suitability comes back as Thai text, such as `"เหมาะสมมาก"` (very suitable), `"ปานกลาง"` (moderate), `"ไม่เหมาะสม"` (not suitable) or `"ไม่มีข้อมูล"` (no data).

@@ -1,28 +1,27 @@
 ---
 title: useSphere
-description: เข้าถึง Sphere API namespace โดยไม่ต้องใช้แผนที่
+description: สถานะการโหลดของ Sphere API และ namespace ของ sphere โดยไม่ต้องมีแผนที่
 ---
 
-เข้าถึง Sphere API namespace โดยไม่จำเป็นต้องมีแผนที่
+`useSphere` รายงานว่าสคริปต์ Sphere โหลดเสร็จหรือยัง และให้ namespace `sphere` แบบ global โดยไม่ต้องมีแผนที่
 
 ```tsx
-import { useSphere } from 'gistda-sphere-react';
+import { useSphere } from "gistda-sphere-react";
 
-function SphereInfo() {
-  const { sphere, isLoaded, error, apiKey } = useSphere();
-
-  if (!isLoaded) return <div>กำลังโหลด API...</div>;
-  if (error) return <div>เกิดข้อผิดพลาด: {error.message}</div>;
-
-  return <div>โหลด API สำเร็จด้วย key: {apiKey}</div>;
+function ApiStatus() {
+  const { isLoaded, error } = useSphere();
+  if (error) return <p>Couldn't load the map API: {error.message}</p>;
+  return <p>{isLoaded ? "Map API ready" : "Loading…"}</p>;
 }
 ```
 
-## ค่าที่ส่งกลับ (Return value)
+## ค่าที่คืนกลับ [#return-value]
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `sphere` | `SphereNamespace \| null` | Namespace ของ `sphere` API แบบ global |
-| `isLoaded` | `boolean` | เป็น `true` เมื่อสคริปต์ API โหลดเสร็จแล้ว |
-| `error` | `Error \| null` | ข้อผิดพลาดหากโหลด API ไม่สำเร็จ |
-| `apiKey` | `string` | API key ที่ส่งให้ `SphereProvider` |
+| Property | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `sphere` | `SphereNamespace \| null` | namespace `sphere` แบบ global เมื่อโหลดเสร็จ |
+| `isLoaded` | `boolean` | เป็น `true` เมื่อโหลดสคริปต์เสร็จ |
+| `error` | `Error \| null` | สาเหตุที่โหลดสคริปต์ไม่สำเร็จ (ถ้ามี) |
+| `apiKey` | `string` | key ที่ส่งให้ `SphereProvider` |
+
+ใช้ namespace นี้เพื่อเข้าถึงคลาสและ enum ของ Sphere เช่น `new sphere.Polygon(...)` หรือ `sphere.Util.formatDistance(1500, "en")` สำหรับการจัดรูปแบบและการแปลงข้อมูลที่มี type กำกับผลลัพธ์ ดู [`useSphereUtils`](/th/docs/hooks/use-sphere-utils)

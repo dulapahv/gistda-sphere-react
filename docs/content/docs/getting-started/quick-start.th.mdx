@@ -1,13 +1,13 @@
 ---
-title: เริ่มต้นใช้งานด่วน
-description: แสดงผลแผนที่แรกของคุณด้วย gistda-sphere-react
+title: เริ่มต้นอย่างรวดเร็ว
+description: แสดงแผนที่แรกของคุณด้วย gistda-sphere-react
 ---
 
-## ตัวอย่างเบื้องต้น
+## ตัวอย่างพื้นฐาน [#minimal-example]
 
-ครอบแอปพลิเคชันด้วย `SphereProvider` จากนั้นใช้ `SphereMap` เพื่อแสดงผลแผนที่:
+ครอบแอปด้วย `SphereProvider` แล้วใช้ `SphereMap` เพื่อแสดงแผนที่
 
-<MapDemo height="400px" zoom={10} center={{ lon: 100.5018, lat: 13.7563 }} language="th">
+<MapDemo height="400px" zoom={10} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" detail="เมืองหลวงของประเทศไทย" />
 </MapDemo>
 
@@ -24,8 +24,8 @@ function App() {
       >
         <Marker
           position={{ lon: 100.5018, lat: 13.7563 }}
-          title="กรุงเทพมหานคร"
-          detail="เมืองหลวงของประเทศไทย"
+          title="Bangkok"
+          detail="Capital of Thailand"
         />
       </SphereMap>
     </SphereProvider>
@@ -33,19 +33,23 @@ function App() {
 }
 ```
 
-## แนวคิดสำคัญ
+<Callout>
+  หากใช้ App Router ของ Next.js ให้วางโค้ดนี้ใน Client Component โดยเพิ่ม `"use client";` ที่บรรทัดแรกของไฟล์
+</Callout>
 
-1. **`SphereProvider`** ต้องครอบคอมโพเนนต์ Sphere ทั้งหมด ทำหน้าที่โหลด API Script
-2. **`SphereMap`** คือคอนเทนเนอร์ของแผนที่ **ต้องกำหนดความสูง (height) อย่างชัดเจน** มิฉะนั้น `<div>` จะยุบเหลือ 0px
-3. **คอมโพเนนต์โอเวอร์เลย์** (Marker, Polygon ฯลฯ) วางภายใน `SphereMap` เป็น JSX Children
-4. **Overlay Hooks** (`useMarkers`, `useOverlays` ฯลฯ) ใช้เพิ่ม/ลบ/อัปเดตโอเวอร์เลย์ผ่านโค้ดจากคอมโพเนนต์ใดก็ได้
-5. **API Hooks** (`useSearch`, `useRoute`, `useTags`) เข้าถึงบริการของ Sphere API จากคอมโพเนนต์ใดก็ได้ภายใต้ `SphereProvider`
+## แนวคิดสำคัญ [#key-concepts]
 
-## การเพิ่มโอเวอร์เลย์
+1. **`SphereProvider`** โหลดสคริปต์ของ Sphere ให้วางไว้เหนือทุกส่วนที่ใช้แผนที่
+2. **`SphereMap`** คือตัวแผนที่ ต้องกำหนด**ความสูง**ให้แผนที่หรือคอนเทนเนอร์ของแผนที่ มิฉะนั้นจะสูง 0 px
+3. **คอมโพเนนต์**อย่าง `Marker`, `Polygon`, `Layer` และ `Tag` วางไว้ใน `SphereMap` จะแสดงเมื่อ mount และหายไปเมื่อ unmount แผนที่จึงเปลี่ยนตาม state ของคุณ
+4. **Hooks** อย่าง `useMapControls`, `useSearch`, `useRoute` และ `useUi` ใช้ได้ทุกที่ภายใต้ `SphereProvider` เช่น ในแถบด้านข้าง
+5. **บริการเว็บ** เช่น การนำทาง การแปลงพิกัดเป็นที่อยู่ และข้อมูลการเกษตร เรียกใช้ผ่าน [`useSphereServices`](/th/docs/hooks/use-sphere-services) ได้แม้ไม่มีแผนที่
 
-วางคอมโพเนนต์โอเวอร์เลย์เป็น Children ของ `SphereMap`:
+## การเพิ่มโอเวอร์เลย์ [#adding-overlays]
 
-<MapDemo height="400px" zoom={11} center={{ lon: 100.5018, lat: 13.7563 }} language="th">
+วางคอมโพเนนต์โอเวอร์เลย์เป็น children ของ `SphereMap`
+
+<MapDemo height="400px" zoom={11} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" />
   <Polygon
     positions={[
@@ -66,7 +70,7 @@ function App() {
 
 ```tsx lineNumbers
 <SphereMap style={{ width: '100%', height: '500px' }}>
-  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" />
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" />
   <Polygon
     positions={[
       { lon: 100.41, lat: 13.78 },
@@ -84,3 +88,10 @@ function App() {
   />
 </SphereMap>
 ```
+
+## ขั้นตอนถัดไป [#next-steps]
+
+- เลื่อนแผนที่ เปลี่ยนชั้นข้อมูลและตัวกรองสี: [`SphereMap`](/th/docs/components/sphere-map), [`useMapControls`](/th/docs/hooks/use-map-controls)
+- ค้นหาสถานที่และวางแผนเส้นทาง: [การค้นหา](/th/docs/examples/search), [การนำทาง](/th/docs/examples/routing)
+- แสดงข้อมูลของคุณเอง: [GeoJSON และรูปแบบอื่น](/th/docs/examples/data-formats), [แผนที่ความร้อนและ 3 มิติ](/th/docs/examples/advanced-layers)
+- ลองทุกฟีเจอร์ได้ในหน้า[ทดลองเล่น](/th/playground)

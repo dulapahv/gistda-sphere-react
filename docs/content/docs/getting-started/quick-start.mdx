@@ -1,5 +1,5 @@
 ---
-title: Quick Start
+title: Quick start
 description: Render your first map with gistda-sphere-react
 ---
 
@@ -7,7 +7,7 @@ description: Render your first map with gistda-sphere-react
 
 Wrap your app with `SphereProvider`, then use `SphereMap` to render a map:
 
-<MapDemo height="400px" zoom={10} center={{ lon: 100.5018, lat: 13.7563 }} language="en">
+<MapDemo height="400px" zoom={10} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" detail="Capital of Thailand" />
 </MapDemo>
 
@@ -33,19 +33,23 @@ function App() {
 }
 ```
 
+<Callout>
+  Using Next.js App Router? Put this in a Client Component: add `"use client";` at the top of the file.
+</Callout>
+
 ## Key concepts
 
-1. **`SphereProvider`** must wrap all Sphere components. It loads the API script.
-2. **`SphereMap`** is the map container. It **must have an explicit height** or its `<div>` collapses to 0px.
-3. **Overlay components** (Marker, Polygon, etc.) go inside `SphereMap` as JSX children.
-4. **Overlay hooks** (`useMarkers`, `useOverlays`, etc.) let you add/remove/update overlays programmatically from any component.
-5. **API hooks** (`useSearch`, `useRoute`, `useTags`) access the Sphere API services from any component inside `SphereProvider`.
+1. **`SphereProvider`** loads the Sphere script. Put it above everything that uses the map.
+2. **`SphereMap`** is the map. Give it (or its container) a **height**, or it collapses to 0 px.
+3. **Components** such as `Marker`, `Polygon`, `Layer` and `Tag` go inside `SphereMap`. They appear when they mount and disappear when they unmount, so the map follows your state.
+4. **Hooks** such as `useMapControls`, `useSearch`, `useRoute` and `useUi` work anywhere under `SphereProvider`, for example in a sidebar.
+5. **Web services** such as routing, geocoding and agriculture data are available through [`useSphereServices`](/docs/hooks/use-sphere-services), even without a map.
 
 ## Adding overlays
 
 Place overlay components as children of `SphereMap`:
 
-<MapDemo height="400px" zoom={11} center={{ lon: 100.5018, lat: 13.7563 }} language="en">
+<MapDemo height="400px" zoom={11} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" />
   <Polygon
     positions={[
@@ -84,3 +88,10 @@ Place overlay components as children of `SphereMap`:
   />
 </SphereMap>
 ```
+
+## Next steps
+
+- Move the map, change layers and filters: [`SphereMap`](/docs/components/sphere-map), [`useMapControls`](/docs/hooks/use-map-controls)
+- Search for places and plan routes: [Search](/docs/examples/search), [Routing](/docs/examples/routing)
+- Show your own data: [GeoJSON and other formats](/docs/examples/data-formats), [heatmaps and 3D](/docs/examples/advanced-layers)
+- Try everything at once in the [playground](/playground)

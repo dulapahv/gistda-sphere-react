@@ -1,5 +1,5 @@
 import { useCallback, useMemo, useState } from "react";
-import type { Icon, Location, PopupOptions, Range } from "../types";
+import type { Icon, Location, PopupOptions, Range } from "@/types";
 
 interface BaseOverlay {
   id: string;

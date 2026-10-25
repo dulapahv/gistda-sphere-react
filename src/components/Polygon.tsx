@@ -1,220 +1,65 @@
-import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
-import { useMapContext } from "../context/MapContext";
-import { useSphereContext } from "../context/SphereContext";
-import type {
-  Bound,
-  GeometryOptions,
-  LineStyleType,
-  Location,
-  MarkerOptions,
-  PopupOptions,
-  Range,
-  SpherePolygon,
-} from "../types";
+import { type ReactNode, type Ref, useImperativeHandle } from "react";
+import { useSphereContext } from "@/context/SphereContext";
+import {
+  countLocations,
+  createGeometryRefMethods,
+  createPolygonOperations,
+  type GeometryRefMethods,
+  type PolygonOperationMethods,
+  readArea,
+} from "@/internal/geometryRef";
+import {
+  type GeometryComponentProps,
+  useGeometry,
+} from "@/internal/useGeometry";
+import type { GeometryInput, SpherePolygon } from "@/types";
 
-export interface PolygonRef {
+export interface PolygonRef
+  extends GeometryRefMethods,
+    PolygonOperationMethods {
+  /** Area in square meters, or formatted text when a language is given. */
   getArea: (language?: string) => number | string | null;
-  getBound: () => Bound | null;
-  getCentroid: () => Location | null;
-  getPivot: () => Location | null;
+  /** The underlying `sphere.Polygon`. */
   getPolygon: () => SpherePolygon | null;
-  rotate: (angle: number) => void;
-  toGeoJSON: () => object | null;
-  togglePopup: (show?: boolean, location?: Location) => void;
-  updateStyle: (options: Partial<GeometryOptions>) => void;
 }
 
-export interface PolygonProps {
-  clickable?: boolean;
-  detail?: string;
-  draggable?: boolean;
-  editable?: boolean;
-  fillColor?: string;
-  label?: string;
-  labelOptions?: MarkerOptions;
-  lineColor?: string;
-  lineStyle?: LineStyleType;
-  lineWidth?: number;
-  onClick?: (polygon: SpherePolygon) => void;
-  onDrag?: (polygon: SpherePolygon) => void;
-  onDrop?: (polygon: SpherePolygon) => void;
-  pivot?: Location;
-  pointer?: boolean;
-  popup?: PopupOptions;
-  positions: Location[];
+export interface PolygonProps extends GeometryComponentProps<SpherePolygon> {
+  /**
+   * Vertices of the polygon. `null` entries start a hole (inner ring). A
+   * GeoJSON `Polygon`/`MultiPolygon` (or feature) is also accepted.
+   */
+  positions: GeometryInput;
   ref?: Ref<PolygonRef>;
-  title?: string;
-  visibleRange?: Range;
-  zIndex?: number;
 }
 
-export function Polygon({
-  positions,
-  ref,
-  title,
-  detail,
-  label,
-  labelOptions,
-  popup,
-  visibleRange,
-  lineWidth,
-  lineColor,
-  fillColor,
-  lineStyle,
-  pivot,
-  clickable,
-  draggable,
-  pointer,
-  zIndex,
-  editable,
-  onClick,
-  onDrag,
-  onDrop,
-}: PolygonProps) {
-  const { map, isReady } = useMapContext();
+/** A filled polygon on the map. Needs at least three vertices. */
+export function Polygon({ positions, ref, ...props }: PolygonProps): ReactNode {
   const { sphere } = useSphereContext();
-  const polygonRef = useRef<SpherePolygon | null>(null);
-  const callbacksRef = useRef({ onClick, onDrag, onDrop });
-
-  useEffect(() => {
-    callbacksRef.current = { onClick, onDrag, onDrop };
-  }, [onClick, onDrag, onDrop]);
-
-  useEffect(() => {
-    if (!(isReady && map && sphere) || positions.length < 3) {
-      return;
-    }
-
-    const options: GeometryOptions = {};
-
-    if (title) {
-      options.title = title;
-    }
-    if (detail) {
-      options.detail = detail;
-    }
-    if (label) {
-      options.label = label;
-    }
-    if (labelOptions) {
-      options.labelOptions = labelOptions;
-    }
-    if (popup) {
-      options.popup = popup;
-    }
-    if (visibleRange) {
-      options.visibleRange = visibleRange;
-    }
-    if (typeof lineWidth === "number") {
-      options.lineWidth = lineWidth;
-    }
-    if (lineColor) {
-      options.lineColor = lineColor;
-    }
-    if (fillColor) {
-      options.fillColor = fillColor;
-    }
-    if (lineStyle) {
-      options.lineStyle = lineStyle;
-    }
-    if (pivot) {
-      options.pivot = pivot;
-    }
-    if (typeof clickable === "boolean") {
-      options.clickable = clickable;
-    }
-    if (typeof draggable === "boolean") {
-      options.draggable = draggable;
-    }
-    if (typeof pointer === "boolean") {
-      options.pointer = pointer;
-    }
-    if (typeof zIndex === "number") {
-      options.zIndex = zIndex;
-    }
-    if (typeof editable === "boolean") {
-      options.editable = editable;
-    }
-
-    const polygon = new sphere.Polygon(positions, options);
-    polygonRef.current = polygon;
-
-    map.Overlays.add(polygon);
-
-    const handleOverlayClick = (data: { overlay: SpherePolygon }) => {
-      if (data.overlay === polygon) {
-        callbacksRef.current.onClick?.(polygon);
-      }
-    };
-
-    const handleOverlayDrag = (overlay: SpherePolygon) => {
-      if (overlay === polygon) {
-        callbacksRef.current.onDrag?.(polygon);
-      }
-    };
-
-    const handleOverlayDrop = (overlay: SpherePolygon) => {
-      if (overlay === polygon) {
-        callbacksRef.current.onDrop?.(polygon);
-      }
-    };
-
-    map.Event.bind("overlayClick", handleOverlayClick);
-    map.Event.bind("overlayDrag", handleOverlayDrag);
-    map.Event.bind("overlayDrop", handleOverlayDrop);
-
-    return () => {
-      map.Event.unbind("overlayClick", handleOverlayClick);
-      map.Event.unbind("overlayDrag", handleOverlayDrag);
-      map.Event.unbind("overlayDrop", handleOverlayDrop);
-      map.Overlays.remove(polygon);
-      polygonRef.current = null;
-    };
-  }, [
-    isReady,
-    map,
-    sphere,
-    positions,
-    title,
-    detail,
-    label,
-    labelOptions,
-    popup,
-    visibleRange,
-    lineWidth,
-    lineColor,
-    fillColor,
-    lineStyle,
-    pivot,
-    clickable,
-    draggable,
-    pointer,
-    zIndex,
-    editable,
-  ]);
+  const { overlayRef, portal } = useGeometry<SpherePolygon>({
+    create: (api, options) =>
+      countLocations(positions) < 3
+        ? null
+        : new api.Polygon(positions, options),
+    props,
+    shape: positions,
+  });
 
   useImperativeHandle(
     ref,
     () => ({
-      getArea: (language?: string) =>
-        polygonRef.current?.size(language) ?? null,
-      getBound: () => polygonRef.current?.bound() ?? null,
-      getCentroid: () => polygonRef.current?.centroid() ?? null,
-      getPivot: () => polygonRef.current?.pivot() ?? null,
-      getPolygon: () => polygonRef.current,
-      rotate: (angle: number) => {
-        polygonRef.current?.rotate(angle);
-      },
-      toGeoJSON: () => polygonRef.current?.toJSON() ?? null,
-      togglePopup: (show?: boolean, location?: Location) => {
-        polygonRef.current?.pop(show, location);
-      },
-      updateStyle: (options: Partial<GeometryOptions>) => {
-        polygonRef.current?.update(options);
-      },
+      ...createGeometryRefMethods(
+        () => sphere,
+        () => overlayRef.current
+      ),
+      ...createPolygonOperations(
+        () => sphere,
+        () => overlayRef.current
+      ),
+      getArea: (language) => readArea(sphere, overlayRef.current, language),
+      getPolygon: () => overlayRef.current,
     }),
-    []
+    [sphere, overlayRef]
   );
 
-  return null;
+  return portal;
 }

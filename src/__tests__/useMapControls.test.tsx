@@ -1,7 +1,7 @@
 import { renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SphereProvider, useMapControls } from "../context/SphereContext";
+import { SphereProvider, useMapControls } from "@/context/SphereContext";
 import { createMockSphereApi } from "./setup";
 
 describe("useMapControls", () => {

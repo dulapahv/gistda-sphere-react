@@ -1,52 +1,60 @@
 ---
 title: Polyline
-description: Draw a line connecting points on the map
+description: A line through several points, with dashes, labels and length measurement
 ---
 
-<MapDemo height="400px" zoom={11} center={{ lon: 100.5, lat: 13.75 }} language="en">
+<MapDemo height="400px" zoom={10} center={{ lon: 100.55, lat: 13.75 }}>
   <Polyline
     positions={[
-      { lon: 100.4, lat: 13.72 },
+      { lon: 100.4, lat: 13.7 },
       { lon: 100.5, lat: 13.8 },
-      { lon: 100.6, lat: 13.72 },
+      { lon: 100.6, lat: 13.7 },
+      { lon: 100.7, lat: 13.8 },
     ]}
     lineColor="blue"
-    lineWidth={3}
+    lineWidth={4}
+    lineStyle="Dashed"
+    title="Route A"
   />
 </MapDemo>
 
 ```tsx
 <Polyline
   positions={[
-    { lon: 100.4, lat: 13.72 },
+    { lon: 100.4, lat: 13.7 },
     { lon: 100.5, lat: 13.8 },
-    { lon: 100.6, lat: 13.72 },
+    { lon: 100.6, lat: 13.7 },
+    { lon: 100.7, lat: 13.8 },
   ]}
   lineColor="blue"
-  lineWidth={3}
+  lineWidth={4}
+  lineStyle="Dashed"
 />
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `positions` | `Location[]` | Yes (min 2) | - | Array of points |
-| `ref` | `Ref<PolylineRef>` | No | - | Ref for imperative control |
-| `title` | `string` | No | - | Hover tooltip text |
-| `detail` | `string` | No | - | Popup text when clicked |
-| `label` | `string` | No | - | Label at line center |
-| `labelOptions` | `MarkerOptions` | No | - | Label marker options |
-| `popup` | `PopupOptions` | No | - | Popup configuration |
-| `visibleRange` | `Range` | No | All zoom levels | Zoom range visibility |
-| `lineWidth` | `number` | No | `3` | Line width in pixels |
-| `lineColor` | `string` | No | Preset color | Line color |
-| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | Line style |
-| `pivot` | `Location` | No | Center | Rotation pivot |
-| `clickable` | `boolean` | No | `false` | Show pointer cursor |
-| `draggable` | `boolean` | No | `false` | Allow dragging |
-| `pointer` | `boolean` | No | `false` | Show drag pointer |
-| `zIndex` | `number` | No | `0` | Stacking order |
-| `onClick` | `(polyline: SpherePolyline) => void` | No | - | Click handler |
-| `onDrag` | `(polyline: SpherePolyline) => void` | No | - | Drag handler |
-| `onDrop` | `(polyline: SpherePolyline) => void` | No | - | Drop handler |
+| Prop | Type | Description |
+| --- | --- | --- |
+| `positions` | `Location[] \| GeoJSON` | **Required.** Points along the line (at least two). `null` entries break it into separate lines. A GeoJSON `LineString` or `MultiLineString` also works. |
+
+Lines also take the [shape props](/docs/components/polygon#shape-props), such as `lineColor`, `lineWidth`, `lineStyle`, `label`, `popupContent` and the event callbacks.
+
+## Line styles
+
+`lineStyle` takes `"Solid"`, `"Dashed"`, `"Dot"` or your own dash pattern:
+
+```tsx
+<Polyline positions={path} lineStyle={[12, 4, 2, 4]} lineWidth={3} />
+```
+
+## Ref
+
+| Method | Description |
+| --- | --- |
+| `getPolyline()` | The underlying `sphere.Polyline`. |
+| `getLength(language?)` | Length in meters, or text such as `"15.5 km"` with a language. |
+| `union(other)` | A new line joining this one and another (not added to the map). |
+| `getBound()`, `getCentroid()`, `getPivot()` | Bounding box, center and label point. |
+| `contains`, `intersects`, `within`, `distanceTo` | Spatial tests. See [Spatial analysis](/docs/examples/spatial-analysis). |
+| `rotate`, `shift`, `updateStyle`, `togglePopup`, `toGeoJSON` | As for [polygons](/docs/components/polygon#ref). |

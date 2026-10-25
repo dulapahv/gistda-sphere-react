@@ -1,0 +1,37 @@
+---
+title: PredefinedOverlay
+description: Live traffic cameras, road events and air quality from Sphere
+---
+
+`<PredefinedOverlay>` shows one of Sphere's live data overlays while it's mounted.
+
+<PredefinedOverlaysDemo />
+
+```tsx
+<SphereMap>
+  <PredefinedOverlay type="cameras" />
+  <PredefinedOverlay type="events" refresh={60} />
+  <PredefinedOverlay type="aqi" />
+</SphereMap>
+```
+
+| Type | Shows |
+| --- | --- |
+| `"cameras"` | Traffic cameras (CCTV), with live video where available. |
+| `"events"` | Road events such as accidents and roadworks. Refreshes every 3 minutes by default. |
+| `"aqi"` | Air quality index stations. |
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `type` | `"cameras" \| "events" \| "aqi"` | **required** | Which overlay to show. |
+| `popup` | `boolean` | `true` | Open a popup when an item is clicked. |
+| `motion` | `boolean` | `true` | Cameras only: include cameras with live video. |
+| `refresh` | `number` | – | Reload the data every this many seconds. |
+
+<Callout>
+  Each predefined overlay exists once per page in the Sphere API, so don't show the same type on two maps at the same time.
+</Callout>
+
+`onOverlayLoad` on [`SphereMap`](/docs/components/sphere-map#events) fires whenever the data (re)loads. You can also load these overlays imperatively with [`useMapControls().loadPredefinedOverlay`](/docs/hooks/use-map-controls).

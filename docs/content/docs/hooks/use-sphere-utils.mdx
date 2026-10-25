@@ -1,0 +1,77 @@
+---
+title: useSphereUtils
+description: Format distances, areas and times, and convert WKT, KML, GPX, GML, Esri JSON and TopoJSON to GeoJSON
+---
+
+`useSphereUtils` wraps Sphere's helpers with typed, promise-based functions. Converters load the Sphere library they need the first time you call them.
+
+```tsx
+import { useSphereUtils } from "gistda-sphere-react";
+
+function Measurements({ meters, squareMeters, seconds }) {
+  const { formatDistance, formatArea, formatThaiArea, formatInterval } = useSphereUtils();
+  return (
+    <ul>
+      <li>{formatDistance(meters)}</li>         {/* "15.5 km" */}
+      <li>{formatArea(squareMeters)}</li>       {/* "120 sq.km" */}
+      <li>{formatThaiArea(squareMeters)}</li>   {/* "74,995 rai 3 ngan 76 sq.wa" */}
+      <li>{formatInterval(seconds)}</li>        {/* "1 hr 2 min" */}
+    </ul>
+  );
+}
+```
+
+Formatters use the map's language unless you pass one (`"th"` or `"en"`).
+
+## Formatting
+
+| Function | Example | Description |
+| --- | --- | --- |
+| `formatDistance(meters, language?)` | `"15.0 km"` | A distance. |
+| `formatArea(squareMeters, language?)` | `"120 sq.km"` | An area in metric units. |
+| `formatThaiArea(squareMeters, language?)` | `"74,995 ไร่ 3 งาน 76 ตร.ว."` | An area in rai, ngan and square wa. |
+| `formatInterval(seconds, language?)` | `"1 ชม. 2 นาที"` | A duration. |
+| `formatDate(isoDate, language?)` | | A date. |
+| `formatTime(isoTime)` | | A time. |
+| `formatDateTimeRange(start, stop, language?)` | | A date and time range. |
+| `latitudeLength(lat)` / `longitudeLength(lat)` | | Meters in one degree of latitude / longitude at a latitude. |
+
+## Converting to GeoJSON
+
+All converters return promises, because the first call loads Sphere's converter library.
+
+| Function | Input |
+| --- | --- |
+| `wktToGeoJSON(text)` | Well-known text, e.g. `"POINT(100.5 13.75)"`. Returns a geometry. |
+| `kmlToGeoJSON(document)` | KML as a string or XML `Document`. |
+| `gpxToGeoJSON(document)` | GPX as a string or XML `Document`. |
+| `gmlToGeoJSON(document)` | GML as a string or XML `Document`. |
+| `esriJsonToGeoJSON(json)` | An Esri JSON geometry. |
+| `topoJsonToGeoJSON(json, object)` | One object of a TopoJSON topology, by name or object. |
+
+```tsx
+const { kmlToGeoJSON } = useSphereUtils();
+
+async function showFile(file: File) {
+  const data = await kmlToGeoJSON(await file.text());
+  setData(data); // then render <GeoJson data={data} />
+}
+```
+
+## Projections
+
+`project` transforms coordinates between coordinate systems given as [proj4](http://proj4js.org/) strings, from WGS84 unless you say otherwise:
+
+```tsx
+const { project } = useSphereUtils();
+
+// WGS84 → UTM zone 47N
+const utm = await project("+proj=utm +zone=47 +datum=WGS84 +units=m", [100.5018, 13.7563]);
+
+// UTM zone 47N → WGS84
+const wgs84 = await project("+proj=longlat +datum=WGS84", [662_190, 1_521_385], "+proj=utm +zone=47 +datum=WGS84 +units=m");
+```
+
+## Raw access
+
+`util` and `math` are Sphere's raw `sphere.Util` and `sphere.Math` objects, or `null` before the API loads. `isReady` is `true` once it has.

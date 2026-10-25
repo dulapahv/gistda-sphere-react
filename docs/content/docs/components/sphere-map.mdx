@@ -1,101 +1,182 @@
 ---
 title: SphereMap
-description: The map container component
+description: The map itself. Hosts overlays, layers and controls, and reports every map event
 ---
+
+`SphereMap` creates a Sphere map in a `<div>` and renders its children (markers, shapes, layers, controls…) once the map is ready.
 
 <SphereMapDemo />
 
 ```tsx
 <SphereMap
   center={{ lon: 100.5018, lat: 13.7563 }}
-  style={{ width: "100%", height: "300px" }}
   zoom={10}
-  onClick={(e) => {
-    console.log(`Clicked at ${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`);
-  }}
-  onLocation={(e) => {
-    console.log(`Moved to ${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`);
-  }}
-  onZoom={(e) => {
-    console.log(`Zoomed to level ${e.toFixed(2)}`);
-  }}
+  language="en"
+  style={{ height: 400 }}
+  onClick={({ lat, lon }) => console.log(`Clicked at ${lat}, ${lon}`)}
 >
-  {/* Markers, Polygons, etc. */}
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" />
 </SphereMap>
 ```
 
+<Callout>
+  The map fills its container, so give the map (or its parent) a height. Without one, the `<div>` collapses to 0 px.
+</Callout>
+
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `center` | `Location` | No | Bangkok (`{ lon: 100.49, lat: 13.72 }`) | Initial map center coordinates |
-| `zoom` | `number` | No | `7` | Initial zoom level (1-22) |
-| `zoomRange` | `Range` | No | All zoom levels | Allowed zoom range (`{ min, max }`) |
-| `language` | `"th" \| "en"` | No | `"th"` | Map language: `"th"` (Thai) or `"en"` (English) |
-| `input` | `boolean` | No | `true` | Allow user input (click, drag, scroll) |
-| `lastView` | `boolean` | No | `false` | Restore last location/zoom from local storage |
-| `ui` | `"Full" \| "Mobile" \| "None"` | No | Fit screen size | UI component mode |
-| `filter` | `FilterType` | No | `"None"` | Initial color filter |
-| `rotate` | `number` | No | `0` | Initial rotation angle in degrees |
-| `pitch` | `number` | No | `0` | Initial pitch angle in degrees |
-| `style` | `CSSProperties` | No | - | CSS styles for the map container |
-| `className` | `string` | No | - | CSS class for the map container |
-| `id` | `string` | No | - | HTML id attribute |
-| `ref` | `Ref<SphereMapRef>` | No | - | Ref for imperative map control |
-| `children` | `ReactNode` | No | - | Overlay components |
+Props marked **live** update the map in place when they change. The others only set the initial state; use the [ref](#ref) or [`useMapControls`](/docs/hooks/use-map-controls) to change them later.
 
-## Event callbacks
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `center` | `Location` | Sphere default | Initial center, `{ lon, lat }`. |
+| `zoom` | `number` | `7` | Initial zoom level (0–22). |
+| `rotate` | `number` | `0` | Initial rotation (bearing) in degrees, clockwise from north. |
+| `pitch` | `number` | `0` | Initial tilt in degrees (up to 60 by default). |
+| `language` | `"th" \| "en"` | `"th"` | **Live.** Language of labels and built-in UI. |
+| `baseLayer` | `LayerInput` | `"STREETS"` | **Live.** Base map: a built-in layer name, a `sphere.Layer`, a MapLibre style URL or a style object. |
+| `filter` | `FilterType` | `"None"` | **Live.** Color filter: `"None"`, `"Dark"`, `"Light"`, `"Protanopia"` or `"Deuteranopia"`. |
+| `zoomRange` | `Range` | `{ min: 0, max: 22 }` | **Live.** Zoom levels users can reach, `{ min, max }`. |
+| `controls` | `UiControlsConfig` | – | **Live.** Show or hide built-in controls, e.g. `{ DPad: false, Scale: true }`. |
+| `ui` | `"Full" \| "Mobile" \| "None"` | fits the container | Which built-in UI to create. See [UI modes](#ui-modes). |
+| `input` | `boolean` | `true` | Allow mouse, touch and keyboard input. |
+| `lastView` | `boolean` | `false` | Restore the last center and zoom from local storage. |
+| `options` | `Record<string, unknown>` | – | Extra options for `new sphere.Map()`, including any [MapLibre map option](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MapOptions/). |
+| `ref` | `Ref<SphereMapRef>` | – | Imperative control. See [Ref](#ref). |
+| `style`, `className`, `id` | – | – | Applied to the container `<div>`. |
+| `children` | `ReactNode` | – | Rendered once the map is ready. |
 
-| Prop | Type | Description |
-|------|------|-------------|
-| `onReady` | `(map: SphereMapInstance) => void` | Map initialized and ready |
-| `onClick` | `(location: Location) => void` | Map clicked |
-| `onDoubleClick` | `(location: Location) => void` | Map double-clicked |
-| `onZoom` | `(zoom: number) => void` | Zoom level changed |
-| `onLocation` | `(location: Location) => void` | Map center changed |
-| `onRotate` | `(angle: number) => void` | Rotation changed |
-| `onPitch` | `(angle: number) => void` | Pitch changed |
-| `onDrag` | `() => void` | User started dragging |
-| `onDrop` | `() => void` | User stopped dragging |
-| `onMouseMove` | `(location: Location) => void` | Mouse moved over map |
-| `onIdle` | `() => void` | Map is idle |
-| `onError` | `(error: Error) => void` | An error occurred |
+## Events
 
-<Callout type="info">
-  The map container must have an explicit height. Without it, the `<div>` collapses to 0px.
-</Callout>
+Every Sphere map event has a callback prop. Handlers receive the values Sphere reports.
+
+| Prop | Arguments | When |
+| --- | --- | --- |
+| `onReady` | `(map)` | The map is ready; children render from here on. |
+| `onClick` | `({ lat, lon, x, y })` | The map was clicked (not fired when an overlay was clicked). |
+| `onDoubleClick` | `({ lat, lon, x, y })` | The map was double-clicked. |
+| `onMouseMove` | `({ lat, lon, x, y })` | The pointer moved over the map. |
+| `onWheel` | `({ x, y, delta })` | The mouse wheel turned. |
+| `onZoom` | `(zoom)` | The zoom level changed. |
+| `onLocation` | `(center)` | The center moved. |
+| `onRotate` | `(angle)` | The rotation changed. |
+| `onPitch` | `(angle)` | The tilt changed. |
+| `onZoomRange` | `({ min, max })` | The allowed zoom range changed. |
+| `onDrag` / `onDrop` | `()` | The user started / stopped dragging the map. |
+| `onIdle` | `()` | The map finished rendering. |
+| `onRepaint` | `()` | The map was repainted. |
+| `onResize` | `()` | The map was resized. |
+| `onFullscreen` | `(isFullscreen)` | Fullscreen was turned on or off. |
+| `onLayerChange` | `(added)` or `(undefined, removed)` | A layer was added or removed. |
+| `onTileLoading` / `onTileLoaded` | `(sourceId)` | Tiles of a source started / finished loading. |
+| `onOverlayClick` | `(overlay, location)` | An overlay was clicked. |
+| `onOverlayHover` / `onOverlayLeave` | `(overlay)` | The pointer entered / left an overlay. |
+| `onOverlayDrag` / `onOverlayDrop` | `(overlay)` | An overlay is being dragged / was dropped. |
+| `onOverlayChange` | `(overlay)` | An overlay was added or removed. |
+| `onOverlayUpdate` | `(overlay)` | An overlay was edited. |
+| `onOverlayLoad` | `(data)` | A [predefined overlay](/docs/components/predefined-overlay) or [object](/docs/components/object-overlay) loaded. |
+| `onPopupClose` | `(popup)` | A popup was closed. |
+| `onBeforeContextMenu` | `({ location, add })` | The right-click menu is about to open. Call `add(element)` to add items, or return `false` to cancel it. |
+| `onContextMenu` | `()` | The right-click menu opened. |
+| `onRouteComplete` | `(routes)` | A route finished calculating. Prefer [`useRoute`](/docs/hooks/use-route). |
+| `onRouteError` | `(status)` | Routing failed. |
+| `onToolbarChange` | `(mode)` | The drawing toolbar changed mode. |
+| `onDrawCreate` / `onDrawDelete` | `(features)` | Shapes were drawn / deleted with the built-in toolbar. |
+| `onTooltipChange` | `(message)` | The toolbar's tooltip text changed. |
+| `onError` | `(error: Error)` | The map reported an error. |
+
+To listen from a child component instead, use [`useMapEvent`](/docs/hooks/event-hooks).
+
+## Base maps and filters
+
+```tsx
+const [dark, setDark] = useState(false);
+
+<SphereMap baseLayer="HYBRID" filter={dark ? "Dark" : "None"} />
+```
+
+Built-in base layers are `"SIMPLE"`, `"STREETS"`, `"STREETS_NIGHT"`, `"HYBRID"` and `"IMAGES"`. `baseLayer` also accepts a MapLibre style, such as Sphere's own vector styles:
+
+```tsx
+<SphereMap baseLayer="https://basemap.sphere.gistda.or.th/vector/sphere_hybrid.json" />
+```
+
+## Built-in controls
+
+```tsx
+<SphereMap controls={{ DPad: false, Zoombar: true, Scale: true, LayerSelector: false }} />
+```
+
+| Control | Description |
+| --- | --- |
+| `DPad` | Arrows for panning. |
+| `Zoombar` | Zoom in/out buttons. |
+| `Geolocation` | Jump to the user's location. |
+| `Toolbar` | Drawing and measuring tools (desktop UI only). |
+| `LayerSelector` | Base map and layer menu. |
+| `Fullscreen` | Fullscreen toggle (desktop UI only). |
+| `Crosshair` | A crosshair at the center. |
+| `Scale` | Scale bar. |
+| `ContextMenu` | Right-click menu. |
+
+For input, lock and context-menu settings, see [`useUi`](/docs/hooks/use-ui). To add your own controls, see [`MapControl`](/docs/components/map-control) and [`MenuBar`](/docs/components/menu-bar).
 
 ## UI modes
 
-The `ui` prop controls which built-in UI elements are shown:
+| `ui` | Description |
+| --- | --- |
+| `"Full"` | Desktop controls: zoom bar, D-pad, geolocation, toolbar, layer menu, fullscreen and scale. |
+| `"Mobile"` | Compact controls for small screens (no toolbar). |
+| `"None"` | No built-in UI. |
 
-| Mode | Description |
-|------|-------------|
-| `"Full"` | All controls: zoom bar, d-pad, geolocation, toolbar, layer selector, fullscreen, scale |
-| `"Mobile"` | Compact controls optimized for small screens |
-| `"None"` | No built-in UI controls |
+Without `ui`, Sphere picks the mobile UI when the map is narrower than 600 px.
 
-By default, the mode is automatically chosen based on screen size.
+## MapLibre options
 
-### Available UI controls
-
-| Control | Description |
-|---------|-------------|
-| DPad | Directional navigation pad |
-| Zoombar | Zoom in/out slider |
-| Geolocation | Navigate to user's location |
-| Toolbar | Drawing tools (desktop only) |
-| LayerSelector | Base layer picker |
-| Fullscreen | Toggle fullscreen (desktop only) |
-| Crosshair | Center crosshair indicator |
-| Scale | Distance scale bar |
-
-UI control visibility can be toggled via the raw map instance:
+`options` is passed to `new sphere.Map()`, and Sphere passes it on to MapLibre. Use it for anything MapLibre supports:
 
 ```tsx
-const { map } = useMap();
-
-map?.Ui.DPad.visible(false);    // hide d-pad
-map?.Ui.Scale.visible(true);    // show scale bar
-map?.Ui.Toolbar.visible(false); // hide toolbar
+<SphereMap
+  options={{
+    maxPitch: 85,         // allow steeper tilts
+    hash: true,           // keep the view in the URL
+    doubleClickZoom: false,
+  }}
+/>
 ```
+
+## Ref
+
+The ref gives you every [`useMapControls`](/docs/hooks/use-map-controls) method plus `getMap()`:
+
+```tsx
+const mapRef = useRef<SphereMapRef>(null);
+
+<SphereMap ref={mapRef} />
+
+mapRef.current?.goTo({ center: { lon: 98.98, lat: 18.79 }, zoom: 12 });
+mapRef.current?.setRotate(45);
+const sphereMap = mapRef.current?.getMap(); // the sphere.Map instance
+const maplibre = sphereMap?.Renderer;        // the MapLibre map
+```
+
+| Method | Description |
+| --- | --- |
+| `getMap()` | The underlying `sphere.Map`, or `null`. Its `Renderer` is the MapLibre map. |
+| `goTo(options, animate?)` | Fly or jump to a view (`center`, `zoom`, `bearing`, `pitch`, `padding`, `duration`). |
+| `setCenter` / `getCenter` | Center of the map. |
+| `setZoom` / `getZoom`, `zoomIn`, `zoomOut` | Zoom level. |
+| `setRotate` / `getRotate` | Rotation in degrees. |
+| `setPitch` / `getPitch` | Tilt in degrees. |
+| `setBound(bound, options?)` / `getBound` | Fit to or read the visible area. |
+| `panBy({ x, y })` | Pan by pixels. |
+| `setZoomRange` / `getZoomRange` | Allowed zoom levels. |
+| `setBaseLayer`, `addLayer`, `removeLayer`, `clearLayers`, `getLayers` | Layers. |
+| `setFilter` / `getFilter` | Color filter. |
+| `setLanguage` / `getLanguage` | Map language. |
+| `loadPredefinedOverlay` / `unloadPredefinedOverlay` | Live overlays (cameras, events, AQI). |
+| `repaint`, `resize` | Redraw, or re-measure after the container changes size. |
+
+<Callout type="warn">
+  Changing `center`, `zoom`, `rotate` or `pitch` props after the first render has no effect. Move the map with the ref or `useMapControls`, so user panning is never overwritten by a re-render.
+</Callout>

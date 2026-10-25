@@ -1,0 +1,77 @@
+---
+title: Custom markers and popups
+description: React components as marker icons and popup content, and custom popups for POIs
+---
+
+Markers and popups can render any React content, with your styles, state and event handlers.
+
+<MapDemo height="320px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }}>
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Democracy Monument">
+    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 999, background: "#7c3aed", color: "white", fontSize: 12, fontWeight: 600, boxShadow: "0 1px 4px rgba(0,0,0,.4)" }}>฿ 1,290</span>
+  </Marker>
+  <Marker position={{ lon: 100.53, lat: 13.745 }} title="Siam">
+    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 999, background: "#7c3aed", color: "white", fontSize: 12, fontWeight: 600, boxShadow: "0 1px 4px rgba(0,0,0,.4)" }}>฿ 2,450</span>
+  </Marker>
+</MapDemo>
+
+## React marker icons
+
+```tsx lineNumbers
+function PriceMarker({ hotel }) {
+  const [hovered, setHovered] = useState(false);
+  return (
+    <Marker
+      position={hotel.location}
+      title={hotel.name}
+      onHover={() => setHovered(true)}
+      onLeave={() => setHovered(false)}
+      options={{ anchor: "bottom" }}
+    >
+      <span className={hovered ? "price price--active" : "price"}>฿ {hotel.price}</span>
+    </Marker>
+  );
+}
+```
+
+## React popups
+
+```tsx lineNumbers
+<Marker
+  position={hotel.location}
+  title={hotel.name}
+  popupContent={
+    <div className="w-56">
+      <img src={hotel.photo} alt="" className="rounded" />
+      <p>{hotel.rating} ★ · {hotel.reviews} reviews</p>
+      <button onClick={() => book(hotel.id)}>Book</button>
+    </div>
+  }
+/>
+```
+
+Shapes take `popupContent` too:
+
+```tsx
+<Polygon positions={district.outline} title={district.name} popupContent={<DistrictStats id={district.id} />} />
+```
+
+## Popups for Sphere's own POIs
+
+Tag layers and search results open Sphere's popups. Change what they show on `SphereProvider`:
+
+```tsx lineNumbers
+<SphereProvider
+  apiKey={apiKey}
+  formatPoi={(poi) => {
+    const element = document.createElement("div");
+    const name = document.createElement("strong");
+    name.textContent = poi.name;
+    const address = document.createElement("p");
+    address.textContent = poi.address ?? "";
+    element.append(name, address);
+    return element;
+  }}
+>
+```
+
+For full control, return popup options from `poiPopupOptions(source, id, name, language)`, for example to load details from your own API. See [SphereProvider](/docs/components/sphere-provider#customizing-poi-popups).

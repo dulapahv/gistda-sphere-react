@@ -1,0 +1,70 @@
+---
+title: GeoJson
+description: แสดง GeoJSON geometry, feature หรือ feature collection พร้อมสไตล์และการคลิกราย feature
+---
+
+`<GeoJson>` วาดข้อมูล GeoJSON เป็นโอเวอร์เลย์ของ Sphere: จุดเป็นหมุด (หรือจุด) เส้นเป็น polyline และพื้นที่เป็นรูปหลายเหลี่ยม เมื่อใช้ร่วมกับ [`useSphereUtils`](/th/docs/hooks/use-sphere-utils) ยังแสดง KML, GPX, WKT และรูปแบบอื่นได้ด้วย
+
+<GeoJsonDemo />
+
+```tsx
+import { GeoJson } from "gistda-sphere-react";
+
+<SphereMap>
+  <GeoJson
+    data={districts}
+    fitBounds
+    style={(feature) => ({
+      fillColor: feature.properties?.risk === "high" ? "rgba(239,68,68,.4)" : "rgba(34,197,94,.3)",
+      lineColor: "#333",
+      lineWidth: 1,
+    })}
+    onClick={(feature) => setSelected(feature.properties?.name)}
+  />
+</SphereMap>
+```
+
+## Props
+
+| Prop | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `data` | `GeoJSON` | **จำเป็น** geometry, feature หรือ feature collection รองรับ `GeometryCollection` และ geometry แบบ multi |
+| `style` | `GeometryOptions \| (feature) => GeometryOptions` | สไตล์ของเส้น รูปหลายเหลี่ยม และจุด หรือฟังก์ชันที่คืนค่าสไตล์ราย feature |
+| `pointType` | `"marker" \| "dot"` | วาดจุดเป็นหมุด (ค่าเริ่มต้น) หรือเป็นจุดตามสไตล์ใน `style` |
+| `markerOptions` | `MarkerOptions \| (feature) => MarkerOptions` | ตัวเลือกของหมุด เช่น `icon` หรือ `title` |
+| `fitBounds` | `boolean \| FitBoundsOptions` | ปรับมุมมองให้พอดีกับข้อมูลหลังวาด เช่น `{ padding: 40, maxZoom: 16 }` |
+| `onClick` | `(feature, overlay, location) => void` | คลิก feature |
+| `onHover` / `onLeave` | `(feature, overlay) => void` | เมาส์เข้า / ออกจาก feature |
+| `ref` | `Ref<GeoJsonRef>` | `getOverlays()` และ `getBound()` |
+
+<Callout>
+  ข้อมูลถูกเปรียบเทียบตามค่า อ็อบเจ็กต์ที่เขียนแบบ inline จึงไม่ถูกวาดใหม่ทุกครั้งที่ render แต่สำหรับข้อมูลขนาดใหญ่ ควรเก็บอ็อบเจ็กต์ให้คงที่ (ใน state หรือ `useMemo`) เพื่อลดการเปรียบเทียบ
+</Callout>
+
+## แสดง KML, GPX และ WKT [#showing-kml-gpx-and-wkt]
+
+```tsx
+const { kmlToGeoJSON } = useSphereUtils();
+const [data, setData] = useState<GeoJSON | null>(null);
+
+async function open(file: File) {
+  setData(await kmlToGeoJSON(await file.text()));
+}
+
+{data && <GeoJson data={data} fitBounds />}
+```
+
+ดูรูปแบบทั้งหมดที่รองรับได้ที่[การแสดง GeoJSON, KML, GPX และ WKT](/th/docs/examples/data-formats)
+
+## ป้ายชื่อจาก properties [#labels-from-properties]
+
+```tsx
+<GeoJson
+  data={stations}
+  markerOptions={(feature) => ({ title: String(feature.properties?.name) })}
+/>
+```
+
+## เมื่อใดควรใช้ `<Layer style>` แทน [#when-to-use-layer-style-instead]
+
+`<GeoJson>` สร้างโอเวอร์เลย์ของ Sphere หนึ่งตัวต่อหนึ่ง feature แต่ละ feature จึงคลิก กำหนดสไตล์ และมีป๊อปอัปได้ หากมีจุดหลายพันจุด หรือต้องการแผนที่ความร้อนและการจัดกลุ่มจุด ให้เพิ่มข้อมูลเป็น source ของ MapLibre ด้วย [`<Layer style>`](/th/docs/components/layer#maplibre-styles-heatmaps-clusters-and-vector-tiles) แทน ซึ่งแสดงผลด้วย GPU

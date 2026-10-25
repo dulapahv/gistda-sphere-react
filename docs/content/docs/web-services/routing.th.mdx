@@ -1,0 +1,57 @@
+---
+title: การนำทาง
+description: เส้นทางพร้อมคำแนะนำทีละขั้น และเมทริกซ์ระยะทางและเวลาระหว่างหลายสถานที่
+---
+
+บริการนำทางสามารถทำงานได้โดยไม่ต้องมีแผนที่ เช่น ใช้ประเมินเวลาจัดส่งบนเซิร์ฟเวอร์ หากต้องการแสดงเส้นทางบนแผนที่ ให้ใช้ [`useRoute`](/th/docs/hooks/use-route)
+
+## เส้นทาง [#a-route]
+
+```ts
+import { getTurnInstruction } from "gistda-sphere-react";
+
+const result = await services.route.route({
+  from: { lon: 100.5018, lat: 13.7563 },
+  to: { lon: 100.5383, lat: 13.7649 },
+  mode: "Traffic",
+  guide: "turns",
+  locale: "en",
+});
+
+console.log(result.data.distance, result.data.interval); // meters, seconds
+
+for (const step of result.features) {
+  const { turn, name, distance } = step.properties;
+  console.log(getTurnInstruction(turn, name, "en"), `${distance} m`);
+}
+```
+
+ผลลัพธ์เป็น GeoJSON `FeatureCollection` ที่มี `LineString` หนึ่งเส้นต่อหนึ่งขั้น จึงส่งให้ [`<GeoJson>`](/th/docs/components/geojson) เพื่อวาดเส้นทางได้ทันที
+
+| ตัวเลือก | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `from`, `to` | `Location` | **จำเป็น** | ต้นทางและปลายทาง |
+| `mode` | `"Traffic" \| "Cost" \| "Distance"` | `"Traffic"` | เร็วที่สุดโดยเลี่ยงรถติด, เร็วที่สุดโดยไม่ใช้ข้อมูลจราจร หรือสั้นที่สุด |
+| `types` | `Array<"Road" \| "Ferry" \| "Tollway">` | ทั้งหมด | ประเภทถนนที่อนุญาต ไม่ใส่ `"Tollway"` เพื่อเลี่ยงทางด่วน |
+| `vehicle` | `"car" \| "motorcycle"` | `"car"` | `"motorcycle"` เลี่ยงถนนที่ห้ามรถจักรยานยนต์ |
+| `guide` | `"roads" \| "turns"` | `"roads"` | แบ่งขั้นตามถนน (`"roads"`) หรือนำทางทีละขั้น (`"turns"`) |
+| `maxResults` | `number` | – | จำนวนเส้นทางทางเลือกสูงสุด |
+| `locale` | `"th" \| "en"` | ค่าเริ่มต้นของไคลเอนต์ | ภาษาของชื่อถนน |
+
+## เมทริกซ์ [#a-matrix]
+
+```ts
+const warehouses = [{ lon: 100.6, lat: 13.7 }, { lon: 100.4, lat: 13.9 }];
+const customers = [{ lon: 100.53, lat: 13.76 }, { lon: 100.49, lat: 13.74 }];
+
+const { data } = await services.route.matrix({ from: warehouses, to: customers, mode: "Distance" });
+
+// data[i][j] is from warehouses[i] to customers[j]
+console.log(data[0][1].distance, data[0][1].interval);
+```
+
+เมทริกซ์รับตัวเลือก `mode`, `types`, `vehicle` และ `locale` เหมือนกัน เมทริกซ์ขนาดใหญ่จะถูกส่งแบบ POST โดยอัตโนมัติ
+
+<Callout>
+  ต้องเปิดบริการนำทางให้กับ API key ของคุณก่อน หากไม่ได้เปิด การเรียกใช้จะล้มเหลวด้วยข้อผิดพลาด `"key"`
+</Callout>

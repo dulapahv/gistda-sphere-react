@@ -1,38 +1,62 @@
-import type { Location } from "gistda-sphere-react";
+import type {
+  CircleRef,
+  DotRef,
+  GeoJSON,
+  Location,
+  MarkerRef,
+  PoiResult,
+  PolygonRef,
+  PolylineRef,
+  RectangleRef,
+  Size,
+} from "gistda-sphere-react";
 
-export interface MarkerData {
+interface ShapeBase {
   id: string;
-  position: Location;
+  /** 1-based number among shapes of the same kind, used in labels. */
+  number: number;
 }
 
-export interface PolygonData {
-  id: string;
-  positions: Location[];
-}
+/** A shape drawn in the playground. */
+export type Shape =
+  | (ShapeBase & { kind: "marker"; position: Location })
+  | (ShapeBase & { kind: "dot"; position: Location })
+  | (ShapeBase & { kind: "polygon"; positions: Location[] })
+  | (ShapeBase & { kind: "polyline"; positions: Location[] })
+  | (ShapeBase & { center: Location; kind: "circle"; radius: number })
+  | (ShapeBase & { kind: "rectangle"; position: Location; size: Size });
 
-export interface CircleData {
+export type ShapeKind = Shape["kind"];
+
+/** Ref handle of a drawn shape's component. */
+export type ShapeHandle =
+  | CircleRef
+  | DotRef
+  | MarkerRef
+  | PolygonRef
+  | PolylineRef
+  | RectangleRef;
+
+/** What the next map click does, when it is not used for drawing. */
+export type PickMode = "routeStop" | "dataPoint";
+
+/** Current view of the map. */
+export interface MapCamera {
   center: Location;
-  id: string;
-  radius: number;
+  pitch: number;
+  rotation: number;
+  zoom: number;
 }
 
-export interface DotData {
-  id: string;
-  position: Location;
+/** GeoJSON shown on the map, with a label for the sidebar. */
+export interface GeoJsonLayer {
+  data: GeoJSON;
+  label: string;
 }
 
-export interface RectangleData {
-  id: string;
-  position: Location;
-  size: { width: number; height: number };
-}
-
-export interface SearchMarkerData {
-  name: string;
-  position: Location;
-}
-
-export interface RouteInfoData {
-  distance: string;
-  time: string;
+/** A place picked from search results. */
+export interface SelectedPlace {
+  poi: PoiResult;
+  /** Draw the place's outline (areas) with `<ObjectOverlay>`. */
+  showOutline: boolean;
 }

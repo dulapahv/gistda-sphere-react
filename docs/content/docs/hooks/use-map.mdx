@@ -1,26 +1,52 @@
 ---
 title: useMap
-description: Access the raw map instance and Sphere API namespace
+description: Get the raw Sphere map, the MapLibre map behind it, and the sphere namespace
 ---
 
-Access the raw map instance and the Sphere API namespace directly.
+`useMap` gives you direct access to the Sphere API for anything this library doesn't wrap. It works anywhere under `SphereProvider`.
 
 ```tsx
-import { useMap } from 'gistda-sphere-react';
+import { useMap } from "gistda-sphere-react";
 
-function MapInfo() {
-  const { map, sphere, isReady } = useMap();
-
-  if (!isReady) return <div>Loading...</div>;
-
-  return <div>Zoom: {map.zoom()}</div>;
+function ZoomLabel() {
+  const { map, isReady } = useMap();
+  if (!isReady || !map) return null;
+  return <span>Zoom: {map.zoom()}</span>;
 }
 ```
 
 ## Return value
 
 | Property | Type | Description |
-|----------|------|-------------|
-| `map` | `SphereMapInstance \| null` | The underlying Sphere map instance |
-| `sphere` | `SphereNamespace \| null` | The global `sphere` API namespace |
-| `isReady` | `boolean` | `true` when the map is initialized |
+| --- | --- | --- |
+| `map` | `SphereMapInstance \| null` | The `sphere.Map` instance. |
+| `sphere` | `SphereNamespace \| null` | The global `sphere` namespace (classes, enums, `Util`). |
+| `isReady` | `boolean` | `true` once the map is ready. |
+
+## The MapLibre map
+
+Sphere draws with [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/). `map.Renderer` is the MapLibre map, so MapLibre features and plugins work too:
+
+```tsx
+const { map } = useMap();
+
+useEffect(() => {
+  const renderer = map?.Renderer;
+  if (!renderer) return;
+  const onMove = () => console.log(renderer.getBearing());
+  renderer.on("move", onMove);
+  return () => {
+    renderer.off("move", onMove);
+  };
+}, [map]);
+```
+
+See [Using MapLibre plugins](/docs/examples/maplibre-plugins) for a complete example.
+
+## Inside a map
+
+Within a `SphereMap`, `useMapContext()` returns `{ map, isReady }` for that specific map. That matters when one provider holds several maps.
+
+<Callout>
+  Prefer the typed components and hooks where they exist: they clean up after themselves on unmount, which raw calls don't.
+</Callout>

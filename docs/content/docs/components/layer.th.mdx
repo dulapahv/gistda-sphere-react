@@ -1,148 +1,147 @@
 ---
 title: Layer (เลเยอร์)
-description: เพิ่มเลเยอร์แผนที่แบบในตัวหรือแบบกำหนดเองลงในแผนที่
+description: ชั้นข้อมูลในตัว ไทล์ WMS/WMTS/TMS/XYZ สไตล์เวกเตอร์ แผนที่ความร้อน 3D Tiles และเลเยอร์ deck.gl
 ---
+
+`<Layer>` เพิ่มเลเยอร์ขณะที่คอมโพเนนต์ถูก mount และนำออกเมื่อ unmount รองรับชั้นข้อมูลในตัวของ Sphere บริการไทล์มาตรฐาน สไตล์ MapLibre และข้อมูล 3 มิติ
 
 <LayerDemo />
 
 ```tsx
-{/* เลเยอร์ข้อมูลในตัว */}
-<Layer preset="TRAFFIC" />
-
-{/* เลเยอร์ WMS แบบกำหนดเอง */}
-<Layer
-  name="my-wms-layer"
-  type="WMS"
-  url="https://example.com/wms"
-  zoomRange={{ min: 1, max: 18 }}
-  opacity={0.7}
-/>
-
-{/* เปลี่ยนเลเยอร์ฐาน */}
-<Layer preset="HYBRID" isBase />
+<SphereMap baseLayer="STREETS">
+  <Layer preset="TRAFFIC" />
+  <Layer name="bluemarble_terrain" type="WMS" url="https://ms.longdo.com/mapproxy/service" opacity={0.6} />
+</SphereMap>
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `preset` | `BuiltInLayer` | No | - | ใช้เลเยอร์ที่มีอยู่แล้ว |
-| `name` | `string` | Conditional | - | ชื่อเลเยอร์ (จำเป็นเมื่อไม่ได้ระบุ `preset`) |
-| `isBase` | `boolean` | No | `false` | ตั้งเป็นเลเยอร์ฐาน |
-| `type` | `LayerType` | No | `"Vector"` | ประเภทเลเยอร์ |
-| `url` | `string` | No | Sphere tile server | URL ของเซิร์ฟเวอร์ไทล์ |
-| `zoomRange` | `Range` | No | All zoom levels | ช่วงการซูมที่มองเห็นได้ |
-| `source` | `Range` | No | All zoom levels | ช่วงการซูมของไทล์ที่พร้อมใช้งาน |
-| `opacity` | `number` | No | `1` | ความทึบของเลเยอร์ (0-1) |
-| `zIndex` | `number` | No | `0` | ลำดับการซ้อน |
-| `bound` | `Bound` | No | World | ขอบเขตสำหรับไทล์ |
-| `attribution` | `string` | No | - | ข้อความระบุแหล่งที่มา |
-| `extraQuery` | `string` | No | - | สตริงคิวรีเพิ่มเติมสำหรับการร้องขอไทล์ |
-| `id` | `string` | No | Layer name | ตัวระบุเลเยอร์ที่ไม่ซ้ำกัน |
-| `format` | `string` | No | `"image/png"` / `"png"` | รูปแบบรูปภาพ |
-| `srs` | `string` | No | `"EPSG:3857"` | ระบบอ้างอิงเชิงพื้นที่ |
-| `tileMatrixPrefix` | `string` | No | - | คำนำหน้าเมทริกซ์ไทล์ WMTS |
-| `styles` | `string` | No | Default | สไตล์เลเยอร์ |
-| `version` | `string` | No | `"1.1.1"` | เวอร์ชัน WMS/WMTS |
-| `refresh` | `number` | No | - | ช่วงเวลาการรีเฟรชอัตโนมัติ (มิลลิวินาที) |
-| `zoomOffset` | `number` | No | - | ค่าชดเชยระดับการซูม |
-| `beforeId` | `string` | No | Symbol layer | แทรกก่อน ID เลเยอร์ |
+ใช้ `preset`, `name`, `style` หรือ `layer` อย่างใดอย่างหนึ่งเพื่อเลือกสิ่งที่จะแสดง
 
-## ประเภทเลเยอร์
+| Prop | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `preset` | `BuiltInLayer` | ชั้นข้อมูลในตัวของ Sphere เช่น `"TRAFFIC"` |
+| `name` | `string` | ชื่อเลเยอร์แรสเตอร์หรือ 3 มิติ สำหรับ WMS คือชื่อเลเยอร์ของ WMS |
+| `type` | `LayerType` | `"Vector"` (ค่าเริ่มต้น), `"XYZ"`, `"WMS"`, `"WMTS"`, `"WMTS_REST"`, `"TMS"`, `"Tiles3D"` หรือ `"I3S"` |
+| `url` | `string` | URL ของเซิร์ฟเวอร์ไทล์หรือ tileset |
+| `style` | `string \| object` | อ็อบเจ็กต์สไตล์หรือ URL สไตล์ของ MapLibre: ไทล์เวกเตอร์ แผนที่ความร้อน การจัดกลุ่มจุด และเลเยอร์ MapLibre อื่น ๆ |
+| `layer` | `object` | เลเยอร์สำเร็จรูปที่เพิ่มตามเดิม: `sphere.Layer`, `MapboxLayer` ของ deck.gl หรืออ็อบเจ็กต์เลเยอร์ของ MapLibre |
+| `isBase` | `boolean` | ใช้เป็นแผนที่ฐานแทนการซ้อนด้านบน แนะนำให้ใช้ prop [`baseLayer` ของ `SphereMap`](/th/docs/components/sphere-map#base-maps-and-filters) |
+| `opacity` | `number` | 0 ถึง 1 |
+| `zIndex` | `number` | เลเยอร์ที่มี `zIndex` สูงกว่าจะแสดงทับเลเยอร์ที่ต่ำกว่า |
+| `zoomRange` | `Range` | ช่วงระดับซูมที่เลเยอร์แสดง |
+| `source` | `Range` | ช่วงระดับซูมที่เซิร์ฟเวอร์ไทล์มีข้อมูล |
+| `bound` | `Bound` | ขอไทล์เฉพาะภายในขอบเขตนี้ |
+| `attribution` | `string` | ข้อความแสดงที่มา |
+| `beforeId` | `string` | แทรกใต้เลเยอร์ MapLibre ที่มี ID นี้ (ค่าเริ่มต้น: ใต้ป้ายชื่อแผนที่) |
+| `extraQuery` | `string` | query string เพิ่มเติมสำหรับคำขอไทล์ เช่น `"TIME=2024-01-01"` |
+| `format` | `string \| false` | WMS/WMTS: MIME type ของภาพ (ค่าเริ่มต้น `image/png`) XYZ/TMS/WMTS_REST: นามสกุลไฟล์ (ค่าเริ่มต้น `png`) ส่ง `false` เพื่อไม่ใส่ |
+| `srs` | `string` | ระบบพิกัดของ WMS หรือ tile matrix set ของ WMTS (ค่าเริ่มต้น `EPSG:3857`) |
+| `styles` | `string` | styles ของ WMS/WMTS |
+| `version` | `string` | เวอร์ชันของ WMS (ค่าเริ่มต้น `1.1.1`) |
+| `tileMatrixPrefix` | `string` | WMTS: ส่วนของชื่อ tile matrix ก่อนระดับซูม |
+| `loadOptions` | `object` | Tiles3D/I3S: ตัวเลือกของ loaders.gl ภายใต้ `3d-tiles`, `i3s` หรือ `tileset` |
+| `pointSize` | `number` | Tiles3D แบบ point cloud: รัศมีของจุดเป็นพิกเซล |
+| `onTilesetLoad` | `(tileset) => void` | Tiles3D/I3S: เรียกเมื่อโหลด tileset เสร็จ พร้อม `cartographicCenter` และ `zoom` |
+| `id` | `string` | ID ของเลเยอร์ (ค่าเริ่มต้น: ชื่อเลเยอร์) |
+| `options` | `Record<string, unknown>` | ตัวเลือกเพิ่มเติมสำหรับ `new sphere.Layer()` |
 
-| ประเภท | คำอธิบาย |
-|------|-------------|
-| `"Vector"` | Mapbox Vector Tiles (ค่าเริ่มต้น) |
-| `"XYZ"` | ไทล์แรสเตอร์แบบ XYZ |
-| `"WMS"` | Web Map Service |
-| `"WMTS"` | Web Map Tile Service (การเข้ารหัส KVP) |
-| `"WMTS_REST"` | Web Map Tile Service (การเข้ารหัส RESTful) |
-| `"TMS"` | Tile Map Service |
-| `"Tiles3D"` | OGC 3D Tiles |
-| `"I3S"` | Indexed 3D Scene Layer |
+## ชั้นข้อมูลในตัว [#built-in-layers]
 
-## เลเยอร์ฐานที่มีให้ในตัว (Built-in base layers)
-
-เลเยอร์ฐานจะมาแทนที่แผนที่ฐานปัจจุบัน สามารถเปิดใช้งานได้เพียงเลเยอร์เดียวเท่านั้นในแต่ละครั้ง
-
-| เลเยอร์ | คำอธิบาย |
-|-------|-------------|
-| `"SIMPLE"` | เลเยอร์ฐานที่มีความซับซ้อนต่ำ |
-| `"STREETS"` | แผนที่ถนนมาตรฐาน (ค่าเริ่มต้น) |
-| `"STREETS_NIGHT"` | แผนที่ถนนในธีมสีเข้ม |
-| `"HYBRID"` | ภาพถ่ายดาวเทียมพร้อมป้ายกำกับ |
-| `"IMAGES"` | ภาพถ่ายดาวเทียมที่ไม่มีป้ายกำกับ |
-
-## เลเยอร์ข้อมูลที่มีให้ในตัว (Built-in data layers)
-
-เลเยอร์ข้อมูลจะถูกเพิ่มเหนือเลเยอร์ฐาน สามารถเปิดใช้งานได้หลายเลเยอร์พร้อมกัน
-
-| เลเยอร์ | คำอธิบาย |
-|-------|-------------|
-| `"TRAFFIC"` | ข้อมูลการจราจรแบบเรียลไทม์ (รีเฟรชอัตโนมัติทุก 3 นาที) |
-| `"PM25"` | แผนที่ความหนาแน่นของคุณภาพอากาศ (PM2.5) |
-| `"HOTSPOT"` | ตำแหน่งจุดความร้อน (ไฟป่า) |
-| `"FLOOD"` | พื้นที่ที่ได้รับผลกระทบจากน้ำท่วม |
-| `"DROUGHT"` | พื้นที่ที่ได้รับผลกระทบจากภัยแล้ง |
-
-## โอเวอร์เลย์ที่กำหนดไว้ล่วงหน้า (Predefined overlays)
-
-Sphere API มีโอเวอร์เลย์ที่กำหนดไว้ล่วงหน้าซึ่งแสดงข้อมูลแบบเรียลไทม์บนแผนที่
-
-<PredefinedOverlaysDemo />
-
-| โอเวอร์เลย์ | คำอธิบาย |
-|---------|-------------|
-| `"cameras"` | ฟีดกล้องวงจรปิดจราจรแบบเรียลไทม์พร้อมวิดีโอเคลื่อนไหว (เลือกได้) |
-| `"events"` | เหตุการณ์จราจรและถนนที่ใช้งานอยู่พร้อมรายละเอียดป๊อปอัป |
-| `"aqi"` | จุดข้อมูลดัชนีคุณภาพอากาศของไทยพร้อมรายละเอียดป๊อปอัป |
+| แผนที่ฐาน | | ชั้นข้อมูล | |
+| --- | --- | --- | --- |
+| `SIMPLE` | แผนที่แบบเรียบ | `TRAFFIC` | การจราจรสด (อัปเดตทุก 3 นาที) |
+| `STREETS` | แผนที่ถนน (ค่าเริ่มต้น) | `PM25` | คุณภาพอากาศ PM2.5 |
+| `STREETS_NIGHT` | แผนที่ถนน ธีมมืด | `HOTSPOT` | จุดความร้อน |
+| `HYBRID` | ภาพดาวเทียมพร้อมป้ายชื่อ | `FLOOD` | พื้นที่น้ำท่วม |
+| `IMAGES` | ภาพดาวเทียม | `DROUGHT` | พื้นที่ภัยแล้ง |
 
 ```tsx
-const { loadPredefinedOverlay, unloadPredefinedOverlay } = useMapControls();
-
-loadPredefinedOverlay('cameras');
-loadPredefinedOverlay('events');
-loadPredefinedOverlay('aqi');
-unloadPredefinedOverlay('cameras');
+<Layer preset="PM25" />
 ```
 
-## ตัวกรองสี (Color filters)
+กำหนดแผนที่ฐานด้วย prop [`baseLayer` ของ `SphereMap`](/th/docs/components/sphere-map#base-maps-and-filters)
 
-ใช้ตัวกรองสีเพื่อปรับการแสดงผลแผนที่สำหรับความสามารถในการเข้าถึงหรือความสวยงาม
-
-<ControlsDemo />
-
-| ตัวกรอง | คำอธิบาย |
-|--------|-------------|
-| `"Dark"` | ตัวกรองโหมดมืด |
-| `"Light"` | สีแผนที่สว่างขึ้น |
-| `"Protanopia"` | ตัวกรองตาบอดสีแดง |
-| `"Deuteranopia"` | ตัวกรองตาบอดสีเขียว |
-| `"None"` | ไม่มีตัวกรอง (ค่าเริ่มต้น) |
+## บริการไทล์ [#tile-services]
 
 ```tsx
-const { setFilter } = useMapControls();
+{/* WMS */}
+<Layer
+  name="bluemarble_terrain"
+  type="WMS"
+  url="https://ms.longdo.com/mapproxy/service"
+  opacity={0.7}
+/>
 
-setFilter('Dark');
-setFilter('Protanopia');
-setFilter(false); // เหมือนกับ 'None'
+{/* WMTS (key-value) */}
+<Layer name="my_layer" type="WMTS" url="https://example.com/wmts" srs="EPSG:3857" />
+
+{/* XYZ from Sphere's own raster server (the default url) */}
+<Layer name="thailand_images" type="XYZ" srs="EPSG3857" format="jpeg" />
+
+{/* XYZ from another server: requests https://tiles.example.com/osm/{z}/{x}/{y}.png */}
+<Layer name="osm" type="XYZ" url="https://tiles.example.com" />
 ```
 
-หรือระบุผ่าน prop ของ `SphereMap`:
+สำหรับ XYZ และ TMS นั้น Sphere สร้าง URL ของไทล์ในรูปแบบ `{url}/{name}/{srs}/{z}/{x}/{y}.{format}` โดยจะไม่ใส่ `srs` หากไม่ได้กำหนด และให้ส่ง `format={false}` เมื่อ URL ของเซิร์ฟเวอร์ไม่มีนามสกุลไฟล์
+
+ดูตัวอย่างฉบับเต็มที่[เลเยอร์ WMS แบบกำหนดเอง](/th/docs/examples/custom-wms-layer)
+
+## สไตล์ MapLibre: แผนที่ความร้อน การจัดกลุ่มจุด และไทล์เวกเตอร์ [#maplibre-styles-heatmaps-clusters-and-vector-tiles]
+
+`style` รับอ็อบเจ็กต์สไตล์ (หรือ URL) ของ MapLibre โดย ID ของ source ต้องไม่ซ้ำกับเลเยอร์อื่น
 
 ```tsx
-<SphereMap filter="Dark" style={{ height: '500px' }}>
-  {/* children */}
-</SphereMap>
+<Layer
+  style={{
+    sources: {
+      quakes: { type: "geojson", data: "https://example.com/earthquakes.geojson" },
+    },
+    layers: [{ id: "quakes-heat", type: "heatmap", source: "quakes" }],
+  }}
+/>
 ```
 
-## การใช้งานเลเยอร์ด้วยโปรแกรม (Using layers programmatically)
+ดูแผนที่ความร้อน การจัดกลุ่มจุด และข้อมูล 3 มิติแบบใช้งานจริงได้ที่[แผนที่ความร้อน การจัดกลุ่ม และ 3 มิติ](/th/docs/examples/advanced-layers)
+
+## 3D Tiles และ I3S [#3d-tiles-and-i3s]
 
 ```tsx
-const { setBaseLayer, addLayer, removeLayer } = useMapControls();
-
-setBaseLayer('HYBRID');
-addLayer('TRAFFIC');
-addLayer('PM25');
-removeLayer('TRAFFIC');
+<Layer
+  name="sf-buildings"
+  type="I3S"
+  url="https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0"
+  onTilesetLoad={(tileset) => {
+    const [lon, lat] = tileset.cartographicCenter ?? [];
+    goTo({ center: { lon, lat }, zoom: (tileset.zoom ?? 13) + 3, pitch: 60 });
+  }}
+/>
 ```
+
+`type="Tiles3D"` ใช้โหลด OGC 3D Tiles (`tileset.json`) รวมถึง point cloud (ใช้ `pointSize`)
+
+## เลเยอร์ deck.gl และ MapLibre [#deckgl-and-raw-maplibre-layers]
+
+Sphere มี deck.gl มาในตัว ให้ห่อเลเยอร์ deck.gl ด้วย `deck.MapboxLayer` แล้วส่งเป็น `layer`
+
+```tsx
+const model = useMemo(
+  () =>
+    new window.deck.MapboxLayer({
+      id: "model",
+      type: window.deck.ScenegraphLayer,
+      data: [{ position: [100.5, 13.7, 0] }],
+      getPosition: (d) => d.position,
+      scenegraph: "https://example.com/model.glb",
+    }),
+  []
+);
+
+<Layer layer={model} />
+```
+
+<Callout>
+  สร้างอ็อบเจ็กต์เลเยอร์เพียงครั้งเดียว (ด้วย `useMemo`) หรือสร้างนอกคอมโพเนนต์ หากสร้างอ็อบเจ็กต์ใหม่ทุกครั้งที่ render เลเยอร์จะถูกเพิ่มใหม่ทุกครั้ง
+</Callout>
+
+`refresh` และ `zoomOffset` ก็รองรับเช่นกัน และจะถูกส่งต่อให้ Sphere ตามเดิม

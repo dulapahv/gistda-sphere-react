@@ -1,67 +1,68 @@
 ---
-title: Getting an API Key
-description: How to obtain a GISTDA Sphere API key
+title: Getting an API key
+description: Get a GISTDA Sphere API key, restrict it to your sites, and enable the services you use
 ---
 
 ## Steps
 
-1. Visit [sphere.gistda.or.th](https://sphere.gistda.or.th/)
-2. Register for an account
-3. Create a new API key and register your domain(s)
+1. Go to [sphere.gistda.or.th](https://sphere.gistda.or.th/) and create an account.
+2. Create an API key.
+3. Add the hosts (domains) where your app runs.
+4. Enable the services your app uses (see below).
 
-## Host Restrictions
+## Allowed hosts
 
-When creating your API key, set the **allowed hosts** to limit usage to only your domains. This is your primary security mechanism since the API key is sent as a query parameter in requests and is visible in the browser's network tab.
-
-For example, if your site is deployed at `example.com` and you develop locally:
+The key is sent with every request and is visible in the browser, so the host list is what protects it. Add every place your app runs:
 
 | Host | Purpose |
-|------|---------|
+| --- | --- |
 | `localhost` | Local development |
-| `example.com` | Production deployment |
+| `example.com` | Production |
 
 <Callout>
-  Don't forget to register `localhost` for local development.
+  If the map works on one local port but not another (for example `localhost:3000` but not `localhost:5173`), check whether the host entry includes a port.
 </Callout>
 
-## Usage
+## Services
 
-Pass the API key to `SphereProvider`:
+Each Sphere service has to be enabled for your key. When one isn't, Sphere usually doesn't report a clear error, so features just seem not to work. This table shows what each feature needs:
+
+| Feature | Service | Symptom when missing |
+| --- | --- | --- |
+| The map, markers, shapes, layers | Map | The map stays empty. |
+| [`useSearch`](/docs/hooks/use-search) search and suggestions, [`<Tag>`](/docs/components/tag) | Search, POI | Errors from `search`/`suggest`, empty tag layers. |
+| `useSearch().address`, right-click menu address | Address (reverse geocoding) | `address()` resolves `null`. |
+| [`<ObjectOverlay>`](/docs/components/object-overlay) | POI details (`poi/get`) | Nothing is drawn; `onError` fires after the timeout. |
+| [`useRoute`](/docs/hooks/use-route), [`<RouteGuide>`](/docs/components/route-guide) | Routing | `"timeout"` error after 20 seconds. Fly mode still works. |
+| [Web services](/docs/web-services) | The matching service | `SphereServiceError` with code `"key"`. |
+| [Static maps](/docs/web-services/maps-and-tiles#static-map-images) | Static map | The image doesn't load. |
+
+## Using the key
+
+Pass the key to `SphereProvider`:
 
 ```tsx
-<SphereProvider apiKey="YOUR_API_KEY">
-  {/* Your app */}
-</SphereProvider>
+<SphereProvider apiKey="YOUR_API_KEY">{/* your app */}</SphereProvider>
 ```
 
-## Environment Variables
+Keep it in an environment variable, so it stays out of source control.
 
-While the API key is ultimately visible in network requests (it's sent as a query parameter to load the SDK), using environment variables keeps the key out of your source code and version control:
-
-<Callout type="warning">
-  The API key is sent as a query parameter in requests and is visible client-side. Use host restrictions as your primary security mechanism.
-</Callout>
-
-For Next.js projects:
-
-```bash title=".env.local"
-NEXT_PUBLIC_SPHERE_API_KEY=your_api_key_here
+```bash title="Next.js: .env.local"
+NEXT_PUBLIC_SPHERE_API_KEY=your_api_key
 ```
 
 ```tsx
 <SphereProvider apiKey={process.env.NEXT_PUBLIC_SPHERE_API_KEY!}>
-  {/* Your app */}
-</SphereProvider>
 ```
 
-For Vite projects:
-
-```bash title=".env"
-VITE_SPHERE_API_KEY=your_api_key_here
+```bash title="Vite: .env"
+VITE_SPHERE_API_KEY=your_api_key
 ```
 
 ```tsx
 <SphereProvider apiKey={import.meta.env.VITE_SPHERE_API_KEY}>
-  {/* Your app */}
-</SphereProvider>
 ```
+
+<Callout type="warn">
+  Environment variables prefixed for the browser (`NEXT_PUBLIC_`, `VITE_`) still end up in your JavaScript. Host restrictions are what keep the key safe. For server-side calls with [`createSphereServices`](/docs/web-services), use a separate key without the browser prefix.
+</Callout>

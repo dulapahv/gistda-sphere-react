@@ -1,0 +1,52 @@
+---
+title: Scroll-friendly maps
+description: Stop maps in long pages from capturing scrolling, and make static maps
+---
+
+A map in the middle of an article can hijack scrolling: users scroll down the page and pan the map instead. There are a few ways to avoid it.
+
+<UiDemo />
+
+## Lock until clicked
+
+`useUi().lockMap()` covers the map with a button. The map only reacts after the user clicks it, and can be locked again:
+
+```tsx lineNumbers
+import { SphereMap, useUi } from "gistda-sphere-react";
+import { useEffect } from "react";
+
+function ScrollLock() {
+  const ui = useUi();
+  useEffect(() => {
+    if (!ui.isReady) return;
+    const lock = ui.lockMap();
+    return () => lock?.remove();
+  }, [ui]);
+  return null;
+}
+
+<SphereMap style={{ height: 400 }}>
+  <ScrollLock />
+</SphereMap>
+```
+
+Labels follow the map language; set your own with `lockMap({ unlockLabel, lockLabel })`.
+
+## Turn off wheel zoom only
+
+```tsx
+const ui = useUi();
+useEffect(() => {
+  if (ui.isReady) ui.setMouseEnabled({ wheel: false });
+}, [ui]);
+```
+
+Users can still drag, and zoom with the zoom bar or a double-click.
+
+## A static map
+
+```tsx
+<SphereMap input={false} controls={{ DPad: false, Zoombar: false, Geolocation: false, LayerSelector: false }} />
+```
+
+For a plain image, such as in an email or a PDF, use a [static map URL](/docs/web-services/maps-and-tiles#static-map-images) instead.

@@ -5,9 +5,17 @@
     "interactive-placement",
     "drawing-polygons",
     "sidebar-controls",
-    "custom-wms-layer",
-    "routing",
     "search",
-    "tags"
+    "routing",
+    "tags",
+    "custom-popups",
+    "---Data and analysis---",
+    "data-formats",
+    "spatial-analysis",
+    "custom-wms-layer",
+    "advanced-layers",
+    "---Integration---",
+    "scroll-friendly-maps",
+    "maplibre-plugins"
   ]
 }

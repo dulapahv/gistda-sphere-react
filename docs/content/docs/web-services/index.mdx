@@ -1,0 +1,104 @@
+---
+title: Overview
+description: A typed client for every Sphere REST web service, in the browser or on a server
+---
+
+Besides the map, Sphere offers REST web services for search, routing, geocoding, elevation, static maps, agriculture, disasters and population. This library includes a typed client for all of them.
+
+<ServicesDemo />
+
+## Getting a client
+
+In React, under `SphereProvider`, use the provider's key:
+
+```tsx
+import { useSphereServices } from "gistda-sphere-react";
+
+const services = useSphereServices({ locale: "en" });
+const { data } = await services.search.search("central world");
+```
+
+Anywhere else, including Node.js 18+ and serverless functions:
+
+```ts
+import { createSphereServices } from "gistda-sphere-react";
+
+const services = createSphereServices({
+  apiKey: process.env.SPHERE_API_KEY!,
+  locale: "en",
+});
+```
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `apiKey` | `string` | **required** (`createSphereServices` only) | Your API key, with the services you call enabled. |
+| `locale` | `"th" \| "en"` | `"th"` | Default language of results. Most methods also take `locale`. |
+| `timeout` | `number` | `15000` | Milliseconds before a request fails. `0` turns it off. |
+| `method` | `"auto" \| "get" \| "post"` | `"auto"` | `"auto"` sends GET, and switches to a form POST when the URL would be too long (large polygons, route matrices). |
+| `baseUrl` | `string` | `https://api.sphere.gistda.or.th/services` | Service URL, e.g. your own proxy. |
+| `fetch` | `typeof fetch` | global `fetch` | Your own fetch implementation. |
+
+## Services
+
+| Namespace | Methods | Page |
+| --- | --- | --- |
+| `search` | `search`, `suggest` | [Search and places](/docs/web-services/search-and-places) |
+| `poi` | `nearby`, `get`, `cluster` | [Search and places](/docs/web-services/search-and-places) |
+| `tags` | `categories` | [Search and places](/docs/web-services/search-and-places#tag-categories) |
+| `route` | `route`, `matrix` | [Routing](/docs/web-services/routing) |
+| `geo` | `address`, `elevation` | [Addresses and elevation](/docs/web-services/location-data) |
+| `maps` | `staticMapUrl`, `embedUrl`, `rasterTileUrl`, `vectorTileUrl`, `vectorStyleUrl`, `wmtsCapabilitiesUrl` | [Maps and tiles](/docs/web-services/maps-and-tiles) |
+| `agri`, `info` (crops, land) | `rice`, `maize`, `cassava`, `sugarcane`, `palm`, `rubber`, `crop`, `cropSuitability`, `landSuitability` | [Agriculture](/docs/web-services/agriculture) |
+| `info` (disasters) | `flood`, `drought`, `hotspot`, `disasterRecurring`, `floodRecurrence`, `droughtRecurrence` | [Disasters](/docs/web-services/disasters) |
+| `population` | `get` | [Population](/docs/web-services/population) |
+
+## Locations and areas
+
+Methods that look up a place take a `{ lon, lat }` location. Many also accept a GeoJSON geometry, such as a polygon, to ask about an area instead:
+
+```ts
+await services.agri.rice({ lon: 100.5, lat: 14.2 });
+await services.agri.rice({
+  type: "Polygon",
+  coordinates: [[[100.4, 14.1], [100.6, 14.1], [100.6, 14.3], [100.4, 14.1]]],
+});
+```
+
+## Errors
+
+Every method throws a `SphereServiceError` when a call fails:
+
+```ts
+import { SphereServiceError } from "gistda-sphere-react";
+
+try {
+  await services.route.route({ from, to });
+} catch (error) {
+  if (error instanceof SphereServiceError) {
+    console.log(error.code, error.service, error.status, error.message);
+  }
+}
+```
+
+| `code` | Meaning |
+| --- | --- |
+| `"key"` | The API key isn't allowed to use this service. Enable it for your key (Sphere answers with HTTP 200 and an error message, which the client detects). |
+| `"http"` | The service returned an HTTP error; see `status` and `body`. |
+| `"timeout"` | No answer within `timeout`. |
+| `"aborted"` | You aborted the request with a `signal`. |
+| `"network"` | The request couldn't be sent, e.g. offline or blocked by CORS. |
+| `"parse"` | The response wasn't JSON. |
+
+## Cancelling requests
+
+Every method takes `signal` and `timeout`:
+
+```ts
+const controller = new AbortController();
+const pending = services.search.suggest("วัดพ", { signal: controller.signal, timeout: 5000 });
+controller.abort(); // pending rejects with code "aborted"
+```
+
+<Callout type="warn">
+  Each service has to be enabled for your API key in the Sphere console, and keys are usually limited to certain domains. When you call the services from a server, there's no browser domain to check, so make sure your key allows it, and keep server keys out of client code.
+</Callout>

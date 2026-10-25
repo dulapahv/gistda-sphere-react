@@ -1,0 +1,52 @@
+---
+title: Tag
+description: Show points of interest by category, or features from your own WFS and OGC API services
+---
+
+`<Tag>` shows a layer of points of interest (POIs) while it's mounted. Sphere has about 260 tags in 20 categories, such as banks, hospitals, temples and cafés.
+
+<TagsDemo />
+
+```tsx
+<SphereMap>
+  <Tag name="โรงพยาบาล" />
+  <Tag name="วัด,พิพิธภัณฑ์" visibleRange={{ min: 12, max: 22 }} />
+</SphereMap>
+```
+
+Tags are identified by their Thai names, such as `"โรงพยาบาล"` (hospitals), `"ธนาคาร/สถาบันการเงิน"` (banks) or `"อาหารไทย"` (Thai food). Use [`useTagCategories`](/docs/hooks/use-tag-categories) for the full list with English labels. A few tags also accept English aliases, such as `"ATM"` and `"Hotel"`.
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `name` | `string` | **Required.** Tag name; several names separated by commas (one layer) or `\|` (separate layers); or `"%"` for all POIs. For WFS/OGC sources, the name of the data layer or collection. |
+| `visibleRange` | `Range` | Zoom levels where the POIs show. |
+| `label` | `Range \| boolean` | Zoom levels where names show, or `true` to show them across `visibleRange`. |
+| `icon` | `"big" \| "small" \| Icon` | Bigger or smaller default icons, or your own image icon. |
+| `area` | `string` | Only show POIs inside this area (geocode), e.g. `"10"` for Bangkok. |
+| `dataset` | `string` | POI dataset to use. |
+| `type` | `"WFS" \| "OGC"` | Load features from your own WFS or OGC API service instead. |
+| `source` | `string` | Service URL for `type`, or another tag server. |
+| `version` | `string` | WFS version (default `2.0.0`). |
+| `extraQuery` | `string` | Extra query string for WFS/OGC requests. |
+
+Any other prop is passed to Sphere's `Tags.add`. For WFS/OGC sources these are [deck.gl `GeoJsonLayer` props](https://deck.gl/docs/api-reference/layers/geojson-layer), such as `getLineWidth` or `pickable`.
+
+## Your own WFS or OGC API data
+
+```tsx
+<Tag
+  name="StructurePnt"
+  type="OGC"
+  source="https://services.interactive-instruments.de/t15/daraa"
+  getLineWidth={5}
+  lineWidthUnits="pixels"
+/>
+```
+
+## Popups
+
+Clicking a POI opens Sphere's popup with the place's details. Turn them off with `useTags().enablePopup(false)`, or customize them with [`SphereProvider`'s `formatPoi`](/docs/components/sphere-provider#customizing-poi-popups).
+
+To add and remove tags imperatively, see [`useTags`](/docs/hooks/use-tags).

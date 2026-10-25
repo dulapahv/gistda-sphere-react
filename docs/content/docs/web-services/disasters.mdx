@@ -1,0 +1,58 @@
+---
+title: Disasters
+description: Flood and drought history at a point, fire hotspots, and how often disasters recur in an area
+---
+
+These services expose GISTDA's disaster monitoring data. To show current flood, drought and hotspot areas on a map, use the built-in [`FLOOD`, `DROUGHT` and `HOTSPOT` layers](/docs/components/layer#built-in-layers).
+
+## Flood and drought at a point
+
+```ts
+const location = { lon: 100.55, lat: 14.35 };
+
+const floods = await services.info.flood(location, { from: "2024-08-01", to: "2024-10-31" });
+// [{ date, status }, …], one entry per day
+
+const drought = await services.info.drought(location, { from: "2024-03-01" });
+// [{ date, value }, …], where value is the soil moisture level
+```
+
+## Fire hotspots
+
+Find hotspots by administrative area (Thai names), around a point, or in a polygon:
+
+```ts
+// By province and district
+await services.info.hotspot({ province: "เชียงใหม่", district: "เชียงดาว", from: "2024-03-01", to: "2024-03-31" });
+
+// Within 10 km of a point
+await services.info.hotspot({ location: { lon: 98.96, lat: 19.36 }, radius: 10_000 });
+
+// Inside a polygon
+await services.info.hotspot({ geo: { type: "Polygon", coordinates: [/* … */] } });
+```
+
+| Option | Description |
+| --- | --- |
+| `province`, `district`, `subdistrict` | Area names in Thai. |
+| `location`, `radius` | A center point and a radius in meters (default 1 km, at most 10 km). |
+| `geo` | A GeoJSON polygon. |
+| `from`, `to` | Date range. |
+
+If you give more than one kind of area, the service uses the names first, then the point, then the polygon. Results are grouped by satellite (`terra` and `aqua` from MODIS, `suomi-npp` from VIIRS) and date, with each hotspot's land use, nearest village and distance.
+
+## How often disasters recur
+
+```ts
+// Flood, drought and hotspot statistics for the area around a point
+const stats = await services.info.disasterRecurring(
+  { lon: 100.55, lat: 14.35 },
+  { types: ["flood", "drought"], version: 2 }
+);
+
+// Repeated flood or drought areas within a polygon
+const repeatedFloods = await services.info.floodRecurrence(polygon);
+const repeatedDroughts = await services.info.droughtRecurrence(polygon);
+```
+
+`disasterRecurring` returns, per disaster type, a `summary_frequency` and yearly counts, e.g. `flood: { summary_frequency: 5, data: [{ year: 2011, frequency: 1 }, …] }` (hotspots are counted per land use instead). `version: 2` uses the newer service. The recurrence lookups return the same shape as the [crop plots](/docs/web-services/agriculture#crop-plots): `result`, `area` (rai) and `geom`.

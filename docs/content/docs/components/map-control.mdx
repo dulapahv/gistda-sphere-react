@@ -1,0 +1,52 @@
+---
+title: MapControl
+description: Render your own React controls inside the map, positioned and styled like the built-in ones
+---
+
+`<MapControl>` places React content in one of the map's corners as a native map control, so it lines up with the zoom bar and other built-in controls and moves with them on small screens.
+
+<MapControlDemo />
+
+```tsx
+import { MapControl, useMapControls } from "gistda-sphere-react";
+
+function HomeButton() {
+  const { goTo } = useMapControls();
+  return (
+    <MapControl position="top-left" group>
+      <button type="button" title="Back to Bangkok" onClick={() => goTo({ center: BANGKOK, zoom: 11 })}>
+        ⌂
+      </button>
+    </MapControl>
+  );
+}
+
+<SphereMap>
+  <HomeButton />
+</SphereMap>
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `children` | `ReactNode` | – | Content of the control. Hooks, state and events work as usual. |
+| `position` | `"top-left" \| "top-right" \| "bottom-left" \| "bottom-right"` | `"top-right"` | Corner of the map. |
+| `group` | `boolean` | `false` | Use the boxed button-group look of the built-in controls. |
+| `className` | `string` | – | Extra CSS class for the control container. |
+| `visible` | `boolean` | `true` | Show or hide the control without unmounting it. |
+
+`<MapControl>` must be inside `SphereMap`.
+
+## Styling
+
+With `group`, buttons get MapLibre's control styles (29 × 29 px, white background). Without it, the container is unstyled, so you can render anything, such as a legend:
+
+```tsx
+<MapControl position="bottom-right" className="rounded bg-white p-2 text-xs shadow">
+  <strong>PM2.5 (µg/m³)</strong>
+  <Legend />
+</MapControl>
+```
+
+For a row of choices like a segmented button, [`MenuBar`](/docs/components/menu-bar) gives you Sphere's built-in look.

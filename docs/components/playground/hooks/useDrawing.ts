@@ -1,188 +1,265 @@
-import type { Location } from "gistda-sphere-react";
-import { useCallback, useState } from "react";
+import type { LineStyleType, Location } from "gistda-sphere-react";
+import { useCallback, useRef, useState } from "react";
 import type { DrawingMode } from "../constants";
-import type {
-  CircleData,
-  DotData,
-  MarkerData,
-  PolygonData,
-  RectangleData,
-} from "../types";
+import type { Shape, ShapeHandle, ShapeKind } from "../types";
 
-export interface DrawingState {
-  circleCenter: Location | null;
-  circles: CircleData[];
-  dots: DotData[];
-  markers: MarkerData[];
-  mode: DrawingMode;
-  polygonPoints: Location[];
-  polygons: PolygonData[];
-  polylinePoints: Location[];
-  polylines: PolygonData[];
-  rectangleCorner: Location | null;
-  rectangles: RectangleData[];
-  selectedPopup: Location | null;
+/** Style applied to every drawn shape; changes update shapes in place. */
+export interface DrawingStyle {
+  /** Let users drag the vertices of polygons and rectangles. */
+  editable: boolean;
+  /** Show each shape's name on the map. */
+  labels: boolean;
+  lineStyle: LineStyleType;
+  lineWidth: number;
 }
 
-export interface UseDrawingReturn extends DrawingState {
+const DEFAULT_STYLE: DrawingStyle = {
+  editable: false,
+  labels: false,
+  lineStyle: "Solid",
+  lineWidth: 3,
+};
+
+const EMPTY_COUNTERS: Record<ShapeKind, number> = {
+  circle: 0,
+  dot: 0,
+  marker: 0,
+  polygon: 0,
+  polyline: 0,
+  rectangle: 0,
+};
+
+/** Points closer than this (in degrees) are the two clicks of a double-click. */
+const SAME_POINT_EPSILON = 1e-9;
+
+/** Whether two locations are the same point. */
+function isSamePoint(a: Location, b: Location): boolean {
+  return (
+    Math.abs(a.lat - b.lat) < SAME_POINT_EPSILON &&
+    Math.abs(a.lon - b.lon) < SAME_POINT_EPSILON
+  );
+}
+
+/** Drops consecutive duplicate points (left behind by double-clicks). */
+function withoutRepeats(points: Location[]): Location[] {
+  return points.filter(
+    (point, index) => index === 0 || !isSamePoint(point, points[index - 1])
+  );
+}
+
+/** Minimum vertices needed to finish a shape in the given mode. */
+function minimumPoints(mode: DrawingMode): number {
+  return mode === "polygon" ? 3 : 2;
+}
+
+type NewShape = Shape extends infer S
+  ? S extends Shape
+    ? Omit<S, "id" | "number">
+    : never
+  : never;
+
+export interface UseDrawingReturn {
+  /** First click of a circle (center) or rectangle (corner). */
+  anchor: Location | null;
+  /** Ref callback that registers a shape component's handle. */
+  bindRef: (id: string) => (handle: ShapeHandle | null) => void;
+  /** Discard the shape in progress. */
+  cancel: () => void;
+  /** Whether the in-progress polygon/polyline has enough points. */
+  canFinish: boolean;
   clearAll: () => void;
-  closePopup: () => void;
+  /** Points of the polygon/polyline in progress. */
+  draft: Location[];
+  /** Complete the polygon/polyline in progress. */
+  finish: () => void;
+  getHandle: (id: string) => ShapeHandle | undefined;
+  /** Handle a map click in the current mode. Returns whether it was used. */
   handleClick: (location: Location) => boolean;
-  handleDoubleClick: () => void;
+  mode: DrawingMode;
+  /** Update a marker or dot after the user dragged it. */
+  moveShape: (id: string, position: Location) => void;
+  removeShape: (id: string) => void;
   setMode: (mode: DrawingMode) => void;
-  totalShapes: number;
-  updateDot: (id: string, position: Location) => void;
-  updateMarker: (id: string, position: Location) => void;
+  setStyle: (changes: Partial<DrawingStyle>) => void;
+  shapes: Shape[];
+  style: DrawingStyle;
+  /** Remove the last point of the shape in progress. */
+  undo: () => void;
 }
 
+/** State and actions of the playground's drawing tools. */
 export function useDrawing(): UseDrawingReturn {
-  const [mode, setMode] = useState<DrawingMode>("none");
-  const [markers, setMarkers] = useState<MarkerData[]>([]);
-  const [polygons, setPolygons] = useState<PolygonData[]>([]);
-  const [polylines, setPolylines] = useState<PolygonData[]>([]);
-  const [circles, setCircles] = useState<CircleData[]>([]);
-  const [dots, setDots] = useState<DotData[]>([]);
-  const [rectangles, setRectangles] = useState<RectangleData[]>([]);
-  const [polygonPoints, setPolygonPoints] = useState<Location[]>([]);
-  const [polylinePoints, setPolylinePoints] = useState<Location[]>([]);
-  const [circleCenter, setCircleCenter] = useState<Location | null>(null);
-  const [rectangleCorner, setRectangleCorner] = useState<Location | null>(null);
-  const [selectedPopup, setSelectedPopup] = useState<Location | null>(null);
+  const [mode, setModeState] = useState<DrawingMode>("none");
+  const [shapes, setShapes] = useState<Shape[]>([]);
+  const [draft, setDraft] = useState<Location[]>([]);
+  const [anchor, setAnchor] = useState<Location | null>(null);
+  const [style, setStyleState] = useState<DrawingStyle>(DEFAULT_STYLE);
+
+  const nextIdRef = useRef(1);
+  const countersRef = useRef<Record<ShapeKind, number>>({ ...EMPTY_COUNTERS });
+  const handlesRef = useRef(new Map<string, ShapeHandle>());
+  const refCallbacksRef = useRef(
+    new Map<string, (handle: ShapeHandle | null) => void>()
+  );
+
+  const addShape = useCallback((shape: NewShape) => {
+    countersRef.current[shape.kind] += 1;
+    const created = {
+      ...shape,
+      id: `${shape.kind}-${nextIdRef.current}`,
+      number: countersRef.current[shape.kind],
+    } as Shape;
+    nextIdRef.current += 1;
+    setShapes((previous) => [...previous, created]);
+  }, []);
+
+  const cancel = useCallback(() => {
+    setDraft([]);
+    setAnchor(null);
+  }, []);
+
+  const setMode = useCallback(
+    (next: DrawingMode) => {
+      setModeState(next);
+      cancel();
+    },
+    [cancel]
+  );
+
+  const finish = useCallback(() => {
+    const points = withoutRepeats(draft);
+    if (mode !== "polygon" && mode !== "polyline") {
+      return;
+    }
+    if (points.length < minimumPoints(mode)) {
+      return;
+    }
+    addShape({ kind: mode, positions: points });
+    setDraft([]);
+  }, [addShape, draft, mode]);
 
   const handleClick = useCallback(
     (location: Location): boolean => {
       switch (mode) {
         case "marker":
-          setMarkers((prev) => [
-            ...prev,
-            { id: `marker-${Date.now()}`, position: location },
-          ]);
-          return true;
         case "dot":
-          setDots((prev) => [
-            ...prev,
-            { id: `dot-${Date.now()}`, position: location },
-          ]);
+          addShape({ kind: mode, position: location });
           return true;
         case "polygon":
-          setPolygonPoints((prev) => [...prev, location]);
-          return true;
         case "polyline":
-          setPolylinePoints((prev) => [...prev, location]);
+          setDraft((previous) => [...previous, location]);
           return true;
         case "circle":
-          if (circleCenter) {
-            const dx = location.lon - circleCenter.lon;
-            const dy = location.lat - circleCenter.lat;
-            const radius = Math.sqrt(dx * dx + dy * dy);
-            setCircles((prev) => [
-              ...prev,
-              { center: circleCenter, id: `circle-${Date.now()}`, radius },
-            ]);
-            setCircleCenter(null);
-          } else {
-            setCircleCenter(location);
+          if (!anchor) {
+            setAnchor(location);
+            return true;
           }
+          addShape({
+            center: anchor,
+            kind: "circle",
+            radius: Math.hypot(
+              location.lon - anchor.lon,
+              location.lat - anchor.lat
+            ),
+          });
+          setAnchor(null);
           return true;
         case "rectangle":
-          if (rectangleCorner) {
-            const width = Math.abs(location.lon - rectangleCorner.lon);
-            const height = Math.abs(location.lat - rectangleCorner.lat);
-            const minLon = Math.min(location.lon, rectangleCorner.lon);
-            const maxLat = Math.max(location.lat, rectangleCorner.lat);
-            setRectangles((prev) => [
-              ...prev,
-              {
-                id: `rect-${Date.now()}`,
-                position: { lat: maxLat, lon: minLon },
-                size: { height, width },
-              },
-            ]);
-            setRectangleCorner(null);
-          } else {
-            setRectangleCorner(location);
+          if (!anchor) {
+            setAnchor(location);
+            return true;
           }
+          addShape({
+            kind: "rectangle",
+            position: {
+              lat: Math.max(location.lat, anchor.lat),
+              lon: Math.min(location.lon, anchor.lon),
+            },
+            size: {
+              height: Math.abs(location.lat - anchor.lat),
+              width: Math.abs(location.lon - anchor.lon),
+            },
+          });
+          setAnchor(null);
           return true;
         default:
-          setSelectedPopup(location);
           return false;
       }
     },
-    [mode, circleCenter, rectangleCorner]
+    [addShape, anchor, mode]
   );
 
-  const handleDoubleClick = useCallback(() => {
-    if (mode === "polygon" && polygonPoints.length >= 3) {
-      setPolygons((prev) => [
-        ...prev,
-        { id: `polygon-${Date.now()}`, positions: polygonPoints },
-      ]);
-      setPolygonPoints([]);
-    } else if (mode === "polyline" && polylinePoints.length >= 2) {
-      setPolylines((prev) => [
-        ...prev,
-        { id: `polyline-${Date.now()}`, positions: polylinePoints },
-      ]);
-      setPolylinePoints([]);
+  const undo = useCallback(() => {
+    if (anchor) {
+      setAnchor(null);
+      return;
     }
-  }, [mode, polygonPoints, polylinePoints]);
+    setDraft((previous) => previous.slice(0, -1));
+  }, [anchor]);
 
-  const clearAll = useCallback(() => {
-    setMarkers([]);
-    setPolygons([]);
-    setPolylines([]);
-    setCircles([]);
-    setDots([]);
-    setRectangles([]);
-    setPolygonPoints([]);
-    setPolylinePoints([]);
-    setCircleCenter(null);
-    setRectangleCorner(null);
-    setSelectedPopup(null);
-  }, []);
-
-  const updateMarker = useCallback((id: string, position: Location) => {
-    setMarkers((prev) =>
-      prev.map((m) => (m.id === id ? { ...m, position } : m))
+  const moveShape = useCallback((id: string, position: Location) => {
+    setShapes((previous) =>
+      previous.map((shape) =>
+        shape.id === id && (shape.kind === "marker" || shape.kind === "dot")
+          ? { ...shape, position }
+          : shape
+      )
     );
   }, []);
 
-  const updateDot = useCallback((id: string, position: Location) => {
-    setDots((prev) => prev.map((d) => (d.id === id ? { ...d, position } : d)));
+  const removeShape = useCallback((id: string) => {
+    setShapes((previous) => previous.filter((shape) => shape.id !== id));
   }, []);
 
-  const closePopup = useCallback(() => {
-    setSelectedPopup(null);
+  const clearAll = useCallback(() => {
+    setShapes([]);
+    cancel();
+    countersRef.current = { ...EMPTY_COUNTERS };
+  }, [cancel]);
+
+  const bindRef = useCallback((id: string) => {
+    const existing = refCallbacksRef.current.get(id);
+    if (existing) {
+      return existing;
+    }
+    const callback = (handle: ShapeHandle | null) => {
+      if (handle) {
+        handlesRef.current.set(id, handle);
+      } else {
+        handlesRef.current.delete(id);
+        refCallbacksRef.current.delete(id);
+      }
+    };
+    refCallbacksRef.current.set(id, callback);
+    return callback;
   }, []);
 
-  const totalShapes =
-    markers.length +
-    polygons.length +
-    polylines.length +
-    circles.length +
-    dots.length +
-    rectangles.length;
+  const getHandle = useCallback((id: string) => handlesRef.current.get(id), []);
+
+  const setStyle = useCallback((changes: Partial<DrawingStyle>) => {
+    setStyleState((previous) => ({ ...previous, ...changes }));
+  }, []);
+
+  const isLineMode = mode === "polygon" || mode === "polyline";
 
   return {
-    circleCenter,
-    circles,
+    anchor,
+    bindRef,
+    cancel,
+    canFinish:
+      isLineMode && withoutRepeats(draft).length >= minimumPoints(mode),
     clearAll,
-    closePopup,
-    dots,
+    draft,
+    finish,
+    getHandle,
     handleClick,
-    handleDoubleClick,
-    markers,
     mode,
-    polygonPoints,
-    polygons,
-    polylinePoints,
-    polylines,
-    rectangleCorner,
-    rectangles,
-    selectedPopup,
+    moveShape,
+    removeShape,
     setMode,
-    totalShapes,
-    updateDot,
-    updateMarker,
+    setStyle,
+    shapes,
+    style,
+    undo,
   };
 }

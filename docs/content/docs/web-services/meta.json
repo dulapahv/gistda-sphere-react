@@ -1,0 +1,13 @@
+{
+  "title": "Web services",
+  "pages": [
+    "index",
+    "search-and-places",
+    "routing",
+    "location-data",
+    "maps-and-tiles",
+    "agriculture",
+    "disasters",
+    "population"
+  ]
+}

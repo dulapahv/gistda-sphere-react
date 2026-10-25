@@ -1,0 +1,173 @@
+---
+title: ความครอบคลุมของ API
+description: ทุกส่วนของ GISTDA Sphere JavaScript API และบริการเว็บ พร้อมตำแหน่งเรียกใช้งานในไลบรารีนี้
+---
+
+หน้านี้เทียบเคียง [เอกสารอ้างอิง Sphere API](https://api.sphere.gistda.or.th/map/doc.html) และ[บริการเว็บ](https://api.sphere.gistda.or.th/services/api)เข้ากับไลบรารีนี้ ส่วนที่ไม่ได้หุ้มไว้ยังเข้าถึงได้ผ่าน [`useMap()`](/th/docs/hooks/use-map) ซึ่งคืนค่าอ็อบเจกต์ `sphere.Map` โดยตรง
+
+## แผนที่ [#map]
+
+| Sphere | ไลบรารี |
+| --- | --- |
+| `new sphere.Map(options)` | [`<SphereMap>`](/th/docs/components/sphere-map) |
+| `MapOptions.layer`, `zoom`, `zoomRange`, `location`, `ui`, `input`, `lastView`, `language` | prop `baseLayer`, `zoom`, `zoomRange`, `center`, `ui`, `input`, `lastView`, `language` |
+| ตัวเลือกแผนที่ของ MapLibre | prop `options` |
+| `map.zoom()` | prop `zoom`, `setZoom`, `getZoom`, `zoomIn`, `zoomOut`, `onZoom` |
+| `map.zoomRange()` | prop `zoomRange`, `setZoomRange`, `getZoomRange`, `onZoomRange` |
+| `map.location()` | prop `center`, `setCenter`, `getCenter`, `onLocation` |
+| `map.bound()` | `setBound`, `getBound` |
+| `map.move()` | `panBy` |
+| `map.goTo()` | `goTo` |
+| `map.rotate()`, `map.pitch()` | prop `rotate`/`pitch`, `setRotate`/`getRotate`, `setPitch`/`getPitch`, `onRotate`/`onPitch` |
+| `map.language()` | prop `language`, `setLanguage`, `getLanguage` |
+| `map.enableFilter()`, `sphere.Filter` | prop `filter`, `setFilter`, `getFilter` |
+| `map.resize()`, `map.repaint()` | `resize`, `repaint` |
+| `map.id()`, `map.placeholder()` | `useMap().map` |
+| `map.Renderer` (MapLibre) | `useMap().map.Renderer`, `ref.getMap().Renderer` |
+
+เมธอดในคอลัมน์ขวาอยู่ใน [`useMapControls`](/th/docs/hooks/use-map-controls) และ ref ของ `SphereMap`
+
+## เหตุการณ์ [#events]
+
+| Sphere | ไลบรารี |
+| --- | --- |
+| `map.Event.bind()`, `unbind()` | prop `on…` ของ `SphereMap`, [`useMapEvent`](/th/docs/hooks/event-hooks) |
+| เหตุการณ์ `sphere.EventName` ทั้ง 37 รายการ | เหตุการณ์ละหนึ่ง prop ตั้งแต่ `onReady` ถึง `onZoomRange` ดู[ตารางเหตุการณ์](/th/docs/components/sphere-map#events) |
+| `Ready` | `onReady`, `useMapReady` |
+| `Click`, `OverlayClick` | `onClick`, `onOverlayClick`, `useMapClick`, `useOverlayClick` และ `onClick` ของโอเวอร์เลย์ทุกชนิด |
+| `BeforeContextmenu` (คืนค่า `false` เพื่อยกเลิก) | `onBeforeContextMenu`, `useMapEvent("beforeContextmenu")` |
+
+## ชั้นข้อมูล [#layers]
+
+| Sphere | ไลบรารี |
+| --- | --- |
+| `new sphere.Layer(name, options)`, `LayerOptions` | prop ของ [`<Layer>`](/th/docs/components/layer) |
+| `sphere.LayerType` (Vector, XYZ, WMS, WMTS, WMTS_REST, TMS, Tiles3D, I3S) | prop `type` |
+| `sphere.Layers` (ชั้นข้อมูลในตัว) | `<Layer preset>`, prop `baseLayer` |
+| `map.Layers.setBase()` | prop `baseLayer`, `setBaseLayer` |
+| `map.Layers.add()`, `insert()`, `remove()`, `clear()` | `<Layer>` (ร่วมกับ `beforeId`), `addLayer`, `removeLayer`, `clearLayers` |
+| `map.Layers.list()`, `size()` | `getLayers()` |
+| `map.Layers.language()` | prop `language` |
+| สไตล์เวกเตอร์, ชั้นข้อมูล MapLibre แบบกำหนดเอง | `<Layer style>`, `<Layer layer>` |
+| ตัวเลือก 3D Tiles (`loadOptions`, `onTilesetLoad`, ขนาดจุด) | prop `loadOptions`, `onTilesetLoad`, `pointSize` |
+
+## โอเวอร์เลย์ [#overlays]
+
+| Sphere | ไลบรารี |
+| --- | --- |
+| `sphere.Marker`, `MarkerOptions` | [`<Marker>`](/th/docs/components/marker) |
+| `sphere.Popup`, `PopupOptions` | [`<Popup>`](/th/docs/components/popup) |
+| `sphere.Polyline`, `Polygon`, `Circle`, `Dot`, `Rectangle`, `GeometryOptions` | [`<Polyline>`](/th/docs/components/polyline), [`<Polygon>`](/th/docs/components/polygon), [`<Circle>`](/th/docs/components/circle), [`<Dot>`](/th/docs/components/dot), [`<Rectangle>`](/th/docs/components/rectangle) |
+| `sphere.LineStyle` | `lineStyle="Solid" \| "Dashed" \| "Dot"` |
+| ข้อมูลนำเข้าแบบ GeoJSON | `positions`/`position` รับ GeoJSON ได้ ใช้ [`<GeoJson>`](/th/docs/components/geojson) สำหรับเอกสารทั้งชุด |
+| `overlay.location()` | prop `position`, `setPosition`, `getPosition` |
+| `overlay.visibleRange()` | prop `visibleRange` |
+| `overlay.shift()` | `shift` ของ ref |
+| `overlay.distance()`, `intersects()`, `contains()`, `within()` | `distanceTo`, `intersects`, `contains`, `within` ของ ref |
+| `overlay.toJSON()` | `toGeoJSON` ของ ref |
+| `overlay.active()` | `ref.getMarker().active()` และอ็อบเจกต์จาก `get…()` อื่น ๆ |
+| `marker.popup()`, `pop()` / `popup()`, `pop()` ของรูปทรง | `togglePopup` ของ ref, prop `popupContent` |
+| `marker.element()`, `popup.element()` | `getElement` ของ ref |
+| `marker.update()` | prop `draggable` และ `rotate`, `setRotation` ของ ref |
+| `popup.title()`, `detail()` | prop `title`/`detail`, `setTitle`/`setDetail` ของ ref |
+| `geometry.update()` | prop รูปแบบที่อัปเดตทันที, `updateStyle` ของ ref |
+| `geometry.pivot()`, `centroid()`, `bound()`, `rotate()` | `getPivot`, `getCentroid`, `getBound`, `rotate` ของ ref |
+| `polyline.size()`, `polygon.size()`, `circle.size()`, `circle.radius()` | `getLength`, `getArea`, `getRadius` ของ ref |
+| `union()`, `intersection()`, `difference()`, `split()` | เมธอดชื่อเดียวกันของ ref |
+| `map.Overlays.add()`, `remove()` | การ mount และ unmount คอมโพเนนต์ |
+| `map.Overlays.load()`, `unload()` | `<PredefinedOverlay>`, `<ObjectOverlay>`, `loadPredefinedOverlay` |
+| `map.Overlays.clear()`, `list()`, `size()`, `lastOpenPopup()` | `useMap().map.Overlays` |
+| `sphere.Overlays.cameras`, `events`, `aqi` | [`<PredefinedOverlay>`](/th/docs/components/predefined-overlay) |
+| `sphere.Overlays.Object`, `ObjectOptions`, `sphere.ObjectLabel` | [`<ObjectOverlay>`](/th/docs/components/object-overlay) (`label` สำหรับ `ObjectLabel.Title`) |
+
+## การนำทาง [#routing]
+
+| Sphere | ไลบรารี ([`useRoute`](/th/docs/hooks/use-route)) |
+| --- | --- |
+| `add()`, `insert()`, `remove()`, `removeAt()`, `list()`, `size()` | `addDestination`, `insertDestination`, `removeDestination`, `removeDestinationAt`, `listDestinations`, `size` |
+| `clearDestination()`, `clearPath()`, `clear()`, `reverse()`, `search()` | `clearDestinations`, `clearPath`, `clear`, `reverse`, `search` |
+| `distance()`, `interval()` | `summary`, `getDistance`, `getInterval` |
+| `guide()` | `steps`, `routes`, `getSteps`, `getGuide` |
+| `exportRouteLine()` | `exportRouteLine` |
+| `mode()`, `modeOf()`, `sphere.RouteMode` | `setMode`/`getMode`, `setModeAt`/`getModeAt` |
+| `enableRoute()`, `sphere.RouteType` | `enableRouteType`, `isRouteTypeEnabled` |
+| `enableRestrict()`, `sphere.RouteRestrict` | `setRestrict`, `isRestrictEnabled` |
+| `label()`, `sphere.RouteLabel` | `setLabel`, `getLabel` |
+| `line()`, `sphere.RouteLine` | `setLineStyle`, `getLineStyle` |
+| `auto()` | `setAuto`, `getAuto` |
+| `enableContextMenu()` | `enableContextMenu` |
+| `placeholder()` | [`<RouteGuide>`](/th/docs/components/route-guide), `setPlaceholder` |
+| `language()` | `setLanguage`, `getLanguage` |
+| เหตุการณ์ `RouteComplete`, `RouteError` | `status`, `error`, `onRouteComplete`, `onRouteError`, `onError` |
+
+## การค้นหาและแท็ก [#search-and-tags]
+
+| Sphere | ไลบรารี |
+| --- | --- |
+| `map.Search.search()`, `suggest()`, `address()`, `nearPoi()` | เมธอดชื่อเดียวกันของ [`useSearch`](/th/docs/hooks/use-search) |
+| `map.Search.placeholder()`, `SearchUiOptions` | [`<SearchResults>`](/th/docs/components/search-results), `setPlaceholder` |
+| `map.Search.clear()`, `enablePopup()`, `language()` | `clear`, `enablePopup`/`isPopupEnabled`, `setLanguage`/`getLanguage` |
+| `map.Tags.add()`, `set()`, `remove()`, `clear()`, `list()`, `size()` | [`<Tag>`](/th/docs/components/tag), [`useTags`](/th/docs/hooks/use-tags) |
+| `map.Tags.enablePopup()`, `language()` | `useTags` |
+| `sphere.TagType`, `TagOptions` | prop ของ `<Tag>` |
+| รายการแท็ก | [`useTagCategories`](/th/docs/hooks/use-tag-categories) |
+
+## ส่วนติดต่อผู้ใช้ [#ui]
+
+| Sphere | ไลบรารี |
+| --- | --- |
+| `sphere.UiComponent` | prop `ui` |
+| `map.Ui.DPad`, `Geolocation`, `Zoombar`, `Toolbar`, `LayerSelector`, `Fullscreen`, `Crosshair`, `Scale`, `ContextMenu` (`visible()`) | prop `controls`, `setControlVisible`/`isControlVisible` ของ [`useUi`](/th/docs/hooks/use-ui) |
+| `map.Ui.Geolocation` (หาตำแหน่ง ลบหมุด) | `locateUser`, `clearUserLocation` |
+| `map.Ui.ContextMenu.enableAddress()`, `enableNearPoi()` | `setContextMenuOptions`, `getContextMenuOptions` |
+| `map.Ui.Keyboard.enable()` | `setKeyboardEnabled`, `isKeyboardEnabled` |
+| `map.Ui.Mouse.enable()`, `enableClick()`, `enableDrag()`, `enableWheel()` | `setMouseEnabled`, `getMouseState` |
+| `map.Ui.add()`, `remove()` | `addControl`, `removeControl`, [`<MapControl>`](/th/docs/components/map-control) |
+| `map.Ui.lockMap()` | `lockMap` (พร้อม `lock`, `unlock`, `remove`) |
+| `map.Ui.language()` | `setLanguage` |
+| `sphere.CustomControl` | [`<MapControl>`](/th/docs/components/map-control) |
+| `sphere.MenuBar`, `selectIndex()`, `MenuBarOptions`, `MenuItem` | [`<MenuBar>`](/th/docs/components/menu-bar) |
+
+## ยูทิลิตี [#utilities]
+
+| Sphere | ไลบรารี ([`useSphereUtils`](/th/docs/hooks/use-sphere-utils)) |
+| --- | --- |
+| `formatDistance`, `formatArea`, `formatThaiArea`, `formatInterval`, `formatDate`, `formatTime`, `formatDateTimeRange` | ฟังก์ชันชื่อเดียวกัน |
+| `WKTToGeoJSON`, `KMLToGeoJSON`, `GPXToGeoJSON`, `GMLToGeoJSON`, `EsriJSONToGeoJSON`, `TopoJSONToGeoJSON` | `wktToGeoJSON`, `kmlToGeoJSON`, `gpxToGeoJSON`, `gmlToGeoJSON`, `esriJsonToGeoJSON`, `topoJsonToGeoJSON` (โหลดไลบรารีที่ต้องใช้ให้เอง) |
+| `initLibrary` | ตัวแปลงรูปแบบและ `project` เรียกให้อัตโนมัติ |
+| `project` | `project` |
+| `latitudeLength`, `longitudeLength` | ฟังก์ชันชื่อเดียวกัน |
+| `formatPoi`, `poiPopupOptions` | prop ของ [`SphereProvider`](/th/docs/components/sphere-provider#customizing-poi-popups) |
+| `append`, `prepend`, `empty`, `loadStyle`, `loadScript`, `getJson`, `isHD`, `validateLocation`, `sameLocation`, `isAbsInRange`, `bound` | `useSphereUtils().util` |
+| `sphere.Math` (`distance`, `closestPointOnLine`, `lineIntersectPoint`) | `useSphereUtils().math` |
+
+## บริการเว็บ [#web-services]
+
+| บริการ | ไลบรารี ([ไคลเอนต์บริการเว็บ](/th/docs/web-services)) |
+| --- | --- |
+| `search/search`, `search/suggest` | `search.search`, `search.suggest` |
+| `poi/search`, `poi/get`, `poi/cluster` | `poi.nearby`, `poi.get`, `poi.cluster` |
+| `category/all` | `tags.categories` |
+| `route/route`, `route/matrix` | `route.route`, `route.matrix` |
+| `geo/address`, `geo/elevation` | `geo.address`, `geo.elevation` |
+| `snippet/static`, `snippet/embed` | `maps.staticMapUrl`, `maps.embedUrl` |
+| ไทล์แรสเตอร์ เวกเตอร์ และ WMTS | `maps.rasterTileUrl`, `maps.vectorTileUrl`, `maps.vectorStyleUrl`, `maps.wmtsCapabilitiesUrl` |
+| `info/crop`, `info/land-suitability`, `info/crop-suitability` | `info.crop`, `info.landSuitability`, `info.cropSuitability` |
+| `info/disaster-flood`, `info/disaster-drought`, `info/disaster-hotspot` | `info.flood`, `info.drought`, `info.hotspot` |
+| `info/disaster-recurring` (และ `/v2`) | `info.disasterRecurring` |
+| `info/disasters/flood-recurrence`, `drought-recurrence` | `info.floodRecurrence`, `info.droughtRecurrence` |
+| `agri/rice`, `maize`, `cassava`, `sugarcane` (รายครึ่งเดือน), `palm`, `rubber` (รายปี) | `agri.rice`, `agri.maize`, `agri.cassava`, `agri.sugarcane`, `agri.palm`, `agri.rubber` |
+| `population/facebook` | `population.get` |
+| บริการทุกตัวทั้งแบบ GET และ POST | ใช้ GET และเปลี่ยนเป็น POST อัตโนมัติเมื่อคำขอยาว (ตัวเลือก `method`) |
+
+## สิ่งที่มีเพิ่มจาก Sphere API [#beyond-the-sphere-api]
+
+ไลบรารีนี้ยังเพิ่มสิ่งที่ Sphere API ไม่มี
+
+- คอมโพเนนต์แบบ declarative ที่คืนทรัพยากรให้อัตโนมัติเมื่อเลิกใช้ พร้อม prop ที่อัปเดตแผนที่ทันทีโดยไม่ต้องสร้างใหม่
+- ใช้เนื้อหา React เป็นไอคอนหมุด ป๊อปอัป และตัวควบคุมแผนที่
+- ผลลัพธ์เส้นทางเป็น React state: `status`, `summary`, `steps` สำหรับนำทางทีละขั้นที่อ่านเข้าใจง่าย และการจัดการเมื่อหมดเวลาสำหรับ key ที่ไม่ได้เปิดบริการนำทาง
+- `onError` สำหรับอ็อบเจกต์ที่โหลดไม่สำเร็จ และข้อผิดพลาดพร้อมรหัสสำหรับบริการเว็บทุกตัว
+- การวิเคราะห์เชิงพื้นที่และการวัดขนาดบน ref ของรูปทรงทุกชนิด
+- ไคลเอนต์บริการเว็บที่มี type ครบ และใช้บนเซิร์ฟเวอร์ได้ด้วย
+- จัดการข้อจำกัดของ Sphere ให้อัตโนมัติ: `input={false}` เพื่อปิดการโต้ตอบ, ป้ายชื่อในโหมด Fly, การลบแท็กแบบ `"a|b"`, ค่าพื้นที่แบบข้อความธรรมดา และอื่น ๆ

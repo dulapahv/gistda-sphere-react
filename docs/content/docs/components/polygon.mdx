@@ -1,56 +1,138 @@
 ---
 title: Polygon
-description: Draw a filled polygon on the map
+description: A filled area, with holes, labels, editing, measurements and polygon operations
 ---
 
-<MapDemo height="400px" zoom={12} center={{ lon: 100.50, lat: 13.75 }} language="en">
+<MapDemo height="400px" zoom={11} center={{ lon: 100.5, lat: 13.75 }}>
   <Polygon
     positions={[
-      { lon: 100.475, lat: 13.775 },
-      { lon: 100.525, lat: 13.775 },
-      { lon: 100.50, lat: 13.725 },
+      { lon: 100.45, lat: 13.8 },
+      { lon: 100.55, lat: 13.8 },
+      { lon: 100.55, lat: 13.7 },
+      { lon: 100.45, lat: 13.7 },
     ]}
     fillColor="rgba(255, 0, 0, 0.3)"
     lineColor="red"
     lineWidth={2}
+    label="Zone A"
+    title="Zone A"
   />
 </MapDemo>
 
 ```tsx
 <Polygon
   positions={[
-    { lon: 100.475, lat: 13.775 },
-    { lon: 100.525, lat: 13.775 },
-    { lon: 100.50, lat: 13.725 },
+    { lon: 100.45, lat: 13.8 },
+    { lon: 100.55, lat: 13.8 },
+    { lon: 100.55, lat: 13.7 },
+    { lon: 100.45, lat: 13.7 },
   ]}
   fillColor="rgba(255, 0, 0, 0.3)"
   lineColor="red"
   lineWidth={2}
+  label="Zone A"
 />
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `positions` | `Location[]` | Yes (min 3) | - | Array of vertices |
-| `ref` | `Ref<PolygonRef>` | No | - | Ref for imperative control |
-| `title` | `string` | No | - | Hover tooltip text |
-| `detail` | `string` | No | - | Popup text when clicked |
-| `label` | `string` | No | - | Label at polygon center |
-| `labelOptions` | `MarkerOptions` | No | - | Label marker options |
-| `popup` | `PopupOptions` | No | - | Popup configuration |
-| `visibleRange` | `Range` | No | All zoom levels | Zoom range visibility |
-| `lineWidth` | `number` | No | `3` | Border width in pixels |
-| `lineColor` | `string` | No | Preset color | Border color |
-| `fillColor` | `string` | No | Preset color | Fill color |
-| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | Border style |
-| `pivot` | `Location` | No | Center | Rotation pivot point |
-| `clickable` | `boolean` | No | `false` | Show pointer cursor |
-| `draggable` | `boolean` | No | `false` | Allow dragging |
-| `pointer` | `boolean` | No | `false` | Show drag pointer |
-| `editable` | `boolean` | No | `false` | Allow vertex editing |
-| `zIndex` | `number` | No | `0` | Stacking order |
-| `onClick` | `(polygon: SpherePolygon) => void` | No | - | Click handler |
-| `onDrag` | `(polygon: SpherePolygon) => void` | No | - | Drag handler |
-| `onDrop` | `(polygon: SpherePolygon) => void` | No | - | Drop handler |
+| Prop | Type | Description |
+| --- | --- | --- |
+| `positions` | `Location[] \| GeoJSON` | **Required.** Corners of the polygon (at least three). `null` entries start a hole. A GeoJSON `Polygon` or `MultiPolygon` (or a feature) also works. |
+
+Polygons also take the [shape props](#shape-props) below.
+
+### Shape props
+
+All shapes ([`Polygon`](/docs/components/polygon), [`Polyline`](/docs/components/polyline), [`Circle`](/docs/components/circle), [`Rectangle`](/docs/components/rectangle) and [`Dot`](/docs/components/dot)) share these props. Props marked **live** update the shape in place; changing any other prop re-creates it.
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `lineColor` | `string` | **Live.** Outline color (any CSS color). |
+| `lineWidth` | `number` | **Live.** Outline width in pixels. |
+| `lineStyle` | `"Solid" \| "Dashed" \| "Dot" \| number[]` | **Live.** Outline style, or a custom `[dash, gap]` pattern. |
+| `fillColor` | `string` | **Live.** Fill color, for areas. |
+| `title` | `string` | Popup title. |
+| `detail` | `string` | Popup text. |
+| `popup` | `PopupOptions` | Full popup configuration. |
+| `popupContent` | `ReactNode` | React content for the popup. |
+| `label` | `string \| boolean` | Text drawn on the shape, or `true` to use `title`. |
+| `labelOptions` | `MarkerOptions` | Options for the label marker. |
+| `editable` | `boolean` | Let users drag the corners (polygons and rectangles). |
+| `draggable` | `boolean` | Let users move the whole shape. |
+| `clickable` | `boolean` | Show a pointer cursor on hover. |
+| `pointer` | `boolean` | Show markers at the corners. |
+| `pivot` | `Location` | Point used for the label and rotation. |
+| `visibleRange` | `Range` | Only show between these zoom levels. |
+| `zIndex` | `number` | Stacking order. |
+| `options` | `Record<string, unknown>` | Extra options for the Sphere constructor. |
+| `onClick` | `(shape, location) => void` | The shape was clicked. |
+| `onHover` / `onLeave` | `(shape) => void` | The pointer entered / left the shape. |
+| `onDrag` / `onDrop` | `(shape) => void` | The shape is being dragged / was dropped. |
+| `ref` | `Ref` | See [Ref](#ref). |
+
+## Holes
+
+Put `null` between the outer ring and each hole:
+
+```tsx
+<Polygon
+  positions={[
+    { lon: 100.4, lat: 13.9 }, { lon: 100.7, lat: 13.9 },
+    { lon: 100.7, lat: 13.6 }, { lon: 100.4, lat: 13.6 },
+    null,
+    { lon: 100.5, lat: 13.8 }, { lon: 100.6, lat: 13.8 },
+    { lon: 100.6, lat: 13.7 }, { lon: 100.5, lat: 13.7 },
+  ]}
+/>
+```
+
+## GeoJSON input
+
+```tsx
+<Polygon
+  positions={{
+    type: "Polygon",
+    coordinates: [[[100.45, 13.8], [100.55, 13.8], [100.55, 13.7], [100.45, 13.8]]],
+  }}
+  fillColor="rgba(0, 128, 255, 0.3)"
+/>
+```
+
+To show whole GeoJSON documents (points, lines and areas together), use [`<GeoJson>`](/docs/components/geojson).
+
+## Styling without flicker
+
+Color, width and line style changes are applied with Sphere's `update()`, so a polygon can follow state without being redrawn:
+
+```tsx
+<Polygon
+  positions={zone}
+  fillColor={hovered ? "rgba(255,0,0,.5)" : "rgba(255,0,0,.2)"}
+  onHover={() => setHovered(true)}
+  onLeave={() => setHovered(false)}
+/>
+```
+
+## Ref
+
+```tsx
+const zoneRef = useRef<PolygonRef>(null);
+
+<Polygon ref={zoneRef} positions={zone} />
+
+zoneRef.current?.getArea();     // 120000000 (square meters)
+zoneRef.current?.getArea("en"); // "120 sq.km"
+```
+
+| Method | Description |
+| --- | --- |
+| `getPolygon()` | The underlying `sphere.Polygon`. |
+| `getArea(language?)` | Area in square meters, or text such as `"120 sq.km"` with a language. For rai/ngan/wa, pass the area to [`formatThaiArea`](/docs/hooks/use-sphere-utils). |
+| `getBound()`, `getCentroid()`, `getPivot()` | Bounding box, center and label point. |
+| `union(other)`, `intersection(other)`, `difference(other)`, `split(other)` | New polygons (not added to the map). See [Spatial analysis](/docs/examples/spatial-analysis). |
+| `contains(target)`, `intersects(target)`, `within(overlay)`, `distanceTo(target, language?)` | Spatial tests against a location or another overlay. |
+| `rotate(angle)`, `shift({ lon, lat })` | Rotate around the pivot, or move by an offset. |
+| `updateStyle(style)` | Change colors, width or line style imperatively. |
+| `togglePopup(show?, location?)` | Show, hide or toggle the popup. |
+| `toGeoJSON()` | The polygon as a GeoJSON feature. |

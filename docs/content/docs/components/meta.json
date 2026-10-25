@@ -3,13 +3,24 @@
   "pages": [
     "sphere-provider",
     "sphere-map",
+    "---Overlays---",
     "marker",
+    "popup",
     "polygon",
     "polyline",
     "circle",
-    "popup",
-    "dot",
     "rectangle",
-    "layer"
+    "dot",
+    "geojson",
+    "object-overlay",
+    "---Layers and data---",
+    "layer",
+    "tag",
+    "predefined-overlay",
+    "---Controls---",
+    "map-control",
+    "menu-bar",
+    "route-guide",
+    "search-results"
   ]
 }

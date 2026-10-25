@@ -1,0 +1,35 @@
+---
+title: Addresses and elevation
+description: Reverse geocoding and height above sea level, at a point or along a line
+---
+
+## Address at a location
+
+```ts
+const address = await services.geo.address({ lon: 100.5018, lat: 13.7563 }, { locale: "en" });
+console.log(address.province, address.district, address.subdistrict, address.postcode);
+```
+
+The result includes `province`, `district`, `subdistrict`, `road`, `postcode`, `geocode` (the area code) and more, when available. On a map, [`useSearch().address`](/docs/hooks/use-search#addresses) does the same.
+
+## Elevation
+
+At a point:
+
+```ts
+const [point] = await services.geo.elevation({ lon: 98.4867, lat: 18.5885 });
+console.log(point.elevation); // meters above mean sea level
+```
+
+Along a line, for an elevation profile:
+
+```ts
+const profile = await services.geo.elevation({
+  type: "LineString",
+  coordinates: [[98.95, 18.79], [98.89, 18.80], [98.49, 18.59]],
+});
+
+for (const sample of profile) {
+  console.log(sample.location, sample.elevation); // position along the line (0–1), meters
+}
+```

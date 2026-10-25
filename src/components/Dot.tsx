@@ -1,148 +1,96 @@
-import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
-import { useMapContext } from "../context/MapContext";
-import { useSphereContext } from "../context/SphereContext";
-import type { GeometryOptions, Location, Range, SphereDot } from "../types";
+import {
+  type ReactNode,
+  type Ref,
+  useEffect,
+  useImperativeHandle,
+} from "react";
+import { useSphereContext } from "@/context/SphereContext";
+import { isLocation } from "@/internal/geometry";
+import {
+  createGeometryRefMethods,
+  type GeometryRefMethods,
+} from "@/internal/geometryRef";
+import { useDeepMemo } from "@/internal/hooks";
+import {
+  type GeometryComponentProps,
+  useGeometry,
+} from "@/internal/useGeometry";
+import type { Location, SphereDot } from "@/types";
 
-export interface DotRef {
+export interface DotRef extends GeometryRefMethods {
+  /** The underlying `sphere.Dot`. */
   getDot: () => SphereDot | null;
+  /** Current position of the dot. */
   getPosition: () => Location | null;
+  /** Move the dot. */
   setPosition: (location: Location) => void;
 }
 
-export interface DotProps {
-  clickable?: boolean;
-  detail?: string;
-  draggable?: boolean;
-  lineColor?: string;
-  lineWidth?: number;
-  onClick?: (dot: SphereDot) => void;
-  onDrag?: (dot: SphereDot) => void;
+export interface DotProps
+  extends Omit<GeometryComponentProps<SphereDot>, "onDrop"> {
+  /** Called after the user drops a draggable dot, with its new position. */
   onDrop?: (dot: SphereDot, location: Location) => void;
+  /** Position of the dot. Changing it moves the dot without re-creating it. */
   position: Location;
   ref?: Ref<DotRef>;
-  title?: string;
-  visibleRange?: Range;
-  zIndex?: number;
 }
 
-export function Dot({
-  position,
-  ref,
-  title,
-  detail,
-  visibleRange,
-  lineWidth,
-  lineColor,
-  clickable,
-  draggable,
-  zIndex,
-  onClick,
-  onDrag,
-  onDrop,
-}: DotProps) {
-  const { map, isReady } = useMapContext();
+/** Reads a single location from an overlay. */
+function readLocation(dot: SphereDot): Location | null {
+  const value = dot.location();
+  return isLocation(value) ? { lat: value.lat, lon: value.lon } : null;
+}
+
+/** A dot (point drawn as a circle of `lineWidth` pixels) on the map. */
+export function Dot({ position, ref, onDrop, ...props }: DotProps): ReactNode {
   const { sphere } = useSphereContext();
-  const dotRef = useRef<SphereDot | null>(null);
-  const callbacksRef = useRef({ onClick, onDrag, onDrop });
+  const { overlayRef, portal } = useGeometry<SphereDot>({
+    create: (api, options) => new api.Dot(position, options),
+    props: {
+      ...props,
+      onDrop: onDrop
+        ? (dot) => {
+            const location = readLocation(dot);
+            if (location) {
+              onDrop(dot, location);
+            }
+          }
+        : undefined,
+    },
+    shape: null,
+  });
 
+  const stablePosition = useDeepMemo(position);
   useEffect(() => {
-    callbacksRef.current = { onClick, onDrag, onDrop };
-  }, [onClick, onDrag, onDrop]);
-
-  useEffect(() => {
-    if (!(isReady && map && sphere)) {
+    const dot = overlayRef.current;
+    if (!dot) {
       return;
     }
-
-    const options: GeometryOptions = {};
-
-    if (title) {
-      options.title = title;
+    const current = readLocation(dot);
+    if (
+      current?.lat !== stablePosition.lat ||
+      current?.lon !== stablePosition.lon
+    ) {
+      dot.location(stablePosition);
     }
-    if (detail) {
-      options.detail = detail;
-    }
-    if (visibleRange) {
-      options.visibleRange = visibleRange;
-    }
-    if (typeof lineWidth === "number") {
-      options.lineWidth = lineWidth;
-    }
-    if (lineColor) {
-      options.lineColor = lineColor;
-    }
-    if (typeof clickable === "boolean") {
-      options.clickable = clickable;
-    }
-    if (typeof draggable === "boolean") {
-      options.draggable = draggable;
-    }
-    if (typeof zIndex === "number") {
-      options.zIndex = zIndex;
-    }
-
-    const dot = new sphere.Dot(position, options);
-    dotRef.current = dot;
-
-    map.Overlays.add(dot);
-
-    const handleOverlayClick = (data: { overlay: SphereDot }) => {
-      if (data.overlay === dot) {
-        callbacksRef.current.onClick?.(dot);
-      }
-    };
-
-    const handleOverlayDrag = (overlay: SphereDot) => {
-      if (overlay === dot) {
-        callbacksRef.current.onDrag?.(dot);
-      }
-    };
-
-    const handleOverlayDrop = (overlay: SphereDot) => {
-      if (overlay === dot) {
-        const newLocation = dot.location() as Location;
-        callbacksRef.current.onDrop?.(dot, newLocation);
-      }
-    };
-
-    map.Event.bind("overlayClick", handleOverlayClick);
-    map.Event.bind("overlayDrag", handleOverlayDrag);
-    map.Event.bind("overlayDrop", handleOverlayDrop);
-
-    return () => {
-      map.Event.unbind("overlayClick", handleOverlayClick);
-      map.Event.unbind("overlayDrag", handleOverlayDrag);
-      map.Event.unbind("overlayDrop", handleOverlayDrop);
-      map.Overlays.remove(dot);
-      dotRef.current = null;
-    };
-  }, [
-    isReady,
-    map,
-    sphere,
-    position,
-    title,
-    detail,
-    visibleRange,
-    lineWidth,
-    lineColor,
-    clickable,
-    draggable,
-    zIndex,
-  ]);
+  }, [stablePosition, overlayRef]);
 
   useImperativeHandle(
     ref,
     () => ({
-      getDot: () => dotRef.current,
+      ...createGeometryRefMethods(
+        () => sphere,
+        () => overlayRef.current
+      ),
+      getDot: () => overlayRef.current,
       getPosition: () =>
-        (dotRef.current?.location() ?? null) as Location | null,
-      setPosition: (location: Location) => {
-        dotRef.current?.location(location);
+        overlayRef.current ? readLocation(overlayRef.current) : null,
+      setPosition: (location) => {
+        overlayRef.current?.location(location);
       },
     }),
-    []
+    [sphere, overlayRef]
   );
 
-  return null;
+  return portal;
 }

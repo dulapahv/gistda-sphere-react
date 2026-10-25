@@ -8,10 +8,11 @@ afterEach(() => {
 });
 
 /**
- * Creates a mock Sphere API for testing.
- * This mock simulates the behavior of the GISTDA Sphere API.
+ * A mock of the GISTDA Sphere API that mirrors the real runtime (verified
+ * against the live script): enum values are the runtime values (dash arrays,
+ * letter codes, bit flags), and `Event.fire` passes every argument through.
  */
-type EventHandler = (data?: unknown) => void;
+type EventHandler = (...args: unknown[]) => unknown;
 
 interface MockEvent {
   bind: Mock;
@@ -33,11 +34,39 @@ interface MockOverlays {
 interface MockLayers {
   add: Mock;
   clear: Mock;
+  insert: Mock;
   language: Mock;
   list: Mock;
   remove: Mock;
   setBase: Mock;
   size: Mock;
+}
+
+interface MockControl {
+  visible: Mock;
+}
+
+interface MockUi {
+  add: Mock;
+  ContextMenu: MockControl & { enableAddress: Mock; enableNearPoi: Mock };
+  Crosshair: MockControl;
+  DPad: MockControl;
+  Fullscreen: MockControl;
+  Geolocation: MockControl & { removeMarker: Mock; trigger: Mock };
+  Keyboard: { enable: Mock };
+  LayerSelector: MockControl & { language: Mock };
+  language: Mock;
+  lockMap: Mock;
+  Mouse: {
+    enable: Mock;
+    enableClick: Mock;
+    enableDrag: Mock;
+    enableWheel: Mock;
+  };
+  remove: Mock;
+  Scale: MockControl;
+  Toolbar: MockControl;
+  Zoombar: MockControl;
 }
 
 interface MockMap {
@@ -56,40 +85,46 @@ interface MockMap {
   Overlays: MockOverlays;
   pitch: Mock;
   placeholder: Mock;
-  Renderer: { on: Mock };
-  Route: Record<string, never>;
+  Renderer: Record<string, Mock>;
+  Route: Record<string, Mock>;
   repaint: Mock;
   resize: Mock;
   rotate: Mock;
-  Search: Record<string, never>;
-  Tags: Record<string, never>;
-  Ui: Record<string, never>;
+  Search: Record<string, Mock>;
+  Tags: Record<string, Mock>;
+  Ui: MockUi;
   zoom: Mock;
   zoomRange: Mock;
 }
 
 interface MockSphere {
   Circle: Mock;
+  CustomControl: Mock;
   Dot: Mock;
-  EventName: Record<string, never>;
-  Filter: Record<string, string>;
+  EventName: Record<string, string>;
+  Filter: Record<string, string | false>;
   Layer: Mock;
   Layers: Record<string, object>;
   LayerType: Record<string, string>;
-  LineStyle: Record<string, string>;
+  LineStyle: Record<string, number[]>;
   Map: Mock;
   Marker: Mock;
-  Math: Record<string, never>;
-  Overlays: Record<string, never>;
+  Math: Record<string, Mock>;
+  MenuBar: Mock;
+  ObjectLabel: { Title: object };
+  Overlays: Record<string, unknown>;
   Polygon: Mock;
   Polyline: Mock;
   Popup: Mock;
   Rectangle: Mock;
-  RouteLabel: Record<string, string>;
+  RouteLabel: Record<string, string | false>;
+  RouteLine: Record<string, string>;
   RouteMode: Record<string, string>;
-  RouteType: Record<string, string>;
+  RouteRestrict: Record<string, number>;
+  RouteType: Record<string, number>;
   TagType: Record<string, string>;
-  Util: Record<string, never>;
+  UiComponent: Record<string, string | false>;
+  Util: Record<string, Mock>;
 }
 
 interface MockSphereApi {
@@ -97,10 +132,30 @@ interface MockSphereApi {
   mockSphere: MockSphere;
 }
 
+/** Mock for a getter/setter method: returns `value` as a getter, `self` as a setter. */
+function accessor(value: unknown, self: () => unknown): Mock {
+  return vi
+    .fn()
+    .mockImplementation((...args: unknown[]) =>
+      args.length === 0 || args[0] === undefined ? value : self()
+    );
+}
+
+/** Mock for a built-in UI control with `visible()`. */
+function control(): MockControl {
+  const self: MockControl = {
+    visible: vi.fn(),
+  };
+  self.visible.mockImplementation((state?: boolean) =>
+    state === undefined ? true : self
+  );
+  return self;
+}
+
 export function createMockSphereApi(): MockSphereApi {
   const eventHandlers: Record<string, Set<EventHandler>> = {};
 
-  const mockEvent = {
+  const mockEvent: MockEvent = {
     bind: vi.fn((eventName: string, handler: EventHandler) => {
       if (!eventHandlers[eventName]) {
         eventHandlers[eventName] = new Set();
@@ -108,13 +163,13 @@ export function createMockSphereApi(): MockSphereApi {
       eventHandlers[eventName].add(handler);
       return mockEvent;
     }),
-    fire: vi.fn((eventName: string, data?: unknown) => {
-      const handlers = eventHandlers[eventName];
-      if (handlers) {
-        for (const handler of handlers) {
-          handler(data);
-        }
+    // Like Sphere, handlers receive every argument and `false` cancels.
+    fire: vi.fn((eventName: string, ...args: unknown[]) => {
+      let canceled = false;
+      for (const handler of eventHandlers[eventName] ?? []) {
+        canceled = handler(...args) === false || canceled;
       }
+      return !canceled;
     }),
     unbind: vi.fn((eventName: string, handler: EventHandler) => {
       eventHandlers[eventName]?.delete(handler);
@@ -122,7 +177,7 @@ export function createMockSphereApi(): MockSphereApi {
     }),
   };
 
-  const mockOverlays = {
+  const mockOverlays: MockOverlays = {
     add: vi.fn().mockReturnThis(),
     clear: vi.fn().mockReturnThis(),
     lastOpenPopup: vi.fn().mockReturnValue(null),
@@ -133,9 +188,15 @@ export function createMockSphereApi(): MockSphereApi {
     unload: vi.fn().mockReturnThis(),
   };
 
-  const mockLayers = {
-    add: vi.fn().mockReturnThis(),
+  const mockLayers: MockLayers = {
+    // Like Sphere for a layer whose style is loaded: added at once, then
+    // announced with `layerChange`.
+    add: vi.fn((layer: unknown) => {
+      mockEvent.fire("layerChange", layer);
+      return mockLayers;
+    }),
     clear: vi.fn().mockReturnThis(),
+    insert: vi.fn().mockReturnThis(),
     language: vi.fn().mockReturnThis(),
     list: vi.fn().mockReturnValue([]),
     remove: vi.fn().mockReturnThis(),
@@ -143,7 +204,40 @@ export function createMockSphereApi(): MockSphereApi {
     size: vi.fn().mockReturnValue(0),
   };
 
-  const mockMap = {
+  const placeholder = document.createElement("div");
+
+  const mockUi: MockUi = {
+    add: vi.fn().mockReturnThis(),
+    ContextMenu: {
+      ...control(),
+      enableAddress: vi.fn().mockReturnValue(true),
+      enableNearPoi: vi.fn().mockReturnValue(true),
+    },
+    Crosshair: control(),
+    DPad: control(),
+    Fullscreen: control(),
+    Geolocation: {
+      ...control(),
+      removeMarker: vi.fn(),
+      trigger: vi.fn().mockReturnValue(true),
+    },
+    Keyboard: { enable: vi.fn().mockReturnValue(true) },
+    LayerSelector: { ...control(), language: vi.fn() },
+    language: vi.fn().mockReturnValue("th"),
+    lockMap: vi.fn(),
+    Mouse: {
+      enable: vi.fn(),
+      enableClick: vi.fn().mockReturnValue(true),
+      enableDrag: vi.fn().mockReturnValue(true),
+      enableWheel: vi.fn().mockReturnValue(true),
+    },
+    remove: vi.fn().mockReturnThis(),
+    Scale: control(),
+    Toolbar: control(),
+    Zoombar: control(),
+  };
+
+  const mockMap: MockMap = {
     _triggerClick: (location: object) => mockEvent.fire("click", location),
     // Helper to trigger ready event in tests
     _triggerReady: () => mockEvent.fire("ready"),
@@ -154,7 +248,7 @@ export function createMockSphereApi(): MockSphereApi {
     goTo: vi.fn().mockReturnThis(),
     id: vi.fn().mockReturnValue(1),
     Layers: mockLayers,
-    language: vi.fn().mockReturnValue("th"),
+    language: accessor("th", () => mockMap),
     location: vi
       .fn()
       .mockImplementation((value?: object) =>
@@ -162,29 +256,23 @@ export function createMockSphereApi(): MockSphereApi {
       ),
     move: vi.fn().mockReturnThis(),
     Overlays: mockOverlays,
-    pitch: vi
-      .fn()
-      .mockImplementation((value?: number) =>
-        value === undefined ? 0 : mockMap
-      ),
-    placeholder: vi.fn().mockReturnValue(document.createElement("div")),
-    Renderer: { on: vi.fn() },
+    pitch: accessor(0, () => mockMap),
+    placeholder: vi.fn().mockReturnValue(placeholder),
+    Renderer: {
+      addControl: vi.fn(),
+      hasControl: vi.fn().mockReturnValue(false),
+      on: vi.fn(),
+      remove: vi.fn(),
+      removeControl: vi.fn(),
+    },
     Route: {},
     repaint: vi.fn().mockReturnThis(),
     resize: vi.fn().mockReturnThis(),
-    rotate: vi
-      .fn()
-      .mockImplementation((value?: number) =>
-        value === undefined ? 0 : mockMap
-      ),
+    rotate: accessor(0, () => mockMap),
     Search: {},
     Tags: {},
-    Ui: {},
-    zoom: vi
-      .fn()
-      .mockImplementation((value?: number) =>
-        value === undefined ? 10 : mockMap
-      ),
+    Ui: mockUi,
+    zoom: accessor(10, () => mockMap),
     zoomRange: vi.fn().mockReturnThis(),
   };
 
@@ -228,31 +316,34 @@ export function createMockSphereApi(): MockSphereApi {
   const mapConstructor = function () {
     return mockMap;
   };
-  const mockSphere = {
+  const mockSphere: MockSphere = {
     Circle: createMockOverlay("Circle"),
+    CustomControl: vi.fn().mockImplementation(function () {
+      return { onAdd: vi.fn(), onRemove: vi.fn(), visible: vi.fn() };
+    }),
     Dot: createMockOverlay("Dot"),
     EventName: {},
     Filter: {
-      Dark: "Dark" as const,
-      Deuteranopia: "Deuteranopia" as const,
-      Light: "Light" as const,
-      None: "None" as const,
-      Protanopia: "Protanopia" as const,
+      Dark: "DARK",
+      Deuteranopia: "DEUTERANOPIA",
+      Light: "LIGHT",
+      None: false,
+      Protanopia: "PROTANOPIA",
     },
     Layer: vi.fn().mockImplementation(function () {
       return {};
     }),
     Layers: {
-      DROUGHT: {},
-      FLOOD: {},
-      HOTSPOT: {},
-      HYBRID: {},
-      IMAGES: {},
-      PM25: {},
-      SIMPLE: {},
-      STREETS: {},
-      STREETS_NIGHT: {},
-      TRAFFIC: {},
+      DROUGHT: { style: "drought" },
+      FLOOD: { style: "flood" },
+      HOTSPOT: { style: "hotspot" },
+      HYBRID: { style: "hybrid" },
+      IMAGES: { style: "images" },
+      PM25: { style: "pm25" },
+      SIMPLE: { style: "simple" },
+      STREETS: { style: "streets" },
+      STREETS_NIGHT: { style: "night" },
+      TRAFFIC: { style: "traffic" },
     },
     LayerType: {
       I3S: "I3S",
@@ -265,28 +356,84 @@ export function createMockSphereApi(): MockSphereApi {
       XYZ: "XYZ",
     },
     LineStyle: {
-      Dashed: "Dashed",
-      Dot: "Dot",
-      Solid: "Solid",
+      Dashed: [6, 4],
+      Dot: [2, 2],
+      Solid: [0],
     },
     Map: vi.fn().mockImplementation(mapConstructor),
     Marker: createMockOverlay("Marker"),
-    Math: {},
-    Overlays: {},
+    Math: {
+      closestPointOnLine: vi.fn(),
+      distance: vi.fn(),
+      lineIntersectPoint: vi.fn(),
+    },
+    MenuBar: vi.fn().mockImplementation(function () {
+      return {
+        onAdd: vi.fn(),
+        onRemove: vi.fn(),
+        selectIndex: vi.fn(),
+        visible: vi.fn(),
+      };
+    }),
+    ObjectLabel: { Title: {} },
+    Overlays: {
+      aqi: { popup: true },
+      cameras: { motion: true, popup: true },
+      events: { popup: true },
+      Object: vi.fn().mockImplementation(function () {
+        return { popup: true, url: "" };
+      }),
+    },
     Polygon: createMockOverlay("Polygon"),
     Polyline: createMockOverlay("Polyline"),
     Popup: createMockOverlay("Popup"),
     Rectangle: createMockOverlay("Rectangle"),
-    RouteLabel: { Distance: "Distance", Hide: "Hide", Time: "Time" },
-    RouteMode: {
-      Cost: "Cost",
-      Distance: "Distance",
-      Fly: "Fly",
-      Traffic: "Traffic",
+    RouteLabel: { Distance: "d", Hide: false, Time: "t" },
+    RouteLine: {
+      Destination: "destination",
+      Ferry: "ferry",
+      Focus: "focus",
+      Road: "road",
     },
-    RouteType: { All: "All", Ferry: "Ferry", Road: "Road", Tollway: "Tollway" },
+    RouteMode: { Cost: "c", Distance: "d", Fly: "f", Traffic: "t" },
+    RouteRestrict: { Bike: 1 },
+    RouteType: { All: 127, Ferry: 8, Road: 1, Tollway: 16 },
     TagType: { OGC: "OGC", WFS: "WFS" },
-    Util: {},
+    UiComponent: { Full: "FULL", Mobile: "MOBILE", None: false },
+    Util: {
+      EsriJSONToGeoJSON: vi.fn().mockReturnValue({ type: "Point" }),
+      formatArea: vi.fn((value: number, lang: string) => `${value} m2 ${lang}`),
+      formatDate: vi.fn((value: string, lang: string) => `${value} ${lang}`),
+      formatDateTimeRange: vi.fn(
+        (start: string, stop: string, lang: string) =>
+          `${start}-${stop} ${lang}`
+      ),
+      formatDistance: vi.fn(
+        (value: number, lang: string) => `${value} m ${lang}`
+      ),
+      formatInterval: vi.fn(
+        (value: number, lang: string) => `${value} s ${lang}`
+      ),
+      formatThaiArea: vi.fn(
+        (value: number, lang: string) => `${value} rai ${lang}`
+      ),
+      formatTime: vi.fn((value: string) => `t:${value}`),
+      GMLToGeoJSON: vi.fn().mockReturnValue({ type: "Point" }),
+      GPXToGeoJSON: vi
+        .fn()
+        .mockReturnValue({ features: [], type: "FeatureCollection" }),
+      initLibrary: vi.fn().mockResolvedValue(undefined),
+      KMLToGeoJSON: vi
+        .fn()
+        .mockReturnValue({ features: [], type: "FeatureCollection" }),
+      latitudeLength: vi.fn().mockReturnValue(110_637),
+      longitudeLength: vi.fn().mockReturnValue(108_149),
+      project: vi.fn().mockReturnValue([608_446, 1_437_348]),
+      TopoJSONToGeoJSON: vi.fn().mockReturnValue({ type: "LineString" }),
+      WKTToGeoJSON: vi
+        .fn()
+        .mockReturnValue({ coordinates: [100, 13], type: "Point" }),
+    },
   };
 
   return { mockMap, mockSphere };

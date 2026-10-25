@@ -1,0 +1,45 @@
+---
+title: RouteGuide
+description: Sphere's built-in turn-by-turn panel for the route on the map
+---
+
+`<RouteGuide>` renders Sphere's own route panel: distance, travel time, turn-by-turn instructions and route options. Put it anywhere inside `SphereProvider`, such as a sidebar, and plan the route with [`useRoute`](/docs/hooks/use-route).
+
+```tsx
+import { RouteGuide, useRoute } from "gistda-sphere-react";
+
+function Directions() {
+  const route = useRoute();
+  return (
+    <aside>
+      <button
+        type="button"
+        onClick={() => {
+          route.clear();
+          route.addDestination({ lon: 100.5018, lat: 13.7563 });
+          route.addDestination({ lon: 98.9853, lat: 18.7883 });
+          route.search();
+        }}
+      >
+        Bangkok → Chiang Mai
+      </button>
+      <RouteGuide className="max-h-96 overflow-auto bg-white text-black" />
+    </aside>
+  );
+}
+```
+
+Try it in the [routing example](/docs/examples/routing) (the "Sphere's guide" button).
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `className` | `string` | Class for the container element. |
+| `style` | `CSSProperties` | Styles for the container element. |
+
+## Things to know
+
+- Attaching a guide turns on automatic re-routing: the route recalculates whenever stops change or are dragged. This is how the Sphere API behaves.
+- The panel uses Sphere's styles, which assume a light background. In a dark theme, give the container a white background.
+- For a guide styled like the rest of your app, render [`useRoute().steps`](/docs/hooks/use-route#turn-by-turn-directions) yourself instead.

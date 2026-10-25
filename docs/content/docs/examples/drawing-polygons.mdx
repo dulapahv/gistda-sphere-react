@@ -1,23 +1,31 @@
 ---
-title: Drawing Polygons
-description: Click to add points, double-click to finish
+title: Drawing polygons
+description: Click to add corners, double-click to finish
 ---
 
-Click to add points, double-click to finish the polygon:
+Click to add corners, then double-click (or press Finish) to complete the polygon:
 
 <DrawingDemo />
 
 ```tsx tab="Component" lineNumbers
-import { useState } from 'react';
-import { SphereProvider, SphereMap, Polygon, Marker, type Location } from 'gistda-sphere-react';
+import { useState } from "react";
+import { Dot, Polygon, SphereMap, SphereProvider, type Location } from "gistda-sphere-react";
+
+/** Drops repeated points: the two clicks of a double-click land on the same spot. */
+const withoutRepeats = (points: Location[]) =>
+  points.filter(
+    (point, index) =>
+      index === 0 || point.lat !== points[index - 1].lat || point.lon !== points[index - 1].lon
+  );
 
 function App() {
   const [points, setPoints] = useState<Location[]>([]);
   const [polygons, setPolygons] = useState<Location[][]>([]);
 
-  const handleDoubleClick = () => {
-    if (points.length >= 3) {
-      setPolygons([...polygons, points]);
+  const finish = () => {
+    const corners = withoutRepeats(points);
+    if (corners.length >= 3) {
+      setPolygons((previous) => [...previous, corners]);
       setPoints([]);
     }
   };
@@ -27,20 +35,16 @@ function App() {
       <SphereMap
         center={{ lon: 100.5, lat: 13.75 }}
         zoom={10}
-        style={{ height: '500px' }}
-        onClick={(location) => setPoints([...points, location])}
-        onDoubleClick={handleDoubleClick}
+        style={{ height: 500 }}
+        onClick={({ lat, lon }) => setPoints((previous) => [...previous, { lat, lon }])}
+        onDoubleClick={finish}
+        options={{ doubleClickZoom: false }} // keep double-clicks for finishing
       >
-        {polygons.map((positions) => (
-          <Polygon
-            key={positions.map((p) => `${p.lon},${p.lat}`).join('|')}
-            positions={positions}
-            fillColor="rgba(255,0,0,0.3)"
-            lineColor="red"
-          />
+        {polygons.map((corners, index) => (
+          <Polygon key={index} positions={corners} fillColor="rgba(255,0,0,0.3)" lineColor="red" />
         ))}
-        {points.map((pos) => (
-          <Marker key={`${pos.lon}-${pos.lat}`} position={pos} />
+        {points.map((point, index) => (
+          <Dot key={index} position={point} lineColor="red" lineWidth={8} />
         ))}
       </SphereMap>
     </SphereProvider>
@@ -48,41 +52,43 @@ function App() {
 }
 ```
 
-```tsx tab="Hook" lineNumbers
-import { useState } from 'react';
+```tsx tab="Hooks" lineNumbers
+import { useState } from "react";
 import {
-  SphereProvider, SphereMap, Polygon, Marker,
-  usePolygons, useMapEvent, type Location,
-} from 'gistda-sphere-react';
+  Dot, Polygon, SphereMap, SphereProvider,
+  useMapEvent, usePolygons, type Location,
+} from "gistda-sphere-react";
+
+/** Drops repeated points: the two clicks of a double-click land on the same spot. */
+const withoutRepeats = (points: Location[]) =>
+  points.filter(
+    (point, index) =>
+      index === 0 || point.lat !== points[index - 1].lat || point.lon !== points[index - 1].lon
+  );
 
 function PolygonDrawer() {
   const [points, setPoints] = useState<Location[]>([]);
-  const { items: polygons, add, clear } = usePolygons();
+  const { items: polygons, add } = usePolygons();
 
-  useMapEvent('click', (location) => {
-    setPoints((prev) => [...prev, location]);
+  useMapEvent("click", ({ lat, lon }) => {
+    setPoints((previous) => [...previous, { lat, lon }]);
   });
 
-  const handleDoubleClick = () => {
-    if (points.length >= 3) {
-      add({ positions: points, fillColor: 'rgba(255,0,0,0.3)', lineColor: 'red' });
+  useMapEvent("doubleClick", () => {
+    const corners = withoutRepeats(points);
+    if (corners.length >= 3) {
+      add({ positions: corners, fillColor: "rgba(255,0,0,0.3)", lineColor: "red" });
       setPoints([]);
     }
-  };
+  });
 
   return (
     <>
-      <button onClick={clear}>Clear Polygons</button>
-      {polygons.map((p) => (
-        <Polygon
-          key={p.id}
-          positions={p.positions}
-          fillColor={p.fillColor}
-          lineColor={p.lineColor}
-        />
+      {polygons.map(({ id, ...polygon }) => (
+        <Polygon key={id} {...polygon} />
       ))}
-      {points.map((pos) => (
-        <Marker key={`${pos.lon}-${pos.lat}`} position={pos} />
+      {points.map((point, index) => (
+        <Dot key={index} position={point} lineColor="red" lineWidth={8} />
       ))}
     </>
   );
@@ -94,8 +100,8 @@ function App() {
       <SphereMap
         center={{ lon: 100.5, lat: 13.75 }}
         zoom={10}
-        style={{ height: '500px' }}
-        onDoubleClick={() => {/* handled in PolygonDrawer */}}
+        style={{ height: 500 }}
+        options={{ doubleClickZoom: false }}
       >
         <PolygonDrawer />
       </SphereMap>
@@ -103,3 +109,10 @@ function App() {
   );
 }
 ```
+
+## Tips
+
+- A double-click also sends two clicks. Drop repeated points before finishing, as above.
+- `options={{ doubleClickZoom: false }}` stops double-clicks from zooming the map. Pass it only while drawing if you want zooming the rest of the time.
+- Sphere also has a built-in drawing toolbar: show it with `controls={{ Toolbar: true }}` and receive the shapes from `onDrawCreate`.
+- The [playground](/playground) has a complete drawing tool with lines, circles, rectangles, measurements and spatial analysis.

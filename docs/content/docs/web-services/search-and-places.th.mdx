@@ -1,0 +1,79 @@
+---
+title: การค้นหาและสถานที่
+description: ค้นหาด้วยคำค้นหา คำแนะนำขณะพิมพ์ สถานที่ใกล้เคียง รายละเอียดสถานที่ POI รายไทล์ และหมวดหมู่แท็ก
+---
+
+บริการเหล่านี้ค้นหาฐานข้อมูลสถานที่ของ Sphere หากใช้บนแผนที่ [`useSearch`](/th/docs/hooks/use-search) ทำงานแบบเดียวกันผ่านแผนที่ ส่วนเมธอดด้านล่างไม่ต้องมีแผนที่
+
+## การค้นหา [#search]
+
+```ts
+const { data, meta } = await services.search.search("โรงพยาบาล", {
+  near: { lon: 100.5383, lat: 13.7649 },
+  showDistance: true,
+  limit: 10,
+});
+
+for (const place of data) {
+  console.log(place.name, place.address, place.distance);
+}
+```
+
+| ตัวเลือก | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `limit`, `offset` | `number` | การแบ่งหน้า `meta.hasmore` บอกว่ายังมีผลลัพธ์อีกหรือไม่ |
+| `near` | `Location` | ให้ความสำคัญกับผลลัพธ์รอบตำแหน่งนี้ |
+| `showDistance` | `boolean` | ใส่ `distance` (เมตร) จาก `near` ในแต่ละผลลัพธ์ |
+| `tag` | `string \| string[]` | เฉพาะสถานที่ที่มีแท็กเหล่านี้ |
+| `locale` | `"th" \| "en"` | ภาษาของชื่อและที่อยู่ |
+
+## คำแนะนำขณะพิมพ์ [#autocomplete]
+
+```ts
+const { data } = await services.search.suggest("เซ็นทรัล", { limit: 5, soundex: true });
+// data: [{ name: "เซ็นทรัลเวิลด์", highlight: "<b>เซ็นทรัล</b>เวิลด์" }, …]
+```
+
+`soundex: true` จะแนะนำคำที่ออกเสียงคล้ายกันด้วย ช่วยเมื่อพิมพ์ผิด
+
+## สถานที่ใกล้เคียง [#nearby-places]
+
+```ts
+const { data } = await services.poi.nearby(
+  { lon: 100.5383, lat: 13.7649 },
+  { span: "1km", tag: "คอฟฟี่ช็อป", limit: 20 }
+);
+```
+
+| ตัวเลือก | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `span` | `string` | รัศมีการค้นหาพร้อมหน่วย: `"500m"`, `"1km"`, `"0.01deg"` |
+| `tag` | `string \| string[]` | เฉพาะสถานที่ที่มีแท็กเหล่านี้ |
+| `limit`, `offset`, `locale` | | เหมือนกับการค้นหา |
+
+## รายละเอียดสถานที่ [#place-details]
+
+```ts
+const place = await services.poi.get("P00000046", { locale: "en" });
+console.log(place.name, place.tel, place.url);
+// Areas such as "A10000000" (Bangkok) include their outline in `place.geo`.
+```
+
+หากต้องการวาดขอบเขตของสถานที่บนแผนที่ ให้ใช้ [`<ObjectOverlay>`](/th/docs/components/object-overlay)
+
+## POI รายไทล์ [#pois-per-map-tile]
+
+```ts
+const items = await services.poi.cluster({ z: 12, x: 3191, y: 1889 }, { tag: "โรงพยาบาล" });
+```
+
+คืนค่า POI ในไทล์แบบ web-mercator หนึ่งไทล์ เหมาะสำหรับวาด POI ด้วยไลบรารีแผนที่ของคุณเอง
+
+## หมวดหมู่แท็ก [#tag-categories]
+
+```ts
+const categories = await services.tags.categories();
+// [{ name: { th: "อาหาร", en: "Food" }, icon: "food", sub: [{ name: { th: "อาหารไทย", en: "Thai" } }, …] }, …]
+```
+
+รายการนี้เปิดสาธารณะและไม่ต้องใช้ API key ใน React ใช้ [`useTagCategories`](/th/docs/hooks/use-tag-categories) เพื่อโหลดให้อัตโนมัติ

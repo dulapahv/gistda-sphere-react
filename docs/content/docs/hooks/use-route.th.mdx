@@ -1,91 +1,37 @@
 ---
 title: useRoute
-description: คำนวณและแสดงเส้นทางระหว่างตำแหน่งต่างๆ
+description: วางแผนเส้นทางแบบหลายจุดแวะและหลายรูปแบบการเดินทาง พร้อมสถานะ ระยะทางและเวลารวม และการนำทางทีละขั้น
 ---
 
-คำนวณและแสดงเส้นทางระหว่างตำแหน่งต่างๆ
+`useRoute` ใช้คำนวณเส้นทางบนแผนที่และเก็บผลลัพธ์ไว้ใน React state ได้แก่ สถานะ ข้อผิดพลาด ระยะทางและเวลารวม และขั้นตอนการนำทางทีละขั้นที่พร้อมนำไปแสดงผล ใช้งานได้ทั้งภายใน `SphereMap` และทุกที่ภายใต้ `SphereProvider`
 
 <RouteDemo />
 
 ```tsx
-import { useRoute } from 'gistda-sphere-react';
+import { useRoute } from "gistda-sphere-react";
 
-function RouteComponent() {
-  const { addDestination, search, getDistance, getInterval, clear, isReady } = useRoute();
+function Directions() {
+  const route = useRoute();
+  const { status, error, summary, steps } = route;
 
-  const calculateRoute = () => {
-    addDestination({ lon: 100.5018, lat: 13.7563 });
-    addDestination({ lon: 98.9853, lat: 18.7883 });
-    search();
+  const plan = () => {
+    route.clear();
+    route.addDestination({ lon: 100.5018, lat: 13.7563 }); // Bangkok
+    route.addDestination({ lon: 98.9853, lat: 18.7883 });  // Chiang Mai
+    route.search();
   };
 
   return (
     <div>
-      <button onClick={calculateRoute}>คำนวณเส้นทาง</button>
-      <button onClick={clear}>ล้าง</button>
-    </div>
-  );
-}
-```
-
-## ตัวเลือก (Options)
-
-`useRoute` รับ options object สำหรับ event ของเส้นทาง:
-
-| Option | Type | Description |
-|--------|------|-------------|
-| `onRouteComplete` | `(routes: unknown[]) => void` | เรียกเมื่อการคำนวณเส้นทางเสร็จสมบูรณ์ |
-| `onRouteError` | `(errorCode: number) => void` | เรียกเมื่อการคำนวณเส้นทางล้มเหลว |
-
-```tsx
-const { search, getDistance, getInterval, addDestination, clear } = useRoute({
-  onRouteComplete() {
-    console.log('ระยะทาง:', getDistance(true));
-    console.log('ระยะเวลา:', getInterval(true));
-  },
-  onRouteError(code) {
-    console.error('เกิดข้อผิดพลาดในการหาเส้นทาง:', code);
-  },
-});
-```
-
-## เส้นทางแบบทีละขั้นตอน (Turn-by-Turn Directions)
-
-ใช้ `getGuide()` เพื่อดึงคำแนะนำการนำทางแบบทีละขั้นตอนหลังจากคำนวณเส้นทางแล้ว
-
-- `getGuide()` ส่งกลับอาร์เรย์ของ `RouteGuideStep` objects
-- `getGuide(true)` ส่งกลับ `HTMLElement` ที่มีคำแนะนำในรูปแบบพร้อมแสดงผล
-
-```tsx
-import { useRoute, type RouteGuideStep } from 'gistda-sphere-react';
-
-function TurnByTurnRoute() {
-  const [steps, setSteps] = useState<RouteGuideStep[]>([]);
-
-  const { addDestination, search, getGuide } = useRoute({
-    onRouteComplete() {
-      const guide = getGuide();
-      if (Array.isArray(guide)) {
-        setSteps(guide as RouteGuideStep[]);
-      }
-    },
-  });
-
-  return (
-    <div>
-      <button onClick={() => {
-        addDestination({ lon: 100.5018, lat: 13.7563 });
-        addDestination({ lon: 98.9853, lat: 18.7883 });
-        search();
-      }}>
-        ดูเส้นทาง
-      </button>
+      <button onClick={plan} disabled={status === "calculating"}>Plan route</button>
+      {error && <p>{error.message}</p>}
+      {summary && (
+        <p>{summary.distanceText} · {summary.intervalText}</p>
+      )}
       <ol>
-        {steps.map((step, i) => (
-          <li key={i}>
-            <strong>{step.instruction}</strong>
-            <span> — {String(step.distance)}</span>
-            {step.duration && <span> · {String(step.duration)}</span>}
+        {steps.map((step, index) => (
+          <li key={index}>
+            {step.instruction} ({step.distanceText})
           </li>
         ))}
       </ol>
@@ -94,64 +40,128 @@ function TurnByTurnRoute() {
 }
 ```
 
-### RouteGuideStep
+Sphere เป็นผู้วาดเส้นทางและหมุดจุดแวะบนแผนที่ ผู้ใช้ลากจุดแวะได้ และคลิกที่จุดแวะเพื่อลบได้
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `instruction` | `string` | ข้อความคำแนะนำการนำทางแบบทีละขั้นตอน |
-| `distance` | `number \| string` | ระยะทางของขั้นตอนนี้ |
-| `duration` | `number \| string` | ระยะเวลาของขั้นตอนนี้ |
-| `location` | `Location` | พิกัดทางภูมิศาสตร์ของขั้นตอนนี้ |
+## สถานะผลลัพธ์ [#result-state]
 
-## ฟังก์ชัน
+| Property | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `status` | `"idle" \| "calculating" \| "complete" \| "error"` | ขั้นตอนของการคำนวณ |
+| `isCalculating` | `boolean` | ทางลัดของ `status === "calculating"` |
+| `summary` | `RouteSummary \| null` | ผลรวม: `distance` (ม.), `distanceText`, `interval` (วินาที), `intervalText` |
+| `steps` | `RouteStep[]` | คำแนะนำทีละขั้น |
+| `routes` | `RouteResult[]` | ข้อมูลช่วงเส้นทาง (leg) จาก Sphere หนึ่งช่วงต่อจุดแวะสองจุดที่ติดกัน |
+| `error` | `RouteErrorInfo \| null` | สาเหตุที่การคำนวณล่าสุดไม่สำเร็จ |
+| `isReady` | `boolean` | เป็น `true` เมื่อแผนที่พร้อมใช้งาน |
 
-| Function | Parameters | Returns | Description |
-|----------|------------|---------|-------------|
-| `isReady` | - | `boolean` | บริการหาเส้นทางถูกสร้างแล้ว |
-| `addDestination` | `(destination, mode?)` | `void` | เพิ่มจุดหมาย |
-| `insertDestination` | `(index, destination, mode?)` | `void` | แทรกจุดหมายที่ตำแหน่งระบุ |
-| `removeDestination` | `(marker)` | `void` | ลบจุดหมายด้วย marker ref |
-| `removeDestinationAt` | `(index)` | `void` | ลบจุดหมายด้วยลำดับ |
-| `clearDestinations` | `()` | `void` | ลบจุดหมายทั้งหมด |
-| `clearPath` | `()` | `void` | ลบเฉพาะเส้นทาง |
-| `clear` | `()` | `void` | ลบเส้นทางทั้งหมด |
-| `reverse` | `()` | `void` | กลับทิศทาง |
-| `search` | `()` | `void` | คำนวณและแสดงเส้นทาง |
-| `getDistance` | `(format?)` | `number \| string` | ระยะทางรวม |
-| `getInterval` | `(format?)` | `number \| string` | เวลาเดินทางโดยประมาณ |
-| `getGuide` | `(format?)` | `RouteGuideStep[] \| HTMLElement` | คำแนะนำการนำทางแบบทีละขั้นตอน |
-| `exportRouteLine` | `(options?)` | `SpherePolyline \| null` | ส่งออกเป็น Polyline |
-| `listDestinations` | `()` | `SphereMarker[]` | รายการ marker ของจุดหมาย |
-| `size` | `()` | `number` | จำนวนจุดหมาย |
-| `setMode` | `(mode)` | `void` | ตั้งค่าโหมดการหาเส้นทาง |
-| `setModeAt` | `(index, mode)` | `void` | ตั้งค่าโหมดสำหรับช่วงเส้นทาง |
-| `enableRouteType` | `(routeType, state)` | `void` | เปิด/ปิดประเภทเส้นทาง |
-| `setLabel` | `(label)` | `void` | ตั้งค่าโหมดแสดงผลป้ายกำกับ |
-| `setAuto` | `(state)` | `void` | เปิด/ปิดการคำนวณซ้ำอัตโนมัติ |
-| `setLanguage` | `(lang: "th" \| "en")` | `void` | ตั้งค่าภาษาเส้นทาง: `"th"` หรือ `"en"` |
+## คำแนะนำทีละขั้น [#turn-by-turn-directions]
 
-## RouteMode
+แต่ละขั้นพร้อมแสดงผลทันที
 
-| Mode | Description |
-|------|-------------|
-| `"Traffic"` | เส้นทางเร็วที่สุดโดยใช้ข้อมูลจราจรแบบเรียลไทม์ |
-| `"Cost"` | เส้นทางเร็วที่สุดโดยไม่รวมข้อมูลจราจร |
-| `"Distance"` | เส้นทางสั้นที่สุดตามระยะทาง |
-| `"Fly"` | เส้นตรงโดยตรง |
+| ฟิลด์ของ `RouteStep` | ตัวอย่าง | คำอธิบาย |
+| --- | --- | --- |
+| `instruction` | `"เลี้ยวขวาสู่ ถนนสาทรเหนือ"` | คำแนะนำที่อ่านเข้าใจง่ายในภาษาของเส้นทาง |
+| `distanceText` | `"640 ม."` | ระยะทางของขั้นนี้ |
+| `intervalText` | `"1 นาที"` | เวลาของขั้นนี้ (ว่างในโหมดเส้นตรง) |
+| `turn` | `1` | รหัสการเลี้ยว เปรียบเทียบกับ [`ROUTE_TURN`](#turn-codes) เพื่อเลือกไอคอน |
+| `name` | `"ถนนสาทรเหนือ"` | ชื่อถนน |
+| `distance`, `interval` | `640`, `60` | ค่าดิบเป็นเมตรและวินาที |
+| `legIndex` | `0` | ช่วงเส้นทาง (คู่จุดแวะ) ที่ขั้นนี้อยู่ |
 
-## RouteType
+คำแนะนำใช้ภาษาของเส้นทาง ซึ่งเปลี่ยนได้ด้วย `setLanguage("en")` หากต้องการแผงนำทางแบบมีสไตล์ของ Sphere ให้เพิ่ม [`<RouteGuide>`](/th/docs/components/route-guide)
 
-| Type | Description |
-|------|-------------|
-| `"Road"` | ถนนปกติ |
-| `"Ferry"` | เส้นทางเรือข้ามฟาก |
-| `"Tollway"` | ทางด่วน |
-| `"All"` | ทุกประเภทเส้นทาง |
+ชื่อถนนมาจากบริการหาเส้นทางในภาษาที่ใช้ตอนคำนวณ ดังนั้นหลังเปลี่ยนภาษา (ด้วย `setLanguage` หรือ prop `language` ของ `SphereMap`) ให้เรียก `search()` อีกครั้งเพื่ออัปเดตชื่อถนน
 
-## RouteLabelType
+### รหัสการเลี้ยว [#turn-codes]
 
-| Label | Description |
-|-------|-------------|
-| `"Distance"` | แสดงป้ายกำกับระยะทาง |
-| `"Time"` | แสดงป้ายกำกับเวลา |
-| `"Hide"` | ซ่อนป้ายกำกับทั้งหมด |
+```tsx
+import { ROUTE_TURN } from "gistda-sphere-react";
+
+const icons = {
+  [ROUTE_TURN.TurnLeft]: "↰",
+  [ROUTE_TURN.TurnRight]: "↱",
+  [ROUTE_TURN.Straight]: "↑",
+  [ROUTE_TURN.UTurn]: "↶",
+  [ROUTE_TURN.Arrive]: "⚑",
+};
+```
+
+`ROUTE_TURN` มี `TurnLeft`, `TurnRight`, `SlightLeft`, `SlightRight`, `HeadToward`, `Straight`, `EnterExpressway`, `UTurn`, `Arrive` และ `Ferry` ส่วน `getTurnInstruction(turn, roadName, language)` ใช้สร้างข้อความคำแนะนำเอง เช่น สำหรับข้อมูลที่ได้จาก[บริการเว็บการนำทาง](/th/docs/web-services/routing)
+
+## ข้อผิดพลาด [#errors]
+
+| `error.code` | ความหมาย |
+| --- | --- |
+| ตัวเลข | รหัสสถานะของ Sphere เช่น `410` เมื่อไม่มีข้อมูลในช่วงเวลาที่เลือก |
+| `"timeout"` | บริการนำทางไม่ตอบกลับภายใน `timeout` (ค่าเริ่มต้น 20 วินาที) มักเกิดจาก API key ยังไม่ได้เปิดบริการนำทาง |
+| `"exception"` | Sphere เกิดข้อผิดพลาดขณะวางแผนเส้นทาง รายละเอียดอยู่ใน `error.message` |
+
+## ตัวเลือก [#options]
+
+```tsx
+const route = useRoute({
+  timeout: 15_000,
+  onRouteComplete: (routes) => console.log("Done", routes),
+  onError: (error) => toast(error.message),
+});
+```
+
+| ตัวเลือก | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `timeout` | `number` | เวลารอ (มิลลิวินาที) ก่อนรายงานข้อผิดพลาด `"timeout"` ค่าเริ่มต้น `20000` ส่ง `0` เพื่อปิด |
+| `onRouteComplete` | `(routes) => void` | คำนวณเส้นทางเสร็จ |
+| `onRouteError` | `(status) => void` | Sphere รายงานรหัสข้อผิดพลาดของการนำทาง |
+| `onError` | `(error: RouteErrorInfo) => void` | ข้อผิดพลาดทุกแบบ รวมถึงหมดเวลา |
+
+## จุดแวะ [#stops]
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `addDestination(location, mode?)` | เพิ่มจุดแวะ (ตำแหน่งหรือ `sphere.Marker`) และกำหนดรูปแบบการเดินทางของช่วงถัดไปได้ |
+| `insertDestination(index, location, mode?)` | แทรกจุดแวะที่ลำดับที่กำหนด |
+| `removeDestination(marker)` / `removeDestinationAt(index)` | ลบจุดแวะ |
+| `listDestinations()` / `size()` | หมุดของจุดแวะ / จำนวนจุดแวะ |
+| `reverse()` | สลับลำดับจุดแวะย้อนกลับ |
+| `clearDestinations()` | ลบจุดแวะทั้งหมด |
+| `clearPath()` | ลบเส้นทางที่วาดไว้ แต่เก็บจุดแวะไว้ |
+| `clear()` | ลบจุดแวะและเส้นทาง และรีเซ็ตสถานะผลลัพธ์ |
+| `search()` | คำนวณเส้นทาง |
+
+## รูปแบบการเดินทางและตัวเลือก [#travel-modes-and-options]
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `setMode(mode)` / `getMode()` | `"Traffic"` (เร็วที่สุด เลี่ยงรถติด ค่าเริ่มต้น), `"Cost"` (เร็วที่สุดโดยไม่ใช้ข้อมูลจราจร), `"Distance"` (สั้นที่สุด) หรือ `"Fly"` (เส้นตรง) |
+| `setModeAt(index, mode)` / `getModeAt(index)` | รูปแบบของช่วงที่เริ่มจากจุดแวะนั้น |
+| `enableRouteType(type, state)` / `isRouteTypeEnabled(type)` | อนุญาตหรือเลี่ยง `"Road"`, `"Ferry"`, `"Tollway"` หรือ `"All"` |
+| `setRestrict("Bike", state)` / `isRestrictEnabled("Bike")` | เลี่ยงถนนที่ห้ามรถจักรยานยนต์ |
+| `setLabel(label)` / `getLabel()` | ป้ายบนเส้นทาง: `"Distance"`, `"Time"` หรือ `"Hide"` |
+| `setLineStyle(part, style)` / `getLineStyle(part)` | รูปแบบของเส้น `"Road"`, `"Ferry"`, `"Destination"` หรือ `"Focus"` |
+| `setAuto(state)` / `getAuto()` | คำนวณใหม่อัตโนมัติเมื่อจุดแวะเปลี่ยน |
+| `enableContextMenu()` | เพิ่มรายการ "เดินทางมาจุดนี้" ในเมนูคลิกขวา ซึ่งเพิ่มจุดแวะ ณ ตำแหน่งนั้น และเปิด `auto` ด้วย |
+| `setLanguage(language)` / `getLanguage()` | ภาษาของคำแนะนำและป้าย |
+
+```tsx
+route.setMode("Distance");
+route.enableRouteType("Tollway", false); // avoid tollways
+route.setRestrict("Bike", true);         // motorcycle-friendly roads
+route.setLineStyle("Road", { lineColor: "#2563eb", lineWidth: 6 });
+```
+
+<Callout>
+  โหมด Fly จะวาดเส้นตรงและใช้งานได้โดยไม่ต้องเปิดบริการนำทาง เนื่องจาก Sphere ไม่รองรับการแสดงป้ายบนช่วงเส้นตรง (จะโยนข้อผิดพลาด) `useRoute` จึงซ่อนป้ายบนเส้นทางระหว่างใช้โหมด Fly และคืนค่าการตั้งค่าป้ายเดิมเมื่อเปลี่ยนโหมด
+</Callout>
+
+## ข้อมูลและการส่งออก [#data-and-export]
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `getSteps()` | ขั้นของเส้นทางปัจจุบัน อ่านเมื่อต้องการ |
+| `getDistance(format?)` / `getInterval(format?)` | ผลรวมเป็นเมตร / วินาที หรือข้อความที่จัดรูปแบบแล้ว |
+| `getGuide(format?)` | ข้อมูลช่วงเส้นทางดิบ หรือคำแนะนำที่จัดรูปแบบของ Sphere เป็น `DocumentFragment` |
+| `exportRouteLine(style?)` | เส้นทางทั้งหมดเป็น `sphere.Polyline` เส้นเดียว (ไม่ถูกเพิ่มลงแผนที่) เรียก `.toJSON()` เพื่อได้ GeoJSON |
+| `setPlaceholder(element)` | แสดงแผงนำทางของ Sphere ใน element |
+
+<Callout type="warn">
+  การนำทางต้องเปิดบริการนำทางให้กับ API key ของคุณ หากไม่ได้เปิด Sphere จะไม่แจ้งข้อผิดพลาดใด ๆ โดย `useRoute` จะรายงานข้อผิดพลาด `"timeout"` แทนการรอไปเรื่อย ๆ
+</Callout>

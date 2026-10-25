@@ -1,0 +1,70 @@
+---
+title: GeoJson
+description: Show a GeoJSON geometry, feature or feature collection, with per-feature styles and clicks
+---
+
+`<GeoJson>` draws GeoJSON data as Sphere overlays: points as markers (or dots), lines as polylines and polygons as polygons. Combined with [`useSphereUtils`](/docs/hooks/use-sphere-utils), it also shows KML, GPX, WKT and other formats.
+
+<GeoJsonDemo />
+
+```tsx
+import { GeoJson } from "gistda-sphere-react";
+
+<SphereMap>
+  <GeoJson
+    data={districts}
+    fitBounds
+    style={(feature) => ({
+      fillColor: feature.properties?.risk === "high" ? "rgba(239,68,68,.4)" : "rgba(34,197,94,.3)",
+      lineColor: "#333",
+      lineWidth: 1,
+    })}
+    onClick={(feature) => setSelected(feature.properties?.name)}
+  />
+</SphereMap>
+```
+
+## Props
+
+| Prop | Type | Description |
+| --- | --- | --- |
+| `data` | `GeoJSON` | **Required.** A geometry, feature or feature collection. `GeometryCollection`s and multi-geometries are supported. |
+| `style` | `GeometryOptions \| (feature) => GeometryOptions` | Style for lines, polygons and dots, or a function that returns one per feature. |
+| `pointType` | `"marker" \| "dot"` | Draw points as markers (default) or as dots styled with `style`. |
+| `markerOptions` | `MarkerOptions \| (feature) => MarkerOptions` | Options for point markers, such as `icon` or `title`. |
+| `fitBounds` | `boolean \| FitBoundsOptions` | Fit the map to the data after drawing it, e.g. `{ padding: 40, maxZoom: 16 }`. |
+| `onClick` | `(feature, overlay, location) => void` | A feature was clicked. |
+| `onHover` / `onLeave` | `(feature, overlay) => void` | The pointer entered / left a feature. |
+| `ref` | `Ref<GeoJsonRef>` | `getOverlays()` and `getBound()`. |
+
+<Callout>
+  The data is compared by value, so an inline object doesn't redraw on every render. For large datasets, still keep the object stable (state or `useMemo`) to skip the comparison.
+</Callout>
+
+## Showing KML, GPX and WKT
+
+```tsx
+const { kmlToGeoJSON } = useSphereUtils();
+const [data, setData] = useState<GeoJSON | null>(null);
+
+async function open(file: File) {
+  setData(await kmlToGeoJSON(await file.text()));
+}
+
+{data && <GeoJson data={data} fitBounds />}
+```
+
+See [Data formats](/docs/examples/data-formats) for every supported format.
+
+## Labels from properties
+
+```tsx
+<GeoJson
+  data={stations}
+  markerOptions={(feature) => ({ title: String(feature.properties?.name) })}
+/>
+```
+
+## When to use `<Layer style>` instead
+
+`<GeoJson>` creates one Sphere overlay per feature, so each one can be clicked, styled and given a popup. For thousands of points, or for heatmaps and clustering, add the data as a MapLibre source with [`<Layer style>`](/docs/components/layer#maplibre-styles-heatmaps-clusters-and-vector-tiles) instead, which renders it on the GPU.

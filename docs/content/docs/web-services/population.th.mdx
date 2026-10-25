@@ -1,0 +1,32 @@
+---
+title: ประชากร
+description: ประมาณจำนวนประชากรในพื้นที่
+---
+
+`population.get` ประมาณจำนวนประชากรภายในพื้นที่ จากแผนที่ความหนาแน่นประชากรความละเอียดสูงของ Meta
+
+```ts
+const result = await services.population.get(
+  "POLYGON((100.49 13.76, 100.52 13.76, 100.52 13.73, 100.49 13.73, 100.49 13.76))",
+  { year: 2020 }
+);
+console.log(result.data, result.meta);
+```
+
+| พารามิเตอร์ | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `wkt` | `string` | พื้นที่ในรูปแบบ well-known text (WKT) ไม่เกิน 1,000 ตร.กม. |
+| `year` | `number` | ปีของข้อมูลประมาณการ |
+
+## จากรูปทรงที่วาด [#from-a-drawn-shape]
+
+รูปทรงที่วาดบนแผนที่แปลงเป็น WKT ได้ เช่น จาก ref ของรูปหลายเหลี่ยม
+
+```ts
+const feature = polygonRef.current?.toGeoJSON() as GeoJSONFeature<GeoJSONPolygon>;
+const ring = feature.geometry.coordinates[0];
+const wkt = `POLYGON((${ring.map(([lon, lat]) => `${lon} ${lat}`).join(", ")}))`;
+const result = await services.population.get(wkt);
+```
+
+รูปหลายเหลี่ยมขนาดใหญ่ทำให้คำขอยาว ไคลเอนต์จะส่งแบบ POST ให้อัตโนมัติ

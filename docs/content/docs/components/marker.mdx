@@ -1,9 +1,9 @@
 ---
 title: Marker
-description: Display a point marker on the map
+description: A point on the map, with an image, HTML or React icon and an optional popup
 ---
 
-<MapDemo height="400px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }} language="en">
+<MapDemo height="400px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Marker
     position={{ lon: 100.5018, lat: 13.7563 }}
     title="Bangkok"
@@ -18,54 +18,121 @@ description: Display a point marker on the map
   title="Bangkok"
   detail="Capital of Thailand"
   draggable
-  onDrop={(marker, newPosition) => console.log('Moved to:', newPosition)}
+  onDrop={(marker, position) => console.log("Moved to", position)}
 />
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `position` | `Location` | Yes | - | Marker coordinates (`{ lon, lat }`) |
-| `ref` | `Ref<MarkerRef>` | No | - | Ref for imperative control |
-| `icon` | `Icon` | No | Default red pin | Custom icon |
-| `title` | `string` | No | - | Text shown on hover tooltip |
-| `detail` | `string` | No | - | Text shown in popup when clicked |
-| `popup` | `PopupOptions` | No | - | Popup configuration (overrides `detail`) |
-| `visibleRange` | `Range` | No | All zoom levels | Zoom range visibility |
-| `clickable` | `boolean` | No | `false` | Show pointer cursor on hover |
-| `draggable` | `boolean` | No | `false` | Allow dragging |
-| `zIndex` | `number` | No | `0` | Stacking order |
-| `rotate` | `number` | No | `0` | Rotation angle in degrees |
-| `onClick` | `(marker: SphereMarker) => void` | No | - | Click handler |
-| `onDrag` | `(marker: SphereMarker) => void` | No | - | Drag handler |
-| `onDrop` | `(marker: SphereMarker, location: Location) => void` | No | - | Drop handler |
-| `onHover` | `(marker: SphereMarker) => void` | No | - | Mouse enter handler |
-| `onLeave` | `(marker: SphereMarker) => void` | No | - | Mouse leave handler |
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `position` | `Location \| GeoJSON point` | **required** | Where the marker is. Changing it moves the marker without re-creating it. |
+| `title` | `string` | – | Tooltip on hover, and the popup title. |
+| `detail` | `string` | – | Popup text shown on click. |
+| `popup` | `PopupOptions` | – | Full popup configuration (overrides `detail`). |
+| `popupContent` | `ReactNode` | – | React content rendered in the popup. |
+| `children` | `ReactNode` | – | React content used as the icon. |
+| `icon` | `Icon` | Sphere's pin | Image (`url`, `urlHD`) or HTML (`html`) icon, with `size` and `offset`. |
+| `rotate` | `number` | `0` | **Live.** Clockwise rotation in degrees. |
+| `draggable` | `boolean` | `false` | **Live.** Let users drag the marker. |
+| `animate` | `boolean \| number` | – | Slide to new positions: `true` (150 ms) or a duration in ms. HTML/React icons only. |
+| `clickable` | `boolean` | – | Show a pointer cursor on hover. |
+| `visibleRange` | `Range` | all levels | Only show the marker between these zoom levels. |
+| `zIndex` | `number` | – | Stacking order. |
+| `options` | `Record<string, unknown>` | – | Extra options for `new sphere.Marker()`. HTML/React icons also accept [MapLibre marker options](https://maplibre.org/maplibre-gl-js/docs/API/type-aliases/MarkerOptions/) such as `anchor`. |
+| `onClick` | `(marker, location) => void` | – | The marker was clicked. |
+| `onDrag` | `(marker) => void` | – | The marker is being dragged. |
+| `onDrop` | `(marker, location) => void` | – | The marker was dropped at `location`. |
+| `onHover` / `onLeave` | `(marker) => void` | – | The pointer entered / left the marker. |
+| `ref` | `Ref<MarkerRef>` | – | See [Ref](#ref). |
 
-## Custom icon
+## React icons
 
-### URL-based icon
+Pass any React content as children to use it as the icon. It renders with your app's styles, state and event handlers:
+
+<MapDemo height="300px" zoom={11} center={{ lon: 100.5018, lat: 13.7563 }}>
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok">
+    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 999, background: "#2563eb", color: "white", fontSize: 12, fontWeight: 600, boxShadow: "0 1px 4px rgba(0,0,0,.4)" }}>Bangkok</span>
+  </Marker>
+</MapDemo>
+
+```tsx
+<Marker position={station.location} title={station.name}>
+  <span className="rounded-full bg-blue-600 px-2 text-white">
+    {station.available}
+  </span>
+</Marker>
+```
+
+The icon is centered on the position. To anchor it at its bottom edge, like a pin, pass `options={{ anchor: "bottom" }}`.
+
+## React popups
+
+`popupContent` renders React into the popup that opens on click:
+
+```tsx
+<Marker
+  position={cafe.location}
+  title={cafe.name}
+  popupContent={
+    <div>
+      <p>{cafe.address}</p>
+      <button onClick={() => addToFavorites(cafe.id)}>Save</button>
+    </div>
+  }
+/>
+```
+
+## Image and HTML icons
 
 ```tsx
 <Marker
   position={{ lon: 100.5, lat: 13.75 }}
   icon={{
-    url: '/my-icon.png',
+    url: "/pin.png",
+    urlHD: "/pin@2x.png",
     size: { width: 32, height: 32 },
-    offset: { x: 16, y: 32 }
+    offset: { x: 16, y: 32 },
   }}
 />
-```
 
-### HTML icon
-
-```tsx
 <Marker
   position={{ lon: 100.5, lat: 13.75 }}
-  icon={{
-    html: '<div style="background: red; width: 20px; height: 20px; border-radius: 50%;"></div>',
-    offset: { x: 10, y: 10 }
-  }}
+  icon={{ html: '<div class="dot"></div>', offset: { x: 8, y: 8 } }}
 />
 ```
+
+## Moving markers
+
+Update `position` to move a marker. With `animate`, HTML and React icons slide to the new spot, which suits live positions such as vehicles:
+
+```tsx
+<Marker position={bus.location} rotate={bus.heading} animate={1000}>
+  <BusIcon />
+</Marker>
+```
+
+## Ref
+
+```tsx
+const markerRef = useRef<MarkerRef>(null);
+
+<Marker ref={markerRef} position={start} draggable />
+
+markerRef.current?.setPosition({ lon: 100.6, lat: 13.8 }, true);
+markerRef.current?.togglePopup(true);
+```
+
+| Method | Description |
+| --- | --- |
+| `getMarker()` | The underlying `sphere.Marker`. |
+| `getElement()` | The marker's DOM element (HTML and React icons only). |
+| `getPosition()` | Current position. |
+| `setPosition(location, animate?)` | Move the marker. |
+| `setRotation(angle)` | Rotate the icon. |
+| `togglePopup(show?)` | Show, hide or toggle the popup. |
+| `contains(target)`, `intersects(target)`, `within(overlay)`, `distanceTo(target, language?)` | Spatial tests. See [Spatial analysis](/docs/examples/spatial-analysis). |
+| `toGeoJSON()` | The marker as a GeoJSON feature. |
+| `shift({ lon, lat })` | Move by an offset in degrees. |
+
+To manage many markers as a list, see [`useMarkers`](/docs/hooks/overlay-hooks).

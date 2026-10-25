@@ -1,95 +1,96 @@
 ---
 title: useSearch
-description: ค้นหาสถานที่ (POI) และแปลงพิกัดกลับเป็นที่อยู่
+description: ค้นหาสถานที่ คำแนะนำการค้นหา สถานที่ใกล้เคียง และค้นหาที่อยู่จากพิกัด
 ---
 
-ค้นหาจุดสนใจ (POI) และแปลงพิกัดกลับเป็นที่อยู่ (Reverse Geocoding)
+`useSearch` ค้นหาข้อมูลสถานที่ของ Sphere ผ่านแผนที่ ใช้งานได้ทั้งภายใน `SphereMap` และทุกที่ภายใต้ `SphereProvider` หากต้องการค้นหาโดยไม่มีแผนที่ หรือบนเซิร์ฟเวอร์ ให้ใช้ [`useSphereServices`](/th/docs/hooks/use-sphere-services)
 
 <SearchDemo />
 
 ```tsx
-import { useSearch } from 'gistda-sphere-react';
+import { useSearch } from "gistda-sphere-react";
 
-function SearchComponent() {
-  const { search, suggest, address, nearPoi, isReady } = useSearch();
+function PlaceSearch() {
+  const { search, isReady } = useSearch();
+  const [places, setPlaces] = useState<PoiResult[]>([]);
 
-  const searchPlace = async () => {
-    const results = await search('พระบรมมหาราชวัง', { limit: 10 });
-    console.log(results.data);
-  };
+  async function run(keyword: string) {
+    const { data } = await search(keyword, { limit: 10 });
+    setPlaces(data);
+  }
 
-  const getSuggestions = async () => {
-    const results = await suggest('สวนกุหลาบวิทยาลัย', { limit: 5 });
-    console.log(results.data);
-  };
-
-  const reverseGeocode = async (location) => {
-    const addr = await address(location);
-    console.log(addr.address, addr.province);
-  };
-
-  return <button onClick={searchPlace}>ค้นหาสถานที่</button>;
+  return (
+    <ul>
+      {places.map((place) => (
+        <li key={place.id}>{place.name}</li>
+      ))}
+    </ul>
+  );
 }
 ```
 
-## ฟังก์ชัน
+## ค่าที่คืนกลับ [#return-value]
 
-| Function | Parameters | Returns | Description |
-|----------|------------|---------|-------------|
-| `isReady` | - | `boolean` | บริการค้นหาถูกสร้างแล้ว |
-| `suggest` | `(keyword, options?)` | `Promise<SearchResult>` | คำแนะนำแบบเติมคำอัตโนมัติ |
-| `search` | `(keyword, options?)` | `Promise<SearchResult>` | ค้นหาจุดสนใจ (POI) |
-| `address` | `(location, options?)` | `Promise<AddressResult>` | แปลงพิกัดกลับเป็นที่อยู่ |
-| `nearPoi` | `(location, options?)` | `Promise<PoiResult[]>` | ค้นหาจุดสนใจใกล้เคียง |
-| `clear` | `()` | `void` | ล้างผลลัพธ์การค้นหา |
-| `enablePopup` | `(state)` | `void` | เปิด/ปิดป๊อปอัปสำหรับผลลัพธ์ |
-| `setLanguage` | `(lang: "th" \| "en")` | `void` | ตั้งค่าภาษาการค้นหา: `"th"` หรือ `"en"` |
+| เมธอด | คืนค่า | คำอธิบาย |
+| --- | --- | --- |
+| `search(keyword, options?)` | `Promise<{ data: PoiResult[], meta }>` | สถานที่ที่ตรงกับคำค้นหา |
+| `suggest(keyword, options?)` | `Promise<{ data: SuggestResult[], meta }>` | คำแนะนำสำหรับคำค้นหาที่พิมพ์ไม่ครบ |
+| `nearPoi(location, options?)` | `Promise<PoiResult[]>` | สถานที่ใกล้ตำแหน่ง |
+| `address(location, options?)` | `Promise<AddressResult \| null>` | ที่อยู่ ณ ตำแหน่ง หรือ `null` (ดูด้านล่าง) |
+| `clear()` | | ล้างผลลัพธ์ที่แสดงใน [`SearchResults`](/th/docs/components/search-results) |
+| `enablePopup(state)` / `isPopupEnabled()` | | ป๊อปอัปของหมุดผลลัพธ์ |
+| `setPlaceholder(element, options?)` | | แสดงรายการผลลัพธ์ของ Sphere ใน element `<SearchResults>` ทำให้อัตโนมัติ |
+| `setLanguage(language)` / `getLanguage()` | | ภาษาของผลลัพธ์ |
+| `isReady` | `boolean` | เป็น `true` เมื่อแผนที่พร้อมใช้งาน |
 
-## SuggestOptions
+`search`, `suggest` และ `nearPoi` จะ throw ข้อผิดพลาดพร้อมระบุชื่อบริการ หากบริการไม่คืนข้อมูลใด ๆ จึงควรครอบการเรียกด้วย `try`/`catch`
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `area` | `string` | Any | จำกัดพื้นที่การค้นหา |
-| `offset` | `number` | `0` | ตำแหน่งเริ่มต้นของผลลัพธ์ |
-| `limit` | `number` | `10` | จำนวนผลลัพธ์สูงสุด |
-| `dataset` | `string` | Default | ชุดข้อมูลสำหรับค้นหา |
+### ตัวเลือก [#options]
 
-## SearchOptions
+| ตัวเลือกของ `search` | คำอธิบาย |
+| --- | --- |
+| `limit`, `offset` | การแบ่งหน้า |
+| `span` | รัศมีการค้นหาพร้อมหน่วย เช่น `"5km"`, `"500m"` |
+| `tag` | เฉพาะสถานที่ที่มีแท็กนี้ เช่น `"โรงพยาบาล"` |
+| `area` | เฉพาะสถานที่ในรหัสพื้นที่นี้ เช่น `"10"` สำหรับกรุงเทพฯ |
+| `dataset` | ชุดข้อมูลที่จะค้นหา |
 
-| Option | Type | Default | Description |
-|--------|------|---------|-------------|
-| `area` | `string` | Any | จำกัดพื้นที่การค้นหา |
-| `tag` | `string` | Any | กรองด้วยแท็ก |
-| `span` | `string` | Anywhere | รัศมีการค้นหา (เช่น `"5km"`) |
-| `offset` | `number` | `0` | ตำแหน่งเริ่มต้นของผลลัพธ์ |
-| `limit` | `number` | `20` | จำนวนผลลัพธ์สูงสุด |
-| `dataset` | `string` | Default | ชุดข้อมูลสำหรับค้นหา |
+`suggest` รับ `limit`, `offset`, `area` และ `dataset` ส่วน `nearPoi` รับ `limit`, `span` (องศา) และ `zoom`
 
-## ประเภทค่าที่ส่งกลับ (Return types)
+## ผลลัพธ์ [#results]
 
-```typescript
-// SearchResult (ส่งกลับจาก suggest และ search)
-{
-  data: object[];
-  total?: number;
-}
+`PoiResult` แต่ละรายการมี `id`, `name`, `lat`, `lon` และหากมีข้อมูล จะมี `address`, `tel`, `url`, `tag` (รายการแท็ก), `distance` และอื่น ๆ ค่า `id` ยังใช้กับ [`<ObjectOverlay>`](/th/docs/components/object-overlay) เพื่อวาดขอบเขตของสถานที่ได้ด้วย
 
-// AddressResult (ส่งกลับจาก address)
-{
-  address?: string;
-  subdistrict?: string;
-  district?: string;
-  province?: string;
-  postcode?: string;
-  geocode?: string;
-}
+## คำแนะนำขณะพิมพ์ [#autocomplete]
 
-// PoiResult (ส่งกลับจาก nearPoi)
-{
-  id: string;
-  name: string;
-  location: Location;
-  category?: string;
-  distance?: number;
+```tsx
+const { suggest } = useSearch();
+const [keyword, setKeyword] = useState("");
+const [suggestions, setSuggestions] = useState<SuggestResult[]>([]);
+
+useEffect(() => {
+  if (keyword.length < 2) {
+    setSuggestions([]);
+    return;
+  }
+  const timer = setTimeout(async () => {
+    const { data } = await suggest(keyword, { limit: 5 });
+    setSuggestions(data);
+  }, 250);
+  return () => clearTimeout(timer);
+}, [keyword, suggest]);
+```
+
+## ที่อยู่ [#addresses]
+
+```tsx
+const { address } = useSearch();
+const result = await address({ lon: 100.5018, lat: 13.7563 });
+if (result) {
+  console.log(result.province, result.district, result.subdistrict, result.road);
 }
 ```
+
+<Callout type="warn">
+  `address` จะคืนค่า `null` เมื่อไม่มีที่อยู่ ณ ตำแหน่งนั้น และเมื่อ API key ไม่ได้เปิดบริการที่อยู่ ส่วนการค้นหา คำแนะนำ และสถานที่ใกล้เคียงใช้บริการอื่น จึงอาจใช้งานได้แม้ที่อยู่ใช้งานไม่ได้
+</Callout>

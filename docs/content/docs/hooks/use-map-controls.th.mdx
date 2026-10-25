@@ -1,48 +1,61 @@
 ---
 title: useMapControls
-description: ควบคุมแผนที่ผ่านโค้ดจากคอมโพเนนต์ใดก็ได้
+description: เลื่อน ซูม หมุน และเอียงแผนที่ รวมถึงจัดการชั้นข้อมูล ตัวกรองสี และภาษาจากที่ใดก็ได้
 ---
 
-ควบคุมแผนที่ผ่านโค้ดจากคอมโพเนนต์ใดก็ได้ที่อยู่ภายใน `SphereProvider`
+`useMapControls` ควบคุมแผนที่แบบ imperative เช่น จากปุ่มในแถบด้านข้าง ใช้งานได้ทุกที่ภายใต้ `SphereProvider` และมีเมธอดชุดเดียวกับ [ref ของ `SphereMap`](/th/docs/components/sphere-map#ref)
 
 <ControlsDemo />
 
 ```tsx
-import { useMapControls } from 'gistda-sphere-react';
+import { useMapControls } from "gistda-sphere-react";
 
-function Sidebar() {
-  const { goTo, setZoom, setFilter, setBaseLayer, isReady } = useMapControls();
-
+function Toolbar() {
+  const { goTo, zoomIn, zoomOut, setRotate, setPitch } = useMapControls();
   return (
-    <div>
-      <button onClick={() => goTo({ center: { lon: 98.98, lat: 18.78 }, zoom: 12 })}>
-        ไปที่เชียงใหม่
-      </button>
-      <button onClick={() => setZoom(15)}>ซูมเข้า</button>
-      <button onClick={() => setFilter('Dark')}>โหมดมืด</button>
-      <button onClick={() => setBaseLayer('HYBRID')}>ดาวเทียม</button>
-    </div>
+    <>
+      <button onClick={() => goTo({ center: { lon: 98.9853, lat: 18.7883 }, zoom: 12 })}>Chiang Mai</button>
+      <button onClick={() => zoomIn()}>+</button>
+      <button onClick={() => zoomOut()}>−</button>
+      <button onClick={() => { setRotate(0); setPitch(0); }}>Reset view</button>
+    </>
   );
 }
 ```
 
-## ฟังก์ชัน
+## มุมมอง [#camera]
 
-| Function | Parameters | Description |
-|----------|------------|-------------|
-| `isReady` | - | ค่า `boolean` ที่ระบุว่าแผนที่พร้อมใช้งานหรือยัง |
-| `goTo` | `(options: FlyToOptions, animate?: boolean)` | นำทางไปยังตำแหน่งที่กำหนด พร้อมตั้งค่าการซูม การหมุน ความชัน และ padding ได้ |
-| `setCenter` | `(location: Location, animate?: boolean)` | ตั้งค่าจุดกึ่งกลางของแผนที่ |
-| `setZoom` | `(zoom: number, animate?: boolean)` | ตั้งค่าระดับการซูม |
-| `setBound` | `(bound: Bound, options?: FitBoundsOptions)` | ปรับแผนที่ให้พอดีกับขอบเขตที่กำหนด |
-| `setRotate` | `(angle: number, animate?: boolean)` | ตั้งค่ามุมการหมุนเป็นองศา |
-| `setPitch` | `(angle: number)` | ตั้งค่ามุมความชัน (pitch) เป็นองศา |
-| `setFilter` | `(filter: FilterType \| false)` | ใช้ตัวกรองสี หรือ `false` เพื่อลบออก |
-| `setLanguage` | `(language: "th" \| "en")` | เปลี่ยนภาษาแผนที่: `"th"` หรือ `"en"` |
-| `setBaseLayer` | `(layer: BuiltInLayer)` | เปลี่ยนเลเยอร์ฐานของแผนที่ |
-| `addLayer` | `(layer: BuiltInLayer)` | เพิ่มเลเยอร์ข้อมูล |
-| `removeLayer` | `(layer: BuiltInLayer)` | ลบเลเยอร์ข้อมูล |
-| `loadPredefinedOverlay` | `(overlay: PredefinedOverlay)` | โหลดโอเวอร์เลย์ที่กำหนดไว้ล่วงหน้า |
-| `unloadPredefinedOverlay` | `(overlay: PredefinedOverlay)` | ลบโอเวอร์เลย์ที่กำหนดไว้ล่วงหน้า |
-| `resize` | `()` | ปรับขนาดแผนที่ให้พอดีกับคอนเทนเนอร์ |
-| `repaint` | `()` | บังคับให้แผนที่วาดใหม่ |
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `goTo(options, animate?)` | เคลื่อนไปยังมุมมองที่กำหนด `options`: `center`, `zoom`, `bearing`, `pitch`, `padding`, `duration` โดยค่าเริ่มต้นจะมีแอนิเมชัน |
+| `setCenter(location, animate?)` / `getCenter()` | จุดกึ่งกลางของแผนที่ |
+| `setZoom(zoom, animate?)` / `getZoom()` | ระดับซูม |
+| `zoomIn(animate?)` / `zoomOut(animate?)` | ซูมเข้าหรือออกหนึ่งระดับ |
+| `setRotate(angle, animate?)` / `getRotate()` | มุมหมุนเป็นองศา ตามเข็มนาฬิกาจากทิศเหนือ |
+| `setPitch(angle)` / `getPitch()` | มุมเอียงเป็นองศา |
+| `setBound(bound, options?)` / `getBound()` | ปรับมุมมองให้พอดีกับกรอบ `{ minLon, minLat, maxLon, maxLat }` (พร้อม `padding`, `maxZoom`…) หรืออ่านกรอบที่มองเห็น |
+| `panBy({ x, y }, animate?)` | เลื่อนแผนที่ตามจำนวนพิกเซล |
+| `setZoomRange(range)` / `getZoomRange()` | ช่วงระดับซูมที่ผู้ใช้ซูมได้ |
+
+## ชั้นข้อมูลและการแสดงผล [#layers-and-appearance]
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `setBaseLayer(layer)` | เปลี่ยนแผนที่ฐาน: ชื่อชั้นข้อมูลในตัว, `sphere.Layer` หรือ URL/อ็อบเจกต์สไตล์ของ MapLibre |
+| `addLayer(layer, beforeId?)` / `removeLayer(layer)` | เพิ่มหรือลบชั้นข้อมูลที่ซ้อนอยู่บนแผนที่ฐาน |
+| `clearLayers()` / `getLayers()` | ลบชั้นข้อมูลที่เพิ่มไว้ทั้งหมด / ดูรายการชั้นข้อมูลของแผนที่ |
+| `setFilter(filter)` / `getFilter()` | ตัวกรองสี: `"Dark"`, `"Light"`, `"Protanopia"`, `"Deuteranopia"` หรือ `"None"` |
+| `setLanguage(language)` / `getLanguage()` | ภาษาของป้ายชื่อและ UI `"th"` หรือ `"en"` |
+| `loadPredefinedOverlay(type, options?)` / `unloadPredefinedOverlay(type)` | ข้อมูลสด `"cameras"`, `"events"` หรือ `"aqi"` |
+
+## อื่น ๆ [#other]
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `isReady` | เป็น `true` เมื่อแผนที่พร้อมใช้งาน ก่อนหน้านั้นเมธอดต่าง ๆ จะไม่ทำงาน |
+| `resize()` | วัดขนาดแผนที่ใหม่หลังคอนเทนเนอร์เปลี่ยนขนาด |
+| `repaint()` | วาดแผนที่ใหม่ |
+
+<Callout>
+  สำหรับสถานะที่ควรเปลี่ยนตามแอป (ภาษา ตัวกรองสี แผนที่ฐาน ขอบเขตการซูม ตัวควบคุม) การใช้ [props ของ `SphereMap`](/th/docs/components/sphere-map#props) จะง่ายกว่า ส่วนเมธอดเหล่านี้เหมาะกับการสั่งงาน เช่น บินไปยังสถานที่เมื่อคลิกรายการ
+</Callout>

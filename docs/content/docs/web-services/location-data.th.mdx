@@ -1,0 +1,35 @@
+---
+title: ที่อยู่และความสูง
+description: การแปลงพิกัดเป็นที่อยู่ (Reverse geocoding) และความสูงจากระดับน้ำทะเล ณ จุดที่ระบุหรือตามแนวเส้น
+---
+
+## ที่อยู่ ณ ตำแหน่ง [#address-at-a-location]
+
+```ts
+const address = await services.geo.address({ lon: 100.5018, lat: 13.7563 }, { locale: "en" });
+console.log(address.province, address.district, address.subdistrict, address.postcode);
+```
+
+ผลลัพธ์มี `province`, `district`, `subdistrict`, `road`, `postcode`, `geocode` (รหัสพื้นที่) และข้อมูลอื่นเมื่อมี หากใช้บนแผนที่ [`useSearch().address`](/th/docs/hooks/use-search#addresses) ทำงานแบบเดียวกัน
+
+## ความสูง [#elevation]
+
+ณ จุดที่ระบุ:
+
+```ts
+const [point] = await services.geo.elevation({ lon: 98.4867, lat: 18.5885 });
+console.log(point.elevation); // meters above mean sea level
+```
+
+ตามแนวเส้น สำหรับกราฟความสูง
+
+```ts
+const profile = await services.geo.elevation({
+  type: "LineString",
+  coordinates: [[98.95, 18.79], [98.89, 18.80], [98.49, 18.59]],
+});
+
+for (const sample of profile) {
+  console.log(sample.location, sample.elevation); // position along the line (0–1), meters
+}
+```

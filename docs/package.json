@@ -11,6 +11,7 @@
     "types:check": "fumadocs-mdx && next typegen && tsc --noEmit"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@vercel/analytics": "^2.0.1",
     "fumadocs-core": "16.17.7",
     "fumadocs-mdx": "15.4.9",

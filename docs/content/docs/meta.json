@@ -1,17 +1,21 @@
 {
   "title": "Docs",
   "pages": [
-    "---Getting Started---",
+    "---Getting started---",
     "...getting-started",
     "---Components---",
     "...components",
     "---Hooks---",
     "...hooks",
+    "---Web services---",
+    "...web-services",
     "---Examples---",
     "...examples",
-    "---",
+    "---Reference---",
+    "api-coverage",
     "ref-apis",
     "typescript",
+    "upgrading",
     "troubleshooting"
   ]
 }

@@ -1,10 +1,34 @@
 "use client";
 
-import { SphereMap, SphereProvider } from "gistda-sphere-react";
+import { SphereMap } from "gistda-sphere-react";
 import { useCallback, useState } from "react";
+import {
+  DemoBar,
+  DemoButton,
+  DemoFrame,
+  DemoNote,
+  useDemoText,
+} from "./demo-ui";
 import { useDocLanguage } from "./use-doc-language";
 
-const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
+const TEXT = {
+  en: {
+    clear: "Clear",
+    clicked: (lat: string, lon: string) => `Clicked at ${lat}, ${lon}`,
+    empty: "No events yet",
+    hint: "Click, zoom, or drag the map to see events",
+    moved: (lat: string, lon: string) => `Moved to ${lat}, ${lon}`,
+    zoomed: (zoom: string) => `Zoomed to level ${zoom}`,
+  },
+  th: {
+    clear: "ล้าง",
+    clicked: (lat: string, lon: string) => `คลิกที่ ${lat}, ${lon}`,
+    empty: "ยังไม่มีเหตุการณ์",
+    hint: "คลิก ซูม หรือลากแผนที่เพื่อดูเหตุการณ์",
+    moved: (lat: string, lon: string) => `เลื่อนไปที่ ${lat}, ${lon}`,
+    zoomed: (zoom: string) => `ซูมไปที่ระดับ ${zoom}`,
+  },
+};
 
 interface LogEntry {
   id: number;
@@ -12,58 +36,46 @@ interface LogEntry {
   time: string;
 }
 
-export function SphereMapDemo() {
-  const [logs, setLogs] = useState<LogEntry[]>([]);
+let nextId = 1;
+
+/** A map that logs its click, move and zoom events. */
+function MapWithLog() {
   const language = useDocLanguage();
+  const text = useDemoText(TEXT);
+  const [logs, setLogs] = useState<LogEntry[]>([]);
 
   const addLog = useCallback((message: string) => {
-    const now = new Date();
-    const time = `${now.getHours().toString().padStart(2, "0")}:${now.getMinutes().toString().padStart(2, "0")}:${now.getSeconds().toString().padStart(2, "0")}`;
-    setLogs((prev) =>
-      [{ id: Math.random(), message, time }, ...prev].slice(0, 20)
+    const time = new Date().toLocaleTimeString([], { hour12: false });
+    nextId += 1;
+    setLogs((previous) =>
+      [{ id: nextId, message, time }, ...previous].slice(0, 20)
     );
   }, []);
 
-  if (!API_KEY) {
-    return null;
-  }
-
   return (
-    <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
-      <SphereProvider apiKey={API_KEY}>
-        <SphereMap
-          center={{ lat: 13.7563, lon: 100.5018 }}
-          language={language}
-          onClick={(e) => {
-            addLog(`Clicked at ${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`);
-          }}
-          onLocation={(e) => {
-            addLog(`Moved to ${e.lat.toFixed(4)}, ${e.lon.toFixed(4)}`);
-          }}
-          onZoom={(e) => {
-            addLog(`Zoomed to level ${e.toFixed(2)}`);
-          }}
-          style={{ height: "300px", width: "100%" }}
-          zoom={10}
-        />
-      </SphereProvider>
-      <div className="flex flex-col gap-2 bg-fd-card p-3">
-        <div className="flex items-center justify-between">
-          <span className="py-2 text-fd-muted-foreground text-sm">
-            Click, zoom, or drag the map to see events
-          </span>
-          <button
-            className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={() => setLogs([])}
-            type="button"
-          >
-            Clear
-          </button>
-        </div>
-        <div className="max-h-30 overflow-y-auto rounded-md border border-fd-border bg-fd-muted p-2 font-mono text-fd-foreground text-xs">
+    <>
+      <SphereMap
+        center={{ lat: 13.7563, lon: 100.5018 }}
+        language={language}
+        onClick={(location) =>
+          addLog(text.clicked(location.lat.toFixed(4), location.lon.toFixed(4)))
+        }
+        onLocation={(location) =>
+          addLog(text.moved(location.lat.toFixed(4), location.lon.toFixed(4)))
+        }
+        onZoom={(zoom) => addLog(text.zoomed(zoom.toFixed(2)))}
+        style={{ height: "300px", width: "100%" }}
+        zoom={10}
+      />
+      <DemoBar>
+        <DemoNote>{text.hint}</DemoNote>
+        <span className="ml-auto">
+          <DemoButton onClick={() => setLogs([])}>{text.clear}</DemoButton>
+        </span>
+        <div className="max-h-30 w-full overflow-y-auto rounded-md border border-fd-border bg-fd-muted p-2 font-mono text-fd-foreground text-xs">
           {logs.length === 0 ? (
             <span className="text-fd-muted-foreground italic">
-              No events yet
+              {text.empty}
             </span>
           ) : (
             logs.map((entry) => (
@@ -79,7 +91,15 @@ export function SphereMapDemo() {
             ))
           )}
         </div>
-      </div>
-    </div>
+      </DemoBar>
+    </>
+  );
+}
+
+export function SphereMapDemo() {
+  return (
+    <DemoFrame height="400px">
+      <MapWithLog />
+    </DemoFrame>
   );
 }

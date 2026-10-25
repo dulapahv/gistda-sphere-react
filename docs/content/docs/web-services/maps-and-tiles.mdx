@@ -1,0 +1,67 @@
+---
+title: Maps and tiles
+description: Static map images, embeddable maps, and Sphere's raster, vector and WMTS tiles for other tools
+---
+
+These helpers build URLs; they don't make requests themselves.
+
+## Static map images
+
+```tsx
+const src = services.maps.staticMapUrl({
+  center: { lon: 100.5018, lat: 13.7563 },
+  zoom: 14,
+  width: 600,
+  height: 300,
+  map: "sphere_streets_en",
+  features: [
+    {
+      type: "Feature",
+      geometry: { type: "Point", coordinates: [100.5018, 13.7563] },
+      properties: { text: "Here", linecolor: "#ffffff", fillcolor: "#2563eb" },
+    },
+  ],
+});
+
+<img src={src} width={600} height={300} alt="Map of the meeting point" />
+```
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `center`, `zoom` | `Location`, `number` | View. Leave them out to fit the drawn features. |
+| `width`, `height` | `number` | Image size in pixels (up to 2048). |
+| `map` | `string` | `"sphere_streets"` (default), `"sphere_streets_en"`, `"sphere_hybrid"`, `"sphere_hybrid_en"` or `"thailand_images"`. |
+| `features` | `Feature \| Feature[]` | Shapes to draw, styled with `properties`: `linecolor`, `linewidth`, `fillcolor`, `text`, `icon`, `offsetx`, `offsety`. |
+
+Static images suit emails, PDFs and link previews. The URL contains your API key, so use a key restricted to your domains.
+
+## Embedded maps
+
+```tsx
+<iframe
+  src={services.maps.embedUrl({ center: { lon: 100.5018, lat: 13.7563 }, zoom: 15, marker: true })}
+  width="100%"
+  height={400}
+  title="Map"
+/>
+```
+
+`embedUrl` also takes `search` (a keyword to search and pin), `poi` (a place ID), `route`, `tags`, `map` and `locale`.
+
+## Tiles for other tools
+
+Use Sphere's base maps in MapLibre, Leaflet, OpenLayers, QGIS and other tools:
+
+| Method | Returns |
+| --- | --- |
+| `rasterTileUrl(layer?)` | An XYZ template, `…/tiles/{layer}/EPSG3857/{z}/{x}/{y}.jpeg?key=…`. Layers: `"sphere_streets"`, `"sphere_hybrid"`, `"thailand_images"`, `"sphere_protanopia"`, `"sphere_deuteranopia"`. |
+| `vectorTileUrl()` | A Mapbox Vector Tiles template, `…/maps/sphere/{z}/{x}/{y}.pbf?key=…`. |
+| `vectorStyleUrl(style?)` | A MapLibre style: `"streets"`, `"hybrid"`, `"protanopia"` or `"deuteranopia"`. |
+| `wmtsCapabilitiesUrl()` | WMTS capabilities, for desktop GIS such as QGIS or ArcGIS. |
+
+```ts
+// Leaflet
+L.tileLayer(services.maps.rasterTileUrl("sphere_hybrid")).addTo(map);
+```
+
+Sphere's vector styles also work as a `SphereMap` base map: `<SphereMap baseLayer={services.maps.vectorStyleUrl("hybrid")} />`.

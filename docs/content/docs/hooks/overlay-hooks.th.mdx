@@ -1,62 +1,65 @@
 ---
-title: Overlay Collection Hooks
-description: จัดการคอลเลกชันของโอเวอร์เลย์ผ่านโค้ด
+title: Overlay collection hooks
+description: เก็บรายการหมุด รูปหลายเหลี่ยม เส้น และวงกลมไว้ใน state แล้วแสดงผลแบบ declarative
 ---
 
-จัดการคอลเลกชันของโอเวอร์เลย์ผ่านโค้ดด้วย hook เหล่านี้
+hooks เหล่านี้เก็บรายการโอเวอร์เลย์ไว้ใน React state พร้อม ID ที่คงที่ จึงเพิ่ม อัปเดต และลบได้จากทุกที่ แล้วแสดงผลด้วยคอมโพเนนต์ที่ตรงกัน
 
 <OverlayDemo />
 
 ## useMarkers
 
 ```tsx
-import { useMarkers } from 'gistda-sphere-react';
+import { Marker, SphereMap, useMarkers } from "gistda-sphere-react";
 
-function MarkerManager() {
-  const { items, add, update, remove, clear, get } = useMarkers();
-
-  const addMarker = () => {
-    const id = add({
-      position: { lon: 100.5, lat: 13.75 },
-      title: 'หมุดใหม่',
-      draggable: true,
-    });
-    console.log('เพิ่มหมุด ID:', id);
-  };
+function Stores() {
+  const { items, add, remove } = useMarkers();
 
   return (
-    <div>
-      <button onClick={addMarker}>เพิ่ม</button>
-      <button onClick={clear}>ล้างทั้งหมด</button>
-      <p>จำนวน: {items.length}</p>
-    </div>
+    <>
+      <button
+        onClick={() => add({ position: { lon: 100.5, lat: 13.75 }, title: "New store" })}
+      >
+        Add store
+      </button>
+      <SphereMap>
+        {items.map((marker) => (
+          <Marker
+            key={marker.id}
+            position={marker.position}
+            title={marker.title}
+            onClick={() => remove(marker.id)}
+          />
+        ))}
+      </SphereMap>
+    </>
   );
 }
 ```
 
-## usePolygons, usePolylines, useCircles
+## usePolygons, usePolylines และ useCircles [#usepolygons-usepolylines-and-usecircles]
 
-Hook เหล่านี้ใช้รูปแบบเดียวกับ `useMarkers` แต่สำหรับโอเวอร์เลย์ประเภทอื่นๆ
+ทำงานแบบเดียวกันสำหรับข้อมูลของ `Polygon` (`positions`), `Polyline` (`positions`) และ `Circle` (`center`, `radius`)
 
 ## useOverlays
 
-รวม overlay collection hook ทั้งหมดไว้ใน hook เดียว
+ทั้งสี่คอลเลกชันในครั้งเดียว
 
 ```tsx
-import { useOverlays } from 'gistda-sphere-react';
-
 const { markers, polygons, polylines, circles, clearAll } = useOverlays();
 ```
 
-## ค่าที่ส่งกลับร่วม (Shared return value)
+## ค่าที่คืนกลับ [#return-value]
 
-Overlay collection hook ทุกตัวส่งกลับ:
+hook คอลเลกชันแต่ละตัวคืนค่า
 
-| Property | Type | Description |
-|----------|------|-------------|
-| `items` | `T[]` | อาร์เรย์ข้อมูลโอเวอร์เลย์ปัจจุบัน |
-| `add` | `(data) => string` | เพิ่มโอเวอร์เลย์ ส่งกลับ ID |
-| `update` | `(id, data) => void` | อัปเดตโอเวอร์เลย์ด้วย ID |
-| `remove` | `(id) => void` | ลบโอเวอร์เลย์ด้วย ID |
-| `clear` | `() => void` | ลบโอเวอร์เลย์ประเภทนี้ทั้งหมด |
-| `get` | `(id) => T \| undefined` | ดึงข้อมูลโอเวอร์เลย์ด้วย ID |
+| Property | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `items` | `T[]` | รายการโอเวอร์เลย์ แต่ละรายการมี `id` |
+| `add(data)` | `string` | เพิ่มโอเวอร์เลย์ และคืน ID ใหม่ |
+| `update(id, changes)` | | รวมการเปลี่ยนแปลงเข้ากับโอเวอร์เลย์ |
+| `remove(id)` | | ลบโอเวอร์เลย์ |
+| `clear()` | | ลบโอเวอร์เลย์ชนิดนี้ทั้งหมด |
+| `get(id)` | `T \| undefined` | หาโอเวอร์เลย์จาก ID |
+
+อ็อบเจกต์ข้อมูลรับ props ชุดเดียวกับคอมโพเนนต์ (`title`, `fillColor`, `draggable`…) จึง spread ค่าใส่คอมโพเนนต์ได้โดยตรง: `<Polygon key={p.id} {...p} />`

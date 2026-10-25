@@ -1,13 +1,13 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Circle } from "../components/Circle";
-import { Dot } from "../components/Dot";
-import { Polygon } from "../components/Polygon";
-import { Polyline } from "../components/Polyline";
-import { Popup } from "../components/Popup";
-import { Rectangle } from "../components/Rectangle";
-import { SphereMap } from "../components/SphereMap";
-import { SphereProvider } from "../context/SphereContext";
+import { Circle } from "@/components/Circle";
+import { Dot } from "@/components/Dot";
+import { Polygon } from "@/components/Polygon";
+import { Polyline } from "@/components/Polyline";
+import { Popup } from "@/components/Popup";
+import { Rectangle } from "@/components/Rectangle";
+import { SphereMap } from "@/components/SphereMap";
+import { SphereProvider } from "@/context/SphereContext";
 import { createMockSphereApi } from "./setup";
 
 describe("Geometry Components", () => {

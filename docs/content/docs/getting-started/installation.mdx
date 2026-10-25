@@ -17,19 +17,18 @@ pnpm add gistda-sphere-react
 yarn add gistda-sphere-react
 ```
 
-## Peer dependencies
-
-The library requires React 19 or later:
-
-```json
-{
-  "peerDependencies": {
-    "react": ">=19.0.0",
-    "react-dom": ">=19.0.0"
-  }
-}
+```bash tab="bun"
+bun add gistda-sphere-react
 ```
+
+The package has no other dependencies and ships its own TypeScript types. The Sphere map itself is loaded from GISTDA's servers when [`SphereProvider`](/docs/components/sphere-provider) mounts, so there's nothing else to install.
+
+## Requirements
+
+- **React 19 or later.** `react` and `react-dom` are peer dependencies.
+- **A browser.** Maps render on the client. With the Next.js App Router, use the components in Client Components (`"use client"`).
+- **An API key** from GISTDA. See [Getting an API key](/docs/getting-started/api-key).
 
 ## Next steps
 
-Once installed, you need an [API key](/docs/getting-started/api-key) from GISTDA to use the map. Then follow the [Quick Start](/docs/getting-started/quick-start) guide to render your first map.
+Follow the [quick start](/docs/getting-started/quick-start) to render your first map.

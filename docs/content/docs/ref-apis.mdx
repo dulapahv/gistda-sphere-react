@@ -1,106 +1,62 @@
 ---
 title: Ref APIs
-description: Imperative control via React refs
+description: Imperative methods on the map and on every overlay, through React refs
 ---
 
-All overlay components support React refs for imperative control.
-
-## SphereMapRef
+Every component that draws something accepts a `ref`, which gives you its imperative methods and the underlying Sphere object.
 
 ```tsx
-const mapRef = useRef<SphereMapRef>(null);
+import { useRef } from "react";
+import { Polygon, SphereMap, type PolygonRef, type SphereMapRef } from "gistda-sphere-react";
 
-<SphereMap ref={mapRef} style={{ height: '500px' }} />
+function Example() {
+  const mapRef = useRef<SphereMapRef>(null);
+  const zoneRef = useRef<PolygonRef>(null);
 
-mapRef.current?.setZoom(15);
-mapRef.current?.goTo({ center: { lon: 100.5, lat: 13.75 }, zoom: 12 });
+  const zoomToZone = () => {
+    const bound = zoneRef.current?.getBound();
+    if (bound) mapRef.current?.setBound(bound, { padding: 40 });
+  };
+
+  return (
+    <SphereMap ref={mapRef}>
+      <Polygon ref={zoneRef} positions={zone} onClick={zoomToZone} />
+    </SphereMap>
+  );
+}
 ```
 
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `getMap` | `()` | Get the underlying map instance |
-| `setZoom` | `(zoom, animate?)` | Set zoom level |
-| `setCenter` | `(location, animate?)` | Set map center |
-| `setBound` | `(bound, options?)` | Fit to bounding box |
-| `goTo` | `(target, animate?)` | Animate to target |
-| `setRotate` | `(angle, animate?)` | Set rotation |
-| `setPitch` | `(angle)` | Set pitch |
-| `setFilter` | `(filter)` | Apply color filter |
-| `resize` | `()` | Resize to fit container |
-| `repaint` | `()` | Force repaint |
+## Ref types
 
-## MarkerRef
+| Component | Ref type | Highlights |
+| --- | --- | --- |
+| `SphereMap` | `SphereMapRef` | [Camera, layers, filters, language](/docs/components/sphere-map#ref), `getMap()`. |
+| `Marker` | `MarkerRef` | [`setPosition`, `setRotation`, `togglePopup`, `getElement`](/docs/components/marker#ref). |
+| `Popup` | `PopupRef` | [`setPosition`, `setTitle`, `setDetail`](/docs/components/popup#ref). |
+| `Polygon` | `PolygonRef` | [`getArea`, `union`, `intersection`, `difference`, `split`](/docs/components/polygon#ref). |
+| `Polyline` | `PolylineRef` | [`getLength`, `union`](/docs/components/polyline#ref). |
+| `Circle` | `CircleRef` | [`getArea`, `getRadius`, `getCenter`](/docs/components/circle#ref). |
+| `Rectangle` | `RectangleRef` | [Same as polygons](/docs/components/rectangle#ref). |
+| `Dot` | `DotRef` | [`getPosition`, `setPosition`](/docs/components/dot#ref). |
+| `GeoJson` | `GeoJsonRef` | `getOverlays()`, `getBound()`. |
+| `ObjectOverlay` | `ObjectOverlayRef` | `getObject()`, `getOverlays()`. |
+| `MenuBar` | `MenuBarRef` | `getMenuBar()`, `select(index)`. |
 
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `getMarker` | `()` | Get the underlying marker |
-| `togglePopup` | `(show?)` | Show or hide popup |
-| `setPosition` | `(location, animate?)` | Move the marker |
-| `setRotation` | `(angle)` | Set rotation |
+## Shared shape methods
 
-## PolygonRef
+Markers, dots and the shapes share these spatial methods (`OverlaySpatialMethods`):
 
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `getPolygon` | `()` | Get the underlying polygon |
-| `togglePopup` | `(show?, location?)` | Show or hide popup |
-| `getPivot` | `()` | Get a point on the surface |
-| `getCentroid` | `()` | Get the geometric center |
-| `getBound` | `()` | Get the bounding box |
-| `getArea` | `(language?)` | Get area |
-| `rotate` | `(angle)` | Rotate the polygon |
-| `updateStyle` | `(options)` | Update line/fill style |
-| `toGeoJSON` | `()` | Convert to GeoJSON |
+| Method | Description |
+| --- | --- |
+| `contains(target)` | Whether a location or overlay is inside this one. |
+| `intersects(target)` | Whether they touch or overlap. |
+| `within(overlay)` | Whether this one is inside another overlay. |
+| `distanceTo(target, language?)` | Shortest distance in meters, or text with a language. |
+| `shift({ lon, lat })` | Move by an offset in degrees. |
+| `toGeoJSON()` | The overlay as a GeoJSON feature. |
 
-## PolylineRef
+Shapes also have `getBound`, `getCentroid`, `getPivot`, `rotate`, `updateStyle` and `togglePopup` (`GeometryRefMethods`). See [Spatial analysis](/docs/examples/spatial-analysis) for examples.
 
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `getPolyline` | `()` | Get the underlying polyline |
-| `togglePopup` | `(show?, location?)` | Show or hide popup |
-| `getPivot` | `()` | Get a point on the line |
-| `getCentroid` | `()` | Get the geometric center |
-| `getBound` | `()` | Get the bounding box |
-| `getLength` | `(language?)` | Get length |
-| `rotate` | `(angle)` | Rotate the polyline |
-| `updateStyle` | `(options)` | Update line style |
-
-## CircleRef
-
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `getCircle` | `()` | Get the underlying circle |
-| `togglePopup` | `(show?, location?)` | Show or hide popup |
-| `getCenter` | `()` | Get the center |
-| `getBound` | `()` | Get the bounding box |
-| `getArea` | `(language?)` | Get area |
-| `getRadius` | `(language?)` | Get radius |
-| `updateStyle` | `(options)` | Update circle style |
-
-## PopupRef
-
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `getPopup` | `()` | Get the underlying popup |
-| `setPosition` | `(location)` | Move the popup |
-| `setTitle` | `(title)` | Change the title |
-| `setDetail` | `(detail)` | Change the detail |
-| `getElement` | `()` | Get the DOM element |
-
-## DotRef
-
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `getDot` | `()` | Get the underlying dot |
-| `setPosition` | `(location)` | Move the dot |
-| `getPosition` | `()` | Get the position |
-
-## RectangleRef
-
-| Method | Parameters | Description |
-|--------|------------|-------------|
-| `getRectangle` | `()` | Get the underlying rectangle |
-| `togglePopup` | `(show?, location?)` | Show or hide popup |
-| `getBound` | `()` | Get the bounding box |
-| `getArea` | `(language?)` | Get area |
-| `updateStyle` | `(options)` | Update rectangle style |
+<Callout>
+  Ref methods are safe to call at any time; they return `null` or `false` while the overlay doesn't exist yet. Call them from event handlers or effects, not during render.
+</Callout>

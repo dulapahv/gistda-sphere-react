@@ -1,0 +1,51 @@
+---
+title: useTagCategories
+description: Every POI tag category, in Thai or English, loaded live from Sphere
+---
+
+`useTagCategories` loads Sphere's list of POI tags: about 260 tags in 20 categories. Use it to build tag pickers, then show the chosen tags with [`<Tag>`](/docs/components/tag).
+
+```tsx
+import { Tag, useTagCategories } from "gistda-sphere-react";
+
+function TagPicker() {
+  const { categories, isLoading, error } = useTagCategories("en");
+  const [tag, setTag] = useState<string | null>(null);
+
+  if (isLoading) return <p>Loading…</p>;
+  if (error) return <p>{error.message}</p>;
+
+  return (
+    <>
+      <select onChange={(event) => setTag(event.target.value)}>
+        {categories.map((category) => (
+          <optgroup key={category.name} label={category.name}>
+            {category.tags.map((item) => (
+              <option key={item.id} value={item.id}>{item.label}</option>
+            ))}
+          </optgroup>
+        ))}
+      </select>
+      <SphereMap>{tag && <Tag name={tag} />}</SphereMap>
+    </>
+  );
+}
+```
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `language` | `"th" \| "en"` | `"en"` | Language of category and tag labels. |
+
+## Return value
+
+| Property | Type | Description |
+| --- | --- | --- |
+| `categories` | `LocalizedTagCategory[]` | `{ name, icon, tags: [{ id, label }] }` per category. Empty until loaded. |
+| `isLoading` | `boolean` | `true` while the list loads. |
+| `error` | `Error \| null` | Why the list couldn't load. |
+
+Each tag's `id` is its Thai name, which is what `<Tag name>` and `useTags().add()` expect. The list is fetched once per page and shared by every component that uses the hook; it doesn't need an API key.
+
+If the request fails, you can fall back to `TAG_CATEGORIES`, a smaller built-in list with the same shape.

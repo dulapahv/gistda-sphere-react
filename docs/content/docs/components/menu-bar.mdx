@@ -1,0 +1,37 @@
+---
+title: MenuBar
+description: Sphere's built-in button group for switching between options on the map
+---
+
+`<MenuBar>` shows a row of buttons on the map where one is selected at a time, using Sphere's own style. It suits choices like base maps or data themes.
+
+```tsx
+import { MenuBar } from "gistda-sphere-react";
+
+const [baseLayer, setBaseLayer] = useState("STREETS");
+
+<SphereMap baseLayer={baseLayer}>
+  <MenuBar
+    items={[
+      { label: "Streets", value: "STREETS" },
+      { label: "Hybrid", value: "HYBRID" },
+      { label: "Night", value: "STREETS_NIGHT" },
+    ]}
+    onChange={(item) => setBaseLayer(item.value as string)}
+    position="bottom-left"
+    selectedIndex={0}
+  />
+</SphereMap>
+```
+
+See it working in the [MapControl demo](/docs/components/map-control).
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `items` | `MenuItem[]` | **required** | Buttons, as `{ label, value? }`. `value` defaults to the label. |
+| `onChange` | `(current, previous) => void` | – | The selected button changed (also when `selectedIndex` changes it). |
+| `selectedIndex` | `number` | – | Index of the button to select. Changing it selects that button. |
+| `position` | `"top-left" \| "top-right" \| "bottom-left" \| "bottom-right"` | `"bottom-right"` | Corner of the map. |
+| `ref` | `Ref<MenuBarRef>` | – | `getMenuBar()`, and `select(index)` (a negative index clears the selection). |

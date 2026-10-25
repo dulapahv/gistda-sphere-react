@@ -1,39 +1,53 @@
 "use client";
 
-import { SphereMap, SphereProvider, useMapControls } from "gistda-sphere-react";
+import {
+  PredefinedOverlay,
+  type PredefinedOverlay as PredefinedOverlayName,
+  SphereMap,
+} from "gistda-sphere-react";
 import { useState } from "react";
+import {
+  DemoBar,
+  DemoButton,
+  DemoFrame,
+  DemoNote,
+  useDemoText,
+} from "./demo-ui";
 import { useDocLanguage } from "./use-doc-language";
 
-const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
+const OVERLAYS: readonly PredefinedOverlayName[] = ["cameras", "events", "aqi"];
 
-const OVERLAYS = [
-  { id: "cameras" as const, label: "CCTV Cameras" },
-  { id: "events" as const, label: "Traffic Events" },
-  { id: "aqi" as const, label: "Air Quality (AQI)" },
-];
+const TEXT = {
+  en: {
+    hint: "Live data from Sphere; some overlays can be empty at times.",
+    overlays: {
+      aqi: "Air quality (AQI)",
+      cameras: "Traffic cameras",
+      events: "Road events",
+    },
+  },
+  th: {
+    hint: "ข้อมูลสดจาก Sphere บางช่วงเวลาอาจไม่มีข้อมูล",
+    overlays: {
+      aqi: "คุณภาพอากาศ (AQI)",
+      cameras: "กล้องจราจร",
+      events: "เหตุการณ์บนถนน",
+    },
+  },
+};
 
-function PredefinedControls() {
-  const { loadPredefinedOverlay, unloadPredefinedOverlay } = useMapControls();
-  const [active, setActive] = useState<Set<string>>(new Set());
+/** Live overlays shown with `<PredefinedOverlay>` while toggled on. */
+function LiveOverlays() {
   const language = useDocLanguage();
+  const text = useDemoText(TEXT);
+  const [active, setActive] = useState<PredefinedOverlayName[]>(["cameras"]);
 
-  const toggle = (id: string) => {
-    setActive((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-        unloadPredefinedOverlay(
-          id as Parameters<typeof unloadPredefinedOverlay>[0]
-        );
-      } else {
-        next.add(id);
-        loadPredefinedOverlay(
-          id as Parameters<typeof loadPredefinedOverlay>[0]
-        );
-      }
-      return next;
-    });
-  };
+  const toggle = (overlay: PredefinedOverlayName) =>
+    setActive((previous) =>
+      previous.includes(overlay)
+        ? previous.filter((existing) => existing !== overlay)
+        : [...previous, overlay]
+    );
 
   return (
     <>
@@ -41,34 +55,32 @@ function PredefinedControls() {
         center={{ lat: 13.7563, lon: 100.5018 }}
         language={language}
         style={{ height: "350px", width: "100%" }}
-        zoom={10}
-      />
-      <div className="flex flex-wrap items-center gap-2 bg-fd-card p-3">
-        {OVERLAYS.map((o) => (
-          <button
-            className={`cursor-pointer rounded-md border px-2 py-1.5 text-xs disabled:cursor-not-allowed disabled:opacity-50 ${active.has(o.id) ? "border-fd-primary bg-fd-primary text-fd-primary-foreground" : "border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent"}`}
-            key={o.id}
-            onClick={() => toggle(o.id)}
-            type="button"
-          >
-            {o.label}
-          </button>
+        zoom={11}
+      >
+        {active.map((overlay) => (
+          <PredefinedOverlay key={overlay} type={overlay} />
         ))}
-      </div>
+      </SphereMap>
+      <DemoBar>
+        {OVERLAYS.map((overlay) => (
+          <DemoButton
+            active={active.includes(overlay)}
+            key={overlay}
+            onClick={() => toggle(overlay)}
+          >
+            {text.overlays[overlay]}
+          </DemoButton>
+        ))}
+        <DemoNote>{text.hint}</DemoNote>
+      </DemoBar>
     </>
   );
 }
 
 export function PredefinedOverlaysDemo() {
-  if (!API_KEY) {
-    return null;
-  }
-
   return (
-    <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
-      <SphereProvider apiKey={API_KEY}>
-        <PredefinedControls />
-      </SphereProvider>
-    </div>
+    <DemoFrame height="420px">
+      <LiveOverlays />
+    </DemoFrame>
   );
 }

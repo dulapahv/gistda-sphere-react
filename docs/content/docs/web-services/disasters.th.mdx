@@ -1,0 +1,58 @@
+---
+title: ภัยพิบัติ
+description: ประวัติน้ำท่วมและภัยแล้ง ณ จุดที่ระบุ จุดความร้อน และความถี่ของภัยพิบัติซ้ำซากในพื้นที่
+---
+
+บริการเหล่านี้ให้ข้อมูลการติดตามภัยพิบัติของ GISTDA หากต้องการแสดงพื้นที่น้ำท่วม ภัยแล้ง และจุดความร้อนปัจจุบันบนแผนที่ ให้ใช้[ชั้นข้อมูล `FLOOD`, `DROUGHT` และ `HOTSPOT` ในตัว](/th/docs/components/layer#built-in-layers)
+
+## น้ำท่วมและภัยแล้ง ณ จุดที่ระบุ [#flood-and-drought-at-a-point]
+
+```ts
+const location = { lon: 100.55, lat: 14.35 };
+
+const floods = await services.info.flood(location, { from: "2024-08-01", to: "2024-10-31" });
+// [{ date, status }, …], one entry per day
+
+const drought = await services.info.drought(location, { from: "2024-03-01" });
+// [{ date, value }, …], where value is the soil moisture level
+```
+
+## จุดความร้อน [#fire-hotspots]
+
+ค้นหาจุดความร้อนตามเขตการปกครอง (ชื่อภาษาไทย) รอบจุด หรือภายในรูปหลายเหลี่ยม
+
+```ts
+// By province and district
+await services.info.hotspot({ province: "เชียงใหม่", district: "เชียงดาว", from: "2024-03-01", to: "2024-03-31" });
+
+// Within 10 km of a point
+await services.info.hotspot({ location: { lon: 98.96, lat: 19.36 }, radius: 10_000 });
+
+// Inside a polygon
+await services.info.hotspot({ geo: { type: "Polygon", coordinates: [/* … */] } });
+```
+
+| ตัวเลือก | คำอธิบาย |
+| --- | --- |
+| `province`, `district`, `subdistrict` | ชื่อจังหวัด อำเภอ ตำบล ภาษาไทย |
+| `location`, `radius` | จุดศูนย์กลางและรัศมีเป็นเมตร (ค่าเริ่มต้น 1 กม. สูงสุด 10 กม.) |
+| `geo` | รูปหลายเหลี่ยมแบบ GeoJSON |
+| `from`, `to` | ช่วงวันที่ |
+
+หากระบุพื้นที่หลายแบบ บริการจะใช้ชื่อเขตการปกครองก่อน ตามด้วยจุด และรูปหลายเหลี่ยม ผลลัพธ์จัดกลุ่มตามดาวเทียม (`terra` และ `aqua` จาก MODIS, `suomi-npp` จาก VIIRS) และวันที่ พร้อมการใช้ประโยชน์ที่ดิน หมู่บ้านที่ใกล้ที่สุด และระยะห่างของแต่ละจุด
+
+## ความถี่ของภัยพิบัติซ้ำซาก [#how-often-disasters-recur]
+
+```ts
+// Flood, drought and hotspot statistics for the area around a point
+const stats = await services.info.disasterRecurring(
+  { lon: 100.55, lat: 14.35 },
+  { types: ["flood", "drought"], version: 2 }
+);
+
+// Repeated flood or drought areas within a polygon
+const repeatedFloods = await services.info.floodRecurrence(polygon);
+const repeatedDroughts = await services.info.droughtRecurrence(polygon);
+```
+
+`disasterRecurring` คืนค่า `summary_frequency` และจำนวนครั้งรายปีของภัยพิบัติแต่ละประเภท เช่น `flood: { summary_frequency: 5, data: [{ year: 2011, frequency: 1 }, …] }` (จุดความร้อนนับตามการใช้ประโยชน์ที่ดินแทน) `version: 2` ใช้บริการเวอร์ชันใหม่ ส่วนการค้นหาพื้นที่ซ้ำซากคืนค่าในรูปแบบเดียวกับ[แปลงเพาะปลูก](/th/docs/web-services/agriculture#crop-plots) คือ `result`, `area` (ไร่) และ `geom`

@@ -14,7 +14,9 @@ A React wrapper for the [GISTDA Sphere Map API](https://sphere.gistda.or.th/). B
 npm install gistda-sphere-react
 ```
 
-## Quick Start
+Requires React 19 or later.
+
+## Quick start
 
 ```tsx
 import { SphereProvider, SphereMap, Marker } from 'gistda-sphere-react';
@@ -38,22 +40,24 @@ function App() {
 }
 ```
 
-## Getting an API Key
+## Getting an API key
 
-1. Visit [sphere.gistda.or.th](https://sphere.gistda.or.th/)
-2. Register for an account
-3. Create a new API key and set the allowed hosts to your domains (e.g. `localhost`, `yourdomain.com`)
+1. Visit [sphere.gistda.or.th](https://sphere.gistda.or.th/) and register for an account.
+2. Create an API key and add the hosts your app runs on (for example `localhost` and `yourdomain.com`).
+3. Enable the services your app uses, such as search, routing or address lookup.
 
-> **Note**: The API key is sent as a query parameter in requests and is visible client-side. Use host restrictions as your primary security mechanism.
+> **Note**: The API key is sent with every request and is visible in the browser. Host restrictions are what keep it safe.
 
 ## Features
 
-- **Components**: `SphereMap`, `Marker`, `Polygon`, `Polyline`, `Circle`, `Popup`, `Dot`, `Rectangle`, `Layer`
-- **Hooks**: `useMap`, `useSphere`, `useMapControls`, `useSearch`, `useRoute`, `useTags`, `useMarkers`, `usePolygons`, `usePolylines`, `useCircles`, `useOverlays`
-- **Event Hooks**: `useMapReady`, `useMapClick`, `useMapZoom`, `useMapLocation`, `useOverlayClick`, `useMapEvent`
-- **Built-in Layers**: Traffic, PM2.5, Hotspot, Flood, Drought, Satellite imagery
-- **Predefined Overlays**: Live CCTV cameras, traffic events, air quality data
-- **Full TypeScript support** with exported types for all components, hooks, and options
+- **The whole Sphere API**: every map class, event and option, mapped on the [API coverage](https://gistda-sphere-react.dulapahv.dev/docs/api-coverage) page.
+- **Components**: `SphereMap`, `Marker`, `Popup`, `Polygon`, `Polyline`, `Circle`, `Rectangle`, `Dot`, `GeoJson`, `ObjectOverlay`, `Layer`, `Tag`, `PredefinedOverlay`, `MapControl`, `MenuBar`, `RouteGuide`, `SearchResults`
+- **Hooks**: `useMap`, `useSphere`, `useMapControls`, `useUi`, `useSearch`, `useRoute`, `useTags`, `useTagCategories`, `useSphereUtils`, `useSphereServices`, overlay collections (`useMarkers`, `usePolygons`, `usePolylines`, `useCircles`, `useOverlays`) and event hooks (`useMapEvent`, `useMapReady`, `useMapClick`, `useMapZoom`, `useMapLocation`, `useOverlayClick`)
+- **React content** in marker icons, popups and map controls
+- **Routing** with status, totals and readable turn-by-turn directions as React state
+- **Data and analysis**: GeoJSON, KML, GPX and WKT; heatmaps, clusters, 3D Tiles and I3S; measurements and polygon operations
+- **Web services client** (`createSphereServices`) for search, routing, addresses, elevation, static maps, agriculture, disasters and population, in the browser or on a server
+- **Full TypeScript support** with typed props, refs, results and events
 
 For detailed API reference, examples, and interactive demos, visit the **[documentation](https://gistda-sphere-react.dulapahv.dev)**.
 

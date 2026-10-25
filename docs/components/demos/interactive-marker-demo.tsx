@@ -1,55 +1,93 @@
 "use client";
 
-import {
-  type Location,
-  Marker,
-  SphereMap,
-  SphereProvider,
-} from "gistda-sphere-react";
+import { type Location, Marker, SphereMap } from "gistda-sphere-react";
 import { useState } from "react";
+import {
+  DemoBar,
+  DemoButton,
+  DemoFrame,
+  DemoNote,
+  useDemoText,
+} from "./demo-ui";
 import { useDocLanguage } from "./use-doc-language";
 
-const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
+const TEXT = {
+  en: {
+    clear: "Clear",
+    hint: (count: number) =>
+      `Click the map to place markers (${count} placed). Drag them to move.`,
+  },
+  th: {
+    clear: "ล้าง",
+    hint: (count: number) =>
+      `คลิกแผนที่เพื่อวางหมุด (วางแล้ว ${count} หมุด) ลากหมุดเพื่อย้ายได้`,
+  },
+};
 
-export function InteractiveMarkerDemo() {
-  const [markers, setMarkers] = useState<Location[]>([]);
+interface PlacedMarker {
+  id: number;
+  position: Location;
+}
+
+let nextId = 1;
+
+/** Click to add markers; drag to move them. */
+function MarkerPlacement() {
   const language = useDocLanguage();
+  const text = useDemoText(TEXT);
+  const [markers, setMarkers] = useState<PlacedMarker[]>([]);
 
-  if (!API_KEY) {
-    return null;
-  }
+  const move = (id: number, position: Location) =>
+    setMarkers((previous) =>
+      previous.map((marker) =>
+        marker.id === id ? { ...marker, position } : marker
+      )
+    );
 
   return (
-    <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
-      <SphereProvider apiKey={API_KEY}>
-        <SphereMap
-          center={{ lat: 13.7563, lon: 100.5018 }}
-          language={language}
-          onClick={(location) => setMarkers((prev) => [...prev, location])}
-          style={{ height: "400px", width: "100%" }}
-          zoom={10}
-        >
-          {markers.map((pos) => (
-            <Marker
-              key={`${pos.lon}-${pos.lat}`}
-              position={pos}
-              title={`${pos.lat.toFixed(4)}, ${pos.lon.toFixed(4)}`}
-            />
-          ))}
-        </SphereMap>
-        <div className="flex flex-wrap items-center gap-2 bg-fd-card p-3">
-          <span className="py-2 text-fd-muted-foreground text-sm">
-            Click the map to place markers ({markers.length} placed)
-          </span>
-          <button
-            className="ml-auto cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
+    <>
+      <SphereMap
+        center={{ lat: 13.7563, lon: 100.5018 }}
+        language={language}
+        onClick={({ lat, lon }) => {
+          nextId += 1;
+          setMarkers((previous) => [
+            ...previous,
+            { id: nextId, position: { lat, lon } },
+          ]);
+        }}
+        style={{ height: "400px", width: "100%" }}
+        zoom={10}
+      >
+        {markers.map((marker) => (
+          <Marker
+            draggable
+            key={marker.id}
+            onDrop={(_, position) => move(marker.id, position)}
+            position={marker.position}
+            title={`${marker.position.lat.toFixed(4)}, ${marker.position.lon.toFixed(4)}`}
+          />
+        ))}
+      </SphereMap>
+      <DemoBar>
+        <DemoNote>{text.hint(markers.length)}</DemoNote>
+        <span className="ml-auto">
+          <DemoButton
+            disabled={markers.length === 0}
             onClick={() => setMarkers([])}
-            type="button"
           >
-            Clear
-          </button>
-        </div>
-      </SphereProvider>
-    </div>
+            {text.clear}
+          </DemoButton>
+        </span>
+      </DemoBar>
+    </>
+  );
+}
+
+export function InteractiveMarkerDemo() {
+  return (
+    <DemoFrame>
+      <MarkerPlacement />
+    </DemoFrame>
   );
 }

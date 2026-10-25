@@ -1,0 +1,45 @@
+---
+title: RouteGuide
+description: แผงนำทางทีละขั้นในตัวของ Sphere สำหรับเส้นทางบนแผนที่
+---
+
+`<RouteGuide>` แสดงแผงเส้นทางของ Sphere เอง ได้แก่ ระยะทาง เวลาเดินทาง คำแนะนำทีละขั้น และตัวเลือกเส้นทาง วางไว้ที่ใดก็ได้ภายใน `SphereProvider` เช่น ในแถบด้านข้าง แล้ววางแผนเส้นทางด้วย [`useRoute`](/th/docs/hooks/use-route)
+
+```tsx
+import { RouteGuide, useRoute } from "gistda-sphere-react";
+
+function Directions() {
+  const route = useRoute();
+  return (
+    <aside>
+      <button
+        type="button"
+        onClick={() => {
+          route.clear();
+          route.addDestination({ lon: 100.5018, lat: 13.7563 });
+          route.addDestination({ lon: 98.9853, lat: 18.7883 });
+          route.search();
+        }}
+      >
+        Bangkok → Chiang Mai
+      </button>
+      <RouteGuide className="max-h-96 overflow-auto bg-white text-black" />
+    </aside>
+  );
+}
+```
+
+ลองใช้งานได้ใน[ตัวอย่างการหาเส้นทาง](/th/docs/examples/routing) (ปุ่ม "คำแนะนำของ Sphere")
+
+## Props
+
+| Prop | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `className` | `string` | class ของคอนเทนเนอร์ |
+| `style` | `CSSProperties` | สไตล์ของคอนเทนเนอร์ |
+
+## สิ่งที่ควรรู้ [#things-to-know]
+
+- การแสดงแผงนำทางจะเปิดการคำนวณเส้นทางใหม่อัตโนมัติ เส้นทางจะคำนวณใหม่ทุกครั้งที่จุดแวะเปลี่ยนหรือถูกลาก ซึ่งเป็นพฤติกรรมของ Sphere API
+- แผงใช้สไตล์ของ Sphere ซึ่งออกแบบสำหรับพื้นหลังสว่าง หากใช้ธีมมืด ให้กำหนดพื้นหลังสีขาวให้คอนเทนเนอร์
+- หากต้องการแผงนำทางที่มีหน้าตาเหมือนส่วนอื่นของแอป ให้แสดง [`useRoute().steps`](/th/docs/hooks/use-route#turn-by-turn-directions) เองแทน

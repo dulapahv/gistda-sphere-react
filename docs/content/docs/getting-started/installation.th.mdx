@@ -3,7 +3,7 @@ title: การติดตั้ง
 description: ติดตั้ง gistda-sphere-react ในโปรเจกต์ของคุณ
 ---
 
-## ติดตั้งแพ็กเกจ
+## ติดตั้งแพ็กเกจ [#install-the-package]
 
 ```bash tab="npm"
 npm install gistda-sphere-react
@@ -17,19 +17,18 @@ pnpm add gistda-sphere-react
 yarn add gistda-sphere-react
 ```
 
-## Peer Dependencies
-
-ไลบรารีนี้ต้องใช้งานร่วมกับ React เวอร์ชัน 19 ขึ้นไป:
-
-```json
-{
-  "peerDependencies": {
-    "react": ">=19.0.0",
-    "react-dom": ">=19.0.0"
-  }
-}
+```bash tab="bun"
+bun add gistda-sphere-react
 ```
 
-## ขั้นตอนถัดไป
+แพ็กเกจนี้ไม่มี dependency อื่นและมี TypeScript types มาให้ในตัว ส่วนสคริปต์แผนที่ Sphere จะโหลดจากเซิร์ฟเวอร์ของ GISTDA เมื่อ [`SphereProvider`](/th/docs/components/sphere-provider) ถูก mount จึงไม่ต้องติดตั้งอะไรเพิ่มเติม
 
-เมื่อติดตั้งเสร็จแล้ว คุณต้องมี [API Key](/docs/getting-started/api-key) จาก GISTDA เพื่อใช้งานแผนที่ จากนั้นทำตามคู่มือ[เริ่มต้นใช้งานด่วน](/docs/getting-started/quick-start)เพื่อแสดงผลแผนที่แรกของคุณ
+## สิ่งที่ต้องมี [#requirements]
+
+- **React 19 ขึ้นไป** โดย `react` และ `react-dom` เป็น peer dependency
+- **เบราว์เซอร์** แผนที่แสดงผลฝั่งไคลเอนต์ หากใช้ App Router ของ Next.js ให้ใช้คอมโพเนนต์ใน Client Component (`"use client"`)
+- **API key** จาก GISTDA ดู[การขอ API key](/th/docs/getting-started/api-key)
+
+## ขั้นตอนถัดไป [#next-steps]
+
+ทำตามหน้า[เริ่มต้นอย่างรวดเร็ว](/th/docs/getting-started/quick-start)เพื่อแสดงแผนที่แรกของคุณ

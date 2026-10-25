@@ -1,189 +1,66 @@
-import { type Ref, useEffect, useImperativeHandle, useRef } from "react";
-import { useMapContext } from "../context/MapContext";
-import { useSphereContext } from "../context/SphereContext";
-import type {
-  Bound,
-  GeometryOptions,
-  LineStyleType,
-  Location,
-  PopupOptions,
-  Range,
-  Size,
-  SphereRectangle,
-} from "../types";
+import { type ReactNode, type Ref, useImperativeHandle } from "react";
+import { useSphereContext } from "@/context/SphereContext";
+import {
+  createGeometryRefMethods,
+  createPolygonOperations,
+  type GeometryRefMethods,
+  type PolygonOperationMethods,
+  readArea,
+} from "@/internal/geometryRef";
+import {
+  type GeometryComponentProps,
+  useGeometry,
+} from "@/internal/useGeometry";
+import type { Location, Size, SphereRectangle } from "@/types";
 
-export interface RectangleRef {
+export interface RectangleRef
+  extends GeometryRefMethods,
+    PolygonOperationMethods {
+  /** Area in square meters, or formatted text when a language is given. */
   getArea: (language?: string) => number | string | null;
-  getBound: () => Bound | null;
+  /** The underlying `sphere.Rectangle`. */
   getRectangle: () => SphereRectangle | null;
-  togglePopup: (show?: boolean, location?: Location) => void;
-  updateStyle: (options: Partial<GeometryOptions>) => void;
 }
 
-export interface RectangleProps {
-  clickable?: boolean;
-  detail?: string;
-  draggable?: boolean;
-  editable?: boolean;
-  fillColor?: string;
-  lineColor?: string;
-  lineStyle?: LineStyleType;
-  lineWidth?: number;
-  onClick?: (rectangle: SphereRectangle) => void;
-  onDrag?: (rectangle: SphereRectangle) => void;
-  onDrop?: (rectangle: SphereRectangle) => void;
-  popup?: PopupOptions;
+export interface RectangleProps
+  extends GeometryComponentProps<SphereRectangle> {
+  /** Top-left corner. */
   position: Location;
   ref?: Ref<RectangleRef>;
+  /** Size in degrees (`{ width, height }`), or the bottom-right corner. */
   size: Size | Location;
-  title?: string;
-  visibleRange?: Range;
-  zIndex?: number;
 }
 
+/** An axis-aligned rectangle on the map. */
 export function Rectangle({
   position,
   size,
   ref,
-  title,
-  detail,
-  popup,
-  visibleRange,
-  lineWidth,
-  lineColor,
-  fillColor,
-  lineStyle,
-  clickable,
-  draggable,
-  editable,
-  zIndex,
-  onClick,
-  onDrag,
-  onDrop,
-}: RectangleProps) {
-  const { map, isReady } = useMapContext();
+  ...props
+}: RectangleProps): ReactNode {
   const { sphere } = useSphereContext();
-  const rectangleRef = useRef<SphereRectangle | null>(null);
-  const callbacksRef = useRef({ onClick, onDrag, onDrop });
-
-  useEffect(() => {
-    callbacksRef.current = { onClick, onDrag, onDrop };
-  }, [onClick, onDrag, onDrop]);
-
-  useEffect(() => {
-    if (!(isReady && map && sphere)) {
-      return;
-    }
-
-    const options: GeometryOptions = {};
-
-    if (title) {
-      options.title = title;
-    }
-    if (detail) {
-      options.detail = detail;
-    }
-    if (popup) {
-      options.popup = popup;
-    }
-    if (visibleRange) {
-      options.visibleRange = visibleRange;
-    }
-    if (typeof lineWidth === "number") {
-      options.lineWidth = lineWidth;
-    }
-    if (lineColor) {
-      options.lineColor = lineColor;
-    }
-    if (fillColor) {
-      options.fillColor = fillColor;
-    }
-    if (lineStyle) {
-      options.lineStyle = lineStyle;
-    }
-    if (typeof clickable === "boolean") {
-      options.clickable = clickable;
-    }
-    if (typeof draggable === "boolean") {
-      options.draggable = draggable;
-    }
-    if (typeof editable === "boolean") {
-      options.editable = editable;
-    }
-    if (typeof zIndex === "number") {
-      options.zIndex = zIndex;
-    }
-
-    const rectangle = new sphere.Rectangle(position, size, options);
-    rectangleRef.current = rectangle;
-
-    map.Overlays.add(rectangle);
-
-    const handleOverlayClick = (data: { overlay: SphereRectangle }) => {
-      if (data.overlay === rectangle) {
-        callbacksRef.current.onClick?.(rectangle);
-      }
-    };
-
-    const handleOverlayDrag = (overlay: SphereRectangle) => {
-      if (overlay === rectangle) {
-        callbacksRef.current.onDrag?.(rectangle);
-      }
-    };
-
-    const handleOverlayDrop = (overlay: SphereRectangle) => {
-      if (overlay === rectangle) {
-        callbacksRef.current.onDrop?.(rectangle);
-      }
-    };
-
-    map.Event.bind("overlayClick", handleOverlayClick);
-    map.Event.bind("overlayDrag", handleOverlayDrag);
-    map.Event.bind("overlayDrop", handleOverlayDrop);
-
-    return () => {
-      map.Event.unbind("overlayClick", handleOverlayClick);
-      map.Event.unbind("overlayDrag", handleOverlayDrag);
-      map.Event.unbind("overlayDrop", handleOverlayDrop);
-      map.Overlays.remove(rectangle);
-      rectangleRef.current = null;
-    };
-  }, [
-    isReady,
-    map,
-    sphere,
-    position,
-    size,
-    title,
-    detail,
-    popup,
-    visibleRange,
-    lineWidth,
-    lineColor,
-    fillColor,
-    lineStyle,
-    clickable,
-    draggable,
-    editable,
-    zIndex,
-  ]);
+  const { overlayRef, portal } = useGeometry<SphereRectangle>({
+    create: (api, options) => new api.Rectangle(position, size, options),
+    props,
+    shape: { position, size },
+  });
 
   useImperativeHandle(
     ref,
     () => ({
-      getArea: (language?: string) =>
-        rectangleRef.current?.size(language) ?? null,
-      getBound: () => rectangleRef.current?.bound() ?? null,
-      getRectangle: () => rectangleRef.current,
-      togglePopup: (show?: boolean, location?: Location) => {
-        rectangleRef.current?.pop(show, location);
-      },
-      updateStyle: (options: Partial<GeometryOptions>) => {
-        rectangleRef.current?.update(options);
-      },
+      ...createGeometryRefMethods(
+        () => sphere,
+        () => overlayRef.current
+      ),
+      ...createPolygonOperations(
+        () => sphere,
+        () => overlayRef.current
+      ),
+      getArea: (language) => readArea(sphere, overlayRef.current, language),
+      getRectangle: () => overlayRef.current,
     }),
-    []
+    [sphere, overlayRef]
   );
 
-  return null;
+  return portal;
 }

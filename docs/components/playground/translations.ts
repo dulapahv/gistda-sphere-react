@@ -1,389 +1,886 @@
-import type { DrawingMode } from "./constants";
+type Predicate = "intersects" | "contains" | "within" | "distance";
+type Operation = "union" | "intersection" | "difference" | "split";
 
-interface PlaygroundTranslations {
-  active: (count: number) => string;
-
-  /** Error */
-  apiKeyError: string;
-  backToDocs: string;
-
-  /** LayerSelector */
-  baseLayer: string;
-  calculate: string;
-  calculating: string;
-  center: string;
-  circleCenter: string;
-  circleN: (n: number) => string;
-  clearAll: string;
-  clearResults: string;
-  clearRoute: string;
-  clickMapToSet: (point: string) => string;
-  clickOppositeCorner: string;
-  clickToSetRadius: string;
-  controlCrosshair: string;
-
-  /** UI control labels */
-  controlDPad: string;
-  controlFullscreen: string;
-  controlGeolocation: string;
-  controlScale: string;
-  controlToolbar: string;
-  controlZoomBar: string;
-  dataLayers: string;
-  destination: string;
-  distance: string;
-  docs: string;
-  dotN: (n: number) => string;
-
-  /** DrawingPanel */
-  drawingTools: string;
-  duration: string;
-  hideDirections: string;
-  hintCircle: string;
-  hintDot: string;
-  hintMarker: string;
-
-  /** Drawing hints */
-  hintNone: string;
-  hintPolygon: string;
-  hintPolyline: string;
-  hintRectangle: string;
-  /** Sidebar */
-  interactivePlayground: string;
-
-  /** Language section */
-  language: string;
-  layerHybrid: string;
-  layerNight: string;
-
-  /** Base layer labels */
-  layerSimple: string;
-  layerStreets: string;
-  lineN: (n: number) => string;
-  liveOverlays: string;
-  locAyutthaya: string;
-  location: string;
-
-  /** Location labels */
-  locBangkok: string;
-  locChiangMai: string;
-  locPattaya: string;
-  locPhuket: string;
-  locSukhothai: string;
-
-  /** MapControlsPanel */
-  mapControls: string;
-
-  /** MapView shape labels */
-  markerN: (n: number) => string;
-  modeCheapest: string;
-  modeShortest: string;
-
-  /** Route mode labels */
-  modeTraffic: string;
-  notSet: string;
-  origin: string;
-  overlayDrought: string;
-  overlayFlood: string;
-  overlayHotspot: string;
-  overlayImages: string;
-  overlayPM25: string;
-
-  /** Overlay layer labels */
-  overlayTraffic: string;
-
-  /** TagsPanel */
-  poiTags: string;
-  polygonN: (n: number) => string;
-  predefinedAQI: string;
-
-  /** Predefined overlay labels */
-  predefinedCCTV: string;
-  predefinedEvents: string;
-
-  /** QuickNav */
-  quickNavigation: string;
-  rectangleCorner: string;
-  rectangleN: (n: number) => string;
-  resultN: (n: number) => string;
-  reverseRoute: string;
-
-  /** RoutePanel */
-  routePlanning: string;
-  searchPlaceholder: string;
-
-  /** SearchPanel */
-  searchPlaces: string;
-  searchResult: string;
-  setDestinationOnMap: string;
-  setOriginOnMap: string;
-  shapes: string;
-  toggleTagsHint: string;
-  toolCircle: string;
-  toolDot: string;
-  toolLine: string;
-  toolMarker: string;
-
-  /** Drawing tool labels */
-  toolPan: string;
-  toolPolygon: string;
-  toolRect: string;
-  turnByTurn: (steps: number) => string;
-
-  /** MapStats */
-  zoom: string;
-}
-
-const en: PlaygroundTranslations = {
-  active: (count) => `${count} active`,
-
-  apiKeyError:
-    "Set NEXT_PUBLIC_SPHERE_API_KEY in docs/.env.local to use the playground.",
-  backToDocs: "Back to docs",
-
-  baseLayer: "Base Layer",
-  calculate: "Calculate",
-  calculating: "Calculating...",
-  center: "Center",
-  circleCenter: "Circle Center",
-  circleN: (n) => `Circle ${n}`,
-  clearAll: "Clear All",
-  clearResults: "Clear Results",
-  clearRoute: "Clear route",
-  clickMapToSet: (point) => `Click on the map to set ${point}`,
-  clickOppositeCorner: "Click opposite corner",
-  clickToSetRadius: "Click to set radius",
-  controlCrosshair: "Crosshair",
-
-  controlDPad: "D-Pad",
-  controlFullscreen: "Fullscreen",
-  controlGeolocation: "Geolocation",
-  controlScale: "Scale",
-  controlToolbar: "Toolbar",
-  controlZoomBar: "Zoom Bar",
-  dataLayers: "Data Layers",
-  destination: "Destination",
-  distance: "Distance",
-  docs: "Docs",
-  dotN: (n) => `Dot ${n}`,
-
-  drawingTools: "Drawing Tools",
-  duration: "Duration",
-  hideDirections: "Hide Directions",
-  hintCircle: "Click center, then click to set radius",
-  hintDot: "Click on the map to place a dot",
-  hintMarker: "Click on the map to place a marker",
-
-  hintNone: "Click and drag to pan the map",
-  hintPolygon: "Click to add points, double-click to complete",
-  hintPolyline: "Click to add points, double-click to complete",
-  hintRectangle: "Click corner, then click opposite corner",
-  interactivePlayground: "Interactive Playground",
-
-  language: "Language",
-  layerHybrid: "Hybrid",
-  layerNight: "Night",
-
-  layerSimple: "Simple",
-  layerStreets: "Streets",
-  lineN: (n) => `Line ${n}`,
-  liveOverlays: "Live Overlays",
-  locAyutthaya: "Ayutthaya",
-  location: "Location",
-
-  locBangkok: "Bangkok",
-  locChiangMai: "Chiang Mai",
-  locPattaya: "Pattaya",
-  locPhuket: "Phuket",
-  locSukhothai: "Sukhothai",
-
-  mapControls: "Map Controls",
-
-  markerN: (n) => `Marker ${n}`,
-  modeCheapest: "Cheapest",
-  modeShortest: "Shortest",
-
-  modeTraffic: "Traffic",
-  notSet: "Not set",
-  origin: "Origin",
-  overlayDrought: "Drought",
-  overlayFlood: "Flood",
-  overlayHotspot: "Hotspot",
-  overlayImages: "Images",
-  overlayPM25: "PM2.5",
-
-  overlayTraffic: "Traffic",
-
-  poiTags: "POI Tags",
-  polygonN: (n) => `Polygon ${n}`,
-  predefinedAQI: "AQI",
-
-  predefinedCCTV: "CCTV",
-  predefinedEvents: "Events",
-
-  quickNavigation: "Quick Navigation",
-  rectangleCorner: "Rectangle Corner",
-  rectangleN: (n) => `Rectangle ${n}`,
-  resultN: (n) => `Result ${n}`,
-  reverseRoute: "Reverse route",
-
-  routePlanning: "Route Planning",
-  searchPlaceholder: "Search for places...",
-
-  searchPlaces: "Search Places",
-  searchResult: "Search Result",
-  setDestinationOnMap: "Set destination on map",
-  setOriginOnMap: "Set origin on map",
-  shapes: "Shapes",
-  toggleTagsHint: "Toggle tags to show points of interest",
-  toolCircle: "Circle",
-  toolDot: "Dot",
-  toolLine: "Line",
-  toolMarker: "Marker",
-
-  toolPan: "Pan",
-  toolPolygon: "Polygon",
-  toolRect: "Rect",
-  turnByTurn: (steps) => `Turn-by-Turn (${steps} steps)`,
-
-  zoom: "Zoom",
+const en = {
+  advancedLayer: {
+    buildings3d: "3D buildings (I3S)",
+    clusters: "Clusters",
+    heatmap: "Heatmap",
+    model3d: "3D model (glTF)",
+    pointcloud: "Point cloud (3D Tiles)",
+    wms: "WMS imagery",
+  },
+  baseLayer: {
+    HYBRID: "Hybrid",
+    IMAGES: "Satellite images",
+    SIMPLE: "Simple",
+    STREETS: "Streets",
+    STREETS_NIGHT: "Streets (night)",
+  },
+  baseLayerShort: {
+    HYBRID: "Hybrid",
+    IMAGES: "Images",
+    SIMPLE: "Simple",
+    STREETS: "Streets",
+    STREETS_NIGHT: "Night",
+  },
+  common: {
+    cancel: "Cancel",
+    clear: "Clear",
+    clearAll: "Clear all",
+    copied: "Copied",
+    copy: "Copy",
+    hide: "Hide",
+    loading: "Loading…",
+    remove: "Remove",
+    show: "Show",
+  },
+  control: {
+    Crosshair: "Crosshair",
+    DPad: "D-pad",
+    Fullscreen: "Fullscreen",
+    Geolocation: "My location",
+    LayerSelector: "Layer menu",
+    Scale: "Scale bar",
+    Toolbar: "Draw toolbar",
+    Zoombar: "Zoom bar",
+  },
+  data: {
+    copyUrl: "Copy URL",
+    errors: {
+      aborted: "Canceled.",
+      http: "The service returned an error.",
+      key: "Your API key can't use this service. Enable it for your key in the Sphere console.",
+      network:
+        "Network error. Check your connection, or whether the service allows requests from this site.",
+      parse: "The service sent a response that isn't valid JSON.",
+      timeout: "The service didn't answer in time. Try again.",
+    },
+    groups: {
+      agri: "Agriculture",
+      disaster: "Disasters",
+      geo: "Geocoding & elevation",
+      people: "Population",
+      poi: "Search & places",
+      route: "Routing",
+    },
+    keyword: "Keyword",
+    openEmbed: "Open embed map",
+    picking: "Click the map…",
+    pickOnMap: "Pick on map",
+    poiId: "POI or area ID",
+    point: "Location",
+    pointHint:
+      "The web services below are asked about this point. It's shown on the map while this tab is open.",
+    rasterLayer: "Raster layer",
+    rasterTiles: "Raster tiles (XYZ)",
+    run: "Send request",
+    service: {
+      address: "Address (reverse geocoding)",
+      cassava: "Cassava, bi-weekly",
+      categories: "Tag categories",
+      crop: "Economic crops",
+      cropSuitability: "Crop suitability (area)",
+      disasterRecurring: "Disaster recurrence",
+      drought: "Drought status",
+      droughtRecurrence: "Drought recurrence (area)",
+      elevation: "Elevation",
+      flood: "Flood status",
+      floodRecurrence: "Flood recurrence (area)",
+      hotspot: "Hotspots within 10 km",
+      landSuitability: "Land suitability",
+      maize: "Maize, bi-weekly",
+      matrix: "Route matrix",
+      nearby: "Nearby places",
+      palm: "Oil palm, yearly",
+      poi: "Place details by ID",
+      population: "Population (area)",
+      rice: "Rice, bi-weekly",
+      route: "Route to Victory Monument",
+      rubber: "Rubber, yearly",
+      search: "Search near the point",
+      sugarcane: "Sugarcane, bi-weekly",
+      suggest: "Autocomplete",
+    },
+    serviceInfo: {
+      address: "Province, district, subdistrict and road at the point.",
+      cassava: "Cassava plots at the point from 50 m satellite data.",
+      categories:
+        "Every POI tag category in Thai and English. Public; no key needed.",
+      crop: "Crop type, cost and price at the point.",
+      cropSuitability:
+        "Crop suitability inside a 2 km square around the point.",
+      disasterRecurring:
+        "How often floods, droughts and fires hit the area (version 2).",
+      drought: "Recent drought observations at the point.",
+      droughtRecurrence: "Repeated drought areas in a 2 km square.",
+      elevation: "Height above mean sea level in meters.",
+      flood: "Recent flood observations at the point.",
+      floodRecurrence: "Repeated flood areas in a 2 km square.",
+      hotspot: "Fire hotspots within 10 km of the point.",
+      landSuitability: "How suitable the land is for farming.",
+      maize: "Maize plots at the point from 50 m satellite data.",
+      matrix:
+        "Distance and time from the point to Victory Monument and Wat Arun.",
+      nearby: "The five closest places of interest.",
+      palm: "Oil palm plots at the point from 50 m satellite data.",
+      poi: "Details of one place or administrative area, e.g. A10000000 (Bangkok).",
+      population:
+        "Population estimate (Meta/Facebook data) in a 2 km square, sent as WKT.",
+      rice: "Rice plots, yield and harvest month at the point.",
+      route:
+        "A route with turn-by-turn steps from the point to Victory Monument.",
+      rubber: "Rubber plots at the point from 50 m satellite data.",
+      search: "Places matching the keyword, sorted by distance from the point.",
+      sugarcane: "Sugarcane plots at the point from 50 m satellite data.",
+      suggest: "Keyword suggestions while typing.",
+    },
+    services: "Web services",
+    servicesHint:
+      "Calls go through createSphereServices (useSphereServices), with no map needed. Each service must be enabled for your API key.",
+    staticAlt: "Static map of the selected location",
+    staticFailed:
+      "The static map didn't load. Your API key may not have the static map service.",
+    staticHint:
+      "Map images from the static map service: handy for emails, PDFs and link previews.",
+    staticMap: "Static & embed maps",
+    style: "Style",
+    tiles: "Tile URLs",
+    tilesHint:
+      "Use Sphere base maps in other map libraries. Replace YOUR_API_KEY with your key.",
+    useCenter: "Use map center",
+    vectorStyle: "Vector style (MapLibre)",
+    vectorTiles: "Vector tiles",
+    wmts: "WMTS capabilities",
+  },
+  dataLayer: {
+    DROUGHT: "Drought",
+    FLOOD: "Flood",
+    HOTSPOT: "Hotspots",
+    PM25: "PM2.5",
+    TRAFFIC: "Traffic",
+  },
+  draw: {
+    analysis: {
+      clearResult: "Clear result",
+      combine: "Combine (polygons; union also joins lines):",
+      distanceResult: (text: string) => `Distance from A to B: ${text}`,
+      empty: "The operation produced no shape.",
+      hint: "Uses the spatial methods on shape refs. Results are drawn in red.",
+      needTwo: "Draw at least two shapes to compare them.",
+      notReady: "That shape isn't on the map yet. Try again in a moment.",
+      operation: {
+        difference: "A minus B",
+        intersection: "Intersection",
+        split: "Split A by B",
+        union: "Union",
+      },
+      operationResult: (operation: Operation, count: number) =>
+        operation === "split"
+          ? `Split into ${count} part${count === 1 ? "" : "s"}.`
+          : "Done. The result is drawn in red.",
+      predicate: {
+        contains: "A contains B",
+        distance: "Distance",
+        intersects: "Intersects",
+        within: "A within B",
+      },
+      predicateResult: (predicate: Predicate, value: boolean) => {
+        const questions: Record<Predicate, string> = {
+          contains: "Does A contain B?",
+          distance: "Distance",
+          intersects: "Do A and B intersect?",
+          within: "Is A within B?",
+        };
+        return `${questions[predicate]} ${value ? "Yes" : "No"}`;
+      },
+      test: "Test:",
+      title: "Spatial analysis",
+    },
+    copyGeoJson: "Copy GeoJSON",
+    download: "Download",
+    editable: "Editable vertices",
+    finish: "Finish",
+    hint: {
+      circle: "Click the center, then click again to set the radius.",
+      dot: "Click to drop a dot. Dots can be dragged.",
+      marker: "Click to drop a marker. Markers can be dragged.",
+      none: "Pick a tool, then click the map. With no tool, clicking the map shows the coordinates.",
+      polygon:
+        "Click to add corners, then double-click or press Finish (3+ points).",
+      polyline: "Click to add points, then double-click or press Finish.",
+      rectangle: "Click one corner, then the opposite corner.",
+    },
+    import: {
+      empty: "Paste some data first.",
+      failed: (message: string) => `Couldn't read the data: ${message}`,
+      format: { geojson: "GeoJSON", gpx: "GPX", kml: "KML", wkt: "WKT" },
+      formatsNote:
+        "WKT, KML and GPX are converted with useSphereUtils, which loads Sphere's converters on demand.",
+      hint: "Show your own data on the map with <GeoJson>.",
+      openFile: "Open file",
+      placeholder: "Paste GeoJSON, WKT, KML or GPX…",
+      sample: "Sample",
+      show: "Show on map",
+      shown: (label: string, count: number) =>
+        `${label}: ${count} feature${count === 1 ? "" : "s"} on the map`,
+      title: "Import data",
+      unrecognized: "No geometry found.",
+      unsupportedFile: (name: string) =>
+        `${name} isn't a supported file. Use .geojson, .json, .wkt, .kml or .gpx.`,
+    },
+    labels: "Labels",
+    lineStyle: { Dashed: "Dashed", Dot: "Dotted", Solid: "Solid" },
+    lineWidth: "Line width",
+    noShapes: "Nothing drawn yet.",
+    shapes: (count: number) => `Shapes (${count})`,
+    style: "Style",
+    styleHint:
+      "Color, width and line style update shapes in place, without re-creating them.",
+    tool: {
+      circle: "Circle",
+      dot: "Dot",
+      marker: "Marker",
+      none: "Pan",
+      polygon: "Polygon",
+      polyline: "Line",
+      rectangle: "Rectangle",
+    },
+    tools: "Tools",
+    undo: "Undo point",
+    zoomTo: "Zoom to",
+  },
+  events: {
+    empty: "Interact with the map to see its events here.",
+    hint: "Every SphereMap event prop is logged. Fast, continuous events (mouse moves, zoom, tiles…) only show in verbose mode.",
+    title: (count: number) => `Events (${count})`,
+    verbose: "Verbose",
+  },
+  filter: {
+    Dark: "Dark",
+    Deuteranopia: "Deuteranopia",
+    Light: "Light",
+    None: "None",
+    Protanopia: "Protanopia",
+  },
+  flyHome: "Back to Bangkok",
+  header: {
+    apiKeyError:
+      "Set NEXT_PUBLIC_SPHERE_API_KEY in docs/.env.local to use the playground.",
+    backToDocs: "Back to the documentation",
+    docs: "Docs",
+    subtitle: "Interactive playground",
+    tabs: "Playground sections",
+  },
+  inspect: {
+    addStop: "Route stop",
+    analyze: "Analyze",
+    title: "Coordinates",
+  },
+  liveOverlay: {
+    aqi: "Air quality",
+    cameras: "Traffic cameras",
+    events: "Road events",
+  },
+  map: {
+    advancedLayers: "Advanced layers",
+    advancedLayersHint:
+      "MapLibre styles, WMS, 3D tiles and deck.gl layers through <Layer>. Sample data: MapLibre, Esri, Longdo and Khronos.",
+    baseMap: "Base map",
+    camera: "View",
+    clearLocation: "Hide location",
+    controls: "Map controls",
+    controlsHint:
+      "Built-in controls via the controls prop. Custom adds a <MapControl> (top left) and a <MenuBar> (bottom left).",
+    customControls: "Custom",
+    dataLayers: "Data layers",
+    dataLayersHint:
+      "Overlays from Sphere. Some only have data in certain seasons.",
+    drag: "Drag",
+    filter: "Color filter",
+    filterHint: "Dark/light themes and color-blind friendly palettes.",
+    flyTo: "Fly to",
+    interaction: "Interaction",
+    interactionHint:
+      "Right-click the map for its menu. The lock covers the map until clicked, so pages scroll past it.",
+    keyboard: "Keyboard",
+    labels: "Map labels",
+    labelsHint:
+      "Changes the label language in place, without reloading the map.",
+    liveOverlays: "Live overlays",
+    liveOverlaysHint: "Real-time data, loaded with <PredefinedOverlay>.",
+    locate: "Locate me",
+    lock: "Lock",
+    maxZoom: "Maximum zoom",
+    menuAddress: "Menu: address",
+    menuNearby: "Menu: nearby",
+    minZoom: "Minimum zoom",
+    pitch: "Pitch",
+    resetView: "Reset",
+    rotation: "Rotation",
+    wheel: "Wheel zoom",
+    zoomIn: "Zoom in",
+    zoomLimits: "Zoom limits",
+    zoomLimitsHint: "The zoomRange prop. Users can't zoom past these levels.",
+    zoomOut: "Zoom out",
+  },
+  places: {
+    activeCount: (count: number) => `${count} on`,
+    builtInList: "Sphere's result list",
+    builtInListHint:
+      "<SearchResults> renders Sphere's own result list and markers for searches.",
+    cities: {
+      Ayutthaya: "Ayutthaya",
+      Bangkok: "Bangkok",
+      "Chiang Mai": "Chiang Mai",
+      Pattaya: "Pattaya",
+      Phuket: "Phuket",
+      Sukhothai: "Sukhothai",
+    },
+    clearTags: (count: number) => `Clear (${count})`,
+    findNearby: "Nearby places",
+    nearby: "Around the map center",
+    nearbyHint:
+      "Nearby places use useSearch().nearPoi. Addresses need the address service on your key.",
+    noAddress:
+      "No address found. Your API key may not have the address service.",
+    noNearby: "No places found near the map center.",
+    noResults: (keyword: string) => `No places found for "${keyword}".`,
+    outline: "Outline",
+    outlineFailed:
+      "The outline didn't load. Your API key may not have the POI details service (poi/get).",
+    outlineHint:
+      "Outline draws the place's shape with <ObjectOverlay> (works best for provinces, districts and other areas).",
+    poiId: (id: string) => `ID ${id}`,
+    routeHere: "Route stop",
+    search: "Search",
+    searchHint: "Suggestions appear as you type (useSearch().suggest).",
+    searchPlaceholder: "Try “central world” or “วัดอรุณ”",
+    selected: "Selected place",
+    tagPopups: "Popups",
+    tags: "POI tags",
+    tagsFallback:
+      "Couldn't load the live tag list, so a built-in list is shown.",
+    tagsHint:
+      "Show places by category with <Tag>. The list is loaded live with useTagCategories.",
+    whatsHere: "What's here?",
+    zoomTo: "Zoom to",
+  },
+  resetNorth: "Face north and flatten",
+  route: {
+    addCenter: "Add map center",
+    auto: "Auto re-route",
+    avoidFerries: "Avoid ferries",
+    avoidTollways: "Avoid tollways",
+    builtInGuide: "Sphere's route guide",
+    builtInGuideHint:
+      "<RouteGuide> renders Sphere's own turn-by-turn panel. It also turns on auto re-routing.",
+    calculate: "Find route",
+    calculating: "Finding route…",
+    contextMenu: "Right-click routing",
+    copyGeoJson: "Copy route GeoJSON",
+    distance: "Distance",
+    duration: "Travel time",
+    exception: (message: string) =>
+      `Sphere couldn't plan this route: ${message}`,
+    failed: (code: number, message: string) =>
+      `Routing failed (status ${code}). ${message}`,
+    label: { Distance: "Distance", Hide: "Hidden", Time: "Time" },
+    labels: "Labels on the route",
+    mode: "Travel mode",
+    modeHint: {
+      Cost: "The fastest route by road, without traffic data.",
+      Distance: "The shortest route by distance.",
+      Fly: "A straight line between stops, as the crow flies. Route labels are hidden in this mode.",
+      Traffic:
+        "The fastest route, avoiding traffic jams with live and predicted traffic.",
+    },
+    modes: {
+      Cost: "Fastest",
+      Distance: "Shortest",
+      Fly: "Straight line",
+      Traffic: "Avoid traffic",
+    },
+    motorcycle: "Motorcycle",
+    needStops: "Add at least two stops.",
+    options: "Options",
+    optionsHint:
+      "Auto re-route recalculates when stops change or are dragged. Right-click routing adds route items to the map menu.",
+    picking: "Click the map to add stops…",
+    pickOnMap: "Add stops on map",
+    result: "Route",
+    reverse: "Reverse",
+    steps: "Steps",
+    stopName: (index: number, total: number) => {
+      if (index === 0) {
+        return "Start";
+      }
+      return index === total - 1 ? "End" : `Stop ${index}`;
+    },
+    stops: (count: number) => `Stops (${count})`,
+    stopsHint:
+      "Stops are Sphere route markers: drag them on the map, or click one to remove it.",
+    timeout:
+      "The routing service didn't answer. This usually means your API key doesn't have the routing service enabled.",
+    turnByTurn: "Turn-by-turn",
+  },
+  shapeName: {
+    circle: (n: number) => `Circle ${n}`,
+    dot: (n: number) => `Dot ${n}`,
+    marker: (n: number) => `Marker ${n}`,
+    polygon: (n: number) => `Polygon ${n}`,
+    polyline: (n: number) => `Line ${n}`,
+    rectangle: (n: number) => `Rectangle ${n}`,
+  },
+  stats: {
+    center: "Center",
+    pitch: "Pitch",
+    rotation: "Rotation",
+    zoom: "Zoom",
+  },
+  tabs: {
+    data: "Data",
+    draw: "Draw",
+    events: "Events",
+    map: "Map",
+    places: "Places",
+    route: "Route",
+  },
 };
 
+export type PlaygroundTranslations = typeof en;
+
 const th: PlaygroundTranslations = {
-  active: (count) => `${count} ที่ใช้งาน`,
-
-  apiKeyError:
-    "ตั้งค่า NEXT_PUBLIC_SPHERE_API_KEY ใน docs/.env.local เพื่อใช้งานสนามทดลอง",
-  backToDocs: "กลับไปยังเอกสาร",
-
-  baseLayer: "เลเยอร์ฐาน",
-  calculate: "คำนวณเส้นทาง",
-  calculating: "กำลังคำนวณ...",
-  center: "จุดศูนย์กลาง",
-  circleCenter: "จุดศูนย์กลางวงกลม",
-  circleN: (n) => `วงกลม ${n}`,
-  clearAll: "ล้างทั้งหมด",
-  clearResults: "ล้างผลลัพธ์",
-  clearRoute: "ล้างเส้นทาง",
-  clickMapToSet: (point) => `คลิกบนแผนที่เพื่อกำหนด${point}`,
-  clickOppositeCorner: "คลิกมุมตรงข้าม",
-  clickToSetRadius: "คลิกเพื่อกำหนดรัศมี",
-  controlCrosshair: "เส้นเล็ง",
-
-  controlDPad: "ปุ่มทิศทาง",
-  controlFullscreen: "เต็มหน้าจอ",
-  controlGeolocation: "ตำแหน่งปัจจุบัน",
-  controlScale: "มาตรส่วน",
-  controlToolbar: "แถบเครื่องมือ",
-  controlZoomBar: "แถบซูม",
-  dataLayers: "เลเยอร์ข้อมูล",
-  destination: "ปลายทาง",
-  distance: "ระยะทาง",
-  docs: "เอกสาร",
-  dotN: (n) => `จุด ${n}`,
-
-  drawingTools: "เครื่องมือวาด",
-  duration: "ระยะเวลา",
-  hideDirections: "ซ่อนเส้นทาง",
-  hintCircle: "คลิกจุดศูนย์กลาง แล้วคลิกเพื่อกำหนดรัศมี",
-  hintDot: "คลิกบนแผนที่เพื่อวางจุด",
-  hintMarker: "คลิกบนแผนที่เพื่อวางหมุด",
-
-  hintNone: "คลิกและลากเพื่อเลื่อนแผนที่",
-  hintPolygon: "คลิกเพื่อเพิ่มจุด ดับเบิลคลิกเพื่อเสร็จสิ้น",
-  hintPolyline: "คลิกเพื่อเพิ่มจุด ดับเบิลคลิกเพื่อเสร็จสิ้น",
-  hintRectangle: "คลิกมุมหนึ่ง แล้วคลิกมุมตรงข้าม",
-  interactivePlayground: "ทดลองเล่น",
-
-  language: "ภาษา",
-  layerHybrid: "ดาวเทียม",
-  layerNight: "กลางคืน",
-
-  layerSimple: "เรียบง่าย",
-  layerStreets: "ถนน",
-  lineN: (n) => `เส้น ${n}`,
-  liveOverlays: "โอเวอร์เลย์สด",
-  locAyutthaya: "อยุธยา",
-  location: "ตำแหน่ง",
-
-  locBangkok: "กรุงเทพฯ",
-  locChiangMai: "เชียงใหม่",
-  locPattaya: "พัทยา",
-  locPhuket: "ภูเก็ต",
-  locSukhothai: "สุโขทัย",
-
-  mapControls: "ปุ่มควบคุมแผนที่",
-
-  markerN: (n) => `หมุด ${n}`,
-  modeCheapest: "ประหยัดที่สุด",
-  modeShortest: "สั้นที่สุด",
-
-  modeTraffic: "ตามการจราจร",
-  notSet: "ยังไม่ได้กำหนด",
-  origin: "ต้นทาง",
-  overlayDrought: "ภัยแล้ง",
-  overlayFlood: "น้ำท่วม",
-  overlayHotspot: "จุดความร้อน",
-  overlayImages: "ภาพถ่าย",
-  overlayPM25: "PM2.5",
-
-  overlayTraffic: "จราจร",
-
-  poiTags: "แท็กจุดสนใจ",
-  polygonN: (n) => `รูปหลายเหลี่ยม ${n}`,
-  predefinedAQI: "คุณภาพอากาศ",
-
-  predefinedCCTV: "กล้อง CCTV",
-  predefinedEvents: "เหตุการณ์",
-
-  quickNavigation: "นำทางด่วน",
-  rectangleCorner: "มุมสี่เหลี่ยม",
-  rectangleN: (n) => `สี่เหลี่ยม ${n}`,
-  resultN: (n) => `ผลลัพธ์ ${n}`,
-  reverseRoute: "สลับเส้นทาง",
-
-  routePlanning: "วางแผนเส้นทาง",
-  searchPlaceholder: "ค้นหาสถานที่...",
-
-  searchPlaces: "ค้นหาสถานที่",
-  searchResult: "ผลการค้นหา",
-  setDestinationOnMap: "กำหนดปลายทางบนแผนที่",
-  setOriginOnMap: "กำหนดต้นทางบนแผนที่",
-  shapes: "รูปทรง",
-  toggleTagsHint: "เปิด/ปิดแท็กเพื่อแสดงจุดสนใจ",
-  toolCircle: "วงกลม",
-  toolDot: "จุด",
-  toolLine: "เส้น",
-  toolMarker: "หมุด",
-
-  toolPan: "เลื่อน",
-  toolPolygon: "รูปหลายเหลี่ยม",
-  toolRect: "สี่เหลี่ยม",
-  turnByTurn: (steps) => `นำทางทีละขั้น (${steps} ขั้นตอน)`,
-
-  zoom: "ระดับซูม",
+  advancedLayer: {
+    buildings3d: "อาคาร 3 มิติ (I3S)",
+    clusters: "จัดกลุ่มจุด",
+    heatmap: "แผนที่ความร้อน",
+    model3d: "โมเดล 3 มิติ (glTF)",
+    pointcloud: "พอยต์คลาวด์ (3D Tiles)",
+    wms: "ภาพจาก WMS",
+  },
+  baseLayer: {
+    HYBRID: "ไฮบริด",
+    IMAGES: "ภาพดาวเทียม",
+    SIMPLE: "แบบเรียบ",
+    STREETS: "ถนน",
+    STREETS_NIGHT: "ถนน (กลางคืน)",
+  },
+  baseLayerShort: {
+    HYBRID: "ไฮบริด",
+    IMAGES: "ดาวเทียม",
+    SIMPLE: "เรียบ",
+    STREETS: "ถนน",
+    STREETS_NIGHT: "กลางคืน",
+  },
+  common: {
+    cancel: "ยกเลิก",
+    clear: "ล้าง",
+    clearAll: "ล้างทั้งหมด",
+    copied: "คัดลอกแล้ว",
+    copy: "คัดลอก",
+    hide: "ซ่อน",
+    loading: "กำลังโหลด…",
+    remove: "ลบ",
+    show: "แสดง",
+  },
+  control: {
+    Crosshair: "เป้ากลางจอ",
+    DPad: "ปุ่มทิศทาง",
+    Fullscreen: "เต็มจอ",
+    Geolocation: "ตำแหน่งของฉัน",
+    LayerSelector: "เมนูชั้นข้อมูล",
+    Scale: "มาตราส่วน",
+    Toolbar: "แถบเครื่องมือวาด",
+    Zoombar: "แถบซูม",
+  },
+  data: {
+    copyUrl: "คัดลอก URL",
+    errors: {
+      aborted: "ยกเลิกแล้ว",
+      http: "บริการตอบกลับด้วยข้อผิดพลาด",
+      key: "API key ของคุณยังใช้บริการนี้ไม่ได้ เปิดใช้บริการนี้สำหรับ key ของคุณใน Sphere console",
+      network:
+        "เชื่อมต่อเครือข่ายไม่สำเร็จ ตรวจสอบการเชื่อมต่อ หรือบริการอาจไม่อนุญาตคำขอจากเว็บไซต์นี้",
+      parse: "ข้อมูลที่บริการตอบกลับไม่ใช่ JSON ที่ถูกต้อง",
+      timeout: "บริการไม่ตอบกลับภายในเวลาที่กำหนด ลองใหม่อีกครั้ง",
+    },
+    groups: {
+      agri: "การเกษตร",
+      disaster: "ภัยพิบัติ",
+      geo: "ที่อยู่และความสูง",
+      people: "ประชากร",
+      poi: "ค้นหาและสถานที่",
+      route: "การนำทาง",
+    },
+    keyword: "คำค้นหา",
+    openEmbed: "เปิดแผนที่แบบฝัง",
+    picking: "คลิกบนแผนที่…",
+    pickOnMap: "เลือกบนแผนที่",
+    poiId: "รหัสสถานที่หรือพื้นที่",
+    point: "ตำแหน่ง",
+    pointHint: "บริการเว็บด้านล่างจะดึงข้อมูลของจุดนี้ โดยจุดจะแสดงบนแผนที่ขณะเปิดแท็บนี้",
+    rasterLayer: "ชั้นข้อมูลแรสเตอร์",
+    rasterTiles: "ไทล์แรสเตอร์ (XYZ)",
+    run: "ส่งคำขอ",
+    service: {
+      address: "ที่อยู่ (Reverse geocoding)",
+      cassava: "มันสำปะหลัง รายครึ่งเดือน",
+      categories: "หมวดหมู่แท็ก",
+      crop: "พืชเศรษฐกิจ",
+      cropSuitability: "ความเหมาะสมของพืช (พื้นที่)",
+      disasterRecurring: "ภัยพิบัติซ้ำซาก",
+      drought: "สถานการณ์ภัยแล้ง",
+      droughtRecurrence: "ภัยแล้งซ้ำซาก (พื้นที่)",
+      elevation: "ความสูง",
+      flood: "สถานการณ์น้ำท่วม",
+      floodRecurrence: "น้ำท่วมซ้ำซาก (พื้นที่)",
+      hotspot: "จุดความร้อนในรัศมี 10 กม.",
+      landSuitability: "ความเหมาะสมของที่ดิน",
+      maize: "ข้าวโพด รายครึ่งเดือน",
+      matrix: "เมทริกซ์ระยะทาง",
+      nearby: "สถานที่ใกล้เคียง",
+      palm: "ปาล์มน้ำมัน รายปี",
+      poi: "รายละเอียดสถานที่จากรหัส",
+      population: "ประชากร (พื้นที่)",
+      rice: "ข้าว รายครึ่งเดือน",
+      route: "เส้นทางไปอนุสาวรีย์ชัยฯ",
+      rubber: "ยางพารา รายปี",
+      search: "ค้นหาใกล้จุดนี้",
+      sugarcane: "อ้อย รายครึ่งเดือน",
+      suggest: "คำแนะนำการค้นหา",
+    },
+    serviceInfo: {
+      address: "จังหวัด อำเภอ ตำบล และถนน ณ จุดนี้",
+      cassava: "แปลงมันสำปะหลัง ณ จุดนี้ จากข้อมูลดาวเทียมความละเอียด 50 ม.",
+      categories:
+        "หมวดหมู่แท็กสถานที่ทั้งหมดทั้งภาษาไทยและอังกฤษ เป็นข้อมูลสาธารณะ ไม่ต้องใช้ key",
+      crop: "ชนิดพืช ต้นทุน และราคา ณ จุดนี้",
+      cropSuitability: "ความเหมาะสมของพืชในพื้นที่สี่เหลี่ยมขนาด 2 กม. รอบจุด",
+      disasterRecurring: "ความถี่ของน้ำท่วม ภัยแล้ง และไฟป่าในพื้นที่ (เวอร์ชัน 2)",
+      drought: "ข้อมูลภัยแล้งล่าสุด ณ จุดนี้",
+      droughtRecurrence: "พื้นที่แล้งซ้ำซากในสี่เหลี่ยมขนาด 2 กม.",
+      elevation: "ความสูงจากระดับน้ำทะเลปานกลาง (เมตร)",
+      flood: "ข้อมูลน้ำท่วมล่าสุด ณ จุดนี้",
+      floodRecurrence: "พื้นที่น้ำท่วมซ้ำซากในสี่เหลี่ยมขนาด 2 กม.",
+      hotspot: "จุดความร้อนในรัศมี 10 กม. จากจุดนี้",
+      landSuitability: "ความเหมาะสมของที่ดินสำหรับการเกษตร",
+      maize: "แปลงข้าวโพด ณ จุดนี้ จากข้อมูลดาวเทียมความละเอียด 50 ม.",
+      matrix: "ระยะทางและเวลาจากจุดนี้ไปอนุสาวรีย์ชัยฯ และวัดอรุณฯ",
+      nearby: "สถานที่ที่ใกล้ที่สุด 5 แห่ง",
+      palm: "แปลงปาล์มน้ำมัน ณ จุดนี้ จากข้อมูลดาวเทียมความละเอียด 50 ม.",
+      poi: "รายละเอียดของสถานที่หรือเขตการปกครอง เช่น A10000000 (กรุงเทพฯ)",
+      population:
+        "ประมาณการประชากร (ข้อมูล Meta/Facebook) ในสี่เหลี่ยมขนาด 2 กม. ส่งเป็น WKT",
+      rice: "แปลงข้าว ผลผลิต และเดือนเก็บเกี่ยว ณ จุดนี้",
+      route: "เส้นทางพร้อมคำแนะนำทีละขั้นจากจุดนี้ไปอนุสาวรีย์ชัยฯ",
+      rubber: "แปลงยางพารา ณ จุดนี้ จากข้อมูลดาวเทียมความละเอียด 50 ม.",
+      search: "สถานที่ที่ตรงกับคำค้นหา เรียงตามระยะห่างจากจุดนี้",
+      sugarcane: "แปลงอ้อย ณ จุดนี้ จากข้อมูลดาวเทียมความละเอียด 50 ม.",
+      suggest: "คำแนะนำขณะพิมพ์",
+    },
+    services: "บริการเว็บ (Web services)",
+    servicesHint:
+      "เรียกผ่าน createSphereServices (useSphereServices) โดยไม่ต้องมีแผนที่ ต้องเปิดใช้แต่ละบริการสำหรับ API key ของคุณ",
+    staticAlt: "ภาพแผนที่ของตำแหน่งที่เลือก",
+    staticFailed: "โหลดภาพแผนที่ไม่สำเร็จ API key ของคุณอาจยังไม่ได้เปิดบริการแผนที่ภาพนิ่ง",
+    staticHint: "ภาพแผนที่จากบริการแผนที่ภาพนิ่ง เหมาะกับอีเมล PDF และตัวอย่างลิงก์",
+    staticMap: "แผนที่ภาพนิ่งและแผนที่แบบฝัง",
+    style: "รูปแบบ",
+    tiles: "URL ของไทล์",
+    tilesHint:
+      "ใช้แผนที่ฐานของ Sphere กับไลบรารีแผนที่อื่น แทนที่ YOUR_API_KEY ด้วย key ของคุณ",
+    useCenter: "ใช้กึ่งกลางแผนที่",
+    vectorStyle: "สไตล์เวกเตอร์ (MapLibre)",
+    vectorTiles: "ไทล์เวกเตอร์",
+    wmts: "WMTS capabilities",
+  },
+  dataLayer: {
+    DROUGHT: "ภัยแล้ง",
+    FLOOD: "น้ำท่วม",
+    HOTSPOT: "จุดความร้อน",
+    PM25: "PM2.5",
+    TRAFFIC: "การจราจร",
+  },
+  draw: {
+    analysis: {
+      clearResult: "ล้างผลลัพธ์",
+      combine: "รวมรูปทรง (รูปหลายเหลี่ยม และรวมเส้นได้ด้วย Union):",
+      distanceResult: (text: string) => `ระยะห่างจาก A ถึง B: ${text}`,
+      empty: "การดำเนินการนี้ไม่ได้รูปทรงใดออกมา",
+      hint: "ใช้เมธอดเชิงพื้นที่ของ ref ของรูปทรง ผลลัพธ์จะแสดงเป็นสีแดง",
+      needTwo: "วาดรูปทรงอย่างน้อย 2 รูปเพื่อเปรียบเทียบ",
+      notReady: "รูปทรงนั้นยังไม่อยู่บนแผนที่ ลองใหม่อีกครั้ง",
+      operation: {
+        difference: "A ลบ B",
+        intersection: "ส่วนที่ซ้อนทับ",
+        split: "แบ่ง A ด้วย B",
+        union: "รวม (Union)",
+      },
+      operationResult: (operation: Operation, count: number) =>
+        operation === "split"
+          ? `แบ่งได้ ${count} ส่วน`
+          : "เรียบร้อย ผลลัพธ์แสดงเป็นสีแดง",
+      predicate: {
+        contains: "A ครอบคลุม B",
+        distance: "ระยะห่าง",
+        intersects: "ตัดกัน",
+        within: "A อยู่ใน B",
+      },
+      predicateResult: (predicate: Predicate, value: boolean) => {
+        const questions: Record<Predicate, string> = {
+          contains: "A ครอบคลุม B หรือไม่?",
+          distance: "ระยะห่าง",
+          intersects: "A และ B ตัดกันหรือไม่?",
+          within: "A อยู่ภายใน B หรือไม่?",
+        };
+        return `${questions[predicate]} ${value ? "ใช่" : "ไม่ใช่"}`;
+      },
+      test: "ทดสอบ:",
+      title: "วิเคราะห์เชิงพื้นที่",
+    },
+    copyGeoJson: "คัดลอก GeoJSON",
+    download: "ดาวน์โหลด",
+    editable: "แก้ไขจุดยอดได้",
+    finish: "เสร็จสิ้น",
+    hint: {
+      circle: "คลิกที่จุดศูนย์กลาง แล้วคลิกอีกครั้งเพื่อกำหนดรัศมี",
+      dot: "คลิกเพื่อวางจุด ลากจุดเพื่อย้ายได้",
+      marker: "คลิกเพื่อวางหมุด ลากหมุดเพื่อย้ายได้",
+      none: "เลือกเครื่องมือแล้วคลิกบนแผนที่ หากไม่เลือกเครื่องมือ การคลิกจะแสดงพิกัด",
+      polygon: "คลิกเพื่อเพิ่มมุม แล้วดับเบิลคลิกหรือกด เสร็จสิ้น (อย่างน้อย 3 จุด)",
+      polyline: "คลิกเพื่อเพิ่มจุด แล้วดับเบิลคลิกหรือกด เสร็จสิ้น",
+      rectangle: "คลิกที่มุมหนึ่ง แล้วคลิกที่มุมตรงข้าม",
+    },
+    import: {
+      empty: "วางข้อมูลก่อน",
+      failed: (message: string) => `อ่านข้อมูลไม่สำเร็จ: ${message}`,
+      format: { geojson: "GeoJSON", gpx: "GPX", kml: "KML", wkt: "WKT" },
+      formatsNote:
+        "แปลง WKT, KML และ GPX ด้วย useSphereUtils ซึ่งจะโหลดตัวแปลงของ Sphere เมื่อใช้งาน",
+      hint: "แสดงข้อมูลของคุณบนแผนที่ด้วย <GeoJson>",
+      openFile: "เปิดไฟล์",
+      placeholder: "วาง GeoJSON, WKT, KML หรือ GPX…",
+      sample: "ตัวอย่าง",
+      show: "แสดงบนแผนที่",
+      shown: (label: string, count: number) =>
+        `${label}: แสดง ${count} รายการบนแผนที่`,
+      title: "นำเข้าข้อมูล",
+      unrecognized: "ไม่พบข้อมูลเชิงพื้นที่",
+      unsupportedFile: (name: string) =>
+        `ไม่รองรับไฟล์ ${name} ใช้ .geojson, .json, .wkt, .kml หรือ .gpx`,
+    },
+    labels: "ป้ายชื่อ",
+    lineStyle: { Dashed: "เส้นประ", Dot: "เส้นจุด", Solid: "เส้นทึบ" },
+    lineWidth: "ความหนาเส้น",
+    noShapes: "ยังไม่มีรูปทรง",
+    shapes: (count: number) => `รูปทรง (${count})`,
+    style: "รูปแบบ",
+    styleHint: "สี ความหนา และรูปแบบเส้น จะอัปเดตรูปทรงทันทีโดยไม่ต้องสร้างใหม่",
+    tool: {
+      circle: "วงกลม",
+      dot: "จุด",
+      marker: "หมุด",
+      none: "เลื่อน",
+      polygon: "รูปหลายเหลี่ยม",
+      polyline: "เส้น",
+      rectangle: "สี่เหลี่ยม",
+    },
+    tools: "เครื่องมือ",
+    undo: "ย้อนจุด",
+    zoomTo: "ซูมไปที่",
+  },
+  events: {
+    empty: "โต้ตอบกับแผนที่เพื่อดูเหตุการณ์ที่นี่",
+    hint: "บันทึกทุก event prop ของ SphereMap ส่วนเหตุการณ์ที่เกิดถี่และต่อเนื่อง (เลื่อนเมาส์ ซูม โหลดไทล์…) จะแสดงเฉพาะในโหมดละเอียด",
+    title: (count: number) => `เหตุการณ์ (${count})`,
+    verbose: "โหมดละเอียด",
+  },
+  filter: {
+    Dark: "มืด",
+    Deuteranopia: "ตาบอดสีเขียว",
+    Light: "สว่าง",
+    None: "ไม่มี",
+    Protanopia: "ตาบอดสีแดง",
+  },
+  flyHome: "กลับกรุงเทพฯ",
+  header: {
+    apiKeyError: "ตั้งค่า NEXT_PUBLIC_SPHERE_API_KEY ใน docs/.env.local เพื่อใช้งาน",
+    backToDocs: "กลับไปที่เอกสาร",
+    docs: "เอกสาร",
+    subtitle: "ทดลองใช้งาน",
+    tabs: "หมวดของหน้าทดลองใช้งาน",
+  },
+  inspect: {
+    addStop: "จุดแวะ",
+    analyze: "วิเคราะห์",
+    title: "พิกัด",
+  },
+  liveOverlay: {
+    aqi: "คุณภาพอากาศ",
+    cameras: "กล้องจราจร",
+    events: "เหตุการณ์บนถนน",
+  },
+  map: {
+    advancedLayers: "ชั้นข้อมูลขั้นสูง",
+    advancedLayersHint:
+      "สไตล์ MapLibre, WMS, 3D Tiles และชั้นข้อมูล deck.gl ผ่าน <Layer> ข้อมูลตัวอย่าง: MapLibre, Esri, Longdo และ Khronos",
+    baseMap: "แผนที่ฐาน",
+    camera: "มุมมอง",
+    clearLocation: "ซ่อนตำแหน่ง",
+    controls: "ตัวควบคุมแผนที่",
+    controlsHint:
+      "ตัวควบคุมในตัวผ่าน prop controls ส่วน กำหนดเอง จะเพิ่ม <MapControl> (มุมซ้ายบน) และ <MenuBar> (มุมซ้ายล่าง)",
+    customControls: "กำหนดเอง",
+    dataLayers: "ชั้นข้อมูล",
+    dataLayersHint: "ชั้นข้อมูลจาก Sphere บางชั้นมีข้อมูลเฉพาะบางฤดูกาล",
+    drag: "ลาก",
+    filter: "ตัวกรองสี",
+    filterHint: "ธีมมืด/สว่าง และชุดสีสำหรับผู้มีภาวะตาบอดสี",
+    flyTo: "บินไปที่",
+    interaction: "การโต้ตอบ",
+    interactionHint:
+      "คลิกขวาที่แผนที่เพื่อเปิดเมนู การล็อกจะบังแผนที่จนกว่าจะคลิก เพื่อให้เลื่อนหน้าเว็บผ่านได้",
+    keyboard: "คีย์บอร์ด",
+    labels: "ภาษาของป้ายชื่อ",
+    labelsHint: "เปลี่ยนภาษาป้ายชื่อทันทีโดยไม่ต้องโหลดแผนที่ใหม่",
+    liveOverlays: "ข้อมูลสด",
+    liveOverlaysHint: "ข้อมูลแบบเรียลไทม์ โหลดด้วย <PredefinedOverlay>",
+    locate: "ตำแหน่งของฉัน",
+    lock: "ล็อก",
+    maxZoom: "ซูมสูงสุด",
+    menuAddress: "เมนู: ที่อยู่",
+    menuNearby: "เมนู: ใกล้เคียง",
+    minZoom: "ซูมต่ำสุด",
+    pitch: "มุมเอียง",
+    resetView: "รีเซ็ต",
+    rotation: "การหมุน",
+    wheel: "ซูมด้วยล้อเมาส์",
+    zoomIn: "ซูมเข้า",
+    zoomLimits: "ขอบเขตการซูม",
+    zoomLimitsHint: "prop zoomRange ผู้ใช้จะซูมเกินระดับนี้ไม่ได้",
+    zoomOut: "ซูมออก",
+  },
+  places: {
+    activeCount: (count: number) => `เปิด ${count}`,
+    builtInList: "รายการผลลัพธ์ของ Sphere",
+    builtInListHint:
+      "<SearchResults> แสดงรายการผลลัพธ์และหมุดของ Sphere เองเมื่อค้นหา",
+    cities: {
+      Ayutthaya: "อยุธยา",
+      Bangkok: "กรุงเทพฯ",
+      "Chiang Mai": "เชียงใหม่",
+      Pattaya: "พัทยา",
+      Phuket: "ภูเก็ต",
+      Sukhothai: "สุโขทัย",
+    },
+    clearTags: (count: number) => `ล้าง (${count})`,
+    findNearby: "สถานที่ใกล้เคียง",
+    nearby: "รอบกึ่งกลางแผนที่",
+    nearbyHint:
+      "สถานที่ใกล้เคียงใช้ useSearch().nearPoi ส่วนที่อยู่ต้องเปิดบริการที่อยู่สำหรับ key ของคุณ",
+    noAddress: "ไม่พบที่อยู่ API key ของคุณอาจยังไม่ได้เปิดบริการที่อยู่",
+    noNearby: "ไม่พบสถานที่ใกล้กึ่งกลางแผนที่",
+    noResults: (keyword: string) => `ไม่พบสถานที่สำหรับ “${keyword}”`,
+    outline: "ขอบเขต",
+    outlineFailed:
+      "โหลดขอบเขตไม่สำเร็จ API key ของคุณอาจยังไม่ได้เปิดบริการรายละเอียดสถานที่ (poi/get)",
+    outlineHint:
+      "ขอบเขต วาดรูปร่างของสถานที่ด้วย <ObjectOverlay> (เหมาะกับจังหวัด อำเภอ และพื้นที่อื่น ๆ)",
+    poiId: (id: string) => `รหัส ${id}`,
+    routeHere: "จุดแวะ",
+    search: "ค้นหา",
+    searchHint: "คำแนะนำจะแสดงขณะพิมพ์ (useSearch().suggest)",
+    searchPlaceholder: "ลอง “เซ็นทรัลเวิลด์” หรือ “วัดอรุณ”",
+    selected: "สถานที่ที่เลือก",
+    tagPopups: "ป๊อปอัป",
+    tags: "แท็กสถานที่",
+    tagsFallback: "โหลดรายการแท็กล่าสุดไม่สำเร็จ จึงแสดงรายการในตัวแทน",
+    tagsHint: "แสดงสถานที่ตามหมวดหมู่ด้วย <Tag> รายการโหลดสดด้วย useTagCategories",
+    whatsHere: "ที่นี่คือที่ไหน?",
+    zoomTo: "ซูมไปที่",
+  },
+  resetNorth: "หันทิศเหนือและปรับระนาบ",
+  route: {
+    addCenter: "เพิ่มกึ่งกลางแผนที่",
+    auto: "คำนวณใหม่อัตโนมัติ",
+    avoidFerries: "เลี่ยงเรือข้ามฟาก",
+    avoidTollways: "เลี่ยงทางด่วน",
+    builtInGuide: "คำแนะนำเส้นทางของ Sphere",
+    builtInGuideHint:
+      "<RouteGuide> แสดงแผงนำทางทีละขั้นของ Sphere เอง และเปิดการคำนวณใหม่อัตโนมัติด้วย",
+    calculate: "ค้นหาเส้นทาง",
+    calculating: "กำลังค้นหาเส้นทาง…",
+    contextMenu: "นำทางด้วยคลิกขวา",
+    copyGeoJson: "คัดลอก GeoJSON ของเส้นทาง",
+    distance: "ระยะทาง",
+    duration: "เวลาเดินทาง",
+    exception: (message: string) => `Sphere วางแผนเส้นทางนี้ไม่ได้: ${message}`,
+    failed: (code: number, message: string) =>
+      `ค้นหาเส้นทางไม่สำเร็จ (สถานะ ${code}) ${message}`,
+    label: { Distance: "ระยะทาง", Hide: "ซ่อน", Time: "เวลา" },
+    labels: "ป้ายบนเส้นทาง",
+    mode: "รูปแบบการเดินทาง",
+    modeHint: {
+      Cost: "เส้นทางทางถนนที่เร็วที่สุด โดยไม่ใช้ข้อมูลการจราจร",
+      Distance: "เส้นทางที่มีระยะทางสั้นที่สุด",
+      Fly: "เส้นตรงระหว่างจุดแวะ ป้ายบนเส้นทางจะถูกซ่อนในโหมดนี้",
+      Traffic: "เส้นทางที่เร็วที่สุด โดยเลี่ยงรถติดจากข้อมูลจราจรปัจจุบันและการคาดการณ์",
+    },
+    modes: {
+      Cost: "เร็วที่สุด",
+      Distance: "สั้นที่สุด",
+      Fly: "เส้นตรง",
+      Traffic: "เลี่ยงรถติด",
+    },
+    motorcycle: "รถจักรยานยนต์",
+    needStops: "เพิ่มจุดแวะอย่างน้อย 2 จุด",
+    options: "ตัวเลือก",
+    optionsHint:
+      "คำนวณใหม่อัตโนมัติเมื่อจุดแวะเปลี่ยนหรือถูกลาก นำทางด้วยคลิกขวาจะเพิ่มรายการเส้นทางในเมนูของแผนที่",
+    picking: "คลิกบนแผนที่เพื่อเพิ่มจุดแวะ…",
+    pickOnMap: "เพิ่มจุดแวะบนแผนที่",
+    result: "เส้นทาง",
+    reverse: "สลับทิศทาง",
+    steps: "จำนวนขั้น",
+    stopName: (index: number, total: number) => {
+      if (index === 0) {
+        return "ต้นทาง";
+      }
+      return index === total - 1 ? "ปลายทาง" : `จุดแวะ ${index}`;
+    },
+    stops: (count: number) => `จุดแวะ (${count})`,
+    stopsHint: "จุดแวะเป็นหมุดเส้นทางของ Sphere ลากบนแผนที่ได้ หรือคลิกที่หมุดเพื่อลบ",
+    timeout: "บริการนำทางไม่ตอบกลับ มักเกิดจาก API key ของคุณยังไม่ได้เปิดบริการนำทาง",
+    turnByTurn: "นำทางทีละขั้น",
+  },
+  shapeName: {
+    circle: (n: number) => `วงกลม ${n}`,
+    dot: (n: number) => `จุด ${n}`,
+    marker: (n: number) => `หมุด ${n}`,
+    polygon: (n: number) => `รูปหลายเหลี่ยม ${n}`,
+    polyline: (n: number) => `เส้น ${n}`,
+    rectangle: (n: number) => `สี่เหลี่ยม ${n}`,
+  },
+  stats: {
+    center: "กึ่งกลาง",
+    pitch: "มุมเอียง",
+    rotation: "การหมุน",
+    zoom: "ซูม",
+  },
+  tabs: {
+    data: "ข้อมูล",
+    draw: "วาด",
+    events: "เหตุการณ์",
+    map: "แผนที่",
+    places: "สถานที่",
+    route: "เส้นทาง",
+  },
 };
 
 const translations: Record<string, PlaygroundTranslations> = { en, th };
 
+/** Playground strings for a docs language (English by default). */
 export function getTranslations(lang: string): PlaygroundTranslations {
-  return translations[lang] ?? translations.en;
+  return translations[lang] ?? en;
 }
-
-export function getDrawingHint(
-  t: PlaygroundTranslations,
-  mode: DrawingMode
-): string {
-  const hints: Record<DrawingMode, string> = {
-    circle: t.hintCircle,
-    dot: t.hintDot,
-    marker: t.hintMarker,
-    none: t.hintNone,
-    polygon: t.hintPolygon,
-    polyline: t.hintPolyline,
-    rectangle: t.hintRectangle,
-  };
-  return hints[mode];
-}
-
-export type { PlaygroundTranslations };

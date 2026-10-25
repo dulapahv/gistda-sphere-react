@@ -1,0 +1,82 @@
+---
+title: useUi
+description: ตัวควบคุมในตัว การควบคุมด้วยเมาส์และคีย์บอร์ด เมนูคลิกขวา ตำแหน่งผู้ใช้ และการล็อกแผนที่เพื่อให้เลื่อนหน้าเว็บได้สะดวก
+---
+
+`useUi` จัดการ UI ในตัวของ Sphere และวิธีที่ผู้ใช้โต้ตอบกับแผนที่ ใช้งานได้ทั้งภายใน `SphereMap` และทุกที่ภายใต้ `SphereProvider`
+
+<UiDemo />
+
+```tsx
+import { useUi } from "gistda-sphere-react";
+
+function InputSettings() {
+  const ui = useUi();
+  return (
+    <>
+      <button onClick={() => ui.setMouseEnabled({ wheel: false })}>Disable wheel zoom</button>
+      <button onClick={() => ui.setKeyboardEnabled(false)}>Disable keyboard</button>
+      <button onClick={() => ui.locateUser()}>Where am I?</button>
+    </>
+  );
+}
+```
+
+## ค่าที่คืนกลับ [#return-value]
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `setControlVisible(name, visible)` / `isControlVisible(name)` | แสดงหรือซ่อน[ตัวควบคุมในตัว](/th/docs/components/sphere-map#built-in-controls) |
+| `setMouseEnabled(enabled)` | `true`/`false` สำหรับเมาส์ทั้งหมด หรือ `{ click, drag, wheel }` เพื่อกำหนดทีละอย่าง |
+| `getMouseState()` | `{ click, drag, wheel }` |
+| `setKeyboardEnabled(enabled)` / `isKeyboardEnabled()` | การนำทางด้วยคีย์บอร์ด |
+| `setContextMenuOptions({ address, nearPoi })` / `getContextMenuOptions()` | แสดงรายการที่อยู่และสถานที่ใกล้เคียงในเมนูคลิกขวา |
+| `locateUser()` | ขอตำแหน่งของผู้ใช้และแสดงบนแผนที่ |
+| `clearUserLocation()` | ซ่อนหมุดตำแหน่งผู้ใช้ |
+| `lockMap(config?)` | บังแผนที่ด้วยแผ่นล็อกจนกว่าผู้ใช้จะคลิก คืนค่าเป็น [`MapLockController`](#lock-the-map) |
+| `addControl(control)` / `removeControl(control)` | เพิ่มตัวควบคุมของ MapLibre หรือ `sphere.CustomControl` สำหรับเนื้อหา React ให้ใช้ [`MapControl`](/th/docs/components/map-control) |
+| `setLanguage(language)` | ภาษาของ UI ในตัวเท่านั้น หากต้องการเปลี่ยนป้ายชื่อด้วย ให้ใช้ prop `language` ของ `SphereMap` |
+| `isReady` | เป็น `true` เมื่อแผนที่พร้อมใช้งาน |
+
+## ล็อกแผนที่ [#lock-the-map]
+
+แผนที่ที่กว้างเต็มหน้าจออาจทำให้ผู้ใช้เลื่อนหน้าเว็บไม่ได้ เพราะการเลื่อนจะไปเลื่อนแผนที่แทน `lockMap` จะบังแผนที่ด้วยปุ่มจนกว่าผู้ใช้จะคลิก
+
+```tsx
+function LockedMap() {
+  const ui = useUi();
+
+  useEffect(() => {
+    if (!ui.isReady) return;
+    const lock = ui.lockMap({ unlockLabel: "Click to use the map" });
+    return () => lock?.remove();
+  }, [ui]);
+
+  return null;
+}
+
+<SphereMap style={{ height: 400 }}>
+  <LockedMap />
+</SphereMap>
+```
+
+| ตัวเลือก `config` | คำอธิบาย |
+| --- | --- |
+| `unlockLabel` / `lockLabel` | ข้อความบนปุ่มขณะล็อก / ปลดล็อก ค่าเริ่มต้นขึ้นกับภาษาของแผนที่ |
+| `unlockClassName` / `lockClassName` | class ของปุ่ม หากไม่กำหนดจะใช้สไตล์เริ่มต้นขนาดเล็ก |
+
+| `MapLockController` | คำอธิบาย |
+| --- | --- |
+| `isLocked()` | แผนที่ถูกล็อกอยู่หรือไม่ |
+| `lock()` / `unlock()` | ล็อกหรือปลดล็อกจากโค้ด |
+| `remove()` | นำแผ่นล็อกออกทั้งหมด |
+
+การเรียก `lockMap` ซ้ำบนแผนที่เดิมจะคืนแผ่นล็อกเดิม แทนการซ้อนแผ่นล็อกที่สอง
+
+## ปิดการควบคุมทั้งหมด [#disabling-all-input]
+
+หากต้องการแผนที่แบบภาพนิ่ง ให้ปิดการโต้ตอบตอนสร้างแผนที่
+
+```tsx
+<SphereMap input={false} controls={{ DPad: false, Zoombar: false }} />
+```

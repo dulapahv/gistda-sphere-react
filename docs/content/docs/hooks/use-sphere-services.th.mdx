@@ -1,0 +1,57 @@
+---
+title: useSphereServices
+description: ไคลเอนต์สำหรับบริการเว็บ REST ของ Sphere ที่มี type ครบถ้วน โดยใช้ API key จาก provider
+---
+
+`useSphereServices` คืนค่า[ไคลเอนต์บริการเว็บ](/th/docs/web-services)ที่ตั้งค่าด้วย API key ของ `SphereProvider` ใช้สำหรับการนำทาง การแปลงพิกัดเป็นที่อยู่ ความสูง แผนที่ภาพนิ่ง รวมถึงข้อมูลการเกษตร ภัยพิบัติ และประชากร โดยไม่ต้องใช้แผนที่
+
+<ServicesDemo />
+
+```tsx
+import { SphereServiceError, useSphereServices } from "gistda-sphere-react";
+
+function Elevation({ location }) {
+  const services = useSphereServices({ locale: "en" });
+  const [meters, setMeters] = useState<number | null>(null);
+
+  useEffect(() => {
+    const controller = new AbortController();
+    services.geo
+      .elevation(location, { signal: controller.signal })
+      .then((points) => setMeters(points[0]?.elevation ?? null))
+      .catch((error) => {
+        if (error instanceof SphereServiceError && error.code === "key") {
+          console.warn("Enable the elevation service for this API key.");
+        }
+      });
+    return () => controller.abort();
+  }, [services, location]);
+
+  return <span>{meters === null ? "…" : `${meters} m`}</span>;
+}
+```
+
+## ตัวเลือก [#options]
+
+| ตัวเลือก | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `locale` | `"th" \| "en"` | `"th"` | ภาษาเริ่มต้นของผลลัพธ์ |
+| `timeout` | `number` | `15000` | เวลารอ (มิลลิวินาที) ก่อนคำขอล้มเหลวด้วยข้อผิดพลาด `"timeout"` |
+| `method` | `"auto" \| "get" \| "post"` | `"auto"` | วิธีส่งคำขอ ดู[ภาพรวมบริการเว็บ](/th/docs/web-services) |
+| `baseUrl` | `string` | `https://api.sphere.gistda.or.th/services` | URL ของบริการ เช่น proxy |
+| `fetch` | `typeof fetch` | `fetch` แบบ global | ฟังก์ชัน fetch ของคุณเอง |
+
+ไคลเอนต์ถูก memoize ไว้ และจะเปลี่ยนเฉพาะเมื่อตัวเลือกเปลี่ยน
+
+## ใช้โดยไม่มี React [#without-react]
+
+นอก React หรือบนเซิร์ฟเวอร์ ให้สร้างไคลเอนต์เดียวกันด้วย `createSphereServices`
+
+```ts
+import { createSphereServices } from "gistda-sphere-react";
+
+const services = createSphereServices({ apiKey: process.env.SPHERE_API_KEY! });
+const { data } = await services.search.search("โรงพยาบาล", { limit: 5 });
+```
+
+ดูบริการทั้งหมด การจัดการข้อผิดพลาด และตัวอย่างได้ที่[บริการเว็บ](/th/docs/web-services)

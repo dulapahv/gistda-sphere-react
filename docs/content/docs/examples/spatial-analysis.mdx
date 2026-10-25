@@ -1,0 +1,73 @@
+---
+title: Spatial analysis
+description: Union, intersection, difference and split of polygons; containment, intersection and distance tests; area and length
+---
+
+Shape refs expose Sphere's geometry operations. Try them on two squares:
+
+<SpatialDemo />
+
+## Polygon operations
+
+```tsx lineNumbers
+import { GeoJson, Polygon, type PolygonRef, type GeoJSON } from "gistda-sphere-react";
+import { useRef, useState } from "react";
+
+function Overlap({ zoneA, zoneB }) {
+  const a = useRef<PolygonRef>(null);
+  const b = useRef<PolygonRef>(null);
+  const [result, setResult] = useState<GeoJSON | null>(null);
+
+  const intersect = () => {
+    const other = b.current?.getPolygon();
+    const overlap = other ? a.current?.intersection(other) : null;
+    setResult(overlap ? overlap.toJSON() : null);
+  };
+
+  return (
+    <>
+      <Polygon ref={a} positions={zoneA} fillColor="rgba(59,130,246,.25)" />
+      <Polygon ref={b} positions={zoneB} fillColor="rgba(245,158,11,.25)" />
+      {result && <GeoJson data={result} style={{ fillColor: "rgba(239,68,68,.4)", lineStyle: "Dashed" }} />}
+    </>
+  );
+}
+```
+
+| Method | Result |
+| --- | --- |
+| `a.union(b)` | Everything covered by either shape. Lines can be joined too. |
+| `a.intersection(b)` | Only the overlap. |
+| `a.difference(b)` | `a` with `b` cut out. |
+| `a.split(b)` | `a` cut into pieces along `b`'s edges (an array). |
+
+The results are Sphere overlays that aren't on the map. Show them with `<GeoJson data={result.toJSON()} />`, or add them with the raw map.
+
+## Tests
+
+```tsx
+zoneRef.current?.contains({ lon: 100.5, lat: 13.75 }); // is the point inside?
+zoneRef.current?.intersects(otherOverlay);              // do they touch or overlap?
+zoneRef.current?.within(otherOverlay);                  // is the zone fully inside the other?
+zoneRef.current?.distanceTo(storeMarker, "en");          // "2.4 km"
+```
+
+`contains`, `intersects` and `distanceTo` accept a `{ lon, lat }` location or another overlay; `within` takes an overlay. Get overlays from refs: `markerRef.current?.getMarker()`, `polygonRef.current?.getPolygon()` and so on.
+
+## Measurements
+
+```tsx
+polygonRef.current?.getArea();     // square meters
+polygonRef.current?.getArea("th"); // "120 ตร.กม."
+lineRef.current?.getLength("en");  // "15.5 km"
+circleRef.current?.getRadius("en"); // "5.48 km"
+
+const { formatThaiArea } = useSphereUtils();
+formatThaiArea(polygonRef.current?.getArea() as number, "th"); // "74,995 ไร่ 3 งาน 76 ตร.ว."
+```
+
+Measurements are geodesic, so they stay accurate far from the equator.
+
+<Callout>
+  Read refs in event handlers or effects, not during render: overlays are created after the component mounts.
+</Callout>

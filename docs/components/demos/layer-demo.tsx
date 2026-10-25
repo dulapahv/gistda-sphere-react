@@ -1,96 +1,95 @@
 "use client";
 
-import { SphereMap, SphereProvider, useMapControls } from "gistda-sphere-react";
+import { type BuiltInLayer, Layer, SphereMap } from "gistda-sphere-react";
 import { useState } from "react";
+import {
+  DemoBar,
+  DemoButton,
+  DemoFrame,
+  DemoNote,
+  useDemoText,
+} from "./demo-ui";
 import { useDocLanguage } from "./use-doc-language";
 
-const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
-
-const baseLayers = [
+const BASE_LAYERS: readonly BuiltInLayer[] = [
   "STREETS",
   "HYBRID",
   "STREETS_NIGHT",
   "SIMPLE",
   "IMAGES",
-] as const;
-const dataLayers = ["TRAFFIC", "PM25", "HOTSPOT", "FLOOD", "DROUGHT"] as const;
+];
+const DATA_LAYERS: readonly BuiltInLayer[] = [
+  "TRAFFIC",
+  "PM25",
+  "HOTSPOT",
+  "FLOOD",
+  "DROUGHT",
+];
 
-function LayerControls() {
-  const { setBaseLayer, addLayer, removeLayer } = useMapControls();
-  const [activeBase, setActiveBase] = useState("STREETS");
-  const [activeData, setActiveData] = useState<Set<string>>(new Set());
+const TEXT = {
+  en: { base: "Base map:", data: "Data layers:" },
+  th: { base: "แผนที่ฐาน:", data: "ชั้นข้อมูล:" },
+};
 
-  const toggleData = (layer: string) => {
-    setActiveData((prev) => {
-      const next = new Set(prev);
-      if (next.has(layer)) {
-        next.delete(layer);
-        removeLayer(layer as (typeof dataLayers)[number]);
-      } else {
-        next.add(layer);
-        addLayer(layer as (typeof dataLayers)[number]);
-      }
-      return next;
-    });
-  };
+/** Base map via the `baseLayer` prop and data layers as `<Layer>` children. */
+function Layers() {
+  const language = useDocLanguage();
+  const text = useDemoText(TEXT);
+  const [baseLayer, setBaseLayer] = useState<BuiltInLayer>("STREETS");
+  const [dataLayers, setDataLayers] = useState<BuiltInLayer[]>([]);
+
+  const toggle = (layer: BuiltInLayer) =>
+    setDataLayers((previous) =>
+      previous.includes(layer)
+        ? previous.filter((existing) => existing !== layer)
+        : [...previous, layer]
+    );
 
   return (
-    <div className="flex flex-col gap-2 bg-fd-card p-3">
-      <div className="flex flex-wrap gap-1.5">
-        <span className="mb-0.5 w-full text-fd-muted-foreground text-xs">
-          Base Layer
-        </span>
-        {baseLayers.map((l) => (
-          <button
-            className={`cursor-pointer rounded-md border px-2 py-0.5 text-xs disabled:cursor-not-allowed disabled:opacity-50 ${activeBase === l ? "border-fd-primary bg-fd-primary text-fd-primary-foreground" : "border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent"}`}
-            key={l}
-            onClick={() => {
-              setActiveBase(l);
-              setBaseLayer(l);
-            }}
-            type="button"
-          >
-            {l}
-          </button>
+    <>
+      <SphereMap
+        baseLayer={baseLayer}
+        center={{ lat: 13.7563, lon: 100.5018 }}
+        language={language}
+        style={{ height: "400px", width: "100%" }}
+        zoom={8}
+      >
+        {dataLayers.map((layer) => (
+          <Layer key={layer} preset={layer} />
         ))}
-      </div>
-      <div className="flex flex-wrap gap-1.5">
-        <span className="mb-0.5 w-full text-fd-muted-foreground text-xs">
-          Data Layers
-        </span>
-        {dataLayers.map((l) => (
-          <button
-            className={`cursor-pointer rounded-md border px-2 py-0.5 text-xs disabled:cursor-not-allowed disabled:opacity-50 ${activeData.has(l) ? "border-fd-primary bg-fd-primary text-fd-primary-foreground" : "border-fd-border bg-fd-secondary text-fd-secondary-foreground hover:bg-fd-accent"}`}
-            key={l}
-            onClick={() => toggleData(l)}
-            type="button"
+      </SphereMap>
+      <DemoBar>
+        <DemoNote>{text.base}</DemoNote>
+        {BASE_LAYERS.map((layer) => (
+          <DemoButton
+            active={baseLayer === layer}
+            key={layer}
+            onClick={() => setBaseLayer(layer)}
           >
-            {l}
-          </button>
+            {layer}
+          </DemoButton>
         ))}
-      </div>
-    </div>
+      </DemoBar>
+      <DemoBar>
+        <DemoNote>{text.data}</DemoNote>
+        {DATA_LAYERS.map((layer) => (
+          <DemoButton
+            active={dataLayers.includes(layer)}
+            key={layer}
+            onClick={() => toggle(layer)}
+          >
+            {layer}
+          </DemoButton>
+        ))}
+      </DemoBar>
+    </>
   );
 }
 
 export function LayerDemo() {
-  const language = useDocLanguage();
-
-  if (!API_KEY) {
-    return null;
-  }
-
   return (
-    <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
-      <SphereProvider apiKey={API_KEY}>
-        <SphereMap
-          center={{ lat: 13.7563, lon: 100.5018 }}
-          language={language}
-          style={{ height: "400px", width: "100%" }}
-          zoom={8}
-        />
-        <LayerControls />
-      </SphereProvider>
-    </div>
+    <DemoFrame height="520px">
+      <Layers />
+    </DemoFrame>
   );
 }

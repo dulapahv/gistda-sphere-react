@@ -1,6 +1,9 @@
 import { useEffect, useRef } from "react";
-import { useMapContext } from "../context/MapContext";
-import { useSphereContext } from "../context/SphereContext";
+import { useMapContext } from "@/context/MapContext";
+import { useSphereContext } from "@/context/SphereContext";
+import { withoutUndefined } from "@/internal/geometry";
+import { useDeepMemo, useLatest } from "@/internal/hooks";
+import { addMapLayer } from "@/internal/mapControls";
 import type {
   Bound,
   BuiltInLayer,
@@ -8,22 +11,47 @@ import type {
   LayerType,
   Range,
   SphereLayer,
-} from "../types";
+  TilesetInfo,
+} from "@/types";
 
 export interface LayerProps {
   attribution?: string;
+  /** Add the layer below this MapLibre layer ID (default: below map labels). */
   beforeId?: string;
   bound?: Bound;
   extraQuery?: string;
-  format?: string;
+  /** Image MIME type (WMS/WMTS) or file extension (XYZ/TMS/WMTS_REST); `false` omits it. */
+  format?: string | false;
   id?: string;
+  /** Use this layer as the base map instead of adding it on top. */
   isBase?: boolean;
+  /**
+   * A ready-made layer to add as-is: a `sphere.Layer`, a deck.gl
+   * `MapboxLayer`, or a MapLibre layer specification object.
+   */
+  layer?: SphereLayer | object;
+  /** Tiles3D/I3S: loaders.gl options under `3d-tiles`, `i3s` or `tileset` keys. */
+  loadOptions?: Record<string, unknown>;
+  /** Raster layer name, or the name of a 3D layer. */
   name?: string;
+  /** Tiles3D/I3S: called once the tileset has loaded (e.g. to fly to it). */
+  onTilesetLoad?: (tileset: TilesetInfo) => void;
   opacity?: number;
+  /** Extra raw options for `new sphere.Layer()`. */
+  options?: Record<string, unknown>;
+  /** Tiles3D: point cloud point radius in pixels. */
+  pointSize?: number;
+  /** Use a built-in Sphere layer. */
   preset?: BuiltInLayer;
+  /** Auto-refresh interval in seconds. */
   refresh?: number;
   source?: Range;
   srs?: string;
+  /**
+   * A MapLibre style specification object or style JSON URL. Use for vector
+   * styles, heatmaps, clustering and other custom MapLibre layers.
+   */
+  style?: string | object;
   styles?: string;
   tileMatrixPrefix?: string;
   type?: LayerType;
@@ -34,9 +62,16 @@ export interface LayerProps {
   zoomRange?: Range;
 }
 
+/**
+ * Adds a layer to the map (or sets the base map with `isBase`). Supports
+ * built-in layers, raster tile services (WMS, WMTS, TMS, XYZ), vector
+ * styles, 3D tiles (Tiles3D, I3S) and raw deck.gl/MapLibre layers.
+ */
 export function Layer({
   name,
   preset,
+  style,
+  layer: rawLayer,
   isBase = false,
   type,
   url,
@@ -56,118 +91,96 @@ export function Layer({
   refresh,
   zoomOffset,
   beforeId,
+  loadOptions,
+  pointSize,
+  onTilesetLoad,
+  options: extraOptions,
 }: LayerProps): null {
   const { map, isReady } = useMapContext();
   const { sphere } = useSphereContext();
-  const layerRef = useRef<SphereLayer | null>(null);
+  const layerRef = useRef<SphereLayer | object | null>(null);
+  const onTilesetLoadRef = useLatest(onTilesetLoad);
+  const hasTilesetHandler = onTilesetLoad !== undefined;
+
+  const stableStyle = useDeepMemo(style);
+  const stableOptions = useDeepMemo(
+    withoutUndefined<LayerOptions & Record<string, unknown>>({
+      ...extraOptions,
+      attribution,
+      bound,
+      extraQuery,
+      format,
+      id,
+      loadOptions,
+      opacity,
+      pointSize,
+      refresh,
+      source,
+      srs,
+      styles,
+      tileMatrixPrefix,
+      type,
+      url,
+      version,
+      zIndex,
+      zoomOffset,
+      zoomRange,
+    })
+  );
 
   useEffect(() => {
     if (!(isReady && map && sphere)) {
       return;
     }
 
-    let layer: SphereLayer | null = null;
+    let layer: SphereLayer | object | null = null;
+    if (rawLayer) {
+      layer = rawLayer;
+    } else if (preset) {
+      layer = sphere.Layers[preset] ?? null;
+    } else if (stableStyle) {
+      layer = new sphere.Layer(stableStyle);
+    } else if (name !== undefined) {
+      const layerOptions: LayerOptions & Record<string, unknown> = {
+        ...stableOptions,
+      };
+      if (hasTilesetHandler) {
+        layerOptions.onTilesetLoad = (tileset) =>
+          onTilesetLoadRef.current?.(tileset);
+      }
+      layer = new sphere.Layer(name, layerOptions);
+    }
 
-    if (preset && sphere.Layers[preset]) {
-      layer = sphere.Layers[preset];
-    } else if (name) {
-      const options: LayerOptions = {};
-
-      if (type) {
-        options.type = type;
-      }
-      if (url) {
-        options.url = url;
-      }
-      if (zoomRange) {
-        options.zoomRange = zoomRange;
-      }
-      if (source) {
-        options.source = source;
-      }
-      if (typeof opacity === "number") {
-        options.opacity = opacity;
-      }
-      if (typeof zIndex === "number") {
-        options.zIndex = zIndex;
-      }
-      if (bound) {
-        options.bound = bound;
-      }
-      if (attribution) {
-        options.attribution = attribution;
-      }
-      if (extraQuery) {
-        options.extraQuery = extraQuery;
-      }
-      if (id) {
-        options.id = id;
-      }
-      if (format) {
-        options.format = format;
-      }
-      if (srs) {
-        options.srs = srs;
-      }
-      if (tileMatrixPrefix) {
-        options.tileMatrixPrefix = tileMatrixPrefix;
-      }
-      if (styles) {
-        options.styles = styles;
-      }
-      if (version) {
-        options.version = version;
-      }
-      if (typeof refresh === "number") {
-        options.refresh = refresh;
-      }
-      if (typeof zoomOffset === "number") {
-        options.zoomOffset = zoomOffset;
-      }
-
-      layer = new sphere.Layer(name, options);
-    } else {
+    if (!layer) {
       return;
     }
 
     layerRef.current = layer;
-
+    let removeLayer: (() => void) | undefined;
     if (isBase) {
-      map.Layers.setBase(layer as SphereLayer);
+      map.Layers.setBase(layer);
     } else {
-      map.Layers.add(layer as SphereLayer, beforeId);
+      removeLayer = addMapLayer(map, layer, beforeId);
     }
 
     return () => {
-      if (!isBase && layerRef.current) {
-        map.Layers.remove(layerRef.current as SphereLayer);
+      removeLayer?.();
+      if (layerRef.current === layer) {
+        layerRef.current = null;
       }
-      layerRef.current = null;
     };
   }, [
     isReady,
     map,
     sphere,
-    name,
+    rawLayer,
     preset,
+    stableStyle,
+    name,
+    stableOptions,
+    hasTilesetHandler,
+    onTilesetLoadRef,
     isBase,
-    type,
-    url,
-    zoomRange,
-    source,
-    opacity,
-    zIndex,
-    bound,
-    attribution,
-    extraQuery,
-    id,
-    format,
-    srs,
-    tileMatrixPrefix,
-    styles,
-    version,
-    refresh,
-    zoomOffset,
     beforeId,
   ]);
 

@@ -1,0 +1,57 @@
+---
+title: ObjectOverlay
+description: Draw a province, district, landmark or POI from Sphere's data by its ID
+---
+
+`<ObjectOverlay>` loads a predefined object from Sphere, such as an administrative area or a place, and draws it: areas as polygons, points as markers. IDs come from [search results](/docs/hooks/use-search) (the `id` of each result).
+
+<ObjectOverlayDemo />
+
+```tsx
+<ObjectOverlay
+  id="A10000000"               // Bangkok
+  fitBounds
+  fillColor="rgba(59, 130, 246, 0.15)"
+  lineColor="rgb(37, 99, 235)"
+  label
+  onLoad={(data, overlays) => console.log("Loaded", data)}
+  onError={(error) => setMessage(error.message)}
+/>
+```
+
+<Callout type="warn">
+  Objects come from Sphere's POI details service (`poi/get`). If your API key doesn't have that service, Sphere draws nothing and reports nothing. Use `onError` to notice: it's called when the object hasn't loaded within `timeout`.
+</Callout>
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `id` | `string` | **required** | Object ID, e.g. `"A10000000"` (Bangkok) or a POI ID like `"P00000046"`. |
+| `dataset` | `string` | Sphere's default | Dataset to load the object from. |
+| `fitBounds` | `boolean \| FitBoundsOptions` | – | Fit the map to the object once it loads. |
+| `label` | `string \| boolean` | – | Label text, or `true` to label the object with its name. |
+| `icon` | `Icon` | – | Marker icon for point objects. |
+| `onLoad` | `(data, overlays) => void` | – | The object loaded; `overlays` are the created shapes. |
+| `onError` | `(error) => void` | – | The object didn't load within `timeout`. |
+| `timeout` | `number` | `15000` | Milliseconds to wait before `onError`; `0` turns it off. |
+| `onClick` | `(overlay, location) => void` | – | One of the object's shapes was clicked. |
+| `simplify` | `number` | – | Simplification tolerance, from about `0.00005` (fine) to `0.001` (rough). |
+| `combine` | `boolean` | – | Merge the object's parts into one shape. |
+| `ignorefragment` | `boolean` | – | Skip small fragments. |
+| `ref` | `Ref<ObjectOverlayRef>` | – | `getObject()` and `getOverlays()`. |
+
+It also takes the [shape style props](/docs/components/polygon#shape-props) (`fillColor`, `lineColor`, `lineWidth`, `lineStyle`…).
+
+## Area IDs
+
+Area IDs start with `A` followed by the province, district and subdistrict codes. The province code is the same as in Thai postal and census codes:
+
+| ID | Area |
+| --- | --- |
+| `A10000000` | Bangkok |
+| `A50000000` | Chiang Mai |
+| `A83000000` | Phuket |
+| `A50010000` | Mueang Chiang Mai district |
+
+To find an ID, search for the place: `useSearch().search("เชียงใหม่")` returns results with their `id`.

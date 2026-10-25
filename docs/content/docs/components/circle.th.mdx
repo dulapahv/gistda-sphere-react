@@ -1,46 +1,47 @@
 ---
 title: Circle (วงกลม)
-description: วาดวงกลมบนแผนที่
+description: วงกลมรอบจุดศูนย์กลาง พร้อมการวัดพื้นที่และรัศมี
 ---
 
-<MapDemo height="400px" zoom={11} center={{ lon: 100.5, lat: 13.75 }} language="en">
+<MapDemo height="400px" zoom={10} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Circle
-    center={{ lon: 100.5, lat: 13.75 }}
-    radius={0.05}
-    fillColor="rgba(0, 100, 255, 0.3)"
+    center={{ lon: 100.5018, lat: 13.7563 }}
+    radius={0.1}
+    fillColor="rgba(0, 128, 255, 0.3)"
     lineColor="blue"
     lineWidth={2}
+    title="พื้นที่ให้บริการ"
   />
 </MapDemo>
 
 ```tsx
 <Circle
-  center={{ lon: 100.5, lat: 13.75 }}
-  radius={0.05}
-  fillColor="rgba(0, 100, 255, 0.3)"
+  center={{ lon: 100.5018, lat: 13.7563 }}
+  radius={0.1}
+  fillColor="rgba(0, 128, 255, 0.3)"
   lineColor="blue"
-  lineWidth={2}
 />
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `center` | `Location` | Yes | - | พิกัดศูนย์กลางของวงกลม |
-| `radius` | `number` | Yes | - | รัศมีของวงกลมในหน่วยองศา |
-| `ref` | `Ref<CircleRef>` | No | - | Ref สำหรับการควบคุมผ่านโค้ด (Imperative control) |
-| `title` | `string` | No | - | ข้อความ Tooltip เมื่อโฮเวอร์ |
-| `detail` | `string` | No | - | ข้อความ Pop-up เมื่อคลิก |
-| `popup` | `PopupOptions` | No | - | การกำหนดค่าป๊อปอัป |
-| `visibleRange` | `Range` | No | All zoom levels | ระยะการซูมที่มองเห็นได้ |
-| `lineWidth` | `number` | No | `3` | ความกว้างของเส้นขอบเป็นพิกเซล |
-| `lineColor` | `string` | No | Preset color | สีเส้นขอบ |
-| `fillColor` | `string` | No | Preset color | สีเติม |
-| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | รูปแบบเส้นขอบ |
-| `clickable` | `boolean` | No | `false` | แสดงเคอร์เซอร์แบบตัวชี้ |
-| `draggable` | `boolean` | No | `false` | อนุญาตให้ลากได้ |
-| `zIndex` | `number` | No | `0` | ลำดับการซ้อน |
-| `onClick` | `(circle: SphereCircle) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อคลิก |
-| `onDrag` | `(circle: SphereCircle) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อกำลังลาก |
-| `onDrop` | `(circle: SphereCircle) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อปล่อย (สิ้นสุดการลาก) |
+| Prop | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `center` | `Location` | **จำเป็น** จุดศูนย์กลางของวงกลม |
+| `radius` | `number` | **จำเป็น** รัศมีเป็นองศา 1 องศาประมาณ 111 กม. ดังนั้น `0.01` ประมาณ 1.1 กม. |
+
+วงกลมรับ [props ของรูปทรง](/th/docs/components/polygon#shape-props) ด้วย
+
+<Callout>
+  หากต้องการกำหนดรัศมีเป็นเมตร ให้หารด้วยความยาวของ 1 องศา: `radius={meters / 111_320}`
+</Callout>
+
+## Ref
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `getCircle()` | `sphere.Circle` ที่อยู่เบื้องหลัง |
+| `getCenter()` | จุดศูนย์กลางของวงกลม |
+| `getRadius(language?)` | รัศมีเป็นเมตร หรือข้อความ เช่น `"5.48 กม."` เมื่อระบุภาษา |
+| `getArea(language?)` | พื้นที่เป็นตารางเมตร หรือข้อความ เช่น `"94.3 ตร.กม."` เมื่อระบุภาษา |
+| `getBound`, `contains`, `intersects`, `within`, `distanceTo`, `rotate`, `shift`, `updateStyle`, `togglePopup`, `toGeoJSON` | เหมือนกับ[รูปหลายเหลี่ยม](/th/docs/components/polygon#ref) |

@@ -1,11 +1,11 @@
 ---
-title: การเพิ่มหมุดผ่านโค้ด
-description: ใช้ React state เพื่อเพิ่มโอเวอร์เลย์แบบไดนามิก
+title: การเพิ่มหมุดจาก state
+description: เพิ่มและลบหมุดด้วย React state หรือ hook useMarkers
 ---
 
-ใช้ React state เพื่อเพิ่มหมุด, รูปหลายเหลี่ยม หรือโอเวอร์เลย์ใดก็ได้แบบไดนามิก
+ใช้ React state เพื่อเพิ่มหมุด รูปหลายเหลี่ยม หรือโอเวอร์เลย์ใด ๆ แบบไดนามิก
 
-<InteractiveMarkerDemo />
+<OverlayDemo />
 
 ```tsx tab="Component" lineNumbers
 import { useState } from 'react';
@@ -24,8 +24,8 @@ function App() {
 
   return (
     <SphereProvider apiKey="YOUR_API_KEY">
-      <button onClick={addMarker}>เพิ่มหมุด</button>
-      <button onClick={() => setMarkers([])}>ล้างทั้งหมด</button>
+      <button onClick={addMarker}>Add Marker</button>
+      <button onClick={() => setMarkers([])}>Clear All</button>
       <SphereMap center={{ lon: 100.5, lat: 13.75 }} zoom={11} style={{ height: '500px' }}>
         {markers.map((position) => (
           <Marker key={`${position.lon}-${position.lat}`} position={position} />
@@ -53,8 +53,8 @@ function MarkerManager() {
 
   return (
     <>
-      <button onClick={addMarker}>เพิ่มหมุด</button>
-      <button onClick={clear}>ล้างทั้งหมด</button>
+      <button onClick={addMarker}>Add Marker</button>
+      <button onClick={clear}>Clear All</button>
       {markers.map((m) => (
         <Marker key={m.id} position={m.position} />
       ))}

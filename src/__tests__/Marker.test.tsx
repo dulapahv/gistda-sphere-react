@@ -1,8 +1,8 @@
 import { act, render, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { Marker } from "../components/Marker";
-import { SphereMap } from "../components/SphereMap";
-import { SphereProvider } from "../context/SphereContext";
+import { Marker } from "@/components/Marker";
+import { SphereMap } from "@/components/SphereMap";
+import { SphereProvider } from "@/context/SphereContext";
 import { createMockSphereApi } from "./setup";
 
 describe("Marker", () => {

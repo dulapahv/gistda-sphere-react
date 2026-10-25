@@ -1,0 +1,57 @@
+---
+title: Routing
+description: Routes with turn-by-turn steps, and distance and time matrices between many places
+---
+
+The routing services work without a map, for example to estimate delivery times on a server. To show routes on a map, use [`useRoute`](/docs/hooks/use-route).
+
+## A route
+
+```ts
+import { getTurnInstruction } from "gistda-sphere-react";
+
+const result = await services.route.route({
+  from: { lon: 100.5018, lat: 13.7563 },
+  to: { lon: 100.5383, lat: 13.7649 },
+  mode: "Traffic",
+  guide: "turns",
+  locale: "en",
+});
+
+console.log(result.data.distance, result.data.interval); // meters, seconds
+
+for (const step of result.features) {
+  const { turn, name, distance } = step.properties;
+  console.log(getTurnInstruction(turn, name, "en"), `${distance} m`);
+}
+```
+
+The result is a GeoJSON `FeatureCollection` with a `LineString` per step, so it can go straight into [`<GeoJson>`](/docs/components/geojson) to draw the route.
+
+| Option | Type | Default | Description |
+| --- | --- | --- | --- |
+| `from`, `to` | `Location` | **required** | Start and end. |
+| `mode` | `"Traffic" \| "Cost" \| "Distance"` | `"Traffic"` | Fastest avoiding traffic jams, fastest without traffic data, or shortest. |
+| `types` | `Array<"Road" \| "Ferry" \| "Tollway">` | all | Kinds of road allowed. Leave out `"Tollway"` to avoid tollways. |
+| `vehicle` | `"car" \| "motorcycle"` | `"car"` | `"motorcycle"` avoids roads closed to motorcycles. |
+| `guide` | `"roads" \| "turns"` | `"roads"` | Steps per road (`"roads"`) or turn-by-turn (`"turns"`). |
+| `maxResults` | `number` | – | Maximum number of alternative routes. |
+| `locale` | `"th" \| "en"` | client default | Language of road names. |
+
+## A matrix
+
+```ts
+const warehouses = [{ lon: 100.6, lat: 13.7 }, { lon: 100.4, lat: 13.9 }];
+const customers = [{ lon: 100.53, lat: 13.76 }, { lon: 100.49, lat: 13.74 }];
+
+const { data } = await services.route.matrix({ from: warehouses, to: customers, mode: "Distance" });
+
+// data[i][j] is from warehouses[i] to customers[j]
+console.log(data[0][1].distance, data[0][1].interval);
+```
+
+Matrices take the same `mode`, `types`, `vehicle` and `locale` options. Large matrices are sent as POST automatically.
+
+<Callout>
+  Routing has to be enabled for your API key. Without it, calls fail with a `"key"` error.
+</Callout>

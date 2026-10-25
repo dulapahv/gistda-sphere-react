@@ -1,0 +1,37 @@
+---
+title: MenuBar
+description: กลุ่มปุ่มในตัวของ Sphere สำหรับสลับตัวเลือกบนแผนที่
+---
+
+`<MenuBar>` แสดงแถวปุ่มบนแผนที่ที่เลือกได้ครั้งละหนึ่งปุ่ม ด้วยสไตล์ของ Sphere เหมาะกับตัวเลือกอย่างแผนที่ฐานหรือธีมข้อมูล
+
+```tsx
+import { MenuBar } from "gistda-sphere-react";
+
+const [baseLayer, setBaseLayer] = useState("STREETS");
+
+<SphereMap baseLayer={baseLayer}>
+  <MenuBar
+    items={[
+      { label: "Streets", value: "STREETS" },
+      { label: "Hybrid", value: "HYBRID" },
+      { label: "Night", value: "STREETS_NIGHT" },
+    ]}
+    onChange={(item) => setBaseLayer(item.value as string)}
+    position="bottom-left"
+    selectedIndex={0}
+  />
+</SphereMap>
+```
+
+ดูการทำงานจริงได้ใน[ตัวอย่างของ MapControl](/th/docs/components/map-control)
+
+## Props
+
+| Prop | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `items` | `MenuItem[]` | **จำเป็น** | ปุ่มในรูปแบบ `{ label, value? }` โดย `value` มีค่าเริ่มต้นเป็น label |
+| `onChange` | `(current, previous) => void` | – | ปุ่มที่เลือกเปลี่ยน (รวมถึงเมื่อ `selectedIndex` เปลี่ยน) |
+| `selectedIndex` | `number` | – | ลำดับของปุ่มที่จะเลือก เมื่อเปลี่ยนค่าจะเลือกปุ่มนั้น |
+| `position` | `"top-left" \| "top-right" \| "bottom-left" \| "bottom-right"` | `"bottom-right"` | มุมของแผนที่ |
+| `ref` | `Ref<MenuBarRef>` | – | `getMenuBar()` และ `select(index)` (ลำดับติดลบจะยกเลิกการเลือก) |

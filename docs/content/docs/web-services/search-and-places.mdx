@@ -1,0 +1,79 @@
+---
+title: Search and places
+description: Keyword search, autocomplete, nearby places, place details, POIs per tile and tag categories
+---
+
+These services search Sphere's place database. On a map, [`useSearch`](/docs/hooks/use-search) does the same through the map; the methods below need no map.
+
+## Search
+
+```ts
+const { data, meta } = await services.search.search("โรงพยาบาล", {
+  near: { lon: 100.5383, lat: 13.7649 },
+  showDistance: true,
+  limit: 10,
+});
+
+for (const place of data) {
+  console.log(place.name, place.address, place.distance);
+}
+```
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `limit`, `offset` | `number` | Paging. `meta.hasmore` tells you if there's more. |
+| `near` | `Location` | Prefer results around this location. |
+| `showDistance` | `boolean` | Include `distance` (meters) from `near` in each result. |
+| `tag` | `string \| string[]` | Only places with these tags. |
+| `locale` | `"th" \| "en"` | Language of names and addresses. |
+
+## Autocomplete
+
+```ts
+const { data } = await services.search.suggest("เซ็นทรัล", { limit: 5, soundex: true });
+// data: [{ name: "เซ็นทรัลเวิลด์", highlight: "<b>เซ็นทรัล</b>เวิลด์" }, …]
+```
+
+`soundex: true` also suggests words that sound alike, which helps with misspellings.
+
+## Nearby places
+
+```ts
+const { data } = await services.poi.nearby(
+  { lon: 100.5383, lat: 13.7649 },
+  { span: "1km", tag: "คอฟฟี่ช็อป", limit: 20 }
+);
+```
+
+| Option | Type | Description |
+| --- | --- | --- |
+| `span` | `string` | Search radius with a unit: `"500m"`, `"1km"`, `"0.01deg"`. |
+| `tag` | `string \| string[]` | Only places with these tags. |
+| `limit`, `offset`, `locale` | | As for search. |
+
+## Place details
+
+```ts
+const place = await services.poi.get("P00000046", { locale: "en" });
+console.log(place.name, place.tel, place.url);
+// Areas such as "A10000000" (Bangkok) include their outline in `place.geo`.
+```
+
+To draw a place's outline on a map, use [`<ObjectOverlay>`](/docs/components/object-overlay).
+
+## POIs per map tile
+
+```ts
+const items = await services.poi.cluster({ z: 12, x: 3191, y: 1889 }, { tag: "โรงพยาบาล" });
+```
+
+Returns the POIs in one web-mercator tile, which is useful for drawing POIs with your own map library.
+
+## Tag categories
+
+```ts
+const categories = await services.tags.categories();
+// [{ name: { th: "อาหาร", en: "Food" }, icon: "food", sub: [{ name: { th: "อาหารไทย", en: "Thai" } }, …] }, …]
+```
+
+This list is public and doesn't need an API key. In React, [`useTagCategories`](/docs/hooks/use-tag-categories) loads it for you.

@@ -15,7 +15,7 @@ import { Cards, Card } from "fumadocs-ui/components/card";
 
 A React wrapper for the [GISTDA Sphere Map API](https://sphere.gistda.or.th/). Build interactive maps of Thailand with full TypeScript support.
 
-<MapDemo height="350px" zoom={7} center={{ lon: 100.5018, lat: 13.7563 }} language="en">
+<MapDemo height="350px" zoom={7} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" detail="Capital of Thailand" />
   <Marker position={{ lon: 98.9853, lat: 18.7883 }} title="Chiang Mai" />
   <Marker position={{ lon: 98.3923, lat: 7.8804 }} title="Phuket" />
@@ -23,13 +23,16 @@ A React wrapper for the [GISTDA Sphere Map API](https://sphere.gistda.or.th/). B
 
 ## Features
 
-- Declarative React components for maps, markers, polygons, and more
-- Full TypeScript support with exported types
-- Hooks for search, routing, tags, and map controls
-- Built-in and custom layer support
-- Overlay collection management
+- **The whole Sphere API**: every map class, event and option, mapped on the [API coverage](/docs/api-coverage) page.
+- **Declarative components** for maps, markers, popups, shapes, GeoJSON, layers, POI tags, live data and controls. They clean up after themselves and update in place.
+- **React everywhere**: React content in marker icons, popups and map controls.
+- **Routing that just works**: route status, totals and readable turn-by-turn steps as React state.
+- **Search, places and POIs**: search with autocomplete, nearby places, addresses, area outlines and over 250 POI tags in 20 categories.
+- **Data and analysis**: GeoJSON, KML, GPX and WKT; heatmaps, clusters and 3D; measurements and polygon operations.
+- **Web services**: a typed client for routing, geocoding, elevation, static maps, agriculture, disasters and population, in the browser or on a server.
+- **TypeScript first**: typed props, refs, results and events.
 
-## Quick Install
+## Quick install
 
 ```bash
 npm install gistda-sphere-react
@@ -37,9 +40,11 @@ npm install gistda-sphere-react
 
 <Cards>
   <Card title="Installation" href="/docs/getting-started/installation" />
-  <Card title="Quick Start" href="/docs/getting-started/quick-start" />
+  <Card title="Quick start" href="/docs/getting-started/quick-start" />
   <Card title="Components" href="/docs/components/sphere-provider" />
   <Card title="Hooks" href="/docs/hooks/use-map" />
+  <Card title="Web services" href="/docs/web-services" />
   <Card title="Examples" href="/docs/examples/programmatic-markers" />
+  <Card title="API coverage" href="/docs/api-coverage" />
   <Card title="Playground" href="/playground" />
 </Cards>

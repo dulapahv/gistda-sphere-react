@@ -1,6 +1,11 @@
-import { render, screen, waitFor } from "@testing-library/react";
+import { act, render, screen, waitFor } from "@testing-library/react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SphereProvider, useSphereContext } from "../context/SphereContext";
+import {
+  type SphereContextValue,
+  SphereProvider,
+  useSphereContext,
+} from "@/context/SphereContext";
+import type { SphereMap } from "@/types";
 import { createMockSphereApi } from "./setup";
 
 describe("SphereContext", () => {
@@ -102,6 +107,72 @@ describe("SphereContext", () => {
       await waitFor(() => {
         expect(onLoad).toHaveBeenCalled();
       });
+    });
+
+    it("calls an inline onLoad once, however often the provider re-renders", async () => {
+      // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
+      window.sphere = mockSphere;
+      const onLoad = vi.fn();
+      const view = () => {
+        // A new function on every render, like an inline callback.
+        const handleLoad = () => onLoad();
+        return (
+          <SphereProvider apiKey="test-key" onLoad={handleLoad}>
+            <div>Content</div>
+          </SphereProvider>
+        );
+      };
+
+      const { rerender } = render(view());
+      await waitFor(() => {
+        expect(onLoad).toHaveBeenCalledTimes(1);
+      });
+      rerender(view());
+      rerender(view());
+
+      expect(onLoad).toHaveBeenCalledTimes(1);
+    });
+
+    it("falls back to the previous ready map when the active one goes away", () => {
+      // @ts-expect-error - mockSphere is a partial mock of SphereNamespace
+      window.sphere = mockSphere;
+      const first = { name: "first" } as unknown as SphereMap;
+      const second = { name: "second" } as unknown as SphereMap;
+      const probe: { current: SphereContextValue | null } = { current: null };
+      function Probe() {
+        probe.current = useSphereContext();
+        return null;
+      }
+      render(
+        <SphereProvider apiKey="test-key">
+          <Probe />
+        </SphereProvider>
+      );
+
+      act(() => {
+        probe.current?.registerMap(first);
+        probe.current?.registerMap(second);
+      });
+      expect(probe.current?.map).toBe(second);
+
+      // A map that is not the active one leaves the active map alone.
+      act(() => {
+        probe.current?.unregisterMap(first);
+        probe.current?.registerMap(first);
+      });
+      expect(probe.current?.map).toBe(first);
+
+      act(() => {
+        probe.current?.unregisterMap(first);
+      });
+      expect(probe.current?.map).toBe(second);
+      expect(probe.current?.isMapReady).toBe(true);
+
+      act(() => {
+        probe.current?.unregisterMap();
+      });
+      expect(probe.current?.map).toBeNull();
+      expect(probe.current?.isMapReady).toBe(false);
     });
   });
 

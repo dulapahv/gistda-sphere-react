@@ -1,16 +1,26 @@
-import { useCallback, useMemo } from "react";
-import { useMap } from "../context/SphereContext";
-import type { Language, TagOptions, Tile } from "../types";
+import { useMemo } from "react";
+import { removeTags } from "@/internal/tags";
+import { useActiveMap } from "@/internal/useActiveMap";
+import type { Language, TagOptions, Tile } from "@/types";
 
+/** Supplies custom tag data per map tile. */
 export type TagDataFunction = (tile: Tile) => object[];
 
 export interface UseTagsReturn {
+  /** Add a tag (keeping existing ones). */
   add: (tag: string | TagDataFunction, options?: TagOptions) => void;
+  /** Remove all tags. */
   clear: () => void;
+  /** Show popups for tag POIs. */
   enablePopup: (state: boolean) => void;
+  getLanguage: () => Language | null;
+  isPopupEnabled: () => boolean | null;
   isReady: boolean;
+  /** Names of the tags on the map. */
   list: () => string[];
+  /** Remove a tag; names joined with `|` are removed one by one. */
   remove: (tag: string) => void;
+  /** Replace all tags with this one. */
   set: (tag: string | TagDataFunction, options?: TagOptions) => void;
   setLanguage: (lang: Language) => void;
   size: () => number;
@@ -45,10 +55,10 @@ export const TAG_CATEGORIES: TagCategory[] = [
   {
     name: "Services",
     tags: [
-      { id: "ธนาคาร", label: "Bank" },
-      { id: "ATM", label: "ATM" },
+      { id: "ธนาคาร/สถาบันการเงิน", label: "Bank" },
+      { id: "เอทีเอ็ม", label: "ATM" },
       { id: "โรงพยาบาล", label: "Hospital" },
-      { id: "ปั๊มน้ำมัน", label: "Gas Station" },
+      { id: "สถานีบริการน้ำมัน", label: "Gas Station" },
     ],
   },
   {
@@ -62,64 +72,48 @@ export const TAG_CATEGORIES: TagCategory[] = [
   },
 ];
 
+/**
+ * POI tag layers (categories of places such as banks or hospitals).
+ * Works inside `SphereMap` and anywhere else under `SphereProvider`.
+ * See also `<Tag>` and `useTagCategories`.
+ */
 export function useTags(): UseTagsReturn {
-  const { map, isReady } = useMap();
+  const { map, isReady } = useActiveMap();
 
-  const set = useCallback(
-    (tag: string | TagDataFunction, options?: TagOptions) => {
-      map?.Tags?.set(tag, options);
-    },
-    [map]
-  );
-
-  const add = useCallback(
-    (tag: string | TagDataFunction, options?: TagOptions) => {
-      map?.Tags?.add(tag, options);
-    },
-    [map]
-  );
-
-  const remove = useCallback(
-    (tag: string) => {
-      map?.Tags?.remove(tag);
-    },
-    [map]
-  );
-
-  const clear = useCallback(() => {
-    map?.Tags?.clear();
-  }, [map]);
-
-  const list = useCallback((): string[] => map?.Tags?.list() ?? [], [map]);
-
-  const size = useCallback((): number => map?.Tags?.size() ?? 0, [map]);
-
-  const enablePopup = useCallback(
-    (state: boolean) => {
-      map?.Tags?.enablePopup(state);
-    },
-    [map]
-  );
-
-  const setLanguage = useCallback(
-    (lang: Language) => {
-      map?.Tags?.language(lang);
-    },
-    [map]
-  );
-
-  return useMemo(
+  return useMemo<UseTagsReturn>(
     () => ({
-      add,
-      clear,
-      enablePopup,
+      add: (tag, options) => {
+        map?.Tags?.add(tag, options);
+      },
+      clear: () => {
+        map?.Tags?.clear();
+      },
+      enablePopup: (state) => {
+        map?.Tags?.enablePopup(state);
+      },
+      getLanguage: () => {
+        const value = map?.Tags?.language();
+        return value === "th" || value === "en" ? value : null;
+      },
+      isPopupEnabled: () => {
+        const value = map?.Tags?.enablePopup();
+        return typeof value === "boolean" ? value : null;
+      },
       isReady,
-      list,
-      remove,
-      set,
-      setLanguage,
-      size,
+      list: () => map?.Tags?.list() ?? [],
+      remove: (tag) => {
+        if (map?.Tags) {
+          removeTags(map, tag);
+        }
+      },
+      set: (tag, options) => {
+        map?.Tags?.set(tag, options);
+      },
+      setLanguage: (lang) => {
+        map?.Tags?.language(lang);
+      },
+      size: () => map?.Tags?.size() ?? 0,
     }),
-    [isReady, set, add, remove, clear, list, size, enablePopup, setLanguage]
+    [map, isReady]
   );
 }

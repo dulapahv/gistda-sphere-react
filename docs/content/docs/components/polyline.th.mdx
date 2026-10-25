@@ -1,52 +1,60 @@
 ---
-title: Polyline (เส้นหลายส่วน)
-description: วาดเส้นเชื่อมต่อจุดต่างๆ บนแผนที่
+title: Polyline (เส้น)
+description: เส้นที่ลากผ่านหลายจุด รองรับเส้นประ ป้ายชื่อ และการวัดความยาว
 ---
 
-<MapDemo height="400px" zoom={11} center={{ lon: 100.5, lat: 13.75 }} language="en">
+<MapDemo height="400px" zoom={10} center={{ lon: 100.55, lat: 13.75 }}>
   <Polyline
     positions={[
-      { lon: 100.4, lat: 13.72 },
+      { lon: 100.4, lat: 13.7 },
       { lon: 100.5, lat: 13.8 },
-      { lon: 100.6, lat: 13.72 },
+      { lon: 100.6, lat: 13.7 },
+      { lon: 100.7, lat: 13.8 },
     ]}
     lineColor="blue"
-    lineWidth={3}
+    lineWidth={4}
+    lineStyle="Dashed"
+    title="เส้นทาง A"
   />
 </MapDemo>
 
 ```tsx
 <Polyline
   positions={[
-    { lon: 100.4, lat: 13.72 },
+    { lon: 100.4, lat: 13.7 },
     { lon: 100.5, lat: 13.8 },
-    { lon: 100.6, lat: 13.72 },
+    { lon: 100.6, lat: 13.7 },
+    { lon: 100.7, lat: 13.8 },
   ]}
   lineColor="blue"
-  lineWidth={3}
+  lineWidth={4}
+  lineStyle="Dashed"
 />
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `positions` | `Location[]` | Yes (min 2) | - | อาร์เรย์ของจุด |
-| `ref` | `Ref<PolylineRef>` | No | - | Ref สำหรับการควบคุมผ่านโค้ด (Imperative control) |
-| `title` | `string` | No | - | ข้อความ Tooltip เมื่อโฮเวอร์ |
-| `detail` | `string` | No | - | ข้อความ Pop-up เมื่อคลิก |
-| `label` | `string` | No | - | ข้อความกำกับตรงกลางเส้น |
-| `labelOptions` | `MarkerOptions` | No | - | ตัวเลือกของ Marker สำหรับข้อความกำกับ |
-| `popup` | `PopupOptions` | No | - | การกำหนดค่าป๊อปอัป |
-| `visibleRange` | `Range` | No | All zoom levels | ระยะการซูมที่มองเห็นได้ |
-| `lineWidth` | `number` | No | `3` | ความกว้างของเส้นเป็นพิกเซล |
-| `lineColor` | `string` | No | Preset color | สีเส้น |
-| `lineStyle` | `"Solid" \| "Dashed" \| "Dot"` | No | `"Solid"` | รูปแบบเส้น |
-| `pivot` | `Location` | No | Center | จุดหมุน |
-| `clickable` | `boolean` | No | `false` | แสดงเคอร์เซอร์แบบตัวชี้ |
-| `draggable` | `boolean` | No | `false` | อนุญาตให้ลากได้ |
-| `pointer` | `boolean` | No | `false` | แสดงตัวชี้การลาก |
-| `zIndex` | `number` | No | `0` | ลำดับการซ้อน |
-| `onClick` | `(polyline: SpherePolyline) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อคลิก |
-| `onDrag` | `(polyline: SpherePolyline) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อกำลังลาก |
-| `onDrop` | `(polyline: SpherePolyline) => void` | No | - | ฟังก์ชันที่จะทำงานเมื่อปล่อย (สิ้นสุดการลาก) |
+| Prop | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `positions` | `Location[] \| GeoJSON` | **จำเป็น** จุดตามแนวเส้น (อย่างน้อย 2 จุด) ค่า `null` จะแบ่งเป็นหลายเส้น หรือใช้ GeoJSON `LineString` / `MultiLineString` ก็ได้ |
+
+เส้นรับ [props ของรูปทรง](/th/docs/components/polygon#shape-props) ด้วย เช่น `lineColor`, `lineWidth`, `lineStyle`, `label`, `popupContent` และ event callbacks
+
+## รูปแบบเส้น [#line-styles]
+
+`lineStyle` รับค่า `"Solid"`, `"Dashed"`, `"Dot"` หรือรูปแบบเส้นประที่กำหนดเอง
+
+```tsx
+<Polyline positions={path} lineStyle={[12, 4, 2, 4]} lineWidth={3} />
+```
+
+## Ref
+
+| เมธอด | คำอธิบาย |
+| --- | --- |
+| `getPolyline()` | `sphere.Polyline` ที่อยู่เบื้องหลัง |
+| `getLength(language?)` | ความยาวเป็นเมตร หรือข้อความ เช่น `"15.5 กม."` เมื่อระบุภาษา |
+| `union(other)` | เส้นใหม่ที่รวมเส้นนี้กับอีกเส้น (ไม่ถูกเพิ่มลงแผนที่) |
+| `getBound()`, `getCentroid()`, `getPivot()` | ขอบเขต จุดศูนย์กลาง และจุดวางป้ายชื่อ |
+| `contains`, `intersects`, `within`, `distanceTo` | การทดสอบเชิงพื้นที่ ดู[การวิเคราะห์เชิงพื้นที่](/th/docs/examples/spatial-analysis) |
+| `rotate`, `shift`, `updateStyle`, `togglePopup`, `toGeoJSON` | เหมือนกับ[รูปหลายเหลี่ยม](/th/docs/components/polygon#ref) |

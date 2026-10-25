@@ -1,36 +1,33 @@
 "use client";
 
-import type { Location } from "gistda-sphere-react";
-import { getTranslations } from "../translations";
+import { useCamera } from "../hooks";
+import type { PlaygroundTranslations } from "../translations";
+import { formatLocation } from "./MapCards";
 
-interface MapStatsProps {
-  center: Location | null;
-  lang: string;
-  totalShapes: number;
-  zoom: number;
-}
+/** Live camera readout at the top of the sidebar. */
+export function MapStats({ t }: { t: PlaygroundTranslations }) {
+  const camera = useCamera();
 
-export function MapStats({ zoom, center, totalShapes, lang }: MapStatsProps) {
-  const t = getTranslations(lang);
+  const angles: [label: string, value: string][] = [
+    [t.stats.zoom, camera ? camera.zoom.toFixed(1) : "–"],
+    [t.stats.rotation, camera ? `${Math.round(camera.rotation)}°` : "–"],
+    [t.stats.pitch, camera ? `${Math.round(camera.pitch)}°` : "–"],
+  ];
 
   return (
-    <div className="mb-4 rounded-lg border border-fd-border bg-fd-secondary px-4 py-2">
-      <div className="flex items-center justify-between py-1">
-        <span className="text-fd-secondary-foreground text-xs">{t.zoom}</span>
-        <span className="font-medium text-fd-foreground text-xs tabular-nums">
-          {zoom.toFixed(1)}
-        </span>
+    <div className="rounded-lg border border-fd-border bg-fd-secondary px-3 py-2 text-xs tabular-nums">
+      <div className="flex justify-between gap-2">
+        {angles.map(([label, value]) => (
+          <span key={label}>
+            <span className="text-fd-muted-foreground">{label} </span>
+            <span className="font-medium text-fd-foreground">{value}</span>
+          </span>
+        ))}
       </div>
-      <div className="flex items-center justify-between py-1">
-        <span className="text-fd-secondary-foreground text-xs">{t.center}</span>
-        <span className="font-medium text-fd-foreground text-xs tabular-nums">
-          {center ? `${center.lat.toFixed(4)}, ${center.lon.toFixed(4)}` : "-"}
-        </span>
-      </div>
-      <div className="flex items-center justify-between py-1">
-        <span className="text-fd-secondary-foreground text-xs">{t.shapes}</span>
-        <span className="font-medium text-fd-foreground text-xs tabular-nums">
-          {totalShapes}
+      <div className="mt-1 flex justify-between gap-2">
+        <span className="text-fd-muted-foreground">{t.stats.center}</span>
+        <span className="font-medium text-fd-foreground">
+          {camera ? formatLocation(camera.center, 4) : "–"}
         </span>
       </div>
     </div>

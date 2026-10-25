@@ -1,0 +1,95 @@
+---
+title: การแสดง GeoJSON, KML, GPX และ WKT
+description: แปลงรูปแบบข้อมูล GIS ที่ใช้กันทั่วไปแล้วแสดงบนแผนที่ รวมถึงไฟล์ที่ผู้ใช้เปิดเอง
+---
+
+[`useSphereUtils`](/th/docs/hooks/use-sphere-utils) แปลง KML, GPX, WKT, GML, Esri JSON และ TopoJSON เป็น GeoJSON แล้ว [`<GeoJson>`](/th/docs/components/geojson) จะวาดลงบนแผนที่
+
+<GeoJsonDemo />
+
+## เปิดไฟล์ [#open-a-file]
+
+```tsx lineNumbers
+import { GeoJson, SphereMap, useSphereUtils, type GeoJSON } from "gistda-sphere-react";
+import { useState } from "react";
+
+function FileViewer() {
+  const { kmlToGeoJSON, gpxToGeoJSON, wktToGeoJSON } = useSphereUtils();
+  const [data, setData] = useState<GeoJSON | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  async function open(file: File) {
+    const text = await file.text();
+    const extension = file.name.split(".").pop()?.toLowerCase();
+    try {
+      if (extension === "kml") setData(await kmlToGeoJSON(text));
+      else if (extension === "gpx") setData(await gpxToGeoJSON(text));
+      else if (extension === "wkt") setData(await wktToGeoJSON(text));
+      else setData(JSON.parse(text));
+      setError(null);
+    } catch (reason) {
+      setError(String(reason));
+    }
+  }
+
+  return (
+    <>
+      <input
+        type="file"
+        accept=".geojson,.json,.kml,.gpx,.wkt"
+        onChange={(event) => event.target.files?.[0] && open(event.target.files[0])}
+      />
+      {error && <p role="alert">{error}</p>}
+      <SphereMap style={{ height: 500 }}>
+        {data && (
+          <GeoJson
+            data={data}
+            fitBounds={{ padding: 40, maxZoom: 16 }}
+            style={{ lineColor: "#059669", fillColor: "rgba(16,185,129,.25)", lineWidth: 3 }}
+          />
+        )}
+      </SphereMap>
+    </>
+  );
+}
+```
+
+## Shapefile [#shapefiles]
+
+Shapefile ต้องใช้ไลบรารีแยก ตัวอย่างของ GISTDA ใช้ [shpjs](https://github.com/calvinmetcalf/shapefile-js) ซึ่งอ่าน Shapefile ที่บีบอัดเป็น zip ออกมาเป็น GeoJSON
+
+```tsx
+import shp from "shpjs"; // npm install shpjs
+
+async function openShapefile(file: File) {
+  const result = await shp(await file.arrayBuffer());
+  // A zip with several layers gives an array of feature collections.
+  setData(Array.isArray(result) ? result[0] : result);
+}
+```
+
+## ส่งออกรูปทรงที่วาด [#export-drawn-shapes]
+
+ref ของรูปทรงทุกแบบมี `toGeoJSON()` จึงบันทึกสิ่งที่ผู้ใช้วาดได้
+
+```tsx
+const features = shapeRefs.map((ref) => ref.current?.toGeoJSON()).filter(Boolean);
+const file = new Blob([JSON.stringify({ type: "FeatureCollection", features })], {
+  type: "application/geo+json",
+});
+```
+
+แท็บวาดในหน้า[ทดลองเล่น](/th/playground)นำเข้าได้ทั้งสี่รูปแบบ และส่งออกสิ่งที่วาดเป็น GeoJSON
+
+## ระบบพิกัดอื่น [#other-coordinate-systems]
+
+ข้อมูลในระบบพิกัดฉาก เช่น UTM โซน 47N แปลงพิกัดได้ด้วย `project`
+
+```tsx
+const { project } = useSphereUtils();
+const [lon, lat] = (await project(
+  "+proj=longlat +datum=WGS84",
+  [662_190, 1_521_385],
+  "+proj=utm +zone=47 +datum=WGS84 +units=m"
+)) as number[];
+```

@@ -1,0 +1,96 @@
+---
+title: การค้นหาพร้อมคำแนะนำอัตโนมัติ
+description: ช่องค้นหาที่มีคำแนะนำ รายการผลลัพธ์ และหมุดพร้อมป๊อปอัปแบบ React
+---
+
+พิมพ์เพื่อดูคำแนะนำ กด Enter เพื่อค้นหา แล้วเลือกผลลัพธ์
+
+<SearchDemo />
+
+```tsx lineNumbers
+import {
+  Marker, SphereMap, SphereProvider, useMapControls, useSearch,
+  type PoiResult, type SuggestResult,
+} from "gistda-sphere-react";
+import { useEffect, useState } from "react";
+
+function PlaceSearch() {
+  const { search, suggest } = useSearch();
+  const { goTo } = useMapControls();
+  const [keyword, setKeyword] = useState("");
+  const [suggestions, setSuggestions] = useState<SuggestResult[]>([]);
+  const [results, setResults] = useState<PoiResult[]>([]);
+  const [selected, setSelected] = useState<PoiResult | null>(null);
+
+  // Suggestions, 250 ms after the user stops typing.
+  useEffect(() => {
+    if (keyword.trim().length < 2) {
+      setSuggestions([]);
+      return;
+    }
+    const timer = setTimeout(async () => {
+      const { data } = await suggest(keyword.trim(), { limit: 5 });
+      setSuggestions(data);
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [keyword, suggest]);
+
+  const runSearch = async (text: string) => {
+    setSuggestions([]);
+    const { data } = await search(text, { limit: 10 });
+    setResults(data);
+  };
+
+  const select = (place: PoiResult) => {
+    setSelected(place);
+    goTo({ center: { lon: place.lon, lat: place.lat }, zoom: 16 });
+  };
+
+  return (
+    <>
+      <input
+        value={keyword}
+        onChange={(event) => setKeyword(event.target.value)}
+        onKeyDown={(event) => event.key === "Enter" && runSearch(keyword)}
+        placeholder="Search for a place"
+      />
+      {suggestions.map((suggestion) => (
+        <button key={suggestion.name} onClick={() => runSearch(suggestion.name)}>
+          {suggestion.name}
+        </button>
+      ))}
+      <ul>
+        {results.map((place) => (
+          <li key={place.id}>
+            <button onClick={() => select(place)}>{place.name}</button>
+          </li>
+        ))}
+      </ul>
+
+      <SphereMap style={{ height: 500 }} zoom={11}>
+        {selected && (
+          <Marker
+            position={{ lon: selected.lon, lat: selected.lat }}
+            title={selected.name}
+            popupContent={<p>{selected.address}</p>}
+          />
+        )}
+      </SphereMap>
+    </>
+  );
+}
+
+function App() {
+  return (
+    <SphereProvider apiKey="YOUR_API_KEY">
+      <PlaceSearch />
+    </SphereProvider>
+  );
+}
+```
+
+## ไอเดียเพิ่มเติม [#ideas]
+
+- แสดงขอบเขตของผลลัพธ์ที่เป็นพื้นที่ (จังหวัดหรืออำเภอ) ด้วย [`<ObjectOverlay id={place.id} fitBounds />`](/th/docs/components/object-overlay)
+- ให้ผลลัพธ์เน้นบริเวณที่อยู่บนจอ: `search(keyword, { span: "5km" })` รอบจุดกึ่งกลางแผนที่ หรือใช้[บริการเว็บสำหรับค้นหา](/th/docs/web-services/search-and-places#search)กับ `near`
+- หากต้องการรายการผลลัพธ์สำเร็จรูปของ Sphere ให้ใช้ [`<SearchResults>`](/th/docs/components/search-results) แทนการสร้างเอง

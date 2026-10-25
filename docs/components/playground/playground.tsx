@@ -1,173 +1,249 @@
 "use client";
 
-import { type Location, SphereProvider } from "gistda-sphere-react";
-import { useCallback, useState } from "react";
+import { IconContext, type IconProps } from "@phosphor-icons/react";
 import {
-  DrawingPanel,
-  LanguageSelector,
-  LayerSelector,
-  MapControlsPanel,
-  MapStats,
-  MapView,
-  QuickNav,
-  RoutePanel,
-  SearchPanel,
-  Sidebar,
-  TagsPanel,
-} from "./components";
-import { useDrawing, useMapSettings } from "./hooks";
+  type Language,
+  type Location,
+  type PoiResult,
+  SphereProvider,
+  useRoute,
+} from "gistda-sphere-react";
+import { useCallback, useState } from "react";
+import { MapView } from "./components/MapView";
+import { Sidebar } from "./components/Sidebar";
+import { DataTab } from "./components/tabs/DataTab";
+import { DrawTab } from "./components/tabs/DrawTab";
+import { EventsTab } from "./components/tabs/EventsTab";
+import { MapTab } from "./components/tabs/MapTab";
+import { PlacesTab } from "./components/tabs/PlacesTab";
+import { RouteTab } from "./components/tabs/RouteTab";
+import { LOCATIONS, type MapLanguage, type TabId } from "./constants";
+import { useDrawing, useEventLog, useMapSettings } from "./hooks";
 import { getTranslations } from "./translations";
-import type { SearchMarkerData } from "./types";
+import type { GeoJsonLayer, PickMode, SelectedPlace } from "./types";
 
 const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
-interface PlaygroundContentProps {
-  lang: string;
+/** Defaults for every Phosphor icon in the playground. */
+const ICON_DEFAULTS: IconProps = { size: 14, weight: "bold" };
+
+/** Reads a single `{ lat, lon }` from an overlay's `location()` result. */
+function toLocation(value: unknown): Location | null {
+  if (
+    typeof value === "object" &&
+    value !== null &&
+    "lat" in value &&
+    "lon" in value &&
+    typeof value.lat === "number" &&
+    typeof value.lon === "number"
+  ) {
+    return { lat: value.lat, lon: value.lon };
+  }
+  return null;
 }
 
-function PlaygroundContent({ lang }: PlaygroundContentProps) {
-  const mapSettings = useMapSettings();
+/** The playground: a tabbed sidebar driving one declaratively rendered map. */
+function PlaygroundContent({ lang }: { lang: string }) {
+  const t = getTranslations(lang);
+  const language: Language = lang === "th" ? "th" : "en";
+  const settings = useMapSettings(language);
   const drawing = useDrawing();
-  const { handleClick: drawingClick } = drawing;
-  const { navigateTo } = mapSettings;
+  const events = useEventLog();
+  const route = useRoute();
 
-  const [searchMarker, setSearchMarker] = useState<SearchMarkerData | null>(
+  const [activeTab, setActiveTab] = useState<TabId>("map");
+  const [pickMode, setPickMode] = useState<PickMode | null>(null);
+  const [inspectPoint, setInspectPoint] = useState<Location | null>(null);
+  const [dataPoint, setDataPoint] = useState<Location>(LOCATIONS.Bangkok);
+  const [selectedPlace, setSelectedPlace] = useState<SelectedPlace | null>(
     null
   );
-  const [routeOrigin, setRouteOrigin] = useState<Location | null>(null);
-  const [routeDestination, setRouteDestination] = useState<Location | null>(
-    null
-  );
-  const [settingRoutePoint, setSettingRoutePoint] = useState<
-    "origin" | "destination" | null
-  >(null);
+  const [nearbyPlaces, setNearbyPlaces] = useState<PoiResult[]>([]);
+  const [activeTags, setActiveTags] = useState<string[]>([]);
+  const [imported, setImported] = useState<GeoJsonLayer | null>(null);
+  const [analysis, setAnalysis] = useState<GeoJsonLayer | null>(null);
+  const [measureVersion, setMeasureVersion] = useState(0);
+  const [outlineFailed, setOutlineFailed] = useState(false);
+  const [routeStops, setRouteStops] = useState<Location[]>([]);
 
-  const handleMapClick = useCallback(
-    (location: Location) => {
-      if (settingRoutePoint === "origin") {
-        setRouteOrigin(location);
-        setSettingRoutePoint(null);
-        return;
-      }
-      if (settingRoutePoint === "destination") {
-        setRouteDestination(location);
-        setSettingRoutePoint(null);
-        return;
-      }
-      drawingClick(location);
-    },
-    [settingRoutePoint, drawingClick]
-  );
+  const { addDestination, listDestinations } = route;
+  const { setMode: setDrawingMode } = drawing;
 
-  const handleSearchResult = useCallback(
-    (marker: SearchMarkerData) => {
-      setSearchMarker(marker);
-      navigateTo(marker.position, 16);
-    },
-    [navigateTo]
-  );
+  // Road names come from the routing service in the route's language, so a
+  // calculated route is fetched again when the map language changes.
+  const changeMapLanguage = (next: MapLanguage) => {
+    settings.setLanguage(next);
+    if (route.status === "complete") {
+      route.setLanguage(next);
+      route.search();
+    }
+  };
+
+  const syncRouteStops = useCallback(() => {
+    setRouteStops(
+      listDestinations().flatMap((marker) => {
+        const location = toLocation(marker.location());
+        return location ? [location] : [];
+      })
+    );
+  }, [listDestinations]);
+
+  const changeTab = (tab: TabId) => {
+    setActiveTab(tab);
+    setPickMode(null);
+    if (tab !== "draw") {
+      setDrawingMode("none");
+    }
+  };
+
+  const addRouteStop = (location: Location) => {
+    addDestination(location);
+    syncRouteStops();
+    setInspectPoint(null);
+    changeTab("route");
+  };
+
+  const analyzeHere = (location: Location) => {
+    setDataPoint(location);
+    setInspectPoint(null);
+    changeTab("data");
+  };
+
+  const handleMapClick = (location: Location) => {
+    if (pickMode === "routeStop") {
+      addDestination(location);
+      syncRouteStops();
+      return;
+    }
+    if (pickMode === "dataPoint") {
+      setDataPoint(location);
+      setPickMode(null);
+      return;
+    }
+    if (drawing.handleClick(location)) {
+      return;
+    }
+    setInspectPoint(location);
+  };
+
+  const toggleTag = (tag: string) =>
+    setActiveTags((previous) =>
+      previous.includes(tag)
+        ? previous.filter((existing) => existing !== tag)
+        : [...previous, tag]
+    );
 
   return (
-    <div className="flex h-screen w-full overflow-hidden bg-fd-background font-sans text-[13px] text-fd-foreground max-md:flex-col">
-      <Sidebar lang={lang}>
-        <MapStats
-          center={mapSettings.center}
-          lang={lang}
-          totalShapes={drawing.totalShapes}
-          zoom={mapSettings.zoom}
-        />
-
-        <LayerSelector
-          activeOverlays={mapSettings.activeOverlays}
-          activePredefined={mapSettings.activePredefined}
-          currentLayer={mapSettings.currentLayer}
-          lang={lang}
-          onLayerChange={mapSettings.setLayer}
-          onOverlayToggle={mapSettings.toggleOverlay}
-          onPredefinedToggle={mapSettings.togglePredefined}
-        />
-
-        <MapControlsPanel
-          lang={lang}
-          mapReady={mapSettings.mapReady}
-          onToggle={mapSettings.toggleUiControl}
-          uiControls={mapSettings.uiControls}
-        />
-
-        <LanguageSelector
-          lang={lang}
-          language={mapSettings.language}
-          onLanguageChange={mapSettings.setLanguage}
-        />
-
-        <QuickNav lang={lang} onNavigate={mapSettings.navigateTo} />
-
-        <div className="my-4 h-px bg-fd-border" />
-
-        <DrawingPanel
-          lang={lang}
-          mode={drawing.mode}
-          onClear={drawing.clearAll}
-          onModeChange={drawing.setMode}
-        />
-
-        <div className="my-4 h-px bg-fd-border" />
-
-        <SearchPanel lang={lang} onResultSelect={handleSearchResult} />
-
-        <div className="my-4 h-px bg-fd-border" />
-
-        <RoutePanel
-          destination={routeDestination}
-          lang={lang}
-          onSetDestination={setRouteDestination}
-          onSetOrigin={setRouteOrigin}
-          onSettingPointChange={setSettingRoutePoint}
-          origin={routeOrigin}
-          settingPoint={settingRoutePoint}
-        />
-
-        <div className="my-4 h-px bg-fd-border" />
-
-        <TagsPanel lang={lang} />
-      </Sidebar>
+    <div className="relative flex h-dvh w-full overflow-hidden bg-fd-background font-sans text-[13px] text-fd-foreground max-md:flex-col">
+      <Sidebar
+        activeTab={activeTab}
+        lang={lang}
+        onTabChange={changeTab}
+        panels={{
+          data: (
+            <DataTab
+              language={settings.language}
+              onPickModeChange={setPickMode}
+              onPointChange={setDataPoint}
+              pickMode={pickMode}
+              point={dataPoint}
+              t={t}
+            />
+          ),
+          draw: (
+            <DrawTab
+              analysis={analysis}
+              drawing={drawing}
+              imported={imported}
+              language={language}
+              measureVersion={measureVersion}
+              onAnalysisChange={setAnalysis}
+              onImport={setImported}
+              t={t}
+            />
+          ),
+          events: <EventsTab events={events} t={t} />,
+          map: (
+            <MapTab
+              settings={{ ...settings, setLanguage: changeMapLanguage }}
+              t={t}
+            />
+          ),
+          places: (
+            <PlacesTab
+              activeTags={activeTags}
+              language={settings.language}
+              nearbyPlaces={nearbyPlaces}
+              onAddRouteStop={addRouteStop}
+              onClearTags={() => setActiveTags([])}
+              onNearbyChange={setNearbyPlaces}
+              onSelectPlace={(place) => {
+                setSelectedPlace(place);
+                setOutlineFailed(false);
+              }}
+              onToggleTag={toggleTag}
+              outlineFailed={outlineFailed}
+              selectedPlace={selectedPlace}
+              t={t}
+            />
+          ),
+          route: (
+            <RouteTab
+              onPickModeChange={setPickMode}
+              onStopsChanged={syncRouteStops}
+              pickMode={pickMode}
+              route={route}
+              stops={routeStops}
+              t={t}
+            />
+          ),
+        }}
+        t={t}
+      />
 
       <MapView
-        center={mapSettings.center}
+        activeTags={activeTags}
+        analysis={analysis}
+        dataPoint={activeTab === "data" ? dataPoint : null}
         drawing={drawing}
-        lang={lang}
-        language={mapSettings.language}
-        onClick={handleMapClick}
-        onDoubleClick={drawing.handleDoubleClick}
-        onLocation={mapSettings.setCenter}
-        onZoom={mapSettings.setZoom}
-        routeDestination={routeDestination}
-        routeOrigin={routeOrigin}
-        searchMarker={searchMarker}
-        settingRoutePoint={settingRoutePoint}
+        events={events}
+        imported={imported}
+        inspectPoint={inspectPoint}
+        nearbyPlaces={nearbyPlaces}
+        onAddRouteStop={addRouteStop}
+        onAnalyzeHere={analyzeHere}
+        onInspectClose={() => setInspectPoint(null)}
+        onMapClick={handleMapClick}
+        onOutlineResult={setOutlineFailed}
+        onOverlayEdited={() => setMeasureVersion((version) => version + 1)}
+        pickMode={pickMode}
+        selectedPlace={selectedPlace}
+        settings={settings}
+        t={t}
       />
     </div>
   );
 }
 
-interface StandalonePlaygroundProps {
-  lang: string;
-}
-
-export function StandalonePlayground({ lang }: StandalonePlaygroundProps) {
+/** The full-page playground. Needs `NEXT_PUBLIC_SPHERE_API_KEY`. */
+export function StandalonePlayground({ lang }: { lang: string }) {
   const t = getTranslations(lang);
 
   if (!API_KEY) {
     return (
-      <div className="flex h-screen flex-col items-center justify-center bg-fd-background p-8 text-center text-fd-foreground">
-        <p className="text-fd-secondary-foreground text-sm">{t.apiKeyError}</p>
+      <div className="flex h-dvh flex-col items-center justify-center bg-fd-background p-8 text-center text-fd-foreground">
+        <p className="text-fd-muted-foreground text-sm">
+          {t.header.apiKeyError}
+        </p>
       </div>
     );
   }
 
   return (
-    <SphereProvider apiKey={API_KEY}>
-      <PlaygroundContent lang={lang} />
-    </SphereProvider>
+    <IconContext.Provider value={ICON_DEFAULTS}>
+      <SphereProvider apiKey={API_KEY}>
+        <PlaygroundContent lang={lang} />
+      </SphereProvider>
+    </IconContext.Provider>
   );
 }

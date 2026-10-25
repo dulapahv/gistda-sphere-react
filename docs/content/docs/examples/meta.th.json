@@ -1,0 +1,21 @@
+{
+  "title": "ตัวอย่าง",
+  "pages": [
+    "programmatic-markers",
+    "interactive-placement",
+    "drawing-polygons",
+    "sidebar-controls",
+    "search",
+    "routing",
+    "tags",
+    "custom-popups",
+    "---ข้อมูลและการวิเคราะห์---",
+    "data-formats",
+    "spatial-analysis",
+    "custom-wms-layer",
+    "advanced-layers",
+    "---การเชื่อมต่อ---",
+    "scroll-friendly-maps",
+    "maplibre-plugins"
+  ]
+}

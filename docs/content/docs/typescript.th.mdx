@@ -1,98 +1,78 @@
 ---
 title: TypeScript
-description: Type definitions และ exports ที่มีให้ใช้งาน
+description: คอมโพเนนต์ hook ผลลัพธ์ และอ็อบเจกต์ของ Sphere ทุกตัวมี type ครบ
 ---
 
-Type ทั้งหมดถูก export จากแพ็กเกจ:
+ไลบรารีนี้เขียนด้วย TypeScript และ export ทุก type จากแพ็กเกจหลัก
 
 ```tsx
-import type {
-  // Type พื้นฐานทางเรขาคณิต
-  Location,          // { lon: number, lat: number }
-  Point,             // { x: number, y: number }
-  Size,              // { width: number, height: number }
-  Range,             // { min: number, max: number }
-  Bound,             // { minLon, minLat, maxLon, maxLat }
-  Tile,              // { x: number, y: number, z: number }
-  Icon,              // { url?, urlHD?, html?, offset?, size? }
-
-  // Type แบบ enum
-  BuiltInLayer,
-  LayerType,
-  FilterType,
-  LineStyleType,
-  PredefinedOverlay,
-  UiComponentMode,
-
-  // Type สำหรับ options
-  PopupOptions,
-  GeometryOptions,
-  MarkerOptions,
-  TagOptions,
-  SearchOptions,
-  SuggestOptions,
-  AddressOptions,
-  NearPoiOptions,
-
-  // Type สำหรับเส้นทาง
-  RouteMode,
-  RouteType,
-  RouteLabelType,
-  RouteGuideStep,
-
-  // Type สำหรับ instance
-  SphereMapInstance,
-  SphereMarker,
-  SpherePolygon,
-  SpherePolyline,
-  SphereCircle,
-  SphereDot,
-  SphereRectangle,
-  SpherePopup,
-  SphereOverlay,
-  SphereNamespace,
-
-  // Type สำหรับ ref
-  SphereMapRef,
-  MarkerRef,
-  PolygonRef,
-  PolylineRef,
-  CircleRef,
-  PopupRef,
-  DotRef,
-  RectangleRef,
-} from 'gistda-sphere-react';
+import type { Location, PoiResult, PolygonRef, RouteStep } from "gistda-sphere-react";
 ```
 
-## Icon type
+## Type ที่ใช้บ่อย [#common-types]
 
-```typescript
-// ไอคอนจาก URL
-{
-  url: string;
-  urlHD?: string;
-  size?: Size;
-  offset?: Point;
-}
+| Type | รูปแบบ |
+| --- | --- |
+| `Location` | `{ lon: number; lat: number }` |
+| `Point` | `{ x: number; y: number }` (พิกเซล) |
+| `Size` | `{ width: number; height: number }` |
+| `Range` | `{ min: number; max: number }` |
+| `Bound` | `{ minLon; minLat; maxLon; maxLat }` |
+| `Icon` | `{ url?; urlHD?; html?; offset?; size? }` |
+| `GeoJSON`, `GeoJSONFeature`, `GeoJSONGeometry`… | อ็อบเจกต์ GeoJSON (RFC 7946) |
 
-// ไอคอนจาก HTML (จะเขียนทับ url)
-{
-  html: string;
-  offset?: Point;
-  size?: Size;
+## ชื่อที่ใช้ใน prop [#names-used-by-props]
+
+type เหล่านี้เป็น union ของสตริง editor จึงเติมคำให้อัตโนมัติ
+
+| Type | ค่า |
+| --- | --- |
+| `BuiltInLayer` | `"SIMPLE"`, `"STREETS"`, `"STREETS_NIGHT"`, `"HYBRID"`, `"IMAGES"`, `"TRAFFIC"`, `"PM25"`, `"HOTSPOT"`, `"FLOOD"`, `"DROUGHT"` |
+| `LayerType` | `"Vector"`, `"XYZ"`, `"WMS"`, `"WMTS"`, `"WMTS_REST"`, `"TMS"`, `"Tiles3D"`, `"I3S"` |
+| `FilterType` | `"None"`, `"Dark"`, `"Light"`, `"Protanopia"`, `"Deuteranopia"` |
+| `LineStyleType` | `"Solid"`, `"Dashed"`, `"Dot"` |
+| `PredefinedOverlay` | `"cameras"`, `"events"`, `"aqi"` |
+| `UiControlName` | `"DPad"`, `"Zoombar"`, `"Geolocation"`, `"Toolbar"`, `"LayerSelector"`, `"Fullscreen"`, `"Crosshair"`, `"Scale"`, `"ContextMenu"` |
+| `UiComponentMode` | `"Full"`, `"Mobile"`, `"None"` |
+| `RouteMode` | `"Traffic"`, `"Cost"`, `"Distance"`, `"Fly"` |
+| `RouteType` | `"Road"`, `"Ferry"`, `"Tollway"`, `"All"` |
+| `RouteLabelType` | `"Distance"`, `"Time"`, `"Hide"` |
+| `Language` | `"th"`, `"en"` |
+
+ไลบรารีจะแปลงค่าเหล่านี้เป็นค่าที่ Sphere ต้องการขณะรันไทม์ คุณจึงไม่ต้องจัดการกับค่า enum ภายในของ Sphere เอง
+
+## ผลลัพธ์ [#results]
+
+| Type | มาจาก |
+| --- | --- |
+| `PoiResult`, `SuggestResult`, `SearchResult`, `AddressResult` | `useSearch` |
+| `RouteStep`, `RouteSummary`, `RouteResult`, `RouteErrorInfo`, `RouteStatus` | `useRoute` |
+| `LocalizedTagCategory` | `useTagCategories` |
+| `SphereServices`, `SphereServiceError`, `RouteServiceResult`, `ElevationPoint`… | [บริการเว็บ](/th/docs/web-services) |
+| `SphereEventMap`, `EventName` | ชื่อเหตุการณ์และอาร์กิวเมนต์ของ handler |
+
+## Props และ ref [#props-and-refs]
+
+คอมโพเนนต์แต่ละตัว export type ของ props และ ref เช่น `SphereMapProps`, `SphereMapRef`, `MarkerProps`, `MarkerRef`, `PolygonProps` และ `PolygonRef` ใช้ type ของ props เมื่อสร้างคอมโพเนนต์ที่ครอบคอมโพเนนต์ของไลบรารี
+
+```tsx
+import { Marker, type MarkerProps } from "gistda-sphere-react";
+
+function StoreMarker({ open, ...props }: MarkerProps & { open: boolean }) {
+  return <Marker {...props} icon={{ url: open ? "/open.png" : "/closed.png" }} />;
 }
 ```
 
-## PopupOptions type
+## อ็อบเจกต์ของ Sphere [#sphere-objects]
 
-```typescript
-{
-  title?: string;
-  detail?: string;
-  loadDetail?: (element: HTMLElement) => void;
-  html?: string;
-  loadHtml?: (element: HTMLElement) => void;
-  size?: Size;
-  closable?: boolean;
+อ็อบเจกต์ของ Sphere เองก็มี type: `SphereMapInstance` (`sphere.Map`), `SphereMarker`, `SpherePolygon`, `SpherePolyline`, `SphereCircle`, `SphereDot`, `SphereRectangle`, `SpherePopup`, `SphereOverlay`, `SphereLayer` และ `SphereNamespace` (ตัวแปร `sphere` ส่วนกลาง) ส่วน `MapLibreMap` ครอบคลุมสมาชิกที่ใช้บ่อยของ `map.Renderer`
+
+```tsx
+import type { SphereMapInstance } from "gistda-sphere-react";
+
+function zoomOf(map: SphereMapInstance) {
+  return map.zoom() as number;
 }
 ```
+
+เมื่อ import แพ็กเกจแล้ว `window.sphere` จะถูกประกาศ type ให้ทั้งโปรเจกต์

@@ -1,0 +1,77 @@
+---
+title: useSphereUtils
+description: จัดรูปแบบระยะทาง พื้นที่ และเวลา และแปลง WKT, KML, GPX, GML, Esri JSON และ TopoJSON เป็น GeoJSON
+---
+
+`useSphereUtils` หุ้มฟังก์ชันยูทิลิตีของ Sphere ด้วยฟังก์ชันที่มี type กำกับและคืนค่าเป็น Promise โดยตัวแปลงรูปแบบจะโหลดไลบรารีของ Sphere ที่ต้องใช้เมื่อถูกเรียกครั้งแรก
+
+```tsx
+import { useSphereUtils } from "gistda-sphere-react";
+
+function Measurements({ meters, squareMeters, seconds }) {
+  const { formatDistance, formatArea, formatThaiArea, formatInterval } = useSphereUtils();
+  return (
+    <ul>
+      <li>{formatDistance(meters)}</li>         {/* "15.5 km" */}
+      <li>{formatArea(squareMeters)}</li>       {/* "120 sq.km" */}
+      <li>{formatThaiArea(squareMeters)}</li>   {/* "74,995 rai 3 ngan 76 sq.wa" */}
+      <li>{formatInterval(seconds)}</li>        {/* "1 hr 2 min" */}
+    </ul>
+  );
+}
+```
+
+ฟังก์ชันจัดรูปแบบใช้ภาษาของแผนที่ เว้นแต่จะระบุภาษา (`"th"` หรือ `"en"`)
+
+## การจัดรูปแบบ [#formatting]
+
+| ฟังก์ชัน | ตัวอย่าง | คำอธิบาย |
+| --- | --- | --- |
+| `formatDistance(meters, language?)` | `"15.0 กม."` | ระยะทาง |
+| `formatArea(squareMeters, language?)` | `"120 ตร.กม."` | พื้นที่ในหน่วยเมตริก |
+| `formatThaiArea(squareMeters, language?)` | `"74,995 ไร่ 3 งาน 76 ตร.ว."` | พื้นที่ในหน่วยไร่ งาน ตารางวา |
+| `formatInterval(seconds, language?)` | `"1 ชม. 2 นาที"` | ระยะเวลา |
+| `formatDate(isoDate, language?)` | | วันที่ |
+| `formatTime(isoTime)` | | เวลา |
+| `formatDateTimeRange(start, stop, language?)` | | ช่วงวันที่และเวลา |
+| `latitudeLength(lat)` / `longitudeLength(lat)` | | จำนวนเมตรใน 1 องศาละติจูด / ลองจิจูด ณ ละติจูดที่กำหนด |
+
+## การแปลงเป็น GeoJSON [#converting-to-geojson]
+
+ตัวแปลงทั้งหมดคืนค่าเป็น promise เพราะการเรียกครั้งแรกจะโหลดไลบรารีตัวแปลงของ Sphere
+
+| ฟังก์ชัน | ข้อมูลเข้า |
+| --- | --- |
+| `wktToGeoJSON(text)` | Well-known text เช่น `"POINT(100.5 13.75)"` คืนค่าเป็น geometry |
+| `kmlToGeoJSON(document)` | KML เป็นสตริงหรือ XML `Document` |
+| `gpxToGeoJSON(document)` | GPX เป็นสตริงหรือ XML `Document` |
+| `gmlToGeoJSON(document)` | GML เป็นสตริงหรือ XML `Document` |
+| `esriJsonToGeoJSON(json)` | geometry แบบ Esri JSON |
+| `topoJsonToGeoJSON(json, object)` | อ็อบเจกต์หนึ่งใน TopoJSON topology โดยระบุด้วยชื่อหรืออ็อบเจกต์ |
+
+```tsx
+const { kmlToGeoJSON } = useSphereUtils();
+
+async function showFile(file: File) {
+  const data = await kmlToGeoJSON(await file.text());
+  setData(data); // then render <GeoJson data={data} />
+}
+```
+
+## การแปลงระบบพิกัด [#projections]
+
+`project` แปลงพิกัดระหว่างระบบพิกัดที่ระบุเป็นสตริง [proj4](http://proj4js.org/) โดยแปลงจาก WGS84 หากไม่ได้ระบุต้นทาง
+
+```tsx
+const { project } = useSphereUtils();
+
+// WGS84 → UTM zone 47N
+const utm = await project("+proj=utm +zone=47 +datum=WGS84 +units=m", [100.5018, 13.7563]);
+
+// UTM zone 47N → WGS84
+const wgs84 = await project("+proj=longlat +datum=WGS84", [662_190, 1_521_385], "+proj=utm +zone=47 +datum=WGS84 +units=m");
+```
+
+## การเข้าถึงโดยตรง [#raw-access]
+
+`util` และ `math` คืออ็อบเจกต์ `sphere.Util` และ `sphere.Math` ของ Sphere โดยตรง หรือเป็น `null` ก่อนที่ API จะโหลดเสร็จ ส่วน `isReady` จะเป็น `true` เมื่อโหลดเสร็จแล้ว

@@ -1,136 +1,117 @@
-import type { Location } from "gistda-sphere-react";
-import { useMap, useMapControls } from "gistda-sphere-react";
-import { useEffect, useState } from "react";
+import type { FilterType, PredefinedOverlay, Range } from "gistda-sphere-react";
+import { useState } from "react";
 import {
+  type AdvancedLayer,
   type BaseLayer,
+  type ControlId,
+  type DataLayer,
   DEFAULT_UI_CONTROLS,
-  LOCATIONS,
   type MapLanguage,
-  type OverlayLayer,
-  type PredefinedOverlay,
-  type UiControlId,
 } from "../constants";
 
-export interface UseMapSettingsReturn {
-  activeOverlays: Set<OverlayLayer>;
-  activePredefined: Set<PredefinedOverlay>;
-  center: Location | null;
-  currentLayer: BaseLayer;
-  language: MapLanguage;
-  mapReady: boolean;
-  navigateTo: (location: Location, zoom?: number) => void;
-  setCenter: (center: Location) => void;
-  setLanguage: (language: MapLanguage) => void;
-  setLayer: (layer: BaseLayer) => void;
-  setZoom: (zoom: number) => void;
-  toggleOverlay: (layer: OverlayLayer) => void;
-  togglePredefined: (overlay: PredefinedOverlay) => void;
-  toggleUiControl: (controlId: UiControlId) => void;
-  uiControls: Record<UiControlId, boolean>;
-  zoom: number;
+/** How users may interact with the map. */
+export interface InteractionSettings {
+  /** Show the address entry in the right-click menu. */
+  contextMenuAddress: boolean;
+  /** Show the nearby places entry in the right-click menu. */
+  contextMenuNearPoi: boolean;
+  keyboard: boolean;
+  /** Cover the map with a lock until the user clicks to unlock it. */
+  locked: boolean;
+  mouseDrag: boolean;
+  mouseWheel: boolean;
 }
 
-export function useMapSettings(): UseMapSettingsReturn {
-  const { map, isReady: mapReady } = useMap();
-  const {
-    setBaseLayer,
-    addLayer,
-    removeLayer,
-    loadPredefinedOverlay,
-    unloadPredefinedOverlay,
-    goTo,
-  } = useMapControls();
+const DEFAULT_INTERACTION: InteractionSettings = {
+  contextMenuAddress: true,
+  contextMenuNearPoi: true,
+  keyboard: true,
+  locked: false,
+  mouseDrag: true,
+  mouseWheel: true,
+};
 
-  const [currentLayer, setCurrentLayer] = useState<BaseLayer>("STREETS");
-  const [activeOverlays, setActiveOverlays] = useState<Set<OverlayLayer>>(
-    new Set()
-  );
-  const [activePredefined, setActivePredefined] = useState<
-    Set<PredefinedOverlay>
-  >(new Set());
-  const [uiControls, setUiControls] =
-    useState<Record<UiControlId, boolean>>(DEFAULT_UI_CONTROLS);
-  const [zoom, setZoom] = useState(10);
-  const [center, setCenter] = useState<Location | null>(LOCATIONS.Bangkok);
-  const [language, setLanguage] = useState<MapLanguage>("th");
+export const DEFAULT_ZOOM_RANGE: Range = { max: 22, min: 0 };
 
-  useEffect(() => {
-    if (!(mapReady && map)) {
-      return;
-    }
-    for (const [controlId, visible] of Object.entries(uiControls)) {
-      const control = map.Ui[controlId as UiControlId];
-      if (control && "visible" in control) {
-        (control as { visible: (v: boolean) => void }).visible(visible);
-      }
-    }
-  }, [mapReady, map, uiControls]);
+/** Adds the item when missing, removes it when present. */
+function toggleItem<T>(items: readonly T[], item: T): T[] {
+  return items.includes(item)
+    ? items.filter((existing) => existing !== item)
+    : [...items, item];
+}
 
-  const setLayer = (layer: BaseLayer) => {
-    setCurrentLayer(layer);
-    setBaseLayer(layer);
-  };
+export interface UseMapSettingsReturn {
+  advancedLayers: AdvancedLayer[];
+  baseLayer: BaseLayer;
+  controls: Record<ControlId, boolean>;
+  dataLayers: DataLayer[];
+  filter: FilterType;
+  interaction: InteractionSettings;
+  language: MapLanguage;
+  liveOverlays: PredefinedOverlay[];
+  setBaseLayer: (layer: BaseLayer) => void;
+  setFilter: (filter: FilterType) => void;
+  setInteraction: (changes: Partial<InteractionSettings>) => void;
+  setLanguage: (language: MapLanguage) => void;
+  setShowCustomControls: (show: boolean) => void;
+  setZoomRange: (range: Range) => void;
+  showCustomControls: boolean;
+  toggleAdvancedLayer: (layer: AdvancedLayer) => void;
+  toggleControl: (control: ControlId) => void;
+  toggleDataLayer: (layer: DataLayer) => void;
+  toggleLiveOverlay: (overlay: PredefinedOverlay) => void;
+  zoomRange: Range;
+}
 
-  const toggleOverlay = (layer: OverlayLayer) => {
-    setActiveOverlays((prev) => {
-      const next = new Set(prev);
-      if (next.has(layer)) {
-        next.delete(layer);
-        removeLayer(layer);
-      } else {
-        next.add(layer);
-        addLayer(layer);
-      }
-      return next;
-    });
-  };
-
-  const togglePredefined = (overlay: PredefinedOverlay) => {
-    setActivePredefined((prev) => {
-      const next = new Set(prev);
-      if (next.has(overlay)) {
-        next.delete(overlay);
-        unloadPredefinedOverlay(overlay);
-      } else {
-        next.add(overlay);
-        loadPredefinedOverlay(overlay);
-      }
-      return next;
-    });
-  };
-
-  const toggleUiControl = (controlId: UiControlId) => {
-    if (!(mapReady && map)) {
-      return;
-    }
-    const newState = !uiControls[controlId];
-    setUiControls((prev) => ({ ...prev, [controlId]: newState }));
-    const control = map.Ui[controlId];
-    if (control && "visible" in control) {
-      (control as { visible: (v: boolean) => void }).visible(newState);
-    }
-  };
-
-  const navigateTo = (location: Location, zoomLevel = 12) => {
-    goTo({ center: location, zoom: zoomLevel });
-  };
+/**
+ * Map settings as plain state. `MapView` renders them declaratively
+ * (`SphereMap` props, `<Layer>`, `<PredefinedOverlay>`…), so this hook has
+ * no side effects of its own.
+ */
+export function useMapSettings(
+  initialLanguage: MapLanguage
+): UseMapSettingsReturn {
+  const [baseLayer, setBaseLayer] = useState<BaseLayer>("STREETS");
+  const [filter, setFilter] = useState<FilterType>("None");
+  const [language, setLanguage] = useState<MapLanguage>(initialLanguage);
+  const [controls, setControls] =
+    useState<Record<ControlId, boolean>>(DEFAULT_UI_CONTROLS);
+  const [dataLayers, setDataLayers] = useState<DataLayer[]>([]);
+  const [liveOverlays, setLiveOverlays] = useState<PredefinedOverlay[]>([]);
+  const [advancedLayers, setAdvancedLayers] = useState<AdvancedLayer[]>([]);
+  const [interaction, setInteractionState] =
+    useState<InteractionSettings>(DEFAULT_INTERACTION);
+  const [zoomRange, setZoomRange] = useState<Range>(DEFAULT_ZOOM_RANGE);
+  const [showCustomControls, setShowCustomControls] = useState(true);
 
   return {
-    activeOverlays,
-    activePredefined,
-    center,
-    currentLayer,
+    advancedLayers,
+    baseLayer,
+    controls,
+    dataLayers,
+    filter,
+    interaction,
     language,
-    mapReady,
-    navigateTo,
-    setCenter,
+    liveOverlays,
+    setBaseLayer,
+    setFilter,
+    setInteraction: (changes) =>
+      setInteractionState((previous) => ({ ...previous, ...changes })),
     setLanguage,
-    setLayer,
-    setZoom,
-    toggleOverlay,
-    togglePredefined,
-    toggleUiControl,
-    uiControls,
-    zoom,
+    setShowCustomControls,
+    setZoomRange,
+    showCustomControls,
+    toggleAdvancedLayer: (layer) =>
+      setAdvancedLayers((previous) => toggleItem(previous, layer)),
+    toggleControl: (control) =>
+      setControls((previous) => ({
+        ...previous,
+        [control]: !previous[control],
+      })),
+    toggleDataLayer: (layer) =>
+      setDataLayers((previous) => toggleItem(previous, layer)),
+    toggleLiveOverlay: (overlay) =>
+      setLiveOverlays((previous) => toggleItem(previous, overlay)),
+    zoomRange,
   };
 }

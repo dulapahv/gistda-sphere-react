@@ -1,10 +1,10 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { MapProvider } from "../context/MapContext";
-import { SphereProvider } from "../context/SphereContext";
-import { useMapClick, useMapEvent, useMapZoom } from "../hooks/useMapEvent";
-import { useSphere } from "../hooks/useSphere";
+import { MapProvider } from "@/context/MapContext";
+import { SphereProvider } from "@/context/SphereContext";
+import { useMapClick, useMapEvent, useMapZoom } from "@/hooks/useMapEvent";
+import { useSphere } from "@/hooks/useSphere";
 import { createMockSphereApi } from "./setup";
 
 describe("Hooks", () => {

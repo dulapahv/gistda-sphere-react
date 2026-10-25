@@ -1,148 +1,147 @@
 ---
 title: Layer
-description: Add built-in or custom tile layers to the map
+description: Built-in data layers, WMS/WMTS/TMS/XYZ tiles, vector styles, heatmaps, 3D tiles and deck.gl layers
 ---
+
+`<Layer>` adds a layer while it's mounted and removes it when it unmounts. It covers Sphere's built-in layers, standard tile services, MapLibre styles and 3D data.
 
 <LayerDemo />
 
 ```tsx
-{/* Built-in data layer */}
-<Layer preset="TRAFFIC" />
-
-{/* Custom WMS layer */}
-<Layer
-  name="my-wms-layer"
-  type="WMS"
-  url="https://example.com/wms"
-  zoomRange={{ min: 1, max: 18 }}
-  opacity={0.7}
-/>
-
-{/* Change the base layer */}
-<Layer preset="HYBRID" isBase />
+<SphereMap baseLayer="STREETS">
+  <Layer preset="TRAFFIC" />
+  <Layer name="bluemarble_terrain" type="WMS" url="https://ms.longdo.com/mapproxy/service" opacity={0.6} />
+</SphereMap>
 ```
 
 ## Props
 
-| Prop | Type | Required | Default | Description |
-|------|------|----------|---------|-------------|
-| `preset` | `BuiltInLayer` | No | - | Use a built-in layer |
-| `name` | `string` | Conditional | - | Layer name (required when `preset` is not provided) |
-| `isBase` | `boolean` | No | `false` | Set as the base layer |
-| `type` | `LayerType` | No | `"Vector"` | Layer type |
-| `url` | `string` | No | Sphere tile server | Tile server URL |
-| `zoomRange` | `Range` | No | All zoom levels | Visible zoom range |
-| `source` | `Range` | No | All zoom levels | Available tile zoom range |
-| `opacity` | `number` | No | `1` | Layer opacity (0-1) |
-| `zIndex` | `number` | No | `0` | Stacking order |
-| `bound` | `Bound` | No | World | Bounding box for tiles |
-| `attribution` | `string` | No | - | Attribution text |
-| `extraQuery` | `string` | No | - | Extra query string for tile requests |
-| `id` | `string` | No | Layer name | Unique layer identifier |
-| `format` | `string` | No | `"image/png"` / `"png"` | Image format |
-| `srs` | `string` | No | `"EPSG:3857"` | Spatial reference system |
-| `tileMatrixPrefix` | `string` | No | - | WMTS tile matrix prefix |
-| `styles` | `string` | No | Default | Layer styles |
-| `version` | `string` | No | `"1.1.1"` | WMS/WMTS version |
-| `refresh` | `number` | No | - | Auto-refresh interval in ms |
-| `zoomOffset` | `number` | No | - | Zoom level offset |
-| `beforeId` | `string` | No | Symbol layer | Insert before layer ID |
+Use one of `preset`, `name`, `style` or `layer` to choose what to show.
 
-## Layer types
+| Prop | Type | Description |
+| --- | --- | --- |
+| `preset` | `BuiltInLayer` | A built-in Sphere layer, e.g. `"TRAFFIC"`. |
+| `name` | `string` | Name of a raster or 3D layer. For WMS this is the WMS layer name. |
+| `type` | `LayerType` | `"Vector"` (default), `"XYZ"`, `"WMS"`, `"WMTS"`, `"WMTS_REST"`, `"TMS"`, `"Tiles3D"` or `"I3S"`. |
+| `url` | `string` | Tile server or tileset URL. |
+| `style` | `string \| object` | A MapLibre style object or style URL: vector tiles, heatmaps, clusters and other MapLibre layers. |
+| `layer` | `object` | A ready-made layer added as is: a `sphere.Layer`, a deck.gl `MapboxLayer` or a MapLibre layer object. |
+| `isBase` | `boolean` | Use as the base map instead of adding on top. Prefer [`SphereMap`'s `baseLayer`](/docs/components/sphere-map#base-maps-and-filters). |
+| `opacity` | `number` | 0 to 1. |
+| `zIndex` | `number` | Layers with a higher `zIndex` draw above lower ones. |
+| `zoomRange` | `Range` | Zoom levels where the layer is visible. |
+| `source` | `Range` | Zoom levels the tile server has. |
+| `bound` | `Bound` | Only request tiles inside this box. |
+| `attribution` | `string` | Attribution text. |
+| `beforeId` | `string` | Insert below this MapLibre layer ID (default: below the map labels). |
+| `extraQuery` | `string` | Extra query string for tile requests, e.g. `"TIME=2024-01-01"`. |
+| `format` | `string \| false` | WMS/WMTS: image MIME type (default `image/png`). XYZ/TMS/WMTS_REST: file extension (default `png`). `false` leaves it out. |
+| `srs` | `string` | WMS spatial reference or WMTS tile matrix set (default `EPSG:3857`). |
+| `styles` | `string` | WMS/WMTS styles. |
+| `version` | `string` | WMS version (default `1.1.1`). |
+| `tileMatrixPrefix` | `string` | WMTS: part of the tile matrix name before the zoom level. |
+| `loadOptions` | `object` | Tiles3D/I3S: loaders.gl options under `3d-tiles`, `i3s` or `tileset`. |
+| `pointSize` | `number` | Tiles3D point clouds: point radius in pixels. |
+| `onTilesetLoad` | `(tileset) => void` | Tiles3D/I3S: called once the tileset loads, with its `cartographicCenter` and `zoom`. |
+| `id` | `string` | Unique layer ID (default: the name). |
+| `options` | `Record<string, unknown>` | Extra options for `new sphere.Layer()`. |
 
-| Type | Description |
-|------|-------------|
-| `"Vector"` | Mapbox Vector Tiles (default) |
-| `"XYZ"` | XYZ raster tiles |
-| `"WMS"` | Web Map Service |
-| `"WMTS"` | Web Map Tile Service (KVP encoding) |
-| `"WMTS_REST"` | Web Map Tile Service (RESTful encoding) |
-| `"TMS"` | Tile Map Service |
-| `"Tiles3D"` | OGC 3D Tiles |
-| `"I3S"` | Indexed 3D Scene Layer |
+## Built-in layers
 
-## Built-in base layers
-
-Base layers replace the current base map. Only one can be active at a time.
-
-| Layer | Description |
-|-------|-------------|
-| `"SIMPLE"` | Low-complexity base layer |
-| `"STREETS"` | Standard street map (default) |
-| `"STREETS_NIGHT"` | Street map with dark theme |
-| `"HYBRID"` | Satellite imagery with labels |
-| `"IMAGES"` | Satellite imagery without labels |
-
-## Built-in data layers
-
-Data layers are added on top of the base layer. Multiple can be active.
-
-| Layer | Description |
-|-------|-------------|
-| `"TRAFFIC"` | Real-time traffic (auto-refreshes every 3 minutes) |
-| `"PM25"` | Air quality (PM2.5) heatmap |
-| `"HOTSPOT"` | Fire hotspot locations |
-| `"FLOOD"` | Flood-affected areas |
-| `"DROUGHT"` | Drought-affected areas |
-
-## Predefined overlays
-
-The Sphere API provides predefined overlays that display live data on the map.
-
-<PredefinedOverlaysDemo />
-
-| Overlay | Description |
-|---------|-------------|
-| `"cameras"` | Live CCTV traffic camera feeds with optional motion video |
-| `"events"` | Active traffic and road events with popup details |
-| `"aqi"` | Thai Air Quality Index data points with popup details |
+| Base maps | | Data layers | |
+| --- | --- | --- | --- |
+| `SIMPLE` | Simple map | `TRAFFIC` | Live traffic (refreshes every 3 minutes) |
+| `STREETS` | Streets (default) | `PM25` | PM2.5 air quality |
+| `STREETS_NIGHT` | Streets, dark theme | `HOTSPOT` | Fire hotspots |
+| `HYBRID` | Satellite with labels | `FLOOD` | Flood areas |
+| `IMAGES` | Satellite imagery | `DROUGHT` | Drought areas |
 
 ```tsx
-const { loadPredefinedOverlay, unloadPredefinedOverlay } = useMapControls();
-
-loadPredefinedOverlay('cameras');
-loadPredefinedOverlay('events');
-loadPredefinedOverlay('aqi');
-unloadPredefinedOverlay('cameras');
+<Layer preset="PM25" />
 ```
 
-## Color filters
+Set the base map with [`SphereMap`'s `baseLayer`](/docs/components/sphere-map#base-maps-and-filters) prop.
 
-Apply visual color filters to the map for accessibility or aesthetics.
-
-<ControlsDemo />
-
-| Filter | Description |
-|--------|-------------|
-| `"Dark"` | Dark mode filter |
-| `"Light"` | Lighter map colors |
-| `"Protanopia"` | Red color blindness filter |
-| `"Deuteranopia"` | Green color blindness filter |
-| `"None"` | No filter (default) |
+## Tile services
 
 ```tsx
-const { setFilter } = useMapControls();
+{/* WMS */}
+<Layer
+  name="bluemarble_terrain"
+  type="WMS"
+  url="https://ms.longdo.com/mapproxy/service"
+  opacity={0.7}
+/>
 
-setFilter('Dark');
-setFilter('Protanopia');
-setFilter(false); // same as 'None'
+{/* WMTS (key-value) */}
+<Layer name="my_layer" type="WMTS" url="https://example.com/wmts" srs="EPSG:3857" />
+
+{/* XYZ from Sphere's own raster server (the default url) */}
+<Layer name="thailand_images" type="XYZ" srs="EPSG3857" format="jpeg" />
+
+{/* XYZ from another server: requests https://tiles.example.com/osm/{z}/{x}/{y}.png */}
+<Layer name="osm" type="XYZ" url="https://tiles.example.com" />
 ```
 
-Or via `SphereMap` prop:
+For XYZ and TMS, Sphere builds tile URLs as `{url}/{name}/{srs}/{z}/{x}/{y}.{format}`, leaving out `srs` when it isn't set. Pass `format={false}` when the server's URLs have no extension.
+
+See [Custom WMS layer](/docs/examples/custom-wms-layer) for a complete example.
+
+## MapLibre styles: heatmaps, clusters and vector tiles
+
+`style` takes a MapLibre style object (or URL). Give its sources IDs that don't clash with other layers:
 
 ```tsx
-<SphereMap filter="Dark" style={{ height: '500px' }}>
-  {/* children */}
-</SphereMap>
+<Layer
+  style={{
+    sources: {
+      quakes: { type: "geojson", data: "https://example.com/earthquakes.geojson" },
+    },
+    layers: [{ id: "quakes-heat", type: "heatmap", source: "quakes" }],
+  }}
+/>
 ```
 
-## Using layers programmatically
+The [3D and advanced layers guide](/docs/examples/advanced-layers) shows heatmaps, clustering and 3D data in action.
+
+## 3D tiles and I3S
 
 ```tsx
-const { setBaseLayer, addLayer, removeLayer } = useMapControls();
-
-setBaseLayer('HYBRID');
-addLayer('TRAFFIC');
-addLayer('PM25');
-removeLayer('TRAFFIC');
+<Layer
+  name="sf-buildings"
+  type="I3S"
+  url="https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0"
+  onTilesetLoad={(tileset) => {
+    const [lon, lat] = tileset.cartographicCenter ?? [];
+    goTo({ center: { lon, lat }, zoom: (tileset.zoom ?? 13) + 3, pitch: 60 });
+  }}
+/>
 ```
+
+`type="Tiles3D"` loads OGC 3D Tiles (`tileset.json`), including point clouds (use `pointSize`).
+
+## deck.gl and raw MapLibre layers
+
+Sphere bundles deck.gl. Wrap a deck.gl layer in `deck.MapboxLayer` and pass it as `layer`:
+
+```tsx
+const model = useMemo(
+  () =>
+    new window.deck.MapboxLayer({
+      id: "model",
+      type: window.deck.ScenegraphLayer,
+      data: [{ position: [100.5, 13.7, 0] }],
+      getPosition: (d) => d.position,
+      scenegraph: "https://example.com/model.glb",
+    }),
+  []
+);
+
+<Layer layer={model} />
+```
+
+<Callout>
+  Create layer objects once (with `useMemo`) or outside the component. A new object on every render re-adds the layer each time.
+</Callout>
+
+`refresh` and `zoomOffset` are also accepted and passed to Sphere unchanged.

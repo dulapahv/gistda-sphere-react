@@ -1,0 +1,37 @@
+---
+title: PredefinedOverlay
+description: ข้อมูลสดจาก Sphere ได้แก่ กล้องจราจร เหตุการณ์บนถนน และคุณภาพอากาศ
+---
+
+`<PredefinedOverlay>` แสดงโอเวอร์เลย์ข้อมูลสดของ Sphere ขณะที่คอมโพเนนต์ถูก mount
+
+<PredefinedOverlaysDemo />
+
+```tsx
+<SphereMap>
+  <PredefinedOverlay type="cameras" />
+  <PredefinedOverlay type="events" refresh={60} />
+  <PredefinedOverlay type="aqi" />
+</SphereMap>
+```
+
+| ชนิด | แสดง |
+| --- | --- |
+| `"cameras"` | กล้องจราจร (CCTV) พร้อมวิดีโอสดหากมี |
+| `"events"` | เหตุการณ์บนถนน เช่น อุบัติเหตุและงานก่อสร้าง อัปเดตทุก 3 นาทีโดยค่าเริ่มต้น |
+| `"aqi"` | สถานีวัดดัชนีคุณภาพอากาศ |
+
+## Props
+
+| Prop | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `type` | `"cameras" \| "events" \| "aqi"` | **จำเป็น** | โอเวอร์เลย์ที่จะแสดง |
+| `popup` | `boolean` | `true` | เปิดป๊อปอัปเมื่อคลิกรายการ |
+| `motion` | `boolean` | `true` | เฉพาะกล้อง: รวมกล้องที่มีวิดีโอสด |
+| `refresh` | `number` | – | โหลดข้อมูลใหม่ทุก ๆ จำนวนวินาทีที่กำหนด |
+
+<Callout>
+  โอเวอร์เลย์สำเร็จรูปแต่ละแบบมีเพียงชุดเดียวต่อหน้าใน Sphere API จึงไม่ควรแสดงแบบเดียวกันบนสองแผนที่พร้อมกัน
+</Callout>
+
+`onOverlayLoad` ของ [`SphereMap`](/th/docs/components/sphere-map#events) จะถูกเรียกทุกครั้งที่ข้อมูลโหลด (หรือโหลดใหม่) และยังโหลดโอเวอร์เลย์เหล่านี้จากโค้ดได้ด้วย [`useMapControls().loadPredefinedOverlay`](/th/docs/hooks/use-map-controls)

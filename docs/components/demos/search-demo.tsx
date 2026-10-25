@@ -1,57 +1,100 @@
 "use client";
 
 import {
-  type Location,
   Marker,
+  type PoiResult,
+  SearchResults,
   SphereMap,
-  SphereProvider,
+  type SuggestResult,
   useMapControls,
   useSearch,
 } from "gistda-sphere-react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import {
+  DemoBar,
+  DemoButton,
+  DemoFrame,
+  DemoNote,
+  useDemoText,
+} from "./demo-ui";
 import { useDocLanguage } from "./use-doc-language";
 
-const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
+const TEXT = {
+  en: {
+    builtIn: "Sphere's result list",
+    clear: "Clear",
+    noResults: "No places found.",
+    placeholder: "Search for places, e.g. Grand Palace or สวนลุมพินี",
+    search: "Search",
+  },
+  th: {
+    builtIn: "รายการผลลัพธ์ของ Sphere",
+    clear: "ล้าง",
+    noResults: "ไม่พบสถานที่",
+    placeholder: "ค้นหาสถานที่ เช่น พระบรมมหาราชวัง หรือ สวนลุมพินี",
+    search: "ค้นหา",
+  },
+};
 
-function SearchControls() {
-  const { search, clear, isReady } = useSearch();
+/** Search with suggestions, a result list and a marker with a React popup. */
+function PlaceSearch() {
+  const language = useDocLanguage();
+  const text = useDemoText(TEXT);
+  const { search, suggest, clear, isReady } = useSearch();
   const { goTo } = useMapControls();
   const [keyword, setKeyword] = useState("");
-  const [results, setResults] = useState<
-    Array<{ name?: string; lat?: number; lon?: number }>
-  >([]);
-  const [loading, setLoading] = useState(false);
-  const [selectedMarker, setSelectedMarker] = useState<Location | null>(null);
-  const language = useDocLanguage();
+  const [suggestions, setSuggestions] = useState<SuggestResult[]>([]);
+  const [results, setResults] = useState<PoiResult[] | null>(null);
+  const [selected, setSelected] = useState<PoiResult | null>(null);
+  const [showBuiltIn, setShowBuiltIn] = useState(false);
+  const requestRef = useRef(0);
 
-  const handleSearch = async () => {
-    if (!(keyword.trim() && isReady)) {
+  // Suggestions while typing; older responses are ignored.
+  useEffect(() => {
+    const trimmed = keyword.trim();
+    if (trimmed.length < 2 || !isReady) {
+      setSuggestions([]);
       return;
     }
-    setLoading(true);
+    requestRef.current += 1;
+    const request = requestRef.current;
+    const timer = setTimeout(async () => {
+      try {
+        const response = await suggest(trimmed, { limit: 5 });
+        if (request === requestRef.current) {
+          setSuggestions(response.data);
+        }
+      } catch {
+        // Suggestions are optional.
+      }
+    }, 250);
+    return () => clearTimeout(timer);
+  }, [keyword, isReady, suggest]);
+
+  const runSearch = async (value = keyword) => {
+    if (!value.trim()) {
+      return;
+    }
+    requestRef.current += 1;
+    setSuggestions([]);
     try {
-      const result = await search(keyword, { limit: 5 });
-      setResults(
-        ((result as { data?: object[] }).data ?? []) as typeof results
-      );
+      const response = await search(value.trim(), { limit: 5 });
+      setResults(response.data);
     } catch {
-      /* search failed */
-    }
-    setLoading(false);
-  };
-
-  const handleSelect = (item: (typeof results)[number]) => {
-    if (item.lat !== undefined && item.lon !== undefined) {
-      const pos: Location = { lat: item.lat, lon: item.lon };
-      setSelectedMarker(pos);
-      goTo({ center: pos, zoom: 16 });
+      setResults([]);
     }
   };
 
-  const handleClear = () => {
-    setResults([]);
+  const select = (poi: PoiResult) => {
+    setSelected(poi);
+    goTo({ center: { lat: poi.lat, lon: poi.lon }, zoom: 16 });
+  };
+
+  const reset = () => {
     setKeyword("");
-    setSelectedMarker(null);
+    setResults(null);
+    setSuggestions([]);
+    setSelected(null);
     clear();
   };
 
@@ -61,71 +104,92 @@ function SearchControls() {
         center={{ lat: 13.7563, lon: 100.5018 }}
         language={language}
         style={{ height: "400px", width: "100%" }}
-        zoom={10}
+        zoom={11}
       >
-        {selectedMarker && (
-          <Marker position={selectedMarker} title="Search Result" />
-        )}
+        {selected ? (
+          <Marker
+            popupContent={
+              <div className="text-xs">
+                <p className="m-0">{selected.address}</p>
+                {selected.tel ? <p className="m-0">{selected.tel}</p> : null}
+              </div>
+            }
+            position={{ lat: selected.lat, lon: selected.lon }}
+            title={selected.name}
+          />
+        ) : null}
       </SphereMap>
-      <div className="flex flex-wrap items-center gap-2 bg-fd-card p-3">
+      <DemoBar>
         <input
-          className="flex-1 rounded-md border border-fd-border bg-fd-secondary px-2 py-2 text-fd-secondary-foreground text-xs placeholder:text-fd-muted-foreground focus:border-fd-ring focus:outline-none"
-          onChange={(e) => setKeyword(e.target.value)}
-          onKeyDown={(e) => {
-            if (e.key === "Enter") {
-              handleSearch();
+          aria-label={text.search}
+          className="min-w-0 flex-1 rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-fd-foreground text-xs placeholder:text-fd-muted-foreground focus:border-fd-ring focus:outline-none"
+          onChange={(event) => setKeyword(event.target.value)}
+          onKeyDown={(event) => {
+            if (event.key === "Enter") {
+              runSearch();
             }
           }}
-          placeholder="Search for places (e.g. พระบรมมหาราชวัง, สวนกุหลาบวิทยาลัย)..."
+          placeholder={text.placeholder}
           type="text"
           value={keyword}
         />
-        <button
-          className="cursor-pointer rounded-md border border-fd-primary bg-fd-primary px-2 py-2 text-fd-primary-foreground text-xs disabled:cursor-not-allowed disabled:opacity-50"
-          disabled={loading || !isReady}
-          onClick={handleSearch}
-          type="button"
+        <DemoButton disabled={!isReady} onClick={() => runSearch()}>
+          {text.search}
+        </DemoButton>
+        <DemoButton onClick={reset}>{text.clear}</DemoButton>
+        <DemoButton
+          active={showBuiltIn}
+          onClick={() => setShowBuiltIn(!showBuiltIn)}
         >
-          Search
-        </button>
-        {results.length > 0 && (
-          <button
-            className="cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-2 text-fd-secondary-foreground text-xs hover:bg-fd-accent disabled:cursor-not-allowed disabled:opacity-50"
-            onClick={handleClear}
-            type="button"
-          >
-            Clear
-          </button>
-        )}
-      </div>
-      {results.length > 0 && (
-        <div className="flex flex-col gap-2 bg-fd-card p-3 pt-0">
-          {results.map((r, i) => (
-            <button
-              className="flex w-full cursor-pointer items-center gap-2 rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-left text-fd-foreground text-xs hover:bg-fd-accent"
-              key={`${r.name}-${i}`}
-              onClick={() => handleSelect(r)}
-              type="button"
-            >
-              {r.name ?? `Result ${i + 1}`}
-            </button>
-          ))}
-        </div>
-      )}
+          {text.builtIn}
+        </DemoButton>
+        {suggestions.length > 0 ? (
+          <div className="flex w-full flex-wrap gap-1">
+            {suggestions.map((suggestion) => (
+              <DemoButton
+                key={suggestion.name}
+                onClick={() => {
+                  setKeyword(suggestion.name);
+                  runSearch(suggestion.name);
+                }}
+              >
+                {suggestion.name}
+              </DemoButton>
+            ))}
+          </div>
+        ) : null}
+        {results?.length === 0 ? <DemoNote>{text.noResults}</DemoNote> : null}
+        {results && results.length > 0 ? (
+          <div className="flex w-full flex-col gap-1">
+            {results.map((poi) => (
+              <button
+                className="w-full cursor-pointer rounded-md border border-fd-border bg-fd-secondary px-2 py-1.5 text-left text-fd-foreground text-xs hover:bg-fd-accent"
+                key={poi.id}
+                onClick={() => select(poi)}
+                type="button"
+              >
+                <span className="font-medium">{poi.name}</span>
+                {poi.address ? (
+                  <span className="block text-fd-muted-foreground">
+                    {poi.address}
+                  </span>
+                ) : null}
+              </button>
+            ))}
+          </div>
+        ) : null}
+        {showBuiltIn ? (
+          <SearchResults className="max-h-60 w-full overflow-y-auto rounded-md border border-fd-border bg-white text-black text-xs" />
+        ) : null}
+      </DemoBar>
     </>
   );
 }
 
 export function SearchDemo() {
-  if (!API_KEY) {
-    return null;
-  }
-
   return (
-    <div className="my-4 overflow-hidden rounded-xl border border-fd-border">
-      <SphereProvider apiKey={API_KEY}>
-        <SearchControls />
-      </SphereProvider>
-    </div>
+    <DemoFrame height="480px">
+      <PlaceSearch />
+    </DemoFrame>
   );
 }

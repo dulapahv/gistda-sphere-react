@@ -2,8 +2,8 @@ import { renderHook } from "@testing-library/react";
 import type { ReactNode } from "react";
 import { useEffect } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { SphereProvider, useSphereContext } from "../context/SphereContext";
-import { TAG_CATEGORIES, useTags } from "../hooks/useTags";
+import { SphereProvider, useSphereContext } from "@/context/SphereContext";
+import { TAG_CATEGORIES, useTags } from "@/hooks/useTags";
 import { createMockSphereApi } from "./setup";
 
 describe("useTags", () => {
@@ -79,6 +79,17 @@ describe("useTags", () => {
       expect(map.Tags.remove).toHaveBeenCalledWith("อาหารไทย");
     });
 
+    it("removes each tag of a combined name", () => {
+      const { result } = renderHook(() => useTags(), {
+        wrapper: createWrapper(),
+      });
+
+      result.current.remove("ธนาคาร|โรงแรม");
+
+      expect(map.Tags.remove).toHaveBeenCalledWith("ธนาคาร");
+      expect(map.Tags.remove).toHaveBeenCalledWith("โรงแรม");
+    });
+
     it("delegates clear to Tags API", () => {
       const { result } = renderHook(() => useTags(), {
         wrapper: createWrapper(),
@@ -144,7 +155,8 @@ describe("useTags", () => {
         (c) => c.name === "Services"
       );
       expect(servicesCategory).toBeDefined();
-      expect(servicesCategory?.tags[0]?.id).toBe("ธนาคาร");
+      // The live tag ID for banks (plain "ธนาคาร" matches no POIs).
+      expect(servicesCategory?.tags[0]?.id).toBe("ธนาคาร/สถาบันการเงิน");
     });
 
     it("has Tourism category", () => {
