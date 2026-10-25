@@ -364,12 +364,17 @@ export function SphereMap({
       unregisterMap(map);
       mapRef.current = null;
       setIsReady(false);
-      // Free the WebGL context; Sphere has no destroy API of its own.
-      try {
-        map.Renderer?.remove();
-      } catch {
-        // The renderer may not have finished initializing; nothing to free.
-      }
+      // Free the WebGL context; Sphere has no destroy API of its own. React
+      // unmounts parents first, so this waits until the overlays and layers
+      // inside the map have removed themselves: Sphere's deck.gl layers throw
+      // when used after the renderer is gone.
+      queueMicrotask(() => {
+        try {
+          map.Renderer?.remove();
+        } catch {
+          // The renderer may not have finished initializing; nothing to free.
+        }
+      });
     };
   }, [isLoaded, sphere, registerMap, unregisterMap, callbacksRef]);
 

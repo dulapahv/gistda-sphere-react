@@ -1,6 +1,7 @@
 import { act, render } from "@testing-library/react";
 import { createRef } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import { Marker } from "@/components/Marker";
 import {
   SphereMap,
   type SphereMapProps,
@@ -188,10 +189,48 @@ describe("SphereMap features", () => {
     expect(mockMap.enableFilter).not.toHaveBeenCalled();
   });
 
-  it("frees the renderer on unmount", () => {
+  it("frees the renderer on unmount", async () => {
     const { unmount } = mount();
     unmount();
+    await Promise.resolve();
     expect(mockMap.Renderer.remove).toHaveBeenCalled();
+  });
+
+  it("frees the renderer only after its overlays removed themselves", async () => {
+    // React unmounts parents first; Sphere's overlays break (deck.gl throws)
+    // when removed from a map whose renderer is already gone.
+    const calls: string[] = [];
+    const removeRenderer = mockMap.Renderer.remove;
+    if (!removeRenderer) {
+      throw new Error("The mock renderer has no remove()");
+    }
+    mockMap.Overlays.remove.mockImplementation(() => {
+      calls.push("overlay");
+      return mockMap.Overlays;
+    });
+    removeRenderer.mockImplementation(() => {
+      calls.push("renderer");
+    });
+    try {
+      const view = render(
+        <SphereProvider apiKey="test-key">
+          <SphereMap>
+            <Marker position={{ lat: 13.75, lon: 100.5 }} />
+          </SphereMap>
+        </SphereProvider>
+      );
+      act(() => {
+        mockMap._triggerReady();
+      });
+
+      view.unmount();
+      await Promise.resolve();
+
+      expect(calls).toEqual(["overlay", "renderer"]);
+    } finally {
+      mockMap.Overlays.remove.mockReturnThis();
+      removeRenderer.mockImplementation(() => undefined);
+    }
   });
 
   it("exposes map controls on its ref", () => {
