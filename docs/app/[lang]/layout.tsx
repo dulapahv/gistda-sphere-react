@@ -13,6 +13,10 @@ export default async function LangLayout({
   return (
     <RootProvider
       i18n={{
+        // Without these, the language switcher assumes every URL starts with
+        // a locale and turns /docs/… into /th/… (English URLs have no /en).
+        defaultLanguage: i18n.defaultLanguage,
+        hideLocale: i18n.hideLocale,
         locale: lang,
         locales: i18n.languages.map((locale) => ({
           locale,
