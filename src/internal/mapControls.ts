@@ -43,6 +43,30 @@ export type PredefinedOverlayOptions = Pick<
   "motion" | "popup" | "refresh"
 >;
 
+/** Where the map is looking. */
+export interface MapView {
+  /** The visible bounding box. */
+  bound: Bound;
+  center: Location;
+  /** Tilt in degrees. */
+  pitch: number;
+  /** Rotation in degrees, clockwise from north. */
+  rotate: number;
+  zoom: number;
+}
+
+/** Reads a map's current view. */
+export function readView(map: SphereMap): MapView {
+  const { lat, lon } = map.location();
+  return {
+    bound: map.bound(),
+    center: { lat, lon },
+    pitch: map.pitch(),
+    rotate: map.rotate(),
+    zoom: map.zoom(),
+  };
+}
+
 /** Imperative map controls shared by `useMapControls` and `SphereMapRef`. */
 export interface MapControls {
   /** Add a non-base layer (built-in name, `sphere.Layer`, deck.gl or MapLibre layer). */
@@ -57,6 +81,8 @@ export interface MapControls {
   getLayers: () => object[];
   getPitch: () => number | null;
   getRotate: () => number | null;
+  /** Center, zoom, rotation, tilt and visible bounding box in one object. */
+  getView: () => MapView | null;
   getZoom: () => number | null;
   getZoomRange: () => Range | null;
   /** Move/zoom/rotate/tilt in one call (`animate: false` jumps). */
@@ -93,6 +119,8 @@ export interface MapControls {
 /** A layer `addMapLayer` asked Sphere to add that it has not added yet. */
 interface PendingLayer {
   layer: SphereLayer | object;
+  /** Runs once this layer has been added and, if requested, removed. */
+  onSettled?: () => void;
   /** Removal was requested while the layer was still loading. */
   removeWhenAdded: boolean;
 }
@@ -100,16 +128,28 @@ interface PendingLayer {
 /** Layers each map is still adding, oldest first. */
 const pendingLayers = new WeakMap<SphereMap, PendingLayer[]>();
 
+/** A layer's id, which Sphere also gives the deck.gl layer of 3D tiles. */
+function layerId(layer: unknown): string | undefined {
+  const id = (layer as { id?: unknown } | undefined)?.id;
+  return typeof id === "string" ? id : undefined;
+}
+
 /** Whether a `layerChange` event announces `layer`. */
 function isSameLayer(layer: object, added: unknown): boolean {
   if (added === layer) {
     return true;
   }
   // 3D tiles are added as a separate deck.gl layer with the same id.
-  const { id } = layer as { id?: unknown };
-  return (
-    typeof id === "string" && (added as { id?: unknown } | undefined)?.id === id
-  );
+  const id = layerId(layer);
+  return id !== undefined && layerId(added) === id;
+}
+
+/** Drops a pending entry that will never be added. */
+function dropPending(pending: PendingLayer[], entry: PendingLayer): void {
+  const index = pending.indexOf(entry);
+  if (index >= 0) {
+    pending.splice(index, 1);
+  }
 }
 
 /** The map's pending layers, listening for their `layerChange` once per map. */
@@ -129,14 +169,36 @@ function pendingLayersOf(map: SphereMap): PendingLayer[] {
       return;
     }
     const [entry] = pending.splice(index, 1);
-    if (entry?.removeWhenAdded) {
+    if (!entry) {
+      return;
+    }
+    if (entry.removeWhenAdded) {
       // After the current announcement, so other listeners see it in order.
       queueMicrotask(() => {
         map.Layers.remove(entry.layer);
+        entry.onSettled?.();
       });
+    } else {
+      entry.onSettled?.();
     }
   });
   return pending;
+}
+
+/** The newest pending entry for a layer with this id, if any. */
+function lastPendingWithId(
+  pending: PendingLayer[],
+  id: string | undefined
+): PendingLayer | undefined {
+  if (id === undefined) {
+    return;
+  }
+  for (let index = pending.length - 1; index >= 0; index -= 1) {
+    const candidate = pending[index];
+    if (candidate && layerId(candidate.layer) === id) {
+      return candidate;
+    }
+  }
 }
 
 /**
@@ -145,6 +207,11 @@ function pendingLayersOf(map: SphereMap): PendingLayer[] {
  * style is ready, and each add of a loading layer adds it again when its
  * style arrives. Removing before then has no effect, so such a layer is
  * removed as soon as Sphere adds it.
+ *
+ * Sphere removes 3D tile layers by id. A layer whose id matches one that is
+ * still loading but already removed waits until that one is gone.
+ * Otherwise, removing the old layer would remove the new one too. React StrictMode hits
+ * this on every mount: it adds a layer, removes it and adds it again.
  */
 export function addMapLayer(
   map: SphereMap,
@@ -152,9 +219,22 @@ export function addMapLayer(
   beforeId?: string
 ): () => void {
   const pending = pendingLayersOf(map);
+  const predecessor = lastPendingWithId(pending, layerId(layer));
   const entry: PendingLayer = { layer, removeWhenAdded: false };
   pending.push(entry);
-  map.Layers.add(layer, beforeId);
+  if (predecessor?.removeWhenAdded) {
+    predecessor.onSettled = () => {
+      if (entry.removeWhenAdded) {
+        // Removed before its turn: skip it and let the next one go.
+        dropPending(pending, entry);
+        entry.onSettled?.();
+      } else {
+        map.Layers.add(layer, beforeId);
+      }
+    };
+  } else {
+    map.Layers.add(layer, beforeId);
+  }
 
   let isRemoved = false;
   return () => {
@@ -255,13 +335,22 @@ export function createMapControls(
     getLayers: () => getMap()?.Layers.list() ?? [],
     getPitch: () => asNumber(getMap()?.pitch()),
     getRotate: () => asNumber(getMap()?.rotate()),
+    getView: () => {
+      const map = getMap();
+      return map ? readView(map) : null;
+    },
     getZoom: () => asNumber(getMap()?.zoom()),
     getZoomRange: () => {
       const value = getMap()?.zoomRange();
       return value && "min" in value ? (value as Range) : null;
     },
     goTo: (options, animate = true) => {
-      getMap()?.goTo(options, animate);
+      // `rotate` matches the SphereMap prop, and MapLibre calls it `bearing`.
+      const { rotate, ...rest } = options;
+      getMap()?.goTo(
+        rotate === undefined ? rest : { bearing: rotate, ...rest },
+        animate
+      );
     },
     isReady,
     loadPredefinedOverlay: (overlay, options) => {

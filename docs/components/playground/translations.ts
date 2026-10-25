@@ -3,7 +3,7 @@ type Operation = "union" | "intersection" | "difference" | "split";
 
 const en = {
   advancedLayer: {
-    buildings3d: "3D buildings (I3S)",
+    buildings3d: "3D buildings (3D Tiles)",
     clusters: "Clusters",
     heatmap: "Heatmap",
     model3d: "3D model (glTF)",
@@ -106,7 +106,7 @@ const en = {
       address: "Province, district, subdistrict and road at the point.",
       cassava: "Cassava plots at the point from 50 m satellite data.",
       categories:
-        "Every POI tag category in Thai and English. Public; no key needed.",
+        "Every POI tag category in Thai and English. It's public, so no key is needed.",
       crop: "Crop type, cost and price at the point.",
       cropSuitability:
         "Crop suitability inside a 2 km square around the point.",
@@ -163,7 +163,7 @@ const en = {
   draw: {
     analysis: {
       clearResult: "Clear result",
-      combine: "Combine (polygons; union also joins lines):",
+      combine: "Combine polygons (union also joins lines):",
       distanceResult: (text: string) => `Distance from A to B: ${text}`,
       empty: "The operation produced no shape.",
       hint: "Uses the spatial methods on shape refs. Results are drawn in red.",
@@ -285,7 +285,7 @@ const en = {
   map: {
     advancedLayers: "Advanced layers",
     advancedLayersHint:
-      "MapLibre styles, WMS, 3D tiles and deck.gl layers through <Layer>. Sample data: MapLibre, Esri, Longdo and Khronos.",
+      "MapLibre styles, WMS, 3D tiles and deck.gl layers through <Layer>. Sample data: MapLibre, Longdo, Cesium, deck.gl and Khronos.",
     baseMap: "Base map",
     camera: "View",
     clearLocation: "Hide location",
@@ -452,7 +452,7 @@ export type PlaygroundTranslations = typeof en;
 
 const th: PlaygroundTranslations = {
   advancedLayer: {
-    buildings3d: "อาคาร 3 มิติ (I3S)",
+    buildings3d: "อาคาร 3 มิติ (3D Tiles)",
     clusters: "จัดกลุ่มจุด",
     heatmap: "แผนที่ความร้อน",
     model3d: "โมเดล 3 มิติ (glTF)",
@@ -724,7 +724,7 @@ const th: PlaygroundTranslations = {
   map: {
     advancedLayers: "ชั้นข้อมูลขั้นสูง",
     advancedLayersHint:
-      "สไตล์ MapLibre, WMS, 3D Tiles และชั้นข้อมูล deck.gl ผ่าน <Layer> ข้อมูลตัวอย่าง: MapLibre, Esri, Longdo และ Khronos",
+      "สไตล์ MapLibre, WMS, 3D Tiles และชั้นข้อมูล deck.gl ผ่าน <Layer> ข้อมูลตัวอย่าง: MapLibre, Longdo, Cesium, deck.gl และ Khronos",
     baseMap: "แผนที่ฐาน",
     camera: "มุมมอง",
     clearLocation: "ซ่อนตำแหน่ง",

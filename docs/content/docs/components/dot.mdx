@@ -9,11 +9,12 @@ description: A small circle marking a point, sized in pixels
 </MapDemo>
 
 ```tsx
-<Dot
-  position={{ lon: 100.5018, lat: 13.7563 }}
-  lineColor="red"
-  lineWidth={12}
-/>
+import { Dot, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.5018, lat: 13.7563 }} style={{ height: 400 }} zoom={12}>
+  <Dot position={{ lon: 100.5018, lat: 13.7563 }} lineColor="red" lineWidth={12} title="Bangkok" />
+  <Dot position={{ lon: 100.52, lat: 13.77 }} lineColor="blue" lineWidth={8} title="Point B" />
+</SphereMap>
 ```
 
 Unlike a [`Circle`](/docs/components/circle), whose radius is a distance on the ground, a dot keeps the same size on screen at every zoom level. `lineWidth` sets its diameter in pixels.
@@ -34,3 +35,5 @@ Dots also take the [shape props](/docs/components/polygon#shape-props), such as 
 | `getDot()` | The underlying `sphere.Dot`. |
 | `getPosition()` / `setPosition(location)` | Read or move the dot. |
 | `contains`, `intersects`, `within`, `distanceTo`, `updateStyle`, `togglePopup`, `toGeoJSON` | As for [polygons](/docs/components/polygon#ref). |
+
+`setPosition` and dragging move the dot until the `position` prop changes to a new location. As with [markers](/docs/components/marker#ref-or-position), keep the location in state, for example from `onDrop`, if the dot should stay where it was moved.

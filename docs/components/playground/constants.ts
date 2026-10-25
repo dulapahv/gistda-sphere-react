@@ -84,7 +84,7 @@ export const SHAPE_COLORS = [
   "rgba(255, 159, 64, 0.6)",
 ];
 
-/** Fill color for the n-th shape; the outline uses the opaque variant. */
+/** Fill color for the n-th shape. The outline uses the opaque variant. */
 export function getShapeColor(index: number): string {
   return SHAPE_COLORS[index % SHAPE_COLORS.length] ?? "rgba(0, 0, 0, 0.6)";
 }

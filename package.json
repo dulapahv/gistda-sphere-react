@@ -22,22 +22,36 @@
   },
   "license": "MIT",
   "author": "dulapahv",
+  "sideEffects": false,
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.mjs",
       "require": "./dist/index.js"
-    }
+    },
+    "./services": {
+      "types": "./dist/services.d.ts",
+      "import": "./dist/services.mjs",
+      "require": "./dist/services.js"
+    },
+    "./package.json": "./package.json"
   },
   "main": "dist/index.js",
   "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "typesVersions": {
+    "*": {
+      "services": [
+        "./dist/services.d.ts"
+      ]
+    }
+  },
   "files": [
     "dist"
   ],
   "scripts": {
-    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
-    "dev": "tsup src/index.ts --format cjs,esm --dts --watch",
+    "build": "tsup",
+    "dev": "tsup --watch",
     "dev:docs": "pnpm --parallel --filter gistda-sphere-react --filter docs run dev",
     "lint": "pnpm dlx ultracite check",
     "lint:fix": "pnpm dlx ultracite fix",

@@ -7,6 +7,10 @@ Event hooks ใช้ผูกคอมโพเนนต์เพื่อร�
 
 <EventLogDemo />
 
+<ShowCode>
+<include cwd meta='title="event-log.tsx"'>components/examples/event-log.tsx</include>
+</ShowCode>
+
 ## useMapEvent
 
 ```tsx
@@ -32,6 +36,8 @@ function ClickLogger() {
 handler สามารถคืนค่า `false` เพื่อยกเลิกเหตุการณ์ที่ยกเลิกได้ ใช้ร่วมกับ `beforeContextmenu` เพื่อเพิ่มรายการเมนูของคุณเองหรือซ่อนเมนู:
 
 ```tsx
+import { useMapEvent } from "gistda-sphere-react";
+
 useMapEvent("beforeContextmenu", (menu) => {
   const item = document.createElement("button");
   item.textContent = "Add a stop here";
@@ -46,19 +52,19 @@ useMapEvent("beforeContextmenu", (menu) => {
 | --- | --- | --- |
 | `useMapReady(handler)` | `(map) => void` | ทำงานเมื่อแผนที่พร้อม หรือทำงานทันทีหากพร้อมอยู่แล้ว |
 | `useMapClick(handler)` | `({ lat, lon, x, y }) => void` | คลิกแผนที่ (ไม่รวมการคลิกโอเวอร์เลย์) |
-| `useMapZoom(handler)` | `() => void` | ระดับซูมเปลี่ยน อ่านระดับซูมด้วย `useMapControls().getZoom()` |
-| `useMapLocation(handler)` | `() => void` | จุดกึ่งกลางเปลี่ยน อ่านค่าด้วย `useMapControls().getCenter()` |
+| `useMapZoom(handler)` | `(zoom) => void` | ระดับซูมเปลี่ยน พร้อมระดับซูมใหม่ ทำงานทุกเฟรมของแอนิเมชัน |
+| `useMapLocation(handler)` | `(center) => void` | จุดกึ่งกลางเปลี่ยน พร้อมค่า `{ lon, lat }` ใหม่ ทำงานทุกเฟรมของแอนิเมชัน |
 | `useOverlayClick(handler)` | `({ overlay, location }) => void` | คลิกโอเวอร์เลย์ใดก็ได้ |
 
 ```tsx
-import { useMapControls, useMapReady, useMapZoom } from "gistda-sphere-react";
+import { useMapReady, useMapZoom } from "gistda-sphere-react";
+import { useState } from "react";
 
 function ZoomIndicator() {
-  const { getZoom } = useMapControls();
   const [zoom, setZoom] = useState<number | null>(null);
 
-  useMapReady(() => setZoom(getZoom()));
-  useMapZoom(() => setZoom(getZoom()));
+  useMapReady((map) => setZoom(map.zoom()));
+  useMapZoom(setZoom);
 
   return <span>Zoom {zoom?.toFixed(1)}</span>;
 }
@@ -67,6 +73,28 @@ function ZoomIndicator() {
 <Callout>
   เหตุการณ์อย่าง `mousemove`, `zoom`, `location` และ `repaint` เกิดขึ้นหลายครั้งต่อวินาทีขณะแผนที่เคลื่อนที่ หลีกเลี่ยงงานหนักใน handler หรือรวบการอัปเดตด้วย `requestAnimationFrame`
 </Callout>
+
+## useMapView
+
+`useMapView` คืนค่ามุมมองปัจจุบันและอัปเดตเมื่อแผนที่หยุดเคลื่อนที่ เหมาะสำหรับแสดงค่าพิกัดหรือบันทึกมุมมอง โดยจะคืนค่า `null` จนกว่าแผนที่จะพร้อมใช้งาน
+
+```tsx
+import { useMapView } from "gistda-sphere-react";
+
+function ViewReadout() {
+  const view = useMapView();
+  if (!view) return null;
+
+  const { center, zoom } = view;
+  return (
+    <p>
+      {center.lat.toFixed(4)}, {center.lon.toFixed(4)} at zoom {zoom.toFixed(1)}
+    </p>
+  );
+}
+```
+
+มุมมองประกอบด้วย `center`, `zoom`, `rotate`, `pitch` และ `bound` (ขอบเขตที่มองเห็น) หากต้องการอัปเดตทุกเฟรมของแอนิเมชัน ให้ใช้ `useMapZoom` และ `useMapLocation` แทน
 
 ## Event props หรือ event hooks [#event-props-or-event-hooks]
 

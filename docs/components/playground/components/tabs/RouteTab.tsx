@@ -24,7 +24,6 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import {
-  type Location,
   ROUTE_TURN,
   type RouteErrorInfo,
   RouteGuide,
@@ -33,7 +32,6 @@ import {
   type RouteStep,
   type UseRouteReturn,
   useMapControls,
-  useMapEvent,
 } from "gistda-sphere-react";
 import { useEffect, useState } from "react";
 import { ROUTE_MODES } from "../../constants";
@@ -105,18 +103,13 @@ function StepItem({ index, step }: { index: number; step: RouteStep }) {
 /** PathIcon tab: stops, travel mode, options, summary and turn-by-turn steps. */
 export function RouteTab({
   onPickModeChange,
-  onStopsChanged,
   pickMode,
   route,
-  stops,
   t,
 }: {
   onPickModeChange: (mode: PickMode | null) => void;
-  /** Re-reads the stop list from Sphere after it changed. */
-  onStopsChanged: () => void;
   pickMode: PickMode | null;
   route: UseRouteReturn;
-  stops: Location[];
   t: PlaygroundTranslations;
 }) {
   const { getCenter } = useMapControls();
@@ -141,11 +134,6 @@ export function RouteTab({
     setAuto(getAuto() ?? false);
   }, [isReady, getAuto, getLabel, getMode]);
 
-  // Stops can also change on the map: dragged, or removed from their popup.
-  useMapEvent("overlayDrop", onStopsChanged);
-  useMapEvent("overlayChange", onStopsChanged);
-  useMapEvent("routeComplete", onStopsChanged);
-
   const changeMode = (next: RouteMode) => {
     setMode(next);
     route.setMode(next);
@@ -155,17 +143,16 @@ export function RouteTab({
     const center = getCenter();
     if (center) {
       route.addDestination(center);
-      onStopsChanged();
     }
   };
 
   const clearAll = () => {
     route.clear();
-    onStopsChanged();
     onPickModeChange(null);
   };
 
-  const { error, status, steps, summary } = route;
+  // Includes stops users dragged or removed on the map.
+  const { destinations: stops, error, status, steps, summary } = route;
   const picking = pickMode === "routeStop";
 
   return (
@@ -186,10 +173,7 @@ export function RouteTab({
                 </span>
                 <Button
                   icon={XIcon}
-                  onClick={() => {
-                    route.removeDestinationAt(index);
-                    onStopsChanged();
-                  }}
+                  onClick={() => route.removeDestinationAt(index)}
                   title={t.common.remove}
                 />
               </li>
@@ -211,10 +195,7 @@ export function RouteTab({
           <Button
             disabled={stops.length < 2}
             icon={ArrowsLeftRightIcon}
-            onClick={() => {
-              route.reverse();
-              onStopsChanged();
-            }}
+            onClick={() => route.reverse()}
             title={t.route.reverse}
           />
           <Button

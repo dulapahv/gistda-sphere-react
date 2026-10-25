@@ -20,8 +20,8 @@ export function toFeatures(data: GeoJSON): GeoJSONFeature[] {
 
 /**
  * Splits a geometry into the simple parts Sphere renders as one overlay
- * each. Geometry collections and multi-points are expanded; multi-lines and
- * multi-polygons are kept whole (Sphere supports them directly).
+ * each. Geometry collections and multi-points are expanded, while
+ * multi-lines and multi-polygons are kept whole (Sphere supports them).
  */
 export function toRenderableGeometries(
   geometry: GeoJSONGeometry | null

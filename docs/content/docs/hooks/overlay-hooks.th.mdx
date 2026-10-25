@@ -7,6 +7,10 @@ hooks เหล่านี้เก็บรายการโอเวอร�
 
 <OverlayDemo />
 
+<ShowCode>
+<include cwd meta='title="marker-list.tsx"'>components/examples/marker-list.tsx</include>
+</ShowCode>
+
 ## useMarkers
 
 ```tsx
@@ -46,6 +50,8 @@ function Stores() {
 ทั้งสี่คอลเลกชันในครั้งเดียว
 
 ```tsx
+import { useOverlays } from "gistda-sphere-react";
+
 const { markers, polygons, polylines, circles, clearAll } = useOverlays();
 ```
 

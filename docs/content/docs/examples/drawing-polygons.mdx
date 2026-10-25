@@ -7,52 +7,15 @@ Click to add corners, then double-click (or press Finish) to complete the polygo
 
 <DrawingDemo />
 
-```tsx tab="Component" lineNumbers
-import { useState } from "react";
-import { Dot, Polygon, SphereMap, SphereProvider, type Location } from "gistda-sphere-react";
+<ShowCode>
+<include cwd meta='title="polygon-drawing.tsx"'>components/examples/polygon-drawing.tsx</include>
+</ShowCode>
 
-/** Drops repeated points: the two clicks of a double-click land on the same spot. */
-const withoutRepeats = (points: Location[]) =>
-  points.filter(
-    (point, index) =>
-      index === 0 || point.lat !== points[index - 1].lat || point.lon !== points[index - 1].lon
-  );
+## With hooks instead
 
-function App() {
-  const [points, setPoints] = useState<Location[]>([]);
-  const [polygons, setPolygons] = useState<Location[][]>([]);
+The demo keeps its shapes in component state. To keep them in a hook instead, and listen to clicks from a child component of the map, use [`usePolygons`](/docs/hooks/overlay-hooks) and [`useMapEvent`](/docs/hooks/event-hooks):
 
-  const finish = () => {
-    const corners = withoutRepeats(points);
-    if (corners.length >= 3) {
-      setPolygons((previous) => [...previous, corners]);
-      setPoints([]);
-    }
-  };
-
-  return (
-    <SphereProvider apiKey="YOUR_API_KEY">
-      <SphereMap
-        center={{ lon: 100.5, lat: 13.75 }}
-        zoom={10}
-        style={{ height: 500 }}
-        onClick={({ lat, lon }) => setPoints((previous) => [...previous, { lat, lon }])}
-        onDoubleClick={finish}
-        options={{ doubleClickZoom: false }} // keep double-clicks for finishing
-      >
-        {polygons.map((corners, index) => (
-          <Polygon key={index} positions={corners} fillColor="rgba(255,0,0,0.3)" lineColor="red" />
-        ))}
-        {points.map((point, index) => (
-          <Dot key={index} position={point} lineColor="red" lineWidth={8} />
-        ))}
-      </SphereMap>
-    </SphereProvider>
-  );
-}
-```
-
-```tsx tab="Hooks" lineNumbers
+```tsx lineNumbers
 import { useState } from "react";
 import {
   Dot, Polygon, SphereMap, SphereProvider,

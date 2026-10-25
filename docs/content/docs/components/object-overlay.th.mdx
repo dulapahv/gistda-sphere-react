@@ -7,17 +7,27 @@ description: วาดจังหวัด อำเภอ สถานที�
 
 <ObjectOverlayDemo />
 
+<ShowCode>
+<include cwd meta='title="province-outline.tsx"'>components/examples/province-outline.tsx</include>
+</ShowCode>
+
 ```tsx
-<ObjectOverlay
-  id="A10000000"               // Bangkok
-  fitBounds
-  fillColor="rgba(59, 130, 246, 0.15)"
-  lineColor="rgb(37, 99, 235)"
-  label
-  onLoad={(data, overlays) => console.log("Loaded", data)}
-  onError={(error) => setMessage(error.message)}
-/>
+import { ObjectOverlay, SphereMap } from "gistda-sphere-react";
+
+<SphereMap style={{ height: 400 }}>
+  <ObjectOverlay
+    id="A10000000"               // Bangkok
+    fitBounds
+    fillColor="rgba(59, 130, 246, 0.15)"
+    lineColor="rgb(37, 99, 235)"
+    label
+    onLoad={(data, overlays) => console.log("Loaded", data)}
+    onError={(error) => setMessage(error.message)}
+  />
+</SphereMap>
 ```
+
+ตัวอย่างสั้น ๆ ด้านล่างละ `<SphereMap>` ไว้ แต่โอเวอร์เลย์ทุกตัวต้องอยู่ภายใน `<SphereMap>` เสมอ
 
 <Callout type="warn">
   อ็อบเจ็กต์มาจากบริการรายละเอียดสถานที่ (`poi/get`) ของ Sphere หาก API key ไม่ได้เปิดบริการนี้ Sphere จะไม่วาดอะไรและไม่แจ้งข้อผิดพลาด ใช้ `onError` เพื่อตรวจจับ ซึ่งจะถูกเรียกเมื่ออ็อบเจ็กต์โหลดไม่เสร็จภายใน `timeout`

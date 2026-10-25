@@ -6,21 +6,27 @@ description: จุดบนแผนที่ ใช้ไอคอนแบบ
 <MapDemo height="400px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Marker
     position={{ lon: 100.5018, lat: 13.7563 }}
-    title="กรุงเทพมหานคร"
-    detail="เมืองหลวงของประเทศไทย"
+    title="Bangkok"
+    detail="Capital of Thailand"
     draggable
   />
 </MapDemo>
 
 ```tsx
-<Marker
-  position={{ lon: 100.5018, lat: 13.7563 }}
-  title="Bangkok"
-  detail="Capital of Thailand"
-  draggable
-  onDrop={(marker, position) => console.log("Moved to", position)}
-/>
+import { Marker, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.5018, lat: 13.7563 }} style={{ height: 400 }} zoom={12}>
+  <Marker
+    position={{ lon: 100.5018, lat: 13.7563 }}
+    title="Bangkok"
+    detail="Capital of Thailand"
+    draggable
+    onDrop={(marker, position) => console.log("Moved to", position)}
+  />
+</SphereMap>
 ```
+
+ตัวอย่างสั้น ๆ ด้านล่างละ `<SphereMap>` ไว้ แต่โอเวอร์เลย์ทุกตัวต้องอยู่ภายใน `<SphereMap>` เสมอ
 
 ## Props
 
@@ -51,17 +57,45 @@ description: จุดบนแผนที่ ใช้ไอคอนแบบ
 ส่งเนื้อหา React เป็น children เพื่อใช้เป็นไอคอน โดยใช้สไตล์ state และ event handlers ของแอปได้ตามปกติ
 
 <MapDemo height="300px" zoom={11} center={{ lon: 100.5018, lat: 13.7563 }}>
-  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร">
-    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 999, background: "#2563eb", color: "white", fontSize: 12, fontWeight: 600, boxShadow: "0 1px 4px rgba(0,0,0,.4)" }}>กรุงเทพฯ</span>
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok">
+    <span
+      style={{
+        background: "#2563eb",
+        borderRadius: 999,
+        color: "white",
+        display: "inline-block",
+        fontSize: 12,
+        fontWeight: 600,
+        padding: "2px 8px",
+        whiteSpace: "nowrap",
+      }}
+    >
+      Bangkok
+    </span>
   </Marker>
 </MapDemo>
 
 ```tsx
-<Marker position={station.location} title={station.name}>
-  <span className="rounded-full bg-blue-600 px-2 text-white">
-    {station.available}
-  </span>
-</Marker>
+import { Marker, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.5018, lat: 13.7563 }} style={{ height: 300 }} zoom={11}>
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok">
+    <span
+      style={{
+        background: "#2563eb",
+        borderRadius: 999,
+        color: "white",
+        display: "inline-block",
+        fontSize: 12,
+        fontWeight: 600,
+        padding: "2px 8px",
+        whiteSpace: "nowrap",
+      }}
+    >
+      Bangkok
+    </span>
+  </Marker>
+</SphereMap>
 ```
 
 ไอคอนจะอยู่กึ่งกลางตำแหน่ง หากต้องการให้ขอบล่างชี้ตำแหน่งแบบหมุดปักแผนที่ ให้ส่ง `options={{ anchor: "bottom" }}`
@@ -71,6 +105,8 @@ description: จุดบนแผนที่ ใช้ไอคอนแบบ
 `popupContent` แสดงเนื้อหา React ในป๊อปอัปที่เปิดเมื่อคลิก
 
 ```tsx
+import { Marker } from "gistda-sphere-react";
+
 <Marker
   position={cafe.location}
   title={cafe.name}
@@ -86,6 +122,8 @@ description: จุดบนแผนที่ ใช้ไอคอนแบบ
 ## ไอคอนแบบรูปภาพและ HTML [#image-and-html-icons]
 
 ```tsx
+import { Marker } from "gistda-sphere-react";
+
 <Marker
   position={{ lon: 100.5, lat: 13.75 }}
   icon={{
@@ -107,6 +145,8 @@ description: จุดบนแผนที่ ใช้ไอคอนแบบ
 อัปเดต `position` เพื่อย้ายหมุด เมื่อใช้ `animate` ไอคอนแบบ HTML และ React จะเลื่อนไปยังตำแหน่งใหม่อย่างนุ่มนวล เหมาะกับตำแหน่งที่เปลี่ยนแบบเรียลไทม์ เช่น ยานพาหนะ
 
 ```tsx
+import { Marker } from "gistda-sphere-react";
+
 <Marker position={bus.location} rotate={bus.heading} animate={1000}>
   <BusIcon />
 </Marker>
@@ -115,6 +155,9 @@ description: จุดบนแผนที่ ใช้ไอคอนแบบ
 ## Ref
 
 ```tsx
+import { Marker, type MarkerRef } from "gistda-sphere-react";
+import { useRef } from "react";
+
 const markerRef = useRef<MarkerRef>(null);
 
 <Marker ref={markerRef} position={start} draggable />
@@ -134,5 +177,18 @@ markerRef.current?.togglePopup(true);
 | `contains(target)`, `intersects(target)`, `within(overlay)`, `distanceTo(target, language?)` | การทดสอบเชิงพื้นที่ ดู[การวิเคราะห์เชิงพื้นที่](/th/docs/examples/spatial-analysis) |
 | `toGeoJSON()` | หมุดในรูปแบบ GeoJSON feature |
 | `shift({ lon, lat })` | เลื่อนตามค่าองศาที่กำหนด |
+
+### ใช้ ref หรือ `position` [#ref-or-position]
+
+`position` กำหนดตำแหน่งของหมุดเมื่อสร้าง และย้ายหมุดทุกครั้งที่ prop เปลี่ยนเป็นตำแหน่งใหม่ ส่วน `setPosition` และการลากจะย้ายหมุดโดยไม่เปลี่ยน prop หมุดจึงอยู่ที่ตำแหน่งนั้นจนกว่า `position` จะเปลี่ยน การเปลี่ยน `icon`, `title`, `detail` หรือป๊อปอัปจะสร้างหมุดใหม่ที่ `position` ดังนั้นหากต้องการให้หมุดที่ย้ายแล้วอยู่ที่เดิม ให้บันทึกตำแหน่งใหม่ไว้ใน state เช่น จาก `onDrop`:
+
+```tsx
+import { type Location, Marker } from "gistda-sphere-react";
+import { useState } from "react";
+
+const [position, setPosition] = useState<Location>({ lon: 100.5018, lat: 13.7563 });
+
+<Marker draggable onDrop={(_, location) => setPosition(location)} position={position} />
+```
 
 หากต้องการจัดการหมุดจำนวนมากเป็นรายการ ดู [`useMarkers`](/th/docs/hooks/overlay-hooks)

@@ -7,21 +7,39 @@ Besides the map, Sphere offers REST web services for search, routing, geocoding,
 
 <ServicesDemo />
 
+<ShowCode>
+<include cwd meta='title="service-calls.tsx"'>components/examples/service-calls.tsx</include>
+</ShowCode>
+
 ## Getting a client
 
-In React, under `SphereProvider`, use the provider's key:
+In React, under `SphereProvider`, `useSphereServices` uses the provider's key, and its `language` unless you pass `locale`:
 
 ```tsx
 import { useSphereServices } from "gistda-sphere-react";
+import { useState } from "react";
 
-const services = useSphereServices({ locale: "en" });
-const { data } = await services.search.search("central world");
+function PlaceName() {
+  const services = useSphereServices({ locale: "en" });
+  const [name, setName] = useState("");
+
+  const find = async () => {
+    const { data } = await services.search.search("central world");
+    setName(data[0]?.name ?? "Not found");
+  };
+
+  return (
+    <button onClick={find} type="button">
+      {name || "Find Central World"}
+    </button>
+  );
+}
 ```
 
-Anywhere else, including Node.js 18+ and serverless functions:
+Anywhere else, including Node.js 18+ and serverless functions, create a client with your key. Import it from `gistda-sphere-react/services`, which leaves out React and the map code (the main entry exports it too):
 
 ```ts
-import { createSphereServices } from "gistda-sphere-react";
+import { createSphereServices } from "gistda-sphere-react/services";
 
 const services = createSphereServices({
   apiKey: process.env.SPHERE_API_KEY!,
@@ -37,6 +55,8 @@ const services = createSphereServices({
 | `method` | `"auto" \| "get" \| "post"` | `"auto"` | `"auto"` sends GET, and switches to a form POST when the URL would be too long (large polygons, route matrices). |
 | `baseUrl` | `string` | `https://api.sphere.gistda.or.th/services` | Service URL, e.g. your own proxy. |
 | `fetch` | `typeof fetch` | global `fetch` | Your own fetch implementation. |
+| `referer` | `string` | – | A page URL on a domain your key allows, sent as the `Referer` header. Needed on servers when your key is limited to certain domains. See [On a server](#on-a-server). |
+| `headers` | `Record<string, string>` | – | Extra headers for every request, such as for your own proxy. |
 
 ## Services
 
@@ -72,7 +92,10 @@ Every method throws a `SphereServiceError` when a call fails:
 import { SphereServiceError } from "gistda-sphere-react";
 
 try {
-  await services.route.route({ from, to });
+  await services.route.route({
+    from: { lon: 100.5018, lat: 13.7563 },
+    to: { lon: 100.5604, lat: 13.7466 },
+  });
 } catch (error) {
   if (error instanceof SphereServiceError) {
     console.log(error.code, error.service, error.status, error.message);
@@ -82,8 +105,8 @@ try {
 
 | `code` | Meaning |
 | --- | --- |
-| `"key"` | The API key isn't allowed to use this service. Enable it for your key (Sphere answers with HTTP 200 and an error message, which the client detects). |
-| `"http"` | The service returned an HTTP error; see `status` and `body`. |
+| `"key"` | The API key isn't allowed to use this service. Enable it for your key (Sphere answers with HTTP 200 and an error message, which the client detects). On a server, a key limited to certain domains also needs [`referer`](#on-a-server). |
+| `"http"` | The service returned an HTTP error. See `status` and `body`. |
 | `"timeout"` | No answer within `timeout`. |
 | `"aborted"` | You aborted the request with a `signal`. |
 | `"network"` | The request couldn't be sent, e.g. offline or blocked by CORS. |
@@ -99,6 +122,29 @@ const pending = services.search.suggest("วัดพ", { signal: controller.sig
 controller.abort(); // pending rejects with code "aborted"
 ```
 
+## On a server
+
+The client runs wherever `fetch` does, such as Node.js 18+, serverless functions, and Next.js route handlers or Server Components. This route handler searches with a key that only the server knows:
+
+```ts title="app/api/places/route.ts"
+import { createSphereServices } from "gistda-sphere-react/services";
+
+const services = createSphereServices({
+  apiKey: process.env.SPHERE_API_KEY!,
+  locale: "en",
+  // A page on a domain your key allows
+  referer: "https://www.example.com/",
+});
+
+export async function GET(request: Request) {
+  const keyword = new URL(request.url).searchParams.get("q") ?? "";
+  const { data } = await services.search.search(keyword);
+  return Response.json(data);
+}
+```
+
+Sphere checks which site a request comes from by its `Referer` header. Browsers send it, but servers don't, so a key limited to certain domains fails on a server with code `"key"`. Set `referer` to a page on a domain your key allows, or use a key without domain limits.
+
 <Callout type="warn">
-  Each service has to be enabled for your API key in the Sphere console, and keys are usually limited to certain domains. When you call the services from a server, there's no browser domain to check, so make sure your key allows it, and keep server keys out of client code.
+  Each service has to be enabled for your API key in the Sphere console. Keep server keys out of client code: in Next.js, don't start their names with `NEXT_PUBLIC_`.
 </Callout>

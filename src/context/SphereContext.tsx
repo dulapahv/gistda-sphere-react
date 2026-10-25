@@ -11,6 +11,7 @@ import {
 import { useLatest } from "@/internal/hooks";
 import { createMapControls, type MapControls } from "@/internal/mapControls";
 import type {
+  Language,
   PoiResult,
   PopupOptions,
   SphereMap,
@@ -23,6 +24,8 @@ interface SphereContextValue {
   error: Error | null;
   isLoaded: boolean;
   isMapReady: boolean;
+  /** Default language of maps and services, from the `language` prop. */
+  language: Language | undefined;
   map: SphereMap | null;
   registerMap: (map: SphereMap) => void;
   sphere: SphereNamespace | null;
@@ -41,6 +44,12 @@ interface SphereProviderProps {
    * search results. Return the element to display.
    */
   formatPoi?: (poi: PoiResult, language: string) => HTMLElement;
+  /**
+   * Default language of every map (`SphereMap`'s `language`) and of the web
+   * services client. Maps without their own `language` use it, and the
+   * others default to Thai.
+   */
+  language?: Language;
   onError?: (error: Error) => void;
   onLoad?: () => void;
   /**
@@ -142,6 +151,7 @@ function installPoiHooks(
 export function SphereProvider({
   apiKey,
   children,
+  language,
   scriptUrl,
   onLoad,
   onError,
@@ -202,13 +212,13 @@ export function SphereProvider({
     return installPoiHooks(
       sphere,
       hasFormatPoi
-        ? (poi, language) =>
-            formatPoiRef.current?.(poi, language) ??
+        ? (poi, poiLanguage) =>
+            formatPoiRef.current?.(poi, poiLanguage) ??
             document.createElement("div")
         : undefined,
       hasPoiPopupOptions
-        ? (source, id, name, language) =>
-            poiPopupOptionsRef.current?.(source, id, name, language) ?? {}
+        ? (source, id, name, poiLanguage) =>
+            poiPopupOptionsRef.current?.(source, id, name, poiLanguage) ?? {}
         : undefined
     );
   }, [
@@ -267,6 +277,7 @@ export function SphereProvider({
       error,
       isLoaded,
       isMapReady,
+      language,
       map,
       registerMap,
       sphere,
@@ -280,6 +291,7 @@ export function SphereProvider({
       map,
       isMapReady,
       controls,
+      language,
       registerMap,
       unregisterMap,
     ]

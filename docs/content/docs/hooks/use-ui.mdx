@@ -7,6 +7,10 @@ description: Built-in controls, mouse and keyboard input, the right-click menu, 
 
 <UiDemo />
 
+<ShowCode>
+<include cwd meta='title="ui-toggles.tsx"'>components/examples/ui-toggles.tsx</include>
+</ShowCode>
+
 ```tsx
 import { useUi } from "gistda-sphere-react";
 
@@ -43,6 +47,9 @@ function InputSettings() {
 A map that fills the screen width can trap scrolling: users scroll the page and pan the map instead. `lockMap` covers the map with a button until the user clicks it:
 
 ```tsx
+import { SphereMap, useUi } from "gistda-sphere-react";
+import { useEffect } from "react";
+
 function LockedMap() {
   const ui = useUi();
 
@@ -78,5 +85,7 @@ Calling `lockMap` again on the same map returns the existing lock instead of sta
 To make a static map, turn interaction off when creating it:
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+
 <SphereMap input={false} controls={{ DPad: false, Zoombar: false }} />
 ```

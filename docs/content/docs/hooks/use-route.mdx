@@ -7,6 +7,10 @@ description: Plan routes with several stops and travel modes, with status, total
 
 <RouteDemo />
 
+<ShowCode>
+<include cwd meta='title="route-planner.tsx"'>components/examples/route-planner.tsx</include>
+</ShowCode>
+
 ```tsx
 import { useRoute } from "gistda-sphere-react";
 
@@ -40,7 +44,7 @@ function Directions() {
 }
 ```
 
-The route and its stop markers are drawn on the map by Sphere. Users can drag the stops, and click one to remove it.
+The route and its stop markers are drawn on the map by Sphere. Users can drag the stops, and click one to remove it. [`destinations`](#stops) follows these changes, but the route is only recalculated when you call `search()`, or by itself with the [`auto` option](#options).
 
 ## Result state
 
@@ -50,6 +54,7 @@ The route and its stop markers are drawn on the map by Sphere. Users can drag th
 | `isCalculating` | `boolean` | Shortcut for `status === "calculating"`. |
 | `summary` | `RouteSummary \| null` | Totals: `distance` (m), `distanceText`, `interval` (s), `intervalText`. |
 | `steps` | `RouteStep[]` | Turn-by-turn steps. |
+| `destinations` | `Location[]` | Locations of the stops, in order. Updates when stops are added, removed, reordered or dragged. |
 | `routes` | `RouteResult[]` | The raw legs from Sphere, one per pair of consecutive stops. |
 | `error` | `RouteErrorInfo \| null` | Why the last calculation failed. |
 | `isReady` | `boolean` | `true` once the map is ready. |
@@ -63,12 +68,12 @@ Each step is ready to display:
 | `instruction` | `"Turn right to Sathon Nuea Rd"` | Readable instruction in the route language. |
 | `distanceText` | `"640 m"` | Formatted step distance. |
 | `intervalText` | `"1 min"` | Formatted step time (empty in Fly mode). |
-| `turn` | `1` | Turn code; compare with [`ROUTE_TURN`](#turn-codes) to pick an icon. |
+| `turn` | `1` | Turn code. Compare it with [`ROUTE_TURN`](#turn-codes) to pick an icon. |
 | `name` | `"Sathon Nuea Rd"` | Road name. |
 | `distance`, `interval` | `640`, `60` | Raw meters and seconds. |
 | `legIndex` | `0` | Which leg (pair of stops) the step belongs to. |
 
-Instructions follow the route language, which you can change with `setLanguage("en")`. For Sphere's own styled panel instead, add [`<RouteGuide>`](/docs/components/route-guide).
+Instructions and totals follow the route language, which is the map's language: Thai unless you set `language` on [`SphereProvider`](/docs/components/sphere-provider#language) or `SphereMap`. To change only the route language, call `setLanguage("en")`. For Sphere's own styled panel instead, add [`<RouteGuide>`](/docs/components/route-guide).
 
 Road names come from the routing service in the language used for the calculation, so after changing the language (with `setLanguage` or `SphereMap`'s `language` prop), call `search()` again to update them.
 
@@ -99,7 +104,10 @@ const icons = {
 ## Options
 
 ```tsx
+import { useRoute } from "gistda-sphere-react";
+
 const route = useRoute({
+  auto: true,
   timeout: 15_000,
   onRouteComplete: (routes) => console.log("Done", routes),
   onError: (error) => toast(error.message),
@@ -108,7 +116,8 @@ const route = useRoute({
 
 | Option | Type | Description |
 | --- | --- | --- |
-| `timeout` | `number` | Milliseconds before reporting a `"timeout"` error. Default `20000`; `0` turns it off. |
+| `auto` | `boolean` | Recalculate whenever the stops change, including when users drag or remove them. Off by default, like Sphere. |
+| `timeout` | `number` | Milliseconds before reporting a `"timeout"` error. Default `20000`, and `0` turns it off. |
 | `onRouteComplete` | `(routes) => void` | A route finished calculating. |
 | `onRouteError` | `(status) => void` | Sphere reported a routing error code. |
 | `onError` | `(error: RouteErrorInfo) => void` | Any failure, including timeouts. |
@@ -120,24 +129,47 @@ const route = useRoute({
 | `addDestination(location, mode?)` | Add a stop (a location or a `sphere.Marker`), optionally with its own travel mode for the next leg. |
 | `insertDestination(index, location, mode?)` | Insert a stop at a position. |
 | `removeDestination(marker)` / `removeDestinationAt(index)` | Remove a stop. |
-| `listDestinations()` / `size()` | The stop markers / how many there are. |
+| `listDestinations()` / `size()` | The stop markers / how many there are. For their locations as state, use `destinations`. |
 | `reverse()` | Reverse the order of the stops. |
 | `clearDestinations()` | Remove all stops. |
 | `clearPath()` | Remove the drawn route, keeping the stops. |
 | `clear()` | Remove stops and route, and reset the result state. |
 | `search()` | Calculate the route. |
 
+`destinations` holds the stops' locations as React state, so you can show them in your own list:
+
+```tsx
+import { useRoute } from "gistda-sphere-react";
+
+function StopList() {
+  const { destinations, removeDestinationAt } = useRoute({ auto: true });
+
+  return (
+    <ol>
+      {destinations.map((stop, index) => (
+        <li key={`${stop.lon},${stop.lat},${index}`}>
+          {stop.lat.toFixed(4)}, {stop.lon.toFixed(4)}
+          <button onClick={() => removeDestinationAt(index)} type="button">
+            Remove
+          </button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+```
+
 ## Travel modes and options
 
 | Method | Description |
 | --- | --- |
-| `setMode(mode)` / `getMode()` | `"Traffic"` (fastest, avoiding traffic jams; the default), `"Cost"` (fastest by road, without traffic data), `"Distance"` (shortest) or `"Fly"` (straight lines). |
+| `setMode(mode)` / `getMode()` | `"Traffic"` (the default: fastest, avoiding traffic jams), `"Cost"` (fastest by road, without traffic data), `"Distance"` (shortest) or `"Fly"` (straight lines). |
 | `setModeAt(index, mode)` / `getModeAt(index)` | Mode of the leg starting at a stop. |
 | `enableRouteType(type, state)` / `isRouteTypeEnabled(type)` | Allow or avoid `"Road"`, `"Ferry"`, `"Tollway"` or `"All"`. |
 | `setRestrict("Bike", state)` / `isRestrictEnabled("Bike")` | Avoid roads closed to motorcycles. |
 | `setLabel(label)` / `getLabel()` | Label on the route: `"Distance"`, `"Time"` or `"Hide"`. |
 | `setLineStyle(part, style)` / `getLineStyle(part)` | Style of `"Road"`, `"Ferry"`, `"Destination"` or `"Focus"` lines. |
-| `setAuto(state)` / `getAuto()` | Recalculate automatically when stops change. |
+| `setAuto(state)` / `getAuto()` | Recalculate automatically when stops change. You can also pass the `auto` option. |
 | `enableContextMenu()` | Add a "Direction to here" item to the right-click menu, which adds a stop there. Also turns on `auto`. |
 | `setLanguage(language)` / `getLanguage()` | Language of instructions and labels. |
 
@@ -163,5 +195,5 @@ route.setLineStyle("Road", { lineColor: "#2563eb", lineWidth: 6 });
 | `setPlaceholder(element)` | Render Sphere's guide panel into an element. |
 
 <Callout type="warn">
-  Routing needs the routing service enabled for your API key. Without it, Sphere gives no error of its own; `useRoute` reports a `"timeout"` error instead of waiting forever.
+  Routing needs the routing service enabled for your API key. Without it, Sphere gives no error of its own, so `useRoute` reports a `"timeout"` error instead of waiting forever.
 </Callout>

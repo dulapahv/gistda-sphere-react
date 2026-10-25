@@ -32,7 +32,7 @@ Each Sphere service has to be enabled for your key. When one isn't, Sphere usual
 | The map, markers, shapes, layers | Map | The map stays empty. |
 | [`useSearch`](/docs/hooks/use-search) search and suggestions, [`<Tag>`](/docs/components/tag) | Search, POI | Errors from `search`/`suggest`, empty tag layers. |
 | `useSearch().address`, right-click menu address | Address (reverse geocoding) | `address()` resolves `null`. |
-| [`<ObjectOverlay>`](/docs/components/object-overlay) | POI details (`poi/get`) | Nothing is drawn; `onError` fires after the timeout. |
+| [`<ObjectOverlay>`](/docs/components/object-overlay) | POI details (`poi/get`) | Nothing is drawn, and `onError` fires after the timeout. |
 | [`useRoute`](/docs/hooks/use-route), [`<RouteGuide>`](/docs/components/route-guide) | Routing | `"timeout"` error after 20 seconds. Fly mode still works. |
 | [Web services](/docs/web-services) | The matching service | `SphereServiceError` with code `"key"`. |
 | [Static maps](/docs/web-services/maps-and-tiles#static-map-images) | Static map | The image doesn't load. |
@@ -42,7 +42,11 @@ Each Sphere service has to be enabled for your key. When one isn't, Sphere usual
 Pass the key to `SphereProvider`:
 
 ```tsx
-<SphereProvider apiKey="YOUR_API_KEY">{/* your app */}</SphereProvider>
+import { SphereProvider } from "gistda-sphere-react";
+
+<SphereProvider apiKey="YOUR_API_KEY">
+  <App />
+</SphereProvider>
 ```
 
 Keep it in an environment variable, so it stays out of source control.
@@ -52,6 +56,8 @@ NEXT_PUBLIC_SPHERE_API_KEY=your_api_key
 ```
 
 ```tsx
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider apiKey={process.env.NEXT_PUBLIC_SPHERE_API_KEY!}>
 ```
 
@@ -60,9 +66,11 @@ VITE_SPHERE_API_KEY=your_api_key
 ```
 
 ```tsx
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider apiKey={import.meta.env.VITE_SPHERE_API_KEY}>
 ```
 
 <Callout type="warn">
-  Environment variables prefixed for the browser (`NEXT_PUBLIC_`, `VITE_`) still end up in your JavaScript. Host restrictions are what keep the key safe. For server-side calls with [`createSphereServices`](/docs/web-services), use a separate key without the browser prefix.
+  Environment variables prefixed for the browser (`NEXT_PUBLIC_`, `VITE_`) still end up in your JavaScript. Host restrictions are what keep the key safe. For server-side calls with [`createSphereServices`](/docs/web-services#on-a-server), use a separate key without the browser prefix. Servers don't send the host that Sphere checks, so a host-restricted key also needs the `referer` option there.
 </Callout>

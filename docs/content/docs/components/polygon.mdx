@@ -20,19 +20,26 @@ description: A filled area, with holes, labels, editing, measurements and polygo
 </MapDemo>
 
 ```tsx
-<Polygon
-  positions={[
-    { lon: 100.45, lat: 13.8 },
-    { lon: 100.55, lat: 13.8 },
-    { lon: 100.55, lat: 13.7 },
-    { lon: 100.45, lat: 13.7 },
-  ]}
-  fillColor="rgba(255, 0, 0, 0.3)"
-  lineColor="red"
-  lineWidth={2}
-  label="Zone A"
-/>
+import { Polygon, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.5, lat: 13.75 }} style={{ height: 400 }} zoom={11}>
+  <Polygon
+    positions={[
+      { lon: 100.45, lat: 13.8 },
+      { lon: 100.55, lat: 13.8 },
+      { lon: 100.55, lat: 13.7 },
+      { lon: 100.45, lat: 13.7 },
+    ]}
+    fillColor="rgba(255, 0, 0, 0.3)"
+    lineColor="red"
+    lineWidth={2}
+    label="Zone A"
+    title="Zone A"
+  />
+</SphereMap>
 ```
+
+The shorter samples below leave out `<SphereMap>`, but every overlay goes inside one.
 
 ## Props
 
@@ -44,7 +51,7 @@ Polygons also take the [shape props](#shape-props) below.
 
 ### Shape props
 
-All shapes ([`Polygon`](/docs/components/polygon), [`Polyline`](/docs/components/polyline), [`Circle`](/docs/components/circle), [`Rectangle`](/docs/components/rectangle) and [`Dot`](/docs/components/dot)) share these props. Props marked **live** update the shape in place; changing any other prop re-creates it.
+All shapes ([`Polygon`](/docs/components/polygon), [`Polyline`](/docs/components/polyline), [`Circle`](/docs/components/circle), [`Rectangle`](/docs/components/rectangle) and [`Dot`](/docs/components/dot)) share these props. Props marked **live** update the shape in place, and changing any other prop re-creates it.
 
 | Prop | Type | Description |
 | --- | --- | --- |
@@ -76,6 +83,8 @@ All shapes ([`Polygon`](/docs/components/polygon), [`Polyline`](/docs/components
 Put `null` between the outer ring and each hole:
 
 ```tsx
+import { Polygon } from "gistda-sphere-react";
+
 <Polygon
   positions={[
     { lon: 100.4, lat: 13.9 }, { lon: 100.7, lat: 13.9 },
@@ -90,6 +99,8 @@ Put `null` between the outer ring and each hole:
 ## GeoJSON input
 
 ```tsx
+import { Polygon } from "gistda-sphere-react";
+
 <Polygon
   positions={{
     type: "Polygon",
@@ -106,6 +117,8 @@ To show whole GeoJSON documents (points, lines and areas together), use [`<GeoJs
 Color, width and line style changes are applied with Sphere's `update()`, so a polygon can follow state without being redrawn:
 
 ```tsx
+import { Polygon } from "gistda-sphere-react";
+
 <Polygon
   positions={zone}
   fillColor={hovered ? "rgba(255,0,0,.5)" : "rgba(255,0,0,.2)"}
@@ -117,6 +130,9 @@ Color, width and line style changes are applied with Sphere's `update()`, so a p
 ## Ref
 
 ```tsx
+import { Polygon, type PolygonRef } from "gistda-sphere-react";
+import { useRef } from "react";
+
 const zoneRef = useRef<PolygonRef>(null);
 
 <Polygon ref={zoneRef} positions={zone} />

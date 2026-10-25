@@ -10,6 +10,8 @@ export type { ControlPosition, MapControlProps } from "./MapControl";
 export { MapControl } from "./MapControl";
 export type { MarkerProps, MarkerRef } from "./Marker";
 export { Marker } from "./Marker";
+export type { MarkerClusterProps } from "./MarkerCluster";
+export { MarkerCluster } from "./MarkerCluster";
 export type { MenuBarProps, MenuBarRef } from "./MenuBar";
 export { MenuBar } from "./MenuBar";
 export type { ObjectOverlayProps, ObjectOverlayRef } from "./ObjectOverlay";

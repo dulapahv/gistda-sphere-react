@@ -254,6 +254,29 @@ describe("createSphereServices", () => {
       return { client, fetchMock };
     }
 
+    it("sends the referer and extra headers with every request", async () => {
+      const fetchMock = vi.fn(async (_url: string, _init?: RequestInit) =>
+        Response.json({ data: [] })
+      );
+      const client = createSphereServices({
+        apiKey: "KEY",
+        fetch: fetchMock as unknown as typeof fetch,
+        headers: { "X-Trace": "1" },
+        referer: "https://example.com/",
+      });
+
+      await client.search.search("cafe");
+      await client.population.get(`POLYGON((${"100 13,".repeat(400)}100 13))`);
+
+      for (const [, init] of fetchMock.mock.calls) {
+        expect(init?.headers).toEqual({
+          Referer: "https://example.com/",
+          "X-Trace": "1",
+        });
+      }
+      expect(fetchMock.mock.calls[1]?.[1]?.method).toBe("POST");
+    });
+
     it("uses GET for normal requests", async () => {
       const { client, fetchMock } = recordingClient();
       await client.search.search("cafe");
@@ -358,6 +381,16 @@ describe("createSphereServices", () => {
         status: 200,
       });
       expect((error as Error).message).toMatch(ENABLE_SERVICE_HINT);
+    });
+
+    it("recognizes key errors whatever their capitalization", async () => {
+      const { client } = clientReturning(
+        "throw 'Search Service API Key Error';"
+      );
+      await expect(client.search.search("cafe")).rejects.toMatchObject({
+        code: "key",
+        service: "search/search",
+      });
     });
 
     it("reports HTTP errors and unparseable bodies", async () => {

@@ -7,8 +7,12 @@ description: แสดง GeoJSON geometry, feature หรือ feature collect
 
 <GeoJsonDemo />
 
+<ShowCode>
+<include cwd meta='title="data-formats.tsx"'>components/examples/data-formats.tsx</include>
+</ShowCode>
+
 ```tsx
-import { GeoJson } from "gistda-sphere-react";
+import { GeoJson, SphereMap } from "gistda-sphere-react";
 
 <SphereMap>
   <GeoJson
@@ -44,6 +48,9 @@ import { GeoJson } from "gistda-sphere-react";
 ## แสดง KML, GPX และ WKT [#showing-kml-gpx-and-wkt]
 
 ```tsx
+import { type GeoJSON, GeoJson, useSphereUtils } from "gistda-sphere-react";
+import { useState } from "react";
+
 const { kmlToGeoJSON } = useSphereUtils();
 const [data, setData] = useState<GeoJSON | null>(null);
 
@@ -59,6 +66,8 @@ async function open(file: File) {
 ## ป้ายชื่อจาก properties [#labels-from-properties]
 
 ```tsx
+import { GeoJson } from "gistda-sphere-react";
+
 <GeoJson
   data={stations}
   markerOptions={(feature) => ({ title: String(feature.properties?.name) })}

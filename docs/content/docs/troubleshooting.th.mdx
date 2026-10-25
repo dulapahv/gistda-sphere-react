@@ -8,6 +8,8 @@ description: ปัญหาที่พบบ่อยและวิธีแ�
 แผนที่จะขยายเต็มคอนเทนเนอร์ คอนเทนเนอร์จึงต้องมีความสูง
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+
 <SphereMap style={{ width: "100%", height: 500 }} />
 ```
 
@@ -24,6 +26,8 @@ description: ปัญหาที่พบบ่อยและวิธีแ�
 วาง `<SphereProvider>` ไว้เหนือทุกคอมโพเนนต์ที่ใช้คอมโพเนนต์หรือ hook ของแผนที่
 
 ```tsx
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider apiKey="YOUR_API_KEY">
   <App />
 </SphereProvider>
@@ -31,7 +35,11 @@ description: ปัญหาที่พบบ่อยและวิธีแ�
 
 ## Next.js: "hooks can only be used in Client Components" [#nextjs-hooks-can-only-be-used-in-client-components]
 
-คอมโพเนนต์และ hook ทำงานในเบราว์เซอร์ ให้ใช้ในไฟล์ที่ขึ้นต้นด้วย `"use client"`
+hook และ prop ที่รับฟังก์ชัน เช่น `onClick` ต้องอยู่ใน Client Component ให้ย้ายโค้ดส่วนนั้นไปไว้ในไฟล์ที่ขึ้นต้นด้วย `"use client"` ส่วนตัวคอมโพเนนต์เองเรียกใช้จาก Server Component ได้ ดู[การใช้งานกับ Next.js](/th/docs/components/sphere-provider#using-it-with-nextjs)
+
+## Next.js: "createContext is not a function" [#nextjs-createcontext-is-not-a-function]
+
+เวอร์ชันก่อน 2.1 ไม่ได้กำกับคอมโพเนนต์เป็น Client Component การเรียกใช้ `SphereProvider` จาก Server Component เช่น layout จึงล้มเหลว ให้อัปเกรดเป็น 2.1 หรือเรียกใช้จากไฟล์ที่ขึ้นต้นด้วย `"use client"`
 
 ## โอเวอร์เลย์ไม่แสดง [#overlays-dont-appear]
 
@@ -41,11 +49,19 @@ description: ปัญหาที่พบบ่อยและวิธีแ�
 
 ## แผนที่เด้งกลับเมื่อคอมโพเนนต์ render ใหม่ [#the-map-jumps-back-when-my-component-re-renders]
 
-`center`, `zoom`, `rotate` และ `pitch` กำหนดเฉพาะมุมมองเริ่มต้น หากต้องการเลื่อนแผนที่ ให้เรียก `goTo` หรือ `setCenter` จาก [`useMapControls`](/th/docs/hooks/use-map-controls) หรือ ref ของแผนที่
+`center`, `zoom`, `rotate` และ `pitch` กำหนดเฉพาะมุมมองเริ่มต้น หากต้องการเลื่อนแผนที่ ให้เรียก `goTo` หรือ `setCenter` จาก [`useMapControls`](/th/docs/hooks/use-map-controls) หรือ ref ของแผนที่ หากต้องการให้ state ของคุณสอดคล้องกับแผนที่ ให้ใช้ [`onViewChange`](/th/docs/components/sphere-map#syncing-the-view)
+
+## แผนที่ไปแสดงที่มุมซ้ายบนของหน้า [#the-map-draws-in-the-pages-top-left-corner]
+
+ก่อนเวอร์ชัน 2.1 แผนที่ที่ mount หลังจากสคริปต์ของ Sphere โหลดเสร็จจะแสดงผิดตำแหน่งเมื่อใช้ React StrictMode ซึ่ง Next.js และ Vite ใช้ใน development ปัญหานี้เกิดหลังการเปลี่ยนหน้าฝั่งไคลเอนต์ หรือกับแผนที่ในแท็บและ modal ให้อัปเกรดเป็น 2.1
 
 ## การคำนวณเส้นทางไม่เสร็จสิ้น [#routing-never-finishes]
 
-หากไม่มีการตอบกลับภายใน 20 วินาที `useRoute` จะแจ้งข้อผิดพลาด `"timeout"` ซึ่งมักเกิดจาก key ของคุณยังไม่ได้เปิดบริการนำทาง ส่วนโหมด Fly (เส้นตรง) ใช้งานได้โดยไม่ต้องเปิดบริการนี้
+หากไม่มีการตอบกลับภายใน 20 วินาที `useRoute` จะแจ้งข้อผิดพลาด `"timeout"` ซึ่งมักเกิดจาก key ของคุณยังไม่ได้เปิดบริการนำทาง โดยในแผง network ของเบราว์เซอร์ คำขอ `route/route` จะตอบกลับว่า `sphere Map API key error` ซึ่ง Sphere ไม่ได้แจ้งต่อ ส่วนโหมด Fly (เส้นตรง) ใช้งานได้โดยไม่ต้องเปิดบริการนี้
+
+## ผลการค้นหาหรือคำแนะนำเส้นทางเป็นภาษาไทย [#search-results-or-directions-are-in-thai]
+
+ผลลัพธ์ใช้ภาษาเดียวกับแผนที่ ซึ่งค่าเริ่มต้นคือภาษาไทย ให้กำหนด `language="en"` ที่ [`SphereProvider`](/th/docs/components/sphere-provider#language) เพื่อเปลี่ยนแผนที่ การค้นหา การนำทาง และบริการเว็บเป็นภาษาอังกฤษ
 
 ## `address()` คืนค่า `null` [#address-returns-null]
 
@@ -61,7 +77,13 @@ description: ปัญหาที่พบบ่อยและวิธีแ�
 
 ## การเรียกบริการเว็บล้มเหลวด้วย code `"key"` [#web-service-calls-fail-with-code-key]
 
-เปิดบริการนั้นให้ key ของคุณ และตรวจสอบโฮสต์ที่อนุญาต การเรียกจากเซิร์ฟเวอร์ไม่มีโฮสต์ของเบราว์เซอร์ key จึงต้องอนุญาตการเรียกแบบนี้ด้วย
+เปิดบริการนั้นให้ key ของคุณ และตรวจสอบโฮสต์ที่อนุญาต การเรียกจากเซิร์ฟเวอร์ไม่ได้ส่งโฮสต์ที่ Sphere ใช้ตรวจสอบ ให้กำหนด[ตัวเลือก `referer`](/th/docs/web-services#on-a-server) เป็นหน้าเว็บในโดเมนที่อนุญาต หรือใช้ key ที่ไม่จำกัดโดเมน
+
+## ชั้นข้อมูล 3 มิติไม่แสดงอะไรเลย [#a-3d-layer-draws-nothing]
+
+- `type="I3S"`: runtime ปัจจุบันของ Sphere ยังวาด mesh แบบ I3S ไม่ได้ และคอนโซลจะเต็มไปด้วยข้อผิดพลาดจาก `MeshLayer` ของ deck.gl ให้ใช้ 3D Tiles แทน ดู[3D Tiles และ I3S](/th/docs/components/layer#3d-tiles-and-i3s)
+- `type="Tiles3D"` ใน development: ก่อนเวอร์ชัน 2.1 React StrictMode จะลบชั้นข้อมูลออกทันทีหลังจากเพิ่ม ให้อัปเกรดเป็น 2.1
+- พอยต์คลาวด์อาจเป็นสีดำหากจุดไม่มีสีของตัวเอง ให้กำหนด `options={{ getPointColor: [r, g, b, 255] }}`
 
 ## Hooks รายงาน `isReady: false` [#hooks-report-isready-false]
 
@@ -70,3 +92,15 @@ hook อย่าง `useSearch`, `useRoute` และ `useTags` ใช้งา
 ## การคลิกรูปทรงไม่ไปถึง `onClick` ของแผนที่ [#clicks-on-shapes-dont-reach-onclick-on-the-map]
 
 การคลิกโอเวอร์เลย์จะรายงานเป็น `onOverlayClick` (และ `onClick` ของโอเวอร์เลย์นั้น) ไม่ใช่การคลิกแผนที่ หากต้องการทั้งสองแบบ ให้จัดการ `onOverlayClick` ด้วย อาร์กิวเมนต์ตัวที่สองคือตำแหน่งที่คลิก
+
+## ป้ายชื่อหรือป๊อปอัปอ่านไม่ออกในโหมดมืด [#labels-or-popups-are-unreadable-in-dark-mode]
+
+ป้ายชื่อของรูปทรงและป๊อปอัปของ Sphere มีพื้นหลังสีอ่อน แต่ตัวอักษรใช้สีตามหน้าเว็บของคุณ หากใช้ธีมมืดที่ตัวอักษรเป็นสีอ่อน ให้กำหนดสีตัวอักษรกลับเป็นสีเข้ม:
+
+```css
+.sphere-geomlabel,
+.sphere-popup_title,
+.sphere-popup_detail {
+  color: #1a1a1a;
+}
+```

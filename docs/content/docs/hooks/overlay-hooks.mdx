@@ -7,6 +7,10 @@ These hooks keep a list of overlays in React state with stable IDs, so you can a
 
 <OverlayDemo />
 
+<ShowCode>
+<include cwd meta='title="marker-list.tsx"'>components/examples/marker-list.tsx</include>
+</ShowCode>
+
 ## useMarkers
 
 ```tsx
@@ -46,6 +50,8 @@ These work the same way for `Polygon` (`positions`), `Polyline` (`positions`) an
 All four collections at once:
 
 ```tsx
+import { useOverlays } from "gistda-sphere-react";
+
 const { markers, polygons, polylines, circles, clearAll } = useOverlays();
 ```
 
@@ -56,7 +62,7 @@ Each collection hook returns:
 | Property | Type | Description |
 | --- | --- | --- |
 | `items` | `T[]` | The overlays, each with an `id`. |
-| `add(data)` | `string` | Add an overlay; returns its new ID. |
+| `add(data)` | `string` | Add an overlay and get its new ID. |
 | `update(id, changes)` | | Merge changes into an overlay. |
 | `remove(id)` | | Remove an overlay. |
 | `clear()` | | Remove all overlays of this type. |

@@ -42,7 +42,7 @@ export interface MarkerRef extends OverlaySpatialMethods {
   getMarker: () => SphereMarker | null;
   /** Current position of the marker. */
   getPosition: () => Location | null;
-  /** Move the marker; `animate` slides it (`true` = 150 ms, or a duration in ms). */
+  /** Move the marker. `animate` slides it (`true` = 150 ms, or a duration in ms). */
   setPosition: (location: Location, animate?: boolean | number) => void;
   /** Rotate the marker icon clockwise, in degrees. */
   setRotation: (angle: number) => void;

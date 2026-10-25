@@ -7,17 +7,27 @@ description: Draw a province, district, landmark or POI from Sphere's data by it
 
 <ObjectOverlayDemo />
 
+<ShowCode>
+<include cwd meta='title="province-outline.tsx"'>components/examples/province-outline.tsx</include>
+</ShowCode>
+
 ```tsx
-<ObjectOverlay
-  id="A10000000"               // Bangkok
-  fitBounds
-  fillColor="rgba(59, 130, 246, 0.15)"
-  lineColor="rgb(37, 99, 235)"
-  label
-  onLoad={(data, overlays) => console.log("Loaded", data)}
-  onError={(error) => setMessage(error.message)}
-/>
+import { ObjectOverlay, SphereMap } from "gistda-sphere-react";
+
+<SphereMap style={{ height: 400 }}>
+  <ObjectOverlay
+    id="A10000000"               // Bangkok
+    fitBounds
+    fillColor="rgba(59, 130, 246, 0.15)"
+    lineColor="rgb(37, 99, 235)"
+    label
+    onLoad={(data, overlays) => console.log("Loaded", data)}
+    onError={(error) => setMessage(error.message)}
+  />
+</SphereMap>
 ```
+
+The shorter samples below leave out `<SphereMap>`, but every overlay goes inside one.
 
 <Callout type="warn">
   Objects come from Sphere's POI details service (`poi/get`). If your API key doesn't have that service, Sphere draws nothing and reports nothing. Use `onError` to notice: it's called when the object hasn't loaded within `timeout`.
@@ -32,9 +42,9 @@ description: Draw a province, district, landmark or POI from Sphere's data by it
 | `fitBounds` | `boolean \| FitBoundsOptions` | – | Fit the map to the object once it loads. |
 | `label` | `string \| boolean` | – | Label text, or `true` to label the object with its name. |
 | `icon` | `Icon` | – | Marker icon for point objects. |
-| `onLoad` | `(data, overlays) => void` | – | The object loaded; `overlays` are the created shapes. |
+| `onLoad` | `(data, overlays) => void` | – | The object loaded. `overlays` are the shapes created for it. |
 | `onError` | `(error) => void` | – | The object didn't load within `timeout`. |
-| `timeout` | `number` | `15000` | Milliseconds to wait before `onError`; `0` turns it off. |
+| `timeout` | `number` | `15000` | Milliseconds to wait before `onError`. `0` turns it off. |
 | `onClick` | `(overlay, location) => void` | – | One of the object's shapes was clicked. |
 | `simplify` | `number` | – | Simplification tolerance, from about `0.00005` (fine) to `0.001` (rough). |
 | `combine` | `boolean` | – | Merge the object's parts into one shape. |

@@ -3,7 +3,7 @@ import { useCallback, useRef, useState } from "react";
 import type { DrawingMode } from "../constants";
 import type { Shape, ShapeHandle, ShapeKind } from "../types";
 
-/** Style applied to every drawn shape; changes update shapes in place. */
+/** Style applied to every drawn shape. Changes update shapes in place. */
 export interface DrawingStyle {
   /** Let users drag the vertices of polygons and rectangles. */
   editable: boolean;

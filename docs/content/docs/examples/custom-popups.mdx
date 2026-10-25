@@ -3,21 +3,69 @@ title: Custom markers and popups
 description: React components as marker icons and popup content, and custom popups for POIs
 ---
 
+export const price = {
+  background: "#7c3aed",
+  borderRadius: 999,
+  color: "white",
+  display: "inline-block",
+  fontSize: 12,
+  fontWeight: 600,
+  padding: "2px 8px",
+  whiteSpace: "nowrap",
+};
+
 Markers and popups can render any React content, with your styles, state and event handlers.
 
 <MapDemo height="320px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }}>
   <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Democracy Monument">
-    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 999, background: "#7c3aed", color: "white", fontSize: 12, fontWeight: 600, boxShadow: "0 1px 4px rgba(0,0,0,.4)" }}>฿ 1,290</span>
+    <span style={price}>฿ 1,290</span>
   </Marker>
   <Marker position={{ lon: 100.53, lat: 13.745 }} title="Siam">
-    <span style={{ display: "inline-block", padding: "2px 8px", borderRadius: 999, background: "#7c3aed", color: "white", fontSize: 12, fontWeight: 600, boxShadow: "0 1px 4px rgba(0,0,0,.4)" }}>฿ 2,450</span>
+    <span style={price}>฿ 2,450</span>
   </Marker>
 </MapDemo>
+
+```tsx
+import { Marker, SphereMap } from "gistda-sphere-react";
+
+const price = {
+  background: "#7c3aed",
+  borderRadius: 999,
+  color: "white",
+  display: "inline-block",
+  fontSize: 12,
+  fontWeight: 600,
+  padding: "2px 8px",
+  whiteSpace: "nowrap",
+};
+
+<SphereMap center={{ lon: 100.5018, lat: 13.7563 }} style={{ height: 320 }} zoom={12}>
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Democracy Monument">
+    <span style={price}>฿ 1,290</span>
+  </Marker>
+  <Marker position={{ lon: 100.53, lat: 13.745 }} title="Siam">
+    <span style={price}>฿ 2,450</span>
+  </Marker>
+</SphereMap>
+```
 
 ## React marker icons
 
 ```tsx lineNumbers
-function PriceMarker({ hotel }) {
+import { type Location, Marker } from "gistda-sphere-react";
+import { useState } from "react";
+
+interface Hotel {
+  id: string;
+  location: Location;
+  name: string;
+  photo: string;
+  price: number;
+  rating: number;
+  reviews: number;
+}
+
+function PriceMarker({ hotel }: { hotel: Hotel }) {
   const [hovered, setHovered] = useState(false);
   return (
     <Marker
@@ -36,6 +84,8 @@ function PriceMarker({ hotel }) {
 ## React popups
 
 ```tsx lineNumbers
+import { Marker } from "gistda-sphere-react";
+
 <Marker
   position={hotel.location}
   title={hotel.name}
@@ -52,6 +102,8 @@ function PriceMarker({ hotel }) {
 Shapes take `popupContent` too:
 
 ```tsx
+import { Polygon } from "gistda-sphere-react";
+
 <Polygon positions={district.outline} title={district.name} popupContent={<DistrictStats id={district.id} />} />
 ```
 
@@ -60,6 +112,8 @@ Shapes take `popupContent` too:
 Tag layers and search results open Sphere's popups. Change what they show on `SphereProvider`:
 
 ```tsx lineNumbers
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider
   apiKey={apiKey}
   formatPoi={(poi) => {

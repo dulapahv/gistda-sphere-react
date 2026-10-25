@@ -1,0 +1,88 @@
+---
+title: MarkerCluster
+description: แสดงจุดนับพันจุดเป็นหมุด โดยจัดกลุ่มจุดที่อยู่ใกล้กันเป็นกลุ่มพร้อมแสดงตัวเลข และแยกออกเมื่อผู้ใช้ซูมเข้า
+---
+
+`<MarkerCluster>` จัดกลุ่มจุดที่อยู่ใกล้กันเป็นหมุดกลุ่มที่แสดงจำนวนจุด และแสดงจุดเดี่ยวอื่น ๆ ด้วย `renderMarker` ของคุณ ทุกจุดจึงยังคงมีไอคอน React ป๊อปอัป และเหตุการณ์ของตัวเอง กลุ่มจะแยกออกเมื่อผู้ใช้ซูมเข้า และจะแสดงผลเฉพาะหมุดที่อยู่ในหรือใกล้พื้นที่ที่มองเห็นเท่านั้น ทำให้แสดงจุดนับพันจุดได้อย่างรวดเร็ว
+
+<MarkerClusterDemo />
+
+<ShowCode>
+<include cwd meta='title="clustered-places.tsx"'>components/examples/clustered-places.tsx</include>
+</ShowCode>
+
+```tsx
+import { type Location, Marker, MarkerCluster, SphereMap } from "gistda-sphere-react";
+
+interface Station {
+  id: string;
+  name: string;
+  position: Location;
+}
+
+function StationMap({ stations }: { stations: Station[] }) {
+  return (
+    <SphereMap style={{ height: 500 }}>
+      <MarkerCluster
+        getPosition={(station) => station.position}
+        items={stations}
+        renderMarker={(station) => (
+          <Marker position={station.position} title={station.name} />
+        )}
+      />
+    </SphereMap>
+  );
+}
+```
+
+## Props
+
+| Prop | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `items` | `T[]` | **จำเป็น** | ข้อมูลจุด ควร memoize อาร์เรย์ขนาดใหญ่ เพราะอาร์เรย์ใหม่จะถูกจัดกลุ่มใหม่ |
+| `getPosition` | `(item) => Location` | **จำเป็น** | ตำแหน่งของแต่ละรายการ |
+| `renderMarker` | `(item, index) => ReactNode` | **จำเป็น** | แสดงจุดที่ไม่ได้อยู่ในกลุ่ม ซึ่งมักเป็น `<Marker>` โดย `index` คือลำดับของรายการใน `items` |
+| `renderCluster` | `(cluster) => ReactNode` | วงกลมสีน้ำเงินพร้อมจำนวน | เนื้อหาไอคอนของหมุดกลุ่ม |
+| `onClusterClick` | `(cluster) => void` | ซูมเข้า | ใช้แทนการทำงานเริ่มต้นที่ซูมเข้าไปยังจุดในกลุ่ม |
+| `radius` | `number` | `60` | ระยะห่างสูงสุดเป็นพิกเซลบนหน้าจอที่จุดจะถูกจัดเป็นกลุ่มเดียวกัน |
+| `minPoints` | `number` | `2` | จำนวนจุดน้อยที่สุดที่จะรวมเป็นกลุ่ม |
+| `maxZoom` | `number` | `16` | เมื่อซูมเกินระดับนี้ จุดจะไม่ถูกจัดกลุ่ม |
+
+## กลุ่มจุด [#clusters]
+
+`renderCluster` และ `onClusterClick` จะได้รับ `Cluster`:
+
+| ฟิลด์ | คำอธิบาย |
+| --- | --- |
+| `count` | จำนวนจุดในกลุ่ม |
+| `items` | ข้อมูลจุดในกลุ่ม |
+| `position` | ตำแหน่งเฉลี่ยของจุด ซึ่งเป็นตำแหน่งของหมุดกลุ่ม |
+| `bound` | ขอบเขตของจุดในกลุ่ม `{ minLon, minLat, maxLon, maxLat }` |
+| `key` | ID ที่คงเดิมตราบใดที่กลุ่มยังมีจุดแรกและจำนวนจุดเท่าเดิม |
+
+ไอคอนของกลุ่มเป็น[ไอคอน React ของหมุด](/th/docs/components/marker#react-icons) จึงปรับแต่งได้อย่างอิสระ ตัวอย่างนี้แสดงรายการจุดในกลุ่มแทนการซูมเข้า:
+
+```tsx
+import { Marker, MarkerCluster } from "gistda-sphere-react";
+import { useState } from "react";
+
+const [selected, setSelected] = useState<Station[]>([]);
+
+<MarkerCluster
+  getPosition={(station) => station.position}
+  items={stations}
+  onClusterClick={(cluster) => setSelected(cluster.items)}
+  renderCluster={(cluster) => <span className="cluster-badge">{cluster.count}</span>}
+  renderMarker={(station) => <Marker position={station.position} title={station.name} />}
+/>
+```
+
+## หลักการทำงาน [#how-it-works]
+
+จุดจะถูกจัดกลุ่มใหม่เมื่อระดับซูมเปลี่ยน โดยใช้ระดับซูมแบบจำนวนเต็ม กลุ่มจึงไม่เปลี่ยนเมื่อผู้ใช้เลื่อนหรือซูมเพียงเล็กน้อย เมื่อซูมเกิน `maxZoom` ทุกจุดจะแสดงเป็นหมุดของตัวเอง
+
+จะแสดงเฉพาะกลุ่มและหมุดที่อยู่ในหรือใกล้พื้นที่ที่มองเห็น ส่วนที่เหลือจะปรากฏเมื่อผู้ใช้เลื่อนแผนที่เข้าไปใกล้ หมุดที่ออกจากพื้นที่นั้นจะถูก unmount ดังนั้น state ของ React ภายในหมุดจะถูกรีเซ็ตเมื่อหมุดกลับมาแสดงอีกครั้ง
+
+<Callout>
+  หากมีจุดหลายแสนจุด ให้จัดกลุ่มใน MapLibre ด้วย[สไตล์ของ `<Layer>`](/th/docs/examples/advanced-layers#clustering) แทน วิธีนี้เร็วกว่าเพราะ GPU เป็นผู้วาดจุด แต่จะแสดงเป็นวงกลมแทนหมุด React
+</Callout>

@@ -3,11 +3,19 @@ title: การเพิ่มหมุดจาก state
 description: เพิ่มและลบหมุดด้วย React state หรือ hook useMarkers
 ---
 
-ใช้ React state เพื่อเพิ่มหมุด รูปหลายเหลี่ยม หรือโอเวอร์เลย์ใด ๆ แบบไดนามิก
+เพิ่มและลบหมุดจากโค้ด ตัวอย่างนี้เก็บหมุดไว้ใน [`useMarkers`](/th/docs/hooks/overlay-hooks) ซึ่งให้ ID กับหมุดแต่ละตัวเพื่อใช้เป็น `key`
 
 <OverlayDemo />
 
-```tsx tab="Component" lineNumbers
+<ShowCode>
+<include cwd meta='title="marker-list.tsx"'>components/examples/marker-list.tsx</include>
+</ShowCode>
+
+## ใช้ React state แทน [#with-react-state-instead]
+
+React state ธรรมดาใช้กับโอเวอร์เลย์ใดก็ได้เช่นกัน โดยต้องกำหนด `key` ที่คงที่ให้แต่ละตัว:
+
+```tsx lineNumbers
 import { useState } from 'react';
 import { SphereProvider, SphereMap, Marker, type Location } from 'gistda-sphere-react';
 
@@ -30,43 +38,6 @@ function App() {
         {markers.map((position) => (
           <Marker key={`${position.lon}-${position.lat}`} position={position} />
         ))}
-      </SphereMap>
-    </SphereProvider>
-  );
-}
-```
-
-```tsx tab="Hook" lineNumbers
-import { SphereProvider, SphereMap, Marker, useMarkers, type Location } from 'gistda-sphere-react';
-
-function MarkerManager() {
-  const { items: markers, add, clear } = useMarkers();
-
-  const addMarker = () => {
-    add({
-      position: {
-        lon: 100.5 + (Math.random() - 0.5) * 0.2,
-        lat: 13.75 + (Math.random() - 0.5) * 0.2,
-      },
-    });
-  };
-
-  return (
-    <>
-      <button onClick={addMarker}>Add Marker</button>
-      <button onClick={clear}>Clear All</button>
-      {markers.map((m) => (
-        <Marker key={m.id} position={m.position} />
-      ))}
-    </>
-  );
-}
-
-function App() {
-  return (
-    <SphereProvider apiKey="YOUR_API_KEY">
-      <SphereMap center={{ lon: 100.5, lat: 13.75 }} zoom={11} style={{ height: '500px' }}>
-        <MarkerManager />
       </SphereMap>
     </SphereProvider>
   );

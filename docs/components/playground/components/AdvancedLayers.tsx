@@ -6,10 +6,14 @@ import type { AdvancedLayer } from "../constants";
 
 const EARTHQUAKES_URL =
   "https://maplibre.org/maplibre-gl-js/docs/assets/earthquakes.geojson";
-const I3S_BUILDINGS_URL =
-  "https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0";
+// Buildings from Cesium's 3D Tiles samples, in Pennsylvania, USA.
+const BUILDINGS_URL =
+  "https://raw.githubusercontent.com/CesiumGS/3d-tiles-samples/main/1.0/TilesetWithRequestVolume/tileset.json";
+// The Royal Exhibition Building in Melbourne, from deck.gl's sample data.
 const POINT_CLOUD_URL =
-  "https://webodm.longdo.com/api/projects/2/tasks/430d3956-ddde-47c1-9ae5-256870076657/assets/3d_tiles/pointcloud/tileset.json";
+  "https://raw.githubusercontent.com/visgl/deck.gl-data/master/3d-tiles/RoyalExhibitionBuilding/tileset.json";
+// The point cloud has no colors of its own, and deck.gl draws such points black.
+const POINT_CLOUD_OPTIONS = { getPointColor: [37, 99, 235, 255] };
 const MODEL_URL =
   "https://raw.githubusercontent.com/KhronosGroup/glTF-Sample-Models/master/2.0/Box/glTF-Binary/Box.glb";
 const WMS_URL = "https://ms.longdo.com/mapproxy/service";
@@ -154,7 +158,7 @@ function ModelLayer() {
 export function AdvancedLayers({ layers }: { layers: AdvancedLayer[] }) {
   const { goTo } = useMapControls();
 
-  // 3D tilesets report their center once loaded; fly there with a tilt.
+  // 3D tilesets report their center once loaded, so fly there with a tilt.
   const flyToTileset = useCallback(
     (tileset: TilesetInfo) => {
       const [lon, lat] = tileset.cartographicCenter ?? [];
@@ -186,14 +190,15 @@ export function AdvancedLayers({ layers }: { layers: AdvancedLayer[] }) {
         <Layer
           name="playground-buildings"
           onTilesetLoad={flyToTileset}
-          type="I3S"
-          url={I3S_BUILDINGS_URL}
+          type="Tiles3D"
+          url={BUILDINGS_URL}
         />
       ) : null}
       {layers.includes("pointcloud") ? (
         <Layer
           name="playground-pointcloud"
           onTilesetLoad={flyToTileset}
+          options={POINT_CLOUD_OPTIONS}
           pointSize={2}
           type="Tiles3D"
           url={POINT_CLOUD_URL}

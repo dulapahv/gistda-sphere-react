@@ -7,8 +7,12 @@ description: แสดงตัวควบคุม React ของคุณเ
 
 <MapControlDemo />
 
+<ShowCode>
+<include cwd meta='title="custom-controls.tsx"'>components/examples/custom-controls.tsx</include>
+</ShowCode>
+
 ```tsx
-import { MapControl, useMapControls } from "gistda-sphere-react";
+import { MapControl, SphereMap, useMapControls } from "gistda-sphere-react";
 
 function HomeButton() {
   const { goTo } = useMapControls();
@@ -43,6 +47,8 @@ function HomeButton() {
 เมื่อใช้ `group` ปุ่มจะได้สไตล์ตัวควบคุมของ MapLibre (29 × 29 px พื้นขาว) หากไม่ใช้ คอนเทนเนอร์จะไม่มีสไตล์ จึงแสดงอะไรก็ได้ เช่น คำอธิบายสัญลักษณ์
 
 ```tsx
+import { MapControl } from "gistda-sphere-react";
+
 <MapControl position="bottom-right" className="rounded bg-white p-2 text-xs shadow">
   <strong>PM2.5 (µg/m³)</strong>
   <Legend />

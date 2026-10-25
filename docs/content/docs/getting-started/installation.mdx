@@ -25,8 +25,8 @@ The package has no other dependencies and ships its own TypeScript types. The Sp
 
 ## Requirements
 
-- **React 19 or later.** `react` and `react-dom` are peer dependencies.
-- **A browser.** Maps render on the client. With the Next.js App Router, use the components in Client Components (`"use client"`).
+- **React 19 or later**, in any setup, such as Vite, Next.js or React Router. `react` and `react-dom` are peer dependencies.
+- **A browser.** Maps render on the client. In the Next.js App Router, you can render the components from Server or Client Components, but hooks and event handlers need a Client Component (`"use client"`). See [Using it with Next.js](/docs/components/sphere-provider#using-it-with-nextjs). The [web services client](/docs/web-services#on-a-server) also runs on servers.
 - **An API key** from GISTDA. See [Getting an API key](/docs/getting-started/api-key).
 
 ## Next steps

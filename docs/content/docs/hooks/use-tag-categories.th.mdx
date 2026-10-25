@@ -6,7 +6,8 @@ description: หมวดหมู่แท็กสถานที่ (POI) ท
 `useTagCategories` โหลดรายการแท็ก POI ของ Sphere ประมาณ 260 แท็กใน 20 หมวดหมู่ ใช้สร้างตัวเลือกแท็ก แล้วแสดงแท็กที่เลือกด้วย [`<Tag>`](/th/docs/components/tag)
 
 ```tsx
-import { Tag, useTagCategories } from "gistda-sphere-react";
+import { SphereMap, Tag, useTagCategories } from "gistda-sphere-react";
+import { useState } from "react";
 
 function TagPicker() {
   const { categories, isLoading, error } = useTagCategories("en");
@@ -36,7 +37,7 @@ function TagPicker() {
 
 | พารามิเตอร์ | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
 | --- | --- | --- | --- |
-| `language` | `"th" \| "en"` | `"en"` | ภาษาของชื่อหมวดหมู่และแท็ก |
+| `language` | `"th" \| "en"` | `language` ของ provider หรือ `"en"` | ภาษาของชื่อหมวดหมู่และแท็ก ค่าเริ่มต้นคือ [`language` ของ `SphereProvider`](/th/docs/components/sphere-provider#language) หากไม่ได้กำหนดจะใช้ภาษาอังกฤษ |
 
 ## ค่าที่คืนกลับ [#return-value]
 

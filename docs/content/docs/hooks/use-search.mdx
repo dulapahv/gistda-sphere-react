@@ -7,24 +7,41 @@ description: Search places, autocomplete, find nearby POIs and look up addresses
 
 <SearchDemo />
 
+<ShowCode>
+<include cwd meta='title="place-search.tsx"'>components/examples/place-search.tsx</include>
+</ShowCode>
+
 ```tsx
-import { useSearch } from "gistda-sphere-react";
+import { type PoiResult, useSearch } from "gistda-sphere-react";
+import { type FormEvent, useState } from "react";
 
 function PlaceSearch() {
   const { search, isReady } = useSearch();
+  const [keyword, setKeyword] = useState("");
   const [places, setPlaces] = useState<PoiResult[]>([]);
 
-  async function run(keyword: string) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     const { data } = await search(keyword, { limit: 10 });
     setPlaces(data);
   }
 
   return (
-    <ul>
-      {places.map((place) => (
-        <li key={place.id}>{place.name}</li>
-      ))}
-    </ul>
+    <form onSubmit={handleSubmit}>
+      <input
+        aria-label="Search places"
+        onChange={(event) => setKeyword(event.target.value)}
+        value={keyword}
+      />
+      <button disabled={!isReady} type="submit">
+        Search
+      </button>
+      <ul>
+        {places.map((place) => (
+          <li key={place.id}>{place.name}</li>
+        ))}
+      </ul>
+    </form>
   );
 }
 ```
@@ -61,33 +78,53 @@ function PlaceSearch() {
 
 Each `PoiResult` has `id`, `name`, `lat`, `lon` and, when available, `address`, `tel`, `url`, `tag` (a list of tags), `distance` and more. The `id` also works with [`<ObjectOverlay>`](/docs/components/object-overlay) to draw the place's outline.
 
+## Language
+
+Results follow the map's language, which defaults to Thai, so an English keyword can still return Thai names. Set `language` on [`SphereProvider`](/docs/components/sphere-provider#language) or `SphereMap` for English results, or call `setLanguage` to change only the search language.
+
 ## Autocomplete
 
-```tsx
-const { suggest } = useSearch();
-const [keyword, setKeyword] = useState("");
-const [suggestions, setSuggestions] = useState<SuggestResult[]>([]);
+[`useSuggest`](/docs/hooks/use-suggest) gives suggestions as users type. It waits for typing to pause and ignores responses for older keywords:
 
-useEffect(() => {
-  if (keyword.length < 2) {
-    setSuggestions([]);
-    return;
-  }
-  const timer = setTimeout(async () => {
-    const { data } = await suggest(keyword, { limit: 5 });
-    setSuggestions(data);
-  }, 250);
-  return () => clearTimeout(timer);
-}, [keyword, suggest]);
+```tsx
+import { useSuggest } from "gistda-sphere-react";
+import { useState } from "react";
+
+function SearchBox() {
+  const [keyword, setKeyword] = useState("");
+  const { suggestions } = useSuggest(keyword, { limit: 5 });
+
+  return (
+    <>
+      <input
+        aria-label="Search places"
+        onChange={(event) => setKeyword(event.target.value)}
+        value={keyword}
+      />
+      <ul>
+        {suggestions.map((suggestion, index) => (
+          <li key={`${suggestion.name}:${index}`}>{suggestion.name}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
 ```
+
+If you call `suggest` yourself, wait for typing to pause and drop responses for older keywords, or a slow response can replace newer suggestions.
 
 ## Addresses
 
 ```tsx
+import { useSearch } from "gistda-sphere-react";
+
 const { address } = useSearch();
-const result = await address({ lon: 100.5018, lat: 13.7563 });
-if (result) {
-  console.log(result.province, result.district, result.subdistrict, result.road);
+
+async function logAddress() {
+  const result = await address({ lon: 100.5018, lat: 13.7563 });
+  if (result) {
+    console.log(result.province, result.district, result.subdistrict, result.road);
+  }
 }
 ```
 

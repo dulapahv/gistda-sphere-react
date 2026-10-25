@@ -1,4 +1,5 @@
 import { act, render, waitFor } from "@testing-library/react";
+import { StrictMode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Layer } from "@/components/Layer";
 import { SphereMap } from "@/components/SphereMap";
@@ -122,6 +123,107 @@ describe("Layer", () => {
       await waitFor(() => {
         expect(mockMap.Layers.remove).toHaveBeenCalledWith(layer);
       });
+    });
+
+    it("adds a 3D layer again only after its removed copy is gone", async () => {
+      const defaultLayer = mockSphere.Layer.getMockImplementation();
+      const defaultAdd = mockMap.Layers.add.getMockImplementation();
+      // 3D tile layers take their name as id, Sphere adds them a moment
+      // later, and it removes them by id.
+      mockSphere.Layer.mockImplementation(function (name: string) {
+        return { id: name };
+      });
+      mockMap.Layers.add.mockImplementation(() => mockMap.Layers);
+      try {
+        render(
+          <StrictMode>
+            <SphereProvider apiKey="test-key">
+              <SphereMap>
+                <Layer
+                  name="buildings"
+                  type="Tiles3D"
+                  url="https://example.com/tileset.json"
+                />
+              </SphereMap>
+            </SphereProvider>
+          </StrictMode>
+        );
+        act(() => {
+          mockMap._triggerReady();
+        });
+
+        // StrictMode added the layer, removed it and created it again. The
+        // new copy waits, since removing the old one would remove it too.
+        expect(mockMap.Layers.add).toHaveBeenCalledTimes(1);
+        const first = mockMap.Layers.add.mock.calls[0]?.[0];
+
+        // Sphere announces the first copy's deck.gl layer (same id).
+        await act(async () => {
+          mockMap.Event.fire("layerChange", { id: "buildings" });
+          await Promise.resolve();
+        });
+        expect(mockMap.Layers.remove).toHaveBeenCalledWith(first);
+        expect(mockMap.Layers.add).toHaveBeenCalledTimes(2);
+        expect(mockMap.Layers.add.mock.calls[1]?.[0]).not.toBe(first);
+
+        // The new copy stays once Sphere adds it.
+        await act(async () => {
+          mockMap.Event.fire("layerChange", { id: "buildings" });
+          await Promise.resolve();
+        });
+        expect(mockMap.Layers.remove).toHaveBeenCalledTimes(1);
+      } finally {
+        if (defaultLayer) {
+          mockSphere.Layer.mockImplementation(defaultLayer);
+        }
+        if (defaultAdd) {
+          mockMap.Layers.add.mockImplementation(defaultAdd);
+        }
+      }
+    });
+
+    it("never adds a waiting 3D layer that unmounts before its turn", async () => {
+      const defaultLayer = mockSphere.Layer.getMockImplementation();
+      const defaultAdd = mockMap.Layers.add.getMockImplementation();
+      mockSphere.Layer.mockImplementation(function (name: string) {
+        return { id: name };
+      });
+      mockMap.Layers.add.mockImplementation(() => mockMap.Layers);
+      try {
+        const { unmount } = render(
+          <StrictMode>
+            <SphereProvider apiKey="test-key">
+              <SphereMap>
+                <Layer
+                  name="buildings"
+                  type="Tiles3D"
+                  url="https://example.com/tileset.json"
+                />
+              </SphereMap>
+            </SphereProvider>
+          </StrictMode>
+        );
+        act(() => {
+          mockMap._triggerReady();
+        });
+        const first = mockMap.Layers.add.mock.calls[0]?.[0];
+        unmount();
+
+        await act(async () => {
+          mockMap.Event.fire("layerChange", { id: "buildings" });
+          await Promise.resolve();
+        });
+        expect(mockMap.Layers.add).toHaveBeenCalledTimes(1);
+        expect(mockMap.Layers.remove).toHaveBeenCalledTimes(1);
+        expect(mockMap.Layers.remove).toHaveBeenCalledWith(first);
+      } finally {
+        if (defaultLayer) {
+          mockSphere.Layer.mockImplementation(defaultLayer);
+        }
+        if (defaultAdd) {
+          mockMap.Layers.add.mockImplementation(defaultAdd);
+        }
+      }
     });
 
     it("does not remove base layer on unmount", async () => {

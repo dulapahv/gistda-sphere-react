@@ -7,24 +7,41 @@ description: ค้นหาสถานที่ คำแนะนำการ
 
 <SearchDemo />
 
+<ShowCode>
+<include cwd meta='title="place-search.tsx"'>components/examples/place-search.tsx</include>
+</ShowCode>
+
 ```tsx
-import { useSearch } from "gistda-sphere-react";
+import { type PoiResult, useSearch } from "gistda-sphere-react";
+import { type FormEvent, useState } from "react";
 
 function PlaceSearch() {
   const { search, isReady } = useSearch();
+  const [keyword, setKeyword] = useState("");
   const [places, setPlaces] = useState<PoiResult[]>([]);
 
-  async function run(keyword: string) {
+  async function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault();
     const { data } = await search(keyword, { limit: 10 });
     setPlaces(data);
   }
 
   return (
-    <ul>
-      {places.map((place) => (
-        <li key={place.id}>{place.name}</li>
-      ))}
-    </ul>
+    <form onSubmit={handleSubmit}>
+      <input
+        aria-label="Search places"
+        onChange={(event) => setKeyword(event.target.value)}
+        value={keyword}
+      />
+      <button disabled={!isReady} type="submit">
+        Search
+      </button>
+      <ul>
+        {places.map((place) => (
+          <li key={place.id}>{place.name}</li>
+        ))}
+      </ul>
+    </form>
   );
 }
 ```
@@ -61,33 +78,53 @@ function PlaceSearch() {
 
 `PoiResult` แต่ละรายการมี `id`, `name`, `lat`, `lon` และหากมีข้อมูล จะมี `address`, `tel`, `url`, `tag` (รายการแท็ก), `distance` และอื่น ๆ ค่า `id` ยังใช้กับ [`<ObjectOverlay>`](/th/docs/components/object-overlay) เพื่อวาดขอบเขตของสถานที่ได้ด้วย
 
+## ภาษา [#language]
+
+ผลลัพธ์จะใช้ภาษาเดียวกับแผนที่ ซึ่งค่าเริ่มต้นคือภาษาไทย ดังนั้นแม้ค้นหาด้วยคำภาษาอังกฤษก็อาจได้ชื่อสถานที่เป็นภาษาไทย ให้กำหนด `language` ที่ [`SphereProvider`](/th/docs/components/sphere-provider#language) หรือ `SphereMap` เพื่อให้ได้ผลลัพธ์ภาษาอังกฤษ หรือเรียก `setLanguage` เพื่อเปลี่ยนเฉพาะภาษาของการค้นหา
+
 ## คำแนะนำขณะพิมพ์ [#autocomplete]
 
-```tsx
-const { suggest } = useSearch();
-const [keyword, setKeyword] = useState("");
-const [suggestions, setSuggestions] = useState<SuggestResult[]>([]);
+[`useSuggest`](/th/docs/hooks/use-suggest) ให้คำแนะนำขณะผู้ใช้พิมพ์ โดยจะรอจนผู้ใช้หยุดพิมพ์ และไม่สนใจผลลัพธ์ของคำค้นหาที่เก่ากว่า:
 
-useEffect(() => {
-  if (keyword.length < 2) {
-    setSuggestions([]);
-    return;
-  }
-  const timer = setTimeout(async () => {
-    const { data } = await suggest(keyword, { limit: 5 });
-    setSuggestions(data);
-  }, 250);
-  return () => clearTimeout(timer);
-}, [keyword, suggest]);
+```tsx
+import { useSuggest } from "gistda-sphere-react";
+import { useState } from "react";
+
+function SearchBox() {
+  const [keyword, setKeyword] = useState("");
+  const { suggestions } = useSuggest(keyword, { limit: 5 });
+
+  return (
+    <>
+      <input
+        aria-label="Search places"
+        onChange={(event) => setKeyword(event.target.value)}
+        value={keyword}
+      />
+      <ul>
+        {suggestions.map((suggestion, index) => (
+          <li key={`${suggestion.name}:${index}`}>{suggestion.name}</li>
+        ))}
+      </ul>
+    </>
+  );
+}
 ```
+
+หากเรียก `suggest` เอง ให้รอจนผู้ใช้หยุดพิมพ์และทิ้งผลลัพธ์ของคำค้นหาที่เก่ากว่า มิฉะนั้นผลลัพธ์ที่มาช้าอาจแทนที่คำแนะนำที่ใหม่กว่า
 
 ## ที่อยู่ [#addresses]
 
 ```tsx
+import { useSearch } from "gistda-sphere-react";
+
 const { address } = useSearch();
-const result = await address({ lon: 100.5018, lat: 13.7563 });
-if (result) {
-  console.log(result.province, result.district, result.subdistrict, result.road);
+
+async function logAddress() {
+  const result = await address({ lon: 100.5018, lat: 13.7563 });
+  if (result) {
+    console.log(result.province, result.district, result.subdistrict, result.road);
+  }
 }
 ```
 

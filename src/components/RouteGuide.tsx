@@ -25,7 +25,7 @@ export function RouteGuide({ className, style }: RouteGuideProps) {
     }
     map.Route.placeholder(container);
     return () => {
-      // Sphere cannot detach a placeholder; point it at a detached element.
+      // Sphere cannot detach a placeholder, so point it at a detached element.
       if (map.Route.placeholder() === container) {
         map.Route.placeholder(document.createElement("div"));
       }

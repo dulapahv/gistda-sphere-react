@@ -1,0 +1,18 @@
+---
+title: Search with autocomplete
+description: A search box with suggestions, a result list and a marker with a React popup
+---
+
+Type to get suggestions, press Enter to search, then pick a result:
+
+<SearchDemo />
+
+<ShowCode>
+<include cwd meta='title="place-search.tsx"'>components/examples/place-search.tsx</include>
+</ShowCode>
+
+## Ideas
+
+- Show the outline of an area result (a province or district) with [`<ObjectOverlay id={place.id} fitBounds />`](/docs/components/object-overlay).
+- Bias results to what's on screen: `search(keyword, { span: "5km" })` around the map center, or use the [search web service](/docs/web-services/search-and-places#search) with `near`.
+- For Sphere's ready-made result list, render [`<SearchResults>`](/docs/components/search-results) instead of your own.

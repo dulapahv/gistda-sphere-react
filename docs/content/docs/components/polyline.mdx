@@ -19,18 +19,25 @@ description: A line through several points, with dashes, labels and length measu
 </MapDemo>
 
 ```tsx
-<Polyline
-  positions={[
-    { lon: 100.4, lat: 13.7 },
-    { lon: 100.5, lat: 13.8 },
-    { lon: 100.6, lat: 13.7 },
-    { lon: 100.7, lat: 13.8 },
-  ]}
-  lineColor="blue"
-  lineWidth={4}
-  lineStyle="Dashed"
-/>
+import { Polyline, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.55, lat: 13.75 }} style={{ height: 400 }} zoom={10}>
+  <Polyline
+    positions={[
+      { lon: 100.4, lat: 13.7 },
+      { lon: 100.5, lat: 13.8 },
+      { lon: 100.6, lat: 13.7 },
+      { lon: 100.7, lat: 13.8 },
+    ]}
+    lineColor="blue"
+    lineWidth={4}
+    lineStyle="Dashed"
+    title="Route A"
+  />
+</SphereMap>
 ```
+
+The shorter samples below leave out `<SphereMap>`, but every overlay goes inside one.
 
 ## Props
 
@@ -45,6 +52,8 @@ Lines also take the [shape props](/docs/components/polygon#shape-props), such as
 `lineStyle` takes `"Solid"`, `"Dashed"`, `"Dot"` or your own dash pattern:
 
 ```tsx
+import { Polyline } from "gistda-sphere-react";
+
 <Polyline positions={path} lineStyle={[12, 4, 2, 4]} lineWidth={3} />
 ```
 

@@ -401,7 +401,9 @@ describe("useRoute", () => {
         });
       }
       map.Route.modeOf = vi.fn().mockReturnValue(undefined);
-      map.Route.list = vi.fn().mockReturnValue([{}, {}]);
+      // Destination markers, as Sphere returns them.
+      const stop = () => ({ location: () => ({ lat: 13.75, lon: 100.5 }) });
+      map.Route.list = vi.fn().mockReturnValue([stop(), stop()]);
       return changes;
     }
 

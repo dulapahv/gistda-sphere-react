@@ -8,6 +8,8 @@ description: Common problems and how to fix them
 The map fills its container, so the container needs a height:
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+
 <SphereMap style={{ width: "100%", height: 500 }} />
 ```
 
@@ -24,6 +26,8 @@ If the map is inside a tab, dialog or collapsible panel that starts hidden, call
 Put `<SphereProvider>` above every component that uses the map components or hooks:
 
 ```tsx
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider apiKey="YOUR_API_KEY">
   <App />
 </SphereProvider>
@@ -31,7 +35,11 @@ Put `<SphereProvider>` above every component that uses the map components or hoo
 
 ## Next.js: "hooks can only be used in Client Components"
 
-The components and hooks run in the browser. Use them from a file that starts with `"use client"`.
+Hooks and props that take functions, such as `onClick`, need a Client Component: move that code into a file that starts with `"use client"`. The components themselves can be rendered from Server Components. See [Using it with Next.js](/docs/components/sphere-provider#using-it-with-nextjs).
+
+## Next.js: "createContext is not a function"
+
+Versions before 2.1 didn't mark their components as Client Components, so rendering `SphereProvider` from a Server Component, such as a layout, failed. Upgrade to 2.1, or render it from a file that starts with `"use client"`.
 
 ## Overlays don't appear
 
@@ -41,11 +49,19 @@ The components and hooks run in the browser. Use them from a file that starts wi
 
 ## The map jumps back when my component re-renders
 
-`center`, `zoom`, `rotate` and `pitch` only set the initial view. To move the map, call `goTo` or `setCenter` from [`useMapControls`](/docs/hooks/use-map-controls) or the map ref.
+`center`, `zoom`, `rotate` and `pitch` only set the initial view. To move the map, call `goTo` or `setCenter` from [`useMapControls`](/docs/hooks/use-map-controls) or the map ref. To keep your state in step with the map, use [`onViewChange`](/docs/components/sphere-map#syncing-the-view).
+
+## The map draws in the page's top-left corner
+
+Before 2.1, a map that mounted after the Sphere script had loaded drew in the wrong place under React StrictMode, which Next.js and Vite use in development. This shows up after client-side navigation, or with maps in tabs and modals. Upgrade to 2.1.
 
 ## Routing never finishes
 
-With no answer within 20 seconds, `useRoute` reports a `"timeout"` error. This almost always means your key doesn't have the routing service enabled. Fly (straight line) mode works without it.
+With no answer within 20 seconds, `useRoute` reports a `"timeout"` error. This almost always means your key doesn't have the routing service enabled: in the browser's network panel, the `route/route` request answers `sphere Map API key error`, which Sphere ignores. Fly (straight line) mode works without the service.
+
+## Search results or directions are in Thai
+
+They follow the map's language, which defaults to Thai. Set `language="en"` on [`SphereProvider`](/docs/components/sphere-provider#language) to switch maps, search, routing and web services to English.
 
 ## `address()` returns `null`
 
@@ -61,7 +77,13 @@ The object comes from the POI details service. If your key doesn't have it, noth
 
 ## Web service calls fail with code `"key"`
 
-Enable that service for your key, and check the allowed hosts. Calls from a server have no browser host, so the key must allow them.
+Enable that service for your key, and check the allowed hosts. Calls from a server don't send the host that Sphere checks: set the [`referer` option](/docs/web-services#on-a-server) to a page on an allowed domain, or use a key without domain limits.
+
+## A 3D layer draws nothing
+
+- `type="I3S"`: Sphere's current runtime can't draw I3S meshes, and the console fills with deck.gl `MeshLayer` errors. Use 3D Tiles instead. See [3D tiles and I3S](/docs/components/layer#3d-tiles-and-i3s).
+- `type="Tiles3D"` in development: before 2.1, React StrictMode removed the layer right after adding it. Upgrade to 2.1.
+- Point clouds can be black if the points have no colors of their own. Set `options={{ getPointColor: [r, g, b, 255] }}`.
 
 ## Hooks report `isReady: false`
 
@@ -69,4 +91,16 @@ Hooks such as `useSearch`, `useRoute` and `useTags` work once the map is ready. 
 
 ## Clicks on shapes don't reach `onClick` on the map
 
-A click on an overlay is reported as `onOverlayClick` (and the overlay's own `onClick`), not as a map click. If you need both, handle `onOverlayClick` too; its second argument is the location.
+A click on an overlay is reported as `onOverlayClick` (and the overlay's own `onClick`), not as a map click. If you need both, handle `onOverlayClick` too. Its second argument is the location.
+
+## Labels or popups are unreadable in dark mode
+
+Sphere's shape labels and popups have light backgrounds, but their text takes your page's color. On a dark theme with light text, set it back to a dark color:
+
+```css
+.sphere-geomlabel,
+.sphere-popup_title,
+.sphere-popup_detail {
+  color: #1a1a1a;
+}
+```

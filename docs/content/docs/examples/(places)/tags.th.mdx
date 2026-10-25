@@ -1,0 +1,23 @@
+---
+title: สถานที่ตามหมวดหมู่
+description: ให้ผู้ใช้เลือกหมวดหมู่สถานที่ (POI) แล้วแสดงบนแผนที่
+---
+
+เลือกหมวดหมู่ แล้วเปิดหรือปิดแท็กเพื่อแสดงสถานที่เหล่านั้นบนแผนที่
+
+<TagsDemo />
+
+<ShowCode>
+<include cwd meta='title="tag-picker.tsx"'>components/examples/tag-picker.tsx</include>
+</ShowCode>
+
+`<Tag>` แต่ละตัวจะเพิ่มชั้นข้อมูลเมื่อ mount และลบออกเมื่อ unmount แผนที่จึงตรงกับค่า `activeTags` เสมอ หากต้องการจัดการแท็กแบบ imperative แทน ให้ใช้ [`useTags`](/th/docs/hooks/use-tags):
+
+```tsx
+import { useTags } from "gistda-sphere-react";
+
+const { add, remove, clear } = useTags();
+add("โรงพยาบาล");
+add("เอทีเอ็ม");
+remove("โรงพยาบาล");
+```

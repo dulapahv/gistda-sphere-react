@@ -7,7 +7,13 @@ description: แสดงสถานที่ (POI) ตามหมวดหม
 
 <TagsDemo />
 
+<ShowCode>
+<include cwd meta='title="tag-picker.tsx"'>components/examples/tag-picker.tsx</include>
+</ShowCode>
+
 ```tsx
+import { SphereMap, Tag } from "gistda-sphere-react";
+
 <SphereMap>
   <Tag name="โรงพยาบาล" />
   <Tag name="วัด,พิพิธภัณฑ์" visibleRange={{ min: 12, max: 22 }} />
@@ -36,6 +42,8 @@ prop อื่น ๆ จะถูกส่งต่อให้ `Tags.add` ข�
 ## ข้อมูล WFS หรือ OGC API ของคุณเอง [#your-own-wfs-or-ogc-api-data]
 
 ```tsx
+import { Tag } from "gistda-sphere-react";
+
 <Tag
   name="StructurePnt"
   type="OGC"

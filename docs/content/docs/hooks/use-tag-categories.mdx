@@ -6,7 +6,8 @@ description: Every POI tag category, in Thai or English, loaded live from Sphere
 `useTagCategories` loads Sphere's list of POI tags: about 260 tags in 20 categories. Use it to build tag pickers, then show the chosen tags with [`<Tag>`](/docs/components/tag).
 
 ```tsx
-import { Tag, useTagCategories } from "gistda-sphere-react";
+import { SphereMap, Tag, useTagCategories } from "gistda-sphere-react";
+import { useState } from "react";
 
 function TagPicker() {
   const { categories, isLoading, error } = useTagCategories("en");
@@ -36,7 +37,7 @@ function TagPicker() {
 
 | Parameter | Type | Default | Description |
 | --- | --- | --- | --- |
-| `language` | `"th" \| "en"` | `"en"` | Language of category and tag labels. |
+| `language` | `"th" \| "en"` | provider's `language`, else `"en"` | Language of category and tag labels. Defaults to [`SphereProvider`'s `language`](/docs/components/sphere-provider#language), then English. |
 
 ## Return value
 
@@ -46,6 +47,6 @@ function TagPicker() {
 | `isLoading` | `boolean` | `true` while the list loads. |
 | `error` | `Error \| null` | Why the list couldn't load. |
 
-Each tag's `id` is its Thai name, which is what `<Tag name>` and `useTags().add()` expect. The list is fetched once per page and shared by every component that uses the hook; it doesn't need an API key.
+Each tag's `id` is its Thai name, which is what `<Tag name>` and `useTags().add()` expect. The list is fetched once per page and shared by every component that uses the hook. It doesn't need an API key.
 
 If the request fails, you can fall back to `TAG_CATEGORIES`, a smaller built-in list with the same shape.

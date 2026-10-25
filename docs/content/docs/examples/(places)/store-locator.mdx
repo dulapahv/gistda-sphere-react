@@ -1,0 +1,25 @@
+---
+title: Store locator
+description: Clustered store markers, a list of the nearest stores in view, and a "near me" button
+---
+
+A store locator puts many branches on a map and lists the closest ones. This one clusters 120 sample stores, lists the stores in view sorted by distance from the map's center, and moves to the user's location on request:
+
+<StoreLocatorDemo />
+
+<ShowCode>
+<include cwd meta='title="store-locator.tsx"'>components/examples/store-locator.tsx</include>
+</ShowCode>
+
+## How it works
+
+- [`<MarkerCluster>`](/docs/components/marker-cluster) draws the stores, so the map stays fast and every store keeps its own React marker.
+- [`useMapView`](/docs/hooks/event-hooks#usemapview) gives the visible box and the center each time the map stops moving. The list keeps the stores inside that box and sorts them by distance, so it follows the map as users pan and zoom.
+- Clicking a store, in the list or on the map, shows a controlled [`<Popup>`](/docs/components/popup), and the list also moves the map there with `goTo`.
+- "Stores near me" asks the browser for its location with `navigator.geolocation` and moves the map there. The list then updates by itself.
+
+<Callout>
+  Browsers share the location only on secure pages (`https://` or `localhost`) and only after users allow it, so always handle the error case.
+</Callout>
+
+With real data, load the stores from your API and keep the array stable (with `useMemo` or state), since `MarkerCluster` groups the points again whenever `items` is a new array.

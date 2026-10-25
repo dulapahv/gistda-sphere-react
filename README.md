@@ -51,12 +51,13 @@ function App() {
 ## Features
 
 - **The whole Sphere API**: every map class, event and option, mapped on the [API coverage](https://gistda-sphere-react.dulapahv.dev/docs/api-coverage) page.
-- **Components**: `SphereMap`, `Marker`, `Popup`, `Polygon`, `Polyline`, `Circle`, `Rectangle`, `Dot`, `GeoJson`, `ObjectOverlay`, `Layer`, `Tag`, `PredefinedOverlay`, `MapControl`, `MenuBar`, `RouteGuide`, `SearchResults`
-- **Hooks**: `useMap`, `useSphere`, `useMapControls`, `useUi`, `useSearch`, `useRoute`, `useTags`, `useTagCategories`, `useSphereUtils`, `useSphereServices`, overlay collections (`useMarkers`, `usePolygons`, `usePolylines`, `useCircles`, `useOverlays`) and event hooks (`useMapEvent`, `useMapReady`, `useMapClick`, `useMapZoom`, `useMapLocation`, `useOverlayClick`)
+- **Components**: `SphereMap`, `Marker`, `MarkerCluster`, `Popup`, `Polygon`, `Polyline`, `Circle`, `Rectangle`, `Dot`, `GeoJson`, `ObjectOverlay`, `Layer`, `Tag`, `PredefinedOverlay`, `MapControl`, `MenuBar`, `RouteGuide`, `SearchResults`
+- **Hooks**: `useMap`, `useSphere`, `useMapControls`, `useUi`, `useSearch`, `useSuggest`, `useRoute`, `useTags`, `useTagCategories`, `useSphereUtils`, `useSphereServices`, overlay collections (`useMarkers`, `usePolygons`, `usePolylines`, `useCircles`, `useOverlays`) and event hooks (`useMapEvent`, `useMapReady`, `useMapClick`, `useMapZoom`, `useMapLocation`, `useMapView`, `useOverlayClick`)
 - **React content** in marker icons, popups and map controls
 - **Routing** with status, totals and readable turn-by-turn directions as React state
-- **Data and analysis**: GeoJSON, KML, GPX and WKT; heatmaps, clusters, 3D Tiles and I3S; measurements and polygon operations
-- **Web services client** (`createSphereServices`) for search, routing, addresses, elevation, static maps, agriculture, disasters and population, in the browser or on a server
+- **Data and analysis**: GeoJSON, KML, GPX and WKT data, heatmaps, clusters, 3D Tiles, measurements and polygon operations
+- **Web services client** (`createSphereServices`) for search, routing, addresses, elevation, static maps, agriculture, disasters and population, in the browser or on a server (import it from `gistda-sphere-react/services` there)
+- **Next.js ready**: components work in Server Components, and hooks and event handlers go in Client Components
 - **Full TypeScript support** with typed props, refs, results and events
 
 For detailed API reference, examples, and interactive demos, visit the **[documentation](https://gistda-sphere-react.dulapahv.dev)**.

@@ -7,32 +7,15 @@ description: คลิกบนแผนที่เพื่อเพิ่ม�
 
 <InteractiveMarkerDemo />
 
-```tsx tab="Component" lineNumbers
-import { useState } from 'react';
-import { SphereProvider, SphereMap, Marker, type Location } from 'gistda-sphere-react';
+<ShowCode>
+<include cwd meta='title="marker-placement.tsx"'>components/examples/marker-placement.tsx</include>
+</ShowCode>
 
-function App() {
-  const [markers, setMarkers] = useState<Location[]>([]);
+## ใช้ useMarkers แทน [#with-usemarkers-instead]
 
-  return (
-    <SphereProvider apiKey="YOUR_API_KEY">
-      <button onClick={() => setMarkers([])}>Clear</button>
-      <SphereMap
-        center={{ lon: 100.5, lat: 13.75 }}
-        zoom={10}
-        style={{ height: '500px' }}
-        onClick={(location) => setMarkers([...markers, location])}
-      >
-        {markers.map((pos) => (
-          <Marker key={`${pos.lon}-${pos.lat}`} position={pos} />
-        ))}
-      </SphereMap>
-    </SphereProvider>
-  );
-}
-```
+ตัวอย่างนี้เก็บหมุดไว้ใน state ของคอมโพเนนต์ หากต้องการเก็บไว้ใน hook แทน และรับการคลิกจากคอมโพเนนต์ลูกของแผนที่ ให้ใช้ [`useMarkers`](/th/docs/hooks/overlay-hooks) และ [`useMapEvent`](/th/docs/hooks/event-hooks):
 
-```tsx tab="Hook" lineNumbers
+```tsx lineNumbers
 import { SphereProvider, SphereMap, Marker, useMarkers, useMapEvent } from 'gistda-sphere-react';
 
 function MarkerPlacer() {

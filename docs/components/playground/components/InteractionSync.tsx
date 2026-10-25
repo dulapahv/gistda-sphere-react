@@ -12,7 +12,7 @@ interface DoubleClickZoomHandler {
 
 /**
  * Applies the playground's interaction settings with `useUi`. Renders
- * nothing; place it inside `SphereMap`.
+ * nothing. Place it inside `SphereMap`.
  */
 export function InteractionSync({
   drawingMode,

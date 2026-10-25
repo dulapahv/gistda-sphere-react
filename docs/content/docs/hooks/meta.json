@@ -8,6 +8,7 @@
     "use-ui",
     "---Places and routes---",
     "use-search",
+    "use-suggest",
     "use-route",
     "use-tags",
     "use-tag-categories",

@@ -1,0 +1,10 @@
+{
+  "title": "Data and analysis",
+  "defaultOpen": true,
+  "pages": [
+    "data-formats",
+    "spatial-analysis",
+    "custom-wms-layer",
+    "advanced-layers"
+  ]
+}

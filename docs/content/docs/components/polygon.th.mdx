@@ -14,25 +14,32 @@ description: พื้นที่ปิด รองรับรู ป้า�
     fillColor="rgba(255, 0, 0, 0.3)"
     lineColor="red"
     lineWidth={2}
-    label="โซน A"
-    title="โซน A"
+    label="Zone A"
+    title="Zone A"
   />
 </MapDemo>
 
 ```tsx
-<Polygon
-  positions={[
-    { lon: 100.45, lat: 13.8 },
-    { lon: 100.55, lat: 13.8 },
-    { lon: 100.55, lat: 13.7 },
-    { lon: 100.45, lat: 13.7 },
-  ]}
-  fillColor="rgba(255, 0, 0, 0.3)"
-  lineColor="red"
-  lineWidth={2}
-  label="Zone A"
-/>
+import { Polygon, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.5, lat: 13.75 }} style={{ height: 400 }} zoom={11}>
+  <Polygon
+    positions={[
+      { lon: 100.45, lat: 13.8 },
+      { lon: 100.55, lat: 13.8 },
+      { lon: 100.55, lat: 13.7 },
+      { lon: 100.45, lat: 13.7 },
+    ]}
+    fillColor="rgba(255, 0, 0, 0.3)"
+    lineColor="red"
+    lineWidth={2}
+    label="Zone A"
+    title="Zone A"
+  />
+</SphereMap>
 ```
+
+ตัวอย่างสั้น ๆ ด้านล่างละ `<SphereMap>` ไว้ แต่โอเวอร์เลย์ทุกตัวต้องอยู่ภายใน `<SphereMap>` เสมอ
 
 ## Props
 
@@ -76,6 +83,8 @@ description: พื้นที่ปิด รองรับรู ป้า�
 ใส่ `null` คั่นระหว่างขอบนอกและรูแต่ละรู
 
 ```tsx
+import { Polygon } from "gistda-sphere-react";
+
 <Polygon
   positions={[
     { lon: 100.4, lat: 13.9 }, { lon: 100.7, lat: 13.9 },
@@ -90,6 +99,8 @@ description: พื้นที่ปิด รองรับรู ป้า�
 ## ข้อมูลแบบ GeoJSON [#geojson-input]
 
 ```tsx
+import { Polygon } from "gistda-sphere-react";
+
 <Polygon
   positions={{
     type: "Polygon",
@@ -106,6 +117,8 @@ description: พื้นที่ปิด รองรับรู ป้า�
 การเปลี่ยนสี ความหนา และรูปแบบเส้นใช้ `update()` ของ Sphere รูปหลายเหลี่ยมจึงเปลี่ยนตาม state ได้โดยไม่ต้องวาดใหม่
 
 ```tsx
+import { Polygon } from "gistda-sphere-react";
+
 <Polygon
   positions={zone}
   fillColor={hovered ? "rgba(255,0,0,.5)" : "rgba(255,0,0,.2)"}
@@ -117,6 +130,9 @@ description: พื้นที่ปิด รองรับรู ป้า�
 ## Ref
 
 ```tsx
+import { Polygon, type PolygonRef } from "gistda-sphere-react";
+import { useRef } from "react";
+
 const zoneRef = useRef<PolygonRef>(null);
 
 <Polygon ref={zoneRef} positions={zone} />

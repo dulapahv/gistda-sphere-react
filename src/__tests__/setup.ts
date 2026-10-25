@@ -70,6 +70,8 @@ interface MockUi {
 }
 
 interface MockMap {
+  /** Fires a MapLibre event (e.g. `moveend`) on the mock renderer. */
+  _fireRenderer: (type: string) => void;
   _triggerClick: (location: object) => void;
   _triggerReady: () => void;
   _triggerZoom: () => void;
@@ -154,6 +156,7 @@ function control(): MockControl {
 
 export function createMockSphereApi(): MockSphereApi {
   const eventHandlers: Record<string, Set<EventHandler>> = {};
+  const rendererHandlers: Record<string, Set<() => void>> = {};
 
   const mockEvent: MockEvent = {
     bind: vi.fn((eventName: string, handler: EventHandler) => {
@@ -238,11 +241,22 @@ export function createMockSphereApi(): MockSphereApi {
   };
 
   const mockMap: MockMap = {
+    _fireRenderer: (type: string) => {
+      for (const handler of rendererHandlers[type] ?? []) {
+        handler();
+      }
+    },
     _triggerClick: (location: object) => mockEvent.fire("click", location),
     // Helper to trigger ready event in tests
     _triggerReady: () => mockEvent.fire("ready"),
     _triggerZoom: () => mockEvent.fire("zoom"),
-    bound: vi.fn().mockReturnThis(),
+    bound: vi
+      .fn()
+      .mockImplementation((value?: object) =>
+        value === undefined
+          ? { maxLat: 14, maxLon: 101, minLat: 13, minLon: 100 }
+          : mockMap
+      ),
     Event: mockEvent,
     enableFilter: vi.fn().mockReturnThis(),
     goTo: vi.fn().mockReturnThis(),
@@ -261,7 +275,13 @@ export function createMockSphereApi(): MockSphereApi {
     Renderer: {
       addControl: vi.fn(),
       hasControl: vi.fn().mockReturnValue(false),
-      on: vi.fn(),
+      off: vi.fn((type: string, handler: () => void) => {
+        rendererHandlers[type]?.delete(handler);
+      }),
+      on: vi.fn((type: string, handler: () => void) => {
+        rendererHandlers[type] ??= new Set();
+        rendererHandlers[type].add(handler);
+      }),
       remove: vi.fn(),
       removeControl: vi.fn(),
     },

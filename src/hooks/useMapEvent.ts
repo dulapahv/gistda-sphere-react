@@ -4,6 +4,7 @@ import { useActiveMap } from "@/internal/useActiveMap";
 import type {
   EventHandler,
   EventName,
+  Location,
   OverlayClickEventData,
   PointerLocation,
   SphereEventHandler,
@@ -72,14 +73,24 @@ export function useMapClick(
   useMapEvent("click", handler);
 }
 
-/** Zoom level changes. Read the zoom with `useMapControls().getZoom()`. */
-export function useMapZoom(handler: () => void): void {
-  useMapEvent("zoom", handler);
+/** Zoom level changes, with the new zoom (many times per second while zooming). */
+export function useMapZoom(handler: (zoom: number) => void): void {
+  const { map } = useActiveMap();
+  useMapEvent("zoom", () => {
+    if (map) {
+      handler(map.zoom());
+    }
+  });
 }
 
-/** Map center changes. Read it with `useMapControls().getCenter()`. */
-export function useMapLocation(handler: () => void): void {
-  useMapEvent("location", handler);
+/** Map center changes, with the new center (many times per second while panning). */
+export function useMapLocation(handler: (center: Location) => void): void {
+  const { map } = useActiveMap();
+  useMapEvent("location", () => {
+    if (map) {
+      handler(map.location());
+    }
+  });
 }
 
 /** Overlay clicks, delivered as `{ overlay, location }`. */

@@ -4,18 +4,11 @@
     "programmatic-markers",
     "interactive-placement",
     "drawing-polygons",
-    "sidebar-controls",
-    "search",
-    "routing",
-    "tags",
     "custom-popups",
-    "---Data and analysis---",
-    "data-formats",
-    "spatial-analysis",
-    "custom-wms-layer",
-    "advanced-layers",
-    "---Integration---",
-    "scroll-friendly-maps",
-    "maplibre-plugins"
+    "live-tracking",
+    "sidebar-controls",
+    "(places)",
+    "(data)",
+    "(integration)"
   ]
 }

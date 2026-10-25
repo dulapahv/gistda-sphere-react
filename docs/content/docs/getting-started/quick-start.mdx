@@ -34,7 +34,7 @@ function App() {
 ```
 
 <Callout>
-  Using Next.js App Router? Put this in a Client Component: add `"use client";` at the top of the file.
+  Using the Next.js App Router? This example works as it is in a Server Component, such as `app/page.tsx`. Code that uses hooks or event handlers like `onClick` goes in a Client Component: add `"use client";` at the top of its file.
 </Callout>
 
 ## Key concepts
@@ -44,6 +44,7 @@ function App() {
 3. **Components** such as `Marker`, `Polygon`, `Layer` and `Tag` go inside `SphereMap`. They appear when they mount and disappear when they unmount, so the map follows your state.
 4. **Hooks** such as `useMapControls`, `useSearch`, `useRoute` and `useUi` work anywhere under `SphereProvider`, for example in a sidebar.
 5. **Web services** such as routing, geocoding and agriculture data are available through [`useSphereServices`](/docs/hooks/use-sphere-services), even without a map.
+6. **Language**: maps, search results and route directions are in Thai unless you set `language="en"` on [`SphereProvider`](/docs/components/sphere-provider#language).
 
 ## Adding overlays
 
@@ -69,6 +70,8 @@ Place overlay components as children of `SphereMap`:
 </MapDemo>
 
 ```tsx lineNumbers
+import { Circle, Marker, Polygon, SphereMap } from "gistda-sphere-react";
+
 <SphereMap style={{ width: '100%', height: '500px' }}>
   <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" />
   <Polygon

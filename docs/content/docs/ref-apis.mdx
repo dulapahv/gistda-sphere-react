@@ -58,5 +58,5 @@ Markers, dots and the shapes share these spatial methods (`OverlaySpatialMethods
 Shapes also have `getBound`, `getCentroid`, `getPivot`, `rotate`, `updateStyle` and `togglePopup` (`GeometryRefMethods`). See [Spatial analysis](/docs/examples/spatial-analysis) for examples.
 
 <Callout>
-  Ref methods are safe to call at any time; they return `null` or `false` while the overlay doesn't exist yet. Call them from event handlers or effects, not during render.
+  Ref methods are safe to call at any time. They return `null` or `false` while the overlay doesn't exist yet. Call them from event handlers or effects, not during render.
 </Callout>

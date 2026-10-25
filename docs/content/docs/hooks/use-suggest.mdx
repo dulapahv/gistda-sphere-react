@@ -1,0 +1,82 @@
+---
+title: useSuggest
+description: Autocomplete suggestions for search boxes, debounced and never out of order
+---
+
+`useSuggest` looks up autocomplete suggestions as users type. It waits until typing pauses, and ignores responses for older keywords, so a slow response never replaces newer suggestions. It works inside `SphereMap` and anywhere else under `SphereProvider`.
+
+<SearchDemo />
+
+<ShowCode>
+<include cwd meta='title="place-search.tsx"'>components/examples/place-search.tsx</include>
+</ShowCode>
+
+```tsx
+import { useMapControls, useSearch, useSuggest } from "gistda-sphere-react";
+import { useState } from "react";
+
+function SearchBox() {
+  const [keyword, setKeyword] = useState("");
+  const { suggestions, isLoading } = useSuggest(keyword, { limit: 5 });
+  const { search } = useSearch();
+  const { goTo } = useMapControls();
+
+  async function choose(name: string) {
+    setKeyword(name);
+    const { data } = await search(name, { limit: 1 });
+    const [place] = data;
+    if (place) {
+      goTo({ center: { lon: place.lon, lat: place.lat }, zoom: 16 });
+    }
+  }
+
+  return (
+    <div>
+      <input
+        aria-label="Search places"
+        onChange={(event) => setKeyword(event.target.value)}
+        value={keyword}
+      />
+      {isLoading ? <p>Searching…</p> : null}
+      <ul>
+        {suggestions.map((suggestion, index) => (
+          <li key={`${suggestion.name}:${index}`}>
+            <button onClick={() => choose(suggestion.name)} type="button">
+              {suggestion.name}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+## Parameters
+
+| Parameter | Type | Default | Description |
+| --- | --- | --- | --- |
+| `keyword` | `string` | **required** | What users typed. Spaces at either end are ignored. |
+| `options.debounce` | `number` | `250` | Milliseconds to wait after the keyword last changed. |
+| `options.minLength` | `number` | `2` | Shortest keyword to look up. Shorter keywords give no suggestions. |
+| `options.limit`, `options.offset` | `number` | – | Paging. |
+| `options.area` | `string` | – | Only places in this area code, e.g. `"10"` for Bangkok. |
+| `options.dataset` | `string` | – | Dataset to search. |
+
+## Return value
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `suggestions` | `SuggestResult[]` | Suggestions for the latest keyword. Empty while the keyword is shorter than `minLength`. |
+| `isLoading` | `boolean` | `true` from a keyword change until its suggestions arrive. |
+| `error` | `Error \| null` | Why the latest lookup failed, if it did. |
+
+Each `SuggestResult` has a `name` and, when available, `highlight` (the name with the matched part wrapped in HTML) and `dataset`. Names can repeat, so combine `name` with the index for React keys, as above.
+
+## Language
+
+Suggestions follow the map's language, which defaults to Thai. Set `language` on [`SphereProvider`](/docs/components/sphere-provider#language) or `SphereMap` for English suggestions.
+
+<Callout>
+  Suggestions are names, not places. To show a place on the map, search for the chosen name with [`useSearch`](/docs/hooks/use-search), as in the example above.
+</Callout>

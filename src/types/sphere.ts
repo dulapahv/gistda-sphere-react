@@ -3,7 +3,7 @@
  *
  * Friendly names (e.g. `"Dashed"`, `"Traffic"`) are what this library's
  * components and hooks accept. The Sphere runtime itself uses different
- * values for several enums (dash arrays, single letters, bit flags); those
+ * values for several enums (dash arrays, single letters, bit flags). Those
  * are modeled by the `*Value` types and converted for you internally.
  *
  * Reference: https://api.sphere.gistda.or.th/map/doc.html
@@ -141,8 +141,8 @@ export type UiComponentMode = "Full" | "Mobile" | "None";
 export type UiComponentValue = "FULL" | "MOBILE" | false;
 
 /**
- * Routing modes: `Traffic` (fastest, avoiding traffic jams with live and
- * predicted traffic; the default), `Cost` (fastest by road, without traffic
+ * Routing modes: `Traffic` (the default: fastest, avoiding traffic jams with
+ * live and predicted traffic), `Cost` (fastest by road, without traffic
  * data), `Distance` (shortest) and `Fly` (straight lines, calculated
  * locally without the routing service).
  */
@@ -394,13 +394,22 @@ export interface TagOptions {
 
 /** Options for `map.goTo()` (MapLibre `EaseToOptions`/`JumpToOptions`). */
 export interface FlyToOptions {
+  /** Rotation in degrees, clockwise from north (MapLibre's name for `rotate`). */
   bearing?: number;
   center?: Location | [number, number];
+  /** Animation length in milliseconds. */
   duration?: number;
   padding?:
     | number
     | { top?: number; bottom?: number; left?: number; right?: number };
+  /** Tilt in degrees. */
   pitch?: number;
+  /**
+   * Rotation in degrees, clockwise from north: another name for `bearing`,
+   * matching `SphereMap`'s `rotate` prop. Used by `useMapControls().goTo`
+   * and `SphereMapRef.goTo`. `bearing` wins when both are set.
+   */
+  rotate?: number;
   zoom?: number;
   [key: string]: unknown;
 }
@@ -628,7 +637,7 @@ export interface MapLibreControl {
 
 /**
  * The MapLibre GL `Map` instance behind `map.Renderer`. Only commonly used
- * members are typed; everything else is still reachable.
+ * members are typed, and everything else is still reachable.
  */
 export interface MapLibreMap {
   addControl: (
@@ -702,7 +711,11 @@ export interface SphereLayerCollection {
     beforeId: string,
     layer: SphereLayer | object
   ) => SphereLayerCollection;
-  language: (value?: Language) => Language | SphereLayerCollection | null;
+  language: {
+    /** Language of the base map labels, or `null` when it has none. */
+    (): Language | null;
+    (value: Language): SphereLayerCollection;
+  };
   list: () => object[];
   remove: (layer: SphereLayer | object) => SphereLayerCollection;
   /** Set the base layer: a Sphere layer, a MapLibre style object, or a style URL. */
@@ -714,13 +727,23 @@ export interface SphereLayerCollection {
 export interface SphereOverlay {
   active: () => boolean;
   contains: (overlay: SphereOverlay) => boolean;
-  distance: (overlay: SphereOverlay, language?: string) => number | string;
+  distance: {
+    /** Shortest distance to another overlay, in meters. */
+    (overlay: SphereOverlay): number;
+    /** The distance as formatted text, e.g. `"1.2 km"`. */
+    (overlay: SphereOverlay, language: string): string;
+    (overlay: SphereOverlay, language?: string): number | string;
+  };
   intersects: (overlay: SphereOverlay) => boolean;
-  /** Get the location, or move the overlay (`animate`: `true` = 150 ms or a duration in ms). */
-  location: (
-    geojson?: Location | Location[] | GeoJSON,
+  /** The overlay's location (a list of locations for lines and polygons). */
+  // biome-ignore lint/style/useConsistentMethodSignatures: method overloads let subtypes narrow them, mirroring Sphere's classes
+  location(): Location | Location[];
+  /** Move the overlay (`animate`: `true` = 150 ms, or a duration in ms). */
+  // biome-ignore lint/style/useConsistentMethodSignatures: see above
+  location(
+    geojson: Location | Location[] | GeoJSON,
     animate?: boolean | number
-  ) => Location | Location[] | SphereOverlay;
+  ): SphereOverlay;
   shift: (vector: Location) => SphereOverlay;
   toJSON: (key?: string) => GeoJSONFeature;
   visibleRange: () => Range;
@@ -730,6 +753,15 @@ export interface SphereOverlay {
 export interface SphereMarker extends SphereOverlay {
   /** The marker's DOM element (HTML icons only). */
   element: () => HTMLElement | undefined;
+  /** The marker's position. */
+  // biome-ignore lint/style/useConsistentMethodSignatures: narrows SphereOverlay.location
+  location(): Location;
+  /** Move the marker (`animate`: `true` = 150 ms, or a duration in ms). */
+  // biome-ignore lint/style/useConsistentMethodSignatures: narrows SphereOverlay.location
+  location(
+    geojson: Location | GeoJSON,
+    animate?: boolean | number
+  ): SphereMarker;
   pop: (mode?: boolean) => SphereMarker;
   popup: () => SpherePopup | null;
   /** Only `draggable` and `rotate` can be updated. */
@@ -739,9 +771,25 @@ export interface SphereMarker extends SphereOverlay {
 }
 
 export interface SpherePopup extends SphereOverlay {
-  detail: (value?: string) => HTMLElement | SpherePopup;
+  detail: {
+    /** The detail element. */
+    (): HTMLElement;
+    (value: string): SpherePopup;
+  };
   element: () => HTMLElement | undefined;
-  title: (value?: string) => HTMLElement | SpherePopup;
+  /** The popup's position. */
+  // biome-ignore lint/style/useConsistentMethodSignatures: narrows SphereOverlay.location
+  location(): Location;
+  // biome-ignore lint/style/useConsistentMethodSignatures: narrows SphereOverlay.location
+  location(
+    geojson: Location | GeoJSON,
+    animate?: boolean | number
+  ): SpherePopup;
+  title: {
+    /** The title element. */
+    (): HTMLElement;
+    (value: string): SpherePopup;
+  };
 }
 
 export interface SpherePolyline extends SphereOverlay {
@@ -751,8 +799,13 @@ export interface SpherePolyline extends SphereOverlay {
   pop: (mode?: boolean, location?: Location) => SpherePolyline;
   popup: () => SpherePopup | null;
   rotate: (angle: number) => SpherePolyline;
-  /** Length in meters, or formatted text when a language is given. */
-  size: (language?: string) => number | string;
+  size: {
+    /** Length (lines) or area (polygons) in meters or square meters. */
+    (): number;
+    /** The size as formatted text, e.g. `"12 km"`. */
+    (language: string): string;
+    (language?: string): number | string;
+  };
   /** Combine with another geometry of the same kind. */
   // biome-ignore lint/style/useConsistentMethodSignatures: method syntax lets SpherePolygon narrow the parameter, mirroring Sphere's class hierarchy
   union(
@@ -786,11 +839,30 @@ export interface SpherePolygon extends SpherePolyline {
 }
 
 export interface SphereCircle extends SpherePolyline {
-  /** Radius in meters, or formatted text when a language is given. */
-  radius: (language?: string) => number | string;
+  /** The center, with its `radius` in degrees. */
+  // biome-ignore lint/style/useConsistentMethodSignatures: narrows SphereOverlay.location
+  location(): Location & { radius?: number };
+  // biome-ignore lint/style/useConsistentMethodSignatures: narrows SphereOverlay.location
+  location(
+    geojson: Location | GeoJSON,
+    animate?: boolean | number
+  ): SphereCircle;
+  radius: {
+    /** Radius in meters. */
+    (): number;
+    /** The radius as formatted text, e.g. `"500 m"`. */
+    (language: string): string;
+    (language?: string): number | string;
+  };
 }
 
-export interface SphereDot extends SpherePolyline {}
+export interface SphereDot extends SpherePolyline {
+  /** The dot's position. */
+  // biome-ignore lint/style/useConsistentMethodSignatures: narrows SphereOverlay.location
+  location(): Location;
+  // biome-ignore lint/style/useConsistentMethodSignatures: narrows SphereOverlay.location
+  location(geojson: Location | GeoJSON, animate?: boolean | number): SphereDot;
+}
 
 export interface SphereRectangle extends SpherePolygon {}
 
@@ -831,7 +903,11 @@ export interface SphereOverlayCollection {
 
 /** A UI control that can be shown or hidden. */
 export interface SphereUiControl {
-  visible: (state?: boolean) => boolean | SphereUiControl | undefined;
+  visible: {
+    /** Whether the control is shown. */
+    (): boolean | undefined;
+    (state: boolean): SphereUiControl;
+  };
 }
 
 /** The geolocation control (a MapLibre `GeolocateControl`). */
@@ -843,30 +919,42 @@ export interface SphereGeolocationControl extends SphereUiControl {
   [key: string]: unknown;
 }
 
+/** A boolean setting: call without arguments to read it, with one to set it. */
+export interface BooleanAccessor<Owner> {
+  (): boolean;
+  (state: boolean): Owner;
+}
+
+/** A language setting: call without arguments to read it, with one to set it. */
+export interface LanguageAccessor<Owner> {
+  (): Language;
+  (value: Language): Owner;
+}
+
 export interface SphereContextMenu extends SphereUiControl {
-  enableAddress: (state?: boolean) => boolean | SphereContextMenu;
-  enableNearPoi: (state?: boolean) => boolean | SphereContextMenu;
+  enableAddress: BooleanAccessor<SphereContextMenu>;
+  enableNearPoi: BooleanAccessor<SphereContextMenu>;
 }
 
 export interface SphereKeyboard {
-  enable: (state?: boolean) => boolean | SphereKeyboard;
+  enable: BooleanAccessor<SphereKeyboard>;
 }
 
 export interface SphereMouse {
-  enable: (state?: boolean) => boolean | SphereMouse;
-  enableClick: (state?: boolean) => boolean | SphereMouse;
-  enableDrag: (state?: boolean) => boolean | SphereMouse;
-  enableWheel: (state?: boolean) => boolean | SphereMouse;
+  enable: BooleanAccessor<SphereMouse>;
+  enableClick: BooleanAccessor<SphereMouse>;
+  enableDrag: BooleanAccessor<SphereMouse>;
+  enableWheel: BooleanAccessor<SphereMouse>;
 }
 
 export interface SphereLayerSelector extends SphereUiControl {
-  language: (value?: Language) => Language | SphereLayerSelector;
+  language: LanguageAccessor<SphereLayerSelector>;
 }
 
 /**
  * Built-in UI controls. Controls are absent when the map was created with
- * `ui: "None"`; `Toolbar` and `Fullscreen` are absent or hidden in mobile mode
- * (narrower than 600px or `ui: "Mobile"`).
+ * `ui: "None"`. `Toolbar` and `Fullscreen` are absent or hidden in mobile
+ * mode (narrower than 600px or `ui: "Mobile"`).
  */
 export interface SphereUiCollection {
   add: (
@@ -879,7 +967,7 @@ export interface SphereUiCollection {
   Geolocation?: SphereGeolocationControl;
   Keyboard?: SphereKeyboard;
   LayerSelector?: SphereLayerSelector;
-  language: (value?: Language) => Language | SphereUiCollection;
+  language: LanguageAccessor<SphereUiCollection>;
   /** Cover the map with a lock overlay and toggle button. Starts locked. */
   lockMap: (options: LockMapOptions) => void;
   Mouse?: SphereMouse;
@@ -898,16 +986,17 @@ export interface SphereSearch {
     options?: AddressOptions
   ) => Promise<AddressResult | null>;
   clear: () => SphereSearch;
-  enablePopup: (state?: boolean) => boolean | SphereSearch;
-  language: (value?: Language) => Language | SphereSearch;
+  enablePopup: BooleanAccessor<SphereSearch>;
+  language: LanguageAccessor<SphereSearch>;
   nearPoi: (
     location: Location,
     options?: NearPoiOptions
   ) => Promise<SearchResponse<PoiResult> | null>;
-  placeholder: (
-    value?: HTMLElement,
-    options?: SearchUiOptions
-  ) => HTMLElement | SphereSearch | undefined;
+  placeholder: {
+    /** The element results are listed in, if any. */
+    (): HTMLElement | undefined;
+    (value: HTMLElement, options?: SearchUiOptions): SphereSearch;
+  };
   search: (
     keyword: string,
     options?: SearchOptions
@@ -924,8 +1013,8 @@ export interface SphereTagCollection {
     options?: TagOptions
   ) => SphereTagCollection;
   clear: () => SphereTagCollection;
-  enablePopup: (state?: boolean) => boolean | SphereTagCollection;
-  language: (value?: Language) => Language | SphereTagCollection;
+  enablePopup: BooleanAccessor<SphereTagCollection>;
+  language: LanguageAccessor<SphereTagCollection>;
   list: () => string[];
   remove: (tag: string) => SphereTagCollection;
   set: (
@@ -940,43 +1029,75 @@ export interface SphereRoute {
     destination: SphereMarker | Location,
     mode?: RouteModeValue
   ) => SphereRoute;
-  auto: (state?: boolean) => boolean | SphereRoute;
+  auto: BooleanAccessor<SphereRoute>;
   clear: () => SphereRoute;
   clearDestination: () => SphereRoute;
   clearPath: () => SphereRoute;
-  distance: (format?: boolean) => number | string;
+  distance: {
+    /** Total distance in meters. */
+    (format?: false): number;
+    /** Total distance as formatted text. */
+    (format: true): string;
+    (format?: boolean): number | string;
+  };
   enableContextMenu: () => SphereRoute;
-  enableRestrict: (
-    routeRestrict: number,
-    state?: boolean
-  ) => boolean | SphereRoute;
-  /** Getter without arguments returns the enabled route-type bit mask. */
-  enableRoute: (
-    routeType?: RouteTypeValue,
-    state?: boolean
-  ) => boolean | number | SphereRoute;
+  enableRestrict: {
+    /** Whether roads closed to this vehicle type are avoided. */
+    (routeRestrict: number): boolean;
+    (routeRestrict: number, state: boolean): SphereRoute;
+  };
+  enableRoute: {
+    /** The enabled route types as a bit mask. */
+    (): number;
+    /** Whether this route type is allowed. */
+    (routeType: RouteTypeValue): boolean;
+    (routeType: RouteTypeValue, state: boolean): SphereRoute;
+  };
   exportRouteLine: (options?: SphereGeometryOptions) => SpherePolyline;
-  /** Legs without `format`, or a formatted guide `DocumentFragment` with `format`. */
-  guide: (format?: boolean) => RouteResult[] | DocumentFragment;
+  guide: {
+    /** The calculated legs (pending legs are numeric request tokens). */
+    (format?: false): RouteResult[];
+    /** Sphere's formatted guide. */
+    (format: true): DocumentFragment;
+    (format?: boolean): RouteResult[] | DocumentFragment;
+  };
   insert: (
     index: number,
     destination: SphereMarker | Location,
     mode?: RouteModeValue
   ) => SphereRoute;
-  interval: (format?: boolean) => number | string;
-  label: (value?: RouteLabelValue) => RouteLabelValue | SphereRoute;
-  language: (value?: Language) => Language | SphereRoute;
-  line: (
-    type: RouteLineValue,
-    value?: SphereGeometryOptions
-  ) => SphereGeometryOptions | SphereRoute;
+  interval: {
+    /** Total travel time in seconds. */
+    (format?: false): number;
+    /** Total travel time as formatted text. */
+    (format: true): string;
+    (format?: boolean): number | string;
+  };
+  label: {
+    (): RouteLabelValue;
+    (value: RouteLabelValue): SphereRoute;
+  };
+  language: LanguageAccessor<SphereRoute>;
+  line: {
+    /** Options of a route line part. */
+    (type: RouteLineValue): SphereGeometryOptions;
+    (type: RouteLineValue, value: SphereGeometryOptions): SphereRoute;
+  };
   list: () => SphereMarker[];
-  mode: (value?: RouteModeValue) => RouteModeValue | SphereRoute;
-  modeOf: (
-    index: number,
-    value?: RouteModeValue
-  ) => RouteModeValue | SphereRoute;
-  placeholder: (value?: HTMLElement) => HTMLElement | SphereRoute | undefined;
+  mode: {
+    (): RouteModeValue;
+    (value: RouteModeValue): SphereRoute;
+  };
+  modeOf: {
+    /** Travel mode of the leg starting at destination `index`. */
+    (index: number): RouteModeValue;
+    (index: number, value: RouteModeValue): SphereRoute;
+  };
+  placeholder: {
+    /** The element the route guide renders into, if any. */
+    (): HTMLElement | undefined;
+    (value: HTMLElement): SphereRoute;
+  };
   remove: (destination: SphereMarker) => SphereRoute;
   removeAt: (index: number) => SphereRoute;
   reverse: () => SphereRoute;
@@ -986,41 +1107,70 @@ export interface SphereRoute {
 
 /** A `sphere.Map` instance. */
 export interface SphereMap {
-  /** Get the visible bounding box, or fit the map to one. */
-  bound: (value?: Bound, options?: FitBoundsOptions) => Bound | SphereMap;
+  bound: {
+    /** The visible bounding box. */
+    (): Bound;
+    /** Fit the map to a bounding box. */
+    (value: Bound, options?: FitBoundsOptions): SphereMap;
+  };
   Event: SphereEvent;
-  enableFilter: (filter?: FilterValue) => FilterValue | "OTHER" | SphereMap;
+  enableFilter: {
+    /** The current color filter (`"OTHER"` for a custom one). */
+    (): FilterValue | "OTHER";
+    (filter: FilterValue): SphereMap;
+  };
   goTo: (target: FlyToOptions, animate?: boolean) => SphereMap;
   id: () => number;
   Layers: SphereLayerCollection;
-  language: (value?: Language) => Language | SphereMap;
-  location: (value?: Location, animate?: boolean) => Location | SphereMap;
+  language: LanguageAccessor<SphereMap>;
+  location: {
+    /** The map's center. */
+    (): Location;
+    /** Move the center. */
+    (value: Location, animate?: boolean): SphereMap;
+  };
   move: (offset: Point, animate?: boolean) => SphereMap;
   Overlays: SphereOverlayCollection;
-  pitch: (angle?: number) => number | SphereMap;
+  pitch: {
+    /** Tilt in degrees. */
+    (): number;
+    (angle: number): SphereMap;
+  };
   placeholder: () => HTMLElement;
   /** The underlying MapLibre GL map. */
   Renderer: MapLibreMap;
   Route: SphereRoute;
   repaint: () => SphereMap;
   resize: () => SphereMap;
-  rotate: (angle?: number, animate?: boolean) => number | SphereMap;
+  rotate: {
+    /** Rotation in degrees, clockwise from north. */
+    (): number;
+    (angle: number, animate?: boolean): SphereMap;
+  };
   Search: SphereSearch;
   Tags: SphereTagCollection;
   Ui: SphereUiCollection;
-  /** Get the zoom, set it, or pass `true`/`false` to zoom in/out one level. */
-  zoom: (value?: number | boolean, animate?: boolean) => number | SphereMap;
-  zoomRange: (value?: Range) => Range | SphereMap;
+  zoom: {
+    /** The zoom level. */
+    (): number;
+    /** Set the zoom, or pass `true`/`false` to zoom in/out one level. */
+    (value: number | boolean, animate?: boolean): SphereMap;
+  };
+  zoomRange: {
+    /** The zoom levels users can reach. */
+    (): Range;
+    (value: Range): SphereMap;
+  };
 }
 
 /** A `sphere.CustomControl`: a MapLibre control with HTML content. */
 export interface SphereCustomControl extends MapLibreControl {
-  visible: (state?: boolean) => boolean | SphereCustomControl;
+  visible: BooleanAccessor<SphereCustomControl>;
 }
 
 /** A `sphere.MenuBar`. */
 export interface SphereMenuBar extends SphereCustomControl {
-  /** Select a button by index; a negative index clears the selection. */
+  /** Select a button by index. A negative index clears the selection. */
   selectIndex: (index: number) => SphereMenuBar;
 }
 
@@ -1181,8 +1331,19 @@ export interface SphereNamespace {
   Util: SphereUtil;
 }
 
+/**
+ * The deck.gl namespace Sphere loads as `window.deck` (e.g. `deck.MapboxLayer`,
+ * `deck.ScenegraphLayer`). Sphere ships deck.gl without types, so it is typed
+ * loosely. Cast to deck.gl's own types (`@deck.gl/core` and friends) if you
+ * need them.
+ */
+// biome-ignore lint/suspicious/noExplicitAny: an untyped third-party namespace of constructors and constants
+export type DeckNamespace = Record<string, any>;
+
 declare global {
   interface Window {
+    /** deck.gl, available once the Sphere script has loaded. */
+    deck?: DeckNamespace;
     sphere?: SphereNamespace;
   }
 }

@@ -39,12 +39,18 @@ function FoodToggle() {
 ส่งฟังก์ชันแทนชื่อแท็กเพื่อให้ข้อมูล POI เอง Sphere จะเรียกฟังก์ชันนี้สำหรับทุกไทล์ของแผนที่
 
 ```tsx
+import { useTags } from "gistda-sphere-react";
+
+const { add } = useTags();
+
 add((tile) =>
   myStores
     .filter((store) => isInTile(store, tile))
     .map((store) => ({ lat: store.lat, lon: store.lon, name: store.name }))
 );
 ```
+
+ในตัวอย่างนี้ `myStores` คือข้อมูลของคุณ และ `isInTile` คือฟังก์ชันของคุณเองที่ตรวจว่าร้านค้าอยู่ในไทล์หรือไม่ โดยไทล์มีค่า `x`, `y` และ `z` (ระดับซูม)
 
 ## ชื่อแท็ก [#tag-names]
 

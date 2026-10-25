@@ -23,6 +23,8 @@ console.log(result.data, result.meta);
 รูปทรงที่วาดบนแผนที่แปลงเป็น WKT ได้ เช่น จาก ref ของรูปหลายเหลี่ยม
 
 ```ts
+import { type GeoJSONFeature, type GeoJSONPolygon } from "gistda-sphere-react";
+
 const feature = polygonRef.current?.toGeoJSON() as GeoJSONFeature<GeoJSONPolygon>;
 const ring = feature.geometry.coordinates[0];
 const wkt = `POLYGON((${ring.map(([lon, lat]) => `${lon} ${lat}`).join(", ")}))`;

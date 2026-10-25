@@ -7,8 +7,12 @@ description: Show a GeoJSON geometry, feature or feature collection, with per-fe
 
 <GeoJsonDemo />
 
+<ShowCode>
+<include cwd meta='title="data-formats.tsx"'>components/examples/data-formats.tsx</include>
+</ShowCode>
+
 ```tsx
-import { GeoJson } from "gistda-sphere-react";
+import { GeoJson, SphereMap } from "gistda-sphere-react";
 
 <SphereMap>
   <GeoJson
@@ -44,6 +48,9 @@ import { GeoJson } from "gistda-sphere-react";
 ## Showing KML, GPX and WKT
 
 ```tsx
+import { type GeoJSON, GeoJson, useSphereUtils } from "gistda-sphere-react";
+import { useState } from "react";
+
 const { kmlToGeoJSON } = useSphereUtils();
 const [data, setData] = useState<GeoJSON | null>(null);
 
@@ -59,6 +66,8 @@ See [Data formats](/docs/examples/data-formats) for every supported format.
 ## Labels from properties
 
 ```tsx
+import { GeoJson } from "gistda-sphere-react";
+
 <GeoJson
   data={stations}
   markerOptions={(feature) => ({ title: String(feature.properties?.name) })}

@@ -7,6 +7,10 @@ description: เลื่อน ซูม หมุน และเอียง�
 
 <ControlsDemo />
 
+<ShowCode>
+<include cwd meta='title="control-panel.tsx"'>components/examples/control-panel.tsx</include>
+</ShowCode>
+
 ```tsx
 import { useMapControls } from "gistda-sphere-react";
 
@@ -27,7 +31,8 @@ function Toolbar() {
 
 | เมธอด | คำอธิบาย |
 | --- | --- |
-| `goTo(options, animate?)` | เคลื่อนไปยังมุมมองที่กำหนด `options`: `center`, `zoom`, `bearing`, `pitch`, `padding`, `duration` โดยค่าเริ่มต้นจะมีแอนิเมชัน |
+| `goTo(options, animate?)` | เคลื่อนไปยังมุมมองที่กำหนด `options`: `center`, `zoom`, `rotate` (หรือ `bearing`), `pitch`, `padding`, `duration` โดยค่าเริ่มต้นจะมีแอนิเมชัน |
+| `getView()` | จุดกึ่งกลาง ระดับซูม มุมหมุน มุมเอียง และขอบเขตที่มองเห็นในอ็อบเจกต์เดียว หรือ `null` หากแผนที่ยังไม่พร้อมใช้งาน |
 | `setCenter(location, animate?)` / `getCenter()` | จุดกึ่งกลางของแผนที่ |
 | `setZoom(zoom, animate?)` / `getZoom()` | ระดับซูม |
 | `zoomIn(animate?)` / `zoomOut(animate?)` | ซูมเข้าหรือออกหนึ่งระดับ |
@@ -37,6 +42,8 @@ function Toolbar() {
 | `panBy({ x, y }, animate?)` | เลื่อนแผนที่ตามจำนวนพิกเซล |
 | `setZoomRange(range)` / `getZoomRange()` | ช่วงระดับซูมที่ผู้ใช้ซูมได้ |
 
+`rotate` และ `bearing` คือมุมเดียวกัน โดย `rotate` ตรงกับ prop ของ `SphereMap` และ `setRotate` ส่วน `bearing` เป็นชื่อที่ MapLibre ใช้ หากส่งทั้งสองค่า จะใช้ค่า `bearing`
+
 ## ชั้นข้อมูลและการแสดงผล [#layers-and-appearance]
 
 | เมธอด | คำอธิบาย |
@@ -44,7 +51,7 @@ function Toolbar() {
 | `setBaseLayer(layer)` | เปลี่ยนแผนที่ฐาน: ชื่อชั้นข้อมูลในตัว, `sphere.Layer` หรือ URL/อ็อบเจกต์สไตล์ของ MapLibre |
 | `addLayer(layer, beforeId?)` / `removeLayer(layer)` | เพิ่มหรือลบชั้นข้อมูลที่ซ้อนอยู่บนแผนที่ฐาน |
 | `clearLayers()` / `getLayers()` | ลบชั้นข้อมูลที่เพิ่มไว้ทั้งหมด / ดูรายการชั้นข้อมูลของแผนที่ |
-| `setFilter(filter)` / `getFilter()` | ตัวกรองสี: `"Dark"`, `"Light"`, `"Protanopia"`, `"Deuteranopia"` หรือ `"None"` |
+| `setFilter(filter)` / `getFilter()` | ตัวกรองสี: `"Dark"`, `"Light"`, `"Protanopia"` หรือ `"Deuteranopia"` ส่ง `"None"` หรือ `false` เพื่อล้างตัวกรอง |
 | `setLanguage(language)` / `getLanguage()` | ภาษาของป้ายชื่อและ UI `"th"` หรือ `"en"` |
 | `loadPredefinedOverlay(type, options?)` / `unloadPredefinedOverlay(type)` | ข้อมูลสด `"cameras"`, `"events"` หรือ `"aqi"` |
 

@@ -1,0 +1,12 @@
+{
+  "title": "สถานที่และเส้นทาง",
+  "defaultOpen": true,
+  "pages": [
+    "search",
+    "location-picker",
+    "store-locator",
+    "delivery-zones",
+    "routing",
+    "tags"
+  ]
+}

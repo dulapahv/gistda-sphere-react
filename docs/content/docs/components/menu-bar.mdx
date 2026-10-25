@@ -6,7 +6,8 @@ description: Sphere's built-in button group for switching between options on the
 `<MenuBar>` shows a row of buttons on the map where one is selected at a time, using Sphere's own style. It suits choices like base maps or data themes.
 
 ```tsx
-import { MenuBar } from "gistda-sphere-react";
+import { MenuBar, SphereMap } from "gistda-sphere-react";
+import { useState } from "react";
 
 const [baseLayer, setBaseLayer] = useState("STREETS");
 

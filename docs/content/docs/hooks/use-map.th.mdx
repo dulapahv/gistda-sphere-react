@@ -28,6 +28,9 @@ function ZoomLabel() {
 Sphere แสดงผลด้วย [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/) โดย `map.Renderer` คือแผนที่ MapLibre จึงใช้ฟีเจอร์และปลั๊กอินของ MapLibre ได้ด้วย
 
 ```tsx
+import { useMap } from "gistda-sphere-react";
+import { useEffect } from "react";
+
 const { map } = useMap();
 
 useEffect(() => {

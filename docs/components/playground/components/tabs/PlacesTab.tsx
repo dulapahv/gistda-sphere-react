@@ -18,14 +18,14 @@ import {
   type Location,
   type PoiResult,
   SearchResults,
-  type SuggestResult,
   TAG_CATEGORIES,
   useMapControls,
   useSearch,
+  useSuggest,
   useTagCategories,
   useTags,
 } from "gistda-sphere-react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import type { PlaygroundTranslations } from "../../translations";
 import type { SelectedPlace } from "../../types";
 import { formatLocation } from "../MapCards";
@@ -39,9 +39,6 @@ import {
   TextInput,
   Toggle,
 } from "../ui";
-
-const SUGGEST_DELAY_MS = 250;
-const MIN_SUGGEST_LENGTH = 2;
 
 /** Error text from an unknown rejection. */
 function messageOf(reason: unknown): string {
@@ -136,7 +133,9 @@ export function PlacesTab({
   const { getCenter, goTo } = useMapControls();
 
   const [keyword, setKeyword] = useState("");
-  const [suggestions, setSuggestions] = useState<SuggestResult[]>([]);
+  // Suggestions show while users type, and hide once a search runs.
+  const [isTyping, setIsTyping] = useState(false);
+  const { suggestions } = useSuggest(isTyping ? keyword : "", { limit: 6 });
   const [results, setResults] = useState<PoiResult[]>([]);
   const [searching, setSearching] = useState(false);
   const [searchError, setSearchError] = useState<string | null>(null);
@@ -146,37 +145,13 @@ export function PlacesTab({
   const [address, setAddress] = useState<string | null>(null);
   const [addressBusy, setAddressBusy] = useState(false);
   const [tagPopups, setTagPopups] = useState(true);
-  const suggestRequestRef = useRef(0);
-
-  // Suggestions while typing, ignoring responses to older keywords.
-  useEffect(() => {
-    const trimmed = keyword.trim();
-    if (trimmed.length < MIN_SUGGEST_LENGTH || !search.isReady) {
-      setSuggestions([]);
-      return;
-    }
-    suggestRequestRef.current += 1;
-    const request = suggestRequestRef.current;
-    const timer = setTimeout(async () => {
-      try {
-        const response = await search.suggest(trimmed, { limit: 6 });
-        if (request === suggestRequestRef.current) {
-          setSuggestions(response.data);
-        }
-      } catch {
-        // Suggestions are optional; the search button still works.
-      }
-    }, SUGGEST_DELAY_MS);
-    return () => clearTimeout(timer);
-  }, [keyword, search]);
 
   const runSearch = async (text = keyword) => {
     const trimmed = text.trim();
     if (!trimmed) {
       return;
     }
-    suggestRequestRef.current += 1;
-    setSuggestions([]);
+    setIsTyping(false);
     setSearching(true);
     setSearchError(null);
     try {
@@ -200,7 +175,7 @@ export function PlacesTab({
   const clearSearch = () => {
     setKeyword("");
     setResults([]);
-    setSuggestions([]);
+    setIsTyping(false);
     setSearchError(null);
     onSelectPlace(null);
     search.clear();
@@ -260,7 +235,10 @@ export function PlacesTab({
         <div className="flex gap-1.5">
           <TextInput
             label={t.places.search}
-            onChange={setKeyword}
+            onChange={(value) => {
+              setKeyword(value);
+              setIsTyping(true);
+            }}
             onEnter={() => runSearch()}
             placeholder={t.places.searchPlaceholder}
             value={keyword}
@@ -277,8 +255,10 @@ export function PlacesTab({
         </div>
         {suggestions.length > 0 ? (
           <ul className="m-0 mt-1 list-none overflow-hidden rounded-md border border-fd-border bg-fd-popover p-0 shadow-sm">
-            {suggestions.map((suggestion) => (
-              <li key={suggestion.name}>
+            {suggestions.map((suggestion, index) => (
+              // Sphere can suggest the same name twice.
+              // biome-ignore lint/suspicious/noArrayIndexKey: suggestions have no IDs
+              <li key={`${suggestion.name}:${index}`}>
                 <button
                   className="w-full cursor-pointer px-2 py-1.5 text-left text-xs hover:bg-fd-accent"
                   onClick={() => {

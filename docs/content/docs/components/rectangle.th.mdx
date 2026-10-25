@@ -10,18 +10,26 @@ description: สี่เหลี่ยมแนวแกนจากมุม�
     fillColor="rgba(0, 200, 0, 0.3)"
     lineColor="green"
     lineWidth={2}
-    title="พื้นที่ที่สนใจ"
+    title="Area of interest"
   />
 </MapDemo>
 
 ```tsx
-<Rectangle
-  position={{ lon: 100.45, lat: 13.8 }}
-  size={{ width: 0.1, height: 0.1 }}
-  fillColor="rgba(0, 200, 0, 0.3)"
-  lineColor="green"
-/>
+import { Rectangle, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.5, lat: 13.75 }} style={{ height: 400 }} zoom={11}>
+  <Rectangle
+    position={{ lon: 100.45, lat: 13.8 }}
+    size={{ width: 0.1, height: 0.1 }}
+    fillColor="rgba(0, 200, 0, 0.3)"
+    lineColor="green"
+    lineWidth={2}
+    title="Area of interest"
+  />
+</SphereMap>
 ```
+
+ตัวอย่างสั้น ๆ ด้านล่างละ `<SphereMap>` ไว้ แต่โอเวอร์เลย์ทุกตัวต้องอยู่ภายใน `<SphereMap>` เสมอ
 
 ## Props
 
@@ -33,6 +41,8 @@ description: สี่เหลี่ยมแนวแกนจากมุม�
 สี่เหลี่ยมรับ [props ของรูปทรง](/th/docs/components/polygon#shape-props) ด้วย รวมถึง `editable`
 
 ```tsx
+import { Rectangle } from "gistda-sphere-react";
+
 // Both describe the same box:
 <Rectangle position={{ lon: 100.45, lat: 13.8 }} size={{ width: 0.1, height: 0.1 }} />
 <Rectangle position={{ lon: 100.45, lat: 13.8 }} size={{ lon: 100.55, lat: 13.7 }} />

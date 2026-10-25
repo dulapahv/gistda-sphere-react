@@ -1,5 +1,5 @@
 import { act, render } from "@testing-library/react";
-import { createRef } from "react";
+import { createRef, StrictMode } from "react";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import { Marker } from "@/components/Marker";
 import {
@@ -196,8 +196,43 @@ describe("SphereMap features", () => {
     expect(mockMap.Renderer.remove).toHaveBeenCalled();
   });
 
+  it("gives each map its own element, so a discarded map can't break the next", async () => {
+    // StrictMode mounts effects twice: the first map is discarded while the
+    // second is created. Removing the first must not touch the second's
+    // element (MapLibre strips its classes, and Sphere leaves elements behind).
+    const view = render(
+      <StrictMode>
+        <SphereProvider apiKey="test-key">
+          <div />
+        </SphereProvider>
+      </StrictMode>
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+    view.rerender(
+      <StrictMode>
+        <SphereProvider apiKey="test-key">
+          <SphereMap style={{ height: 300 }} />
+        </SphereProvider>
+      </StrictMode>
+    );
+    await act(async () => {
+      await Promise.resolve();
+    });
+
+    const placeholders = mockSphere.Map.mock.calls.map(
+      ([options]) => (options as { placeholder: HTMLElement }).placeholder
+    );
+    expect(placeholders).toHaveLength(2);
+    expect(placeholders[0]).not.toBe(placeholders[1]);
+    expect(placeholders[0]?.isConnected).toBe(false);
+    expect(placeholders[1]?.isConnected).toBe(true);
+    expect(mockMap.Renderer.remove).toHaveBeenCalledTimes(1);
+  });
+
   it("frees the renderer only after its overlays removed themselves", async () => {
-    // React unmounts parents first; Sphere's overlays break (deck.gl throws)
+    // React unmounts parents first, and Sphere's overlays break (deck.gl throws)
     // when removed from a map whose renderer is already gone.
     const calls: string[] = [];
     const removeRenderer = mockMap.Renderer.remove;

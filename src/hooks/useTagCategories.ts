@@ -21,7 +21,7 @@ export interface UseTagCategoriesReturn {
 /** Shared request so every component reuses one fetch per page. */
 let categoriesRequest: Promise<TagCategoryInfo[]> | null = null;
 
-/** Clears the shared request (internal; used by tests). */
+/** Clears the shared request (internal, used by tests). */
 export function resetTagCategoriesCache(): void {
   categoriesRequest = null;
 }
@@ -41,7 +41,7 @@ function loadCategories(apiKey: string): Promise<TagCategoryInfo[]> {
 
 /**
  * Converts the API shape into labeled categories. The live list repeats a
- * few tags within a category under different English names; the tag ID
+ * few tags within a category under different English names. The tag ID
  * (the Thai name) is what selects POIs, so each ID is kept once.
  */
 function localize(
@@ -64,12 +64,12 @@ function localize(
 /**
  * Every POI tag category available in Sphere (about 260 tags in 20
  * categories), fetched from the public category list. Tag `id`s are the
- * names to pass to `useTags().add()` or `<Tag name>`.
+ * names to pass to `useTags().add()` or `<Tag name>`. Labels are in
+ * `language`, else `SphereProvider`'s `language`, else English.
  */
-export function useTagCategories(
-  language: Language = "en"
-): UseTagCategoriesReturn {
-  const { apiKey } = useSphereContext();
+export function useTagCategories(language?: Language): UseTagCategoriesReturn {
+  const { apiKey, language: providerLanguage } = useSphereContext();
+  const labelLanguage = language ?? providerLanguage ?? "en";
   const [data, setData] = useState<TagCategoryInfo[] | null>(null);
   const [error, setError] = useState<Error | null>(null);
 
@@ -95,8 +95,8 @@ export function useTagCategories(
   }, [apiKey]);
 
   const categories = useMemo(
-    () => (data ? localize(data, language) : []),
-    [data, language]
+    () => (data ? localize(data, labelLanguage) : []),
+    [data, labelLanguage]
   );
 
   return { categories, error, isLoading: data === null && error === null };

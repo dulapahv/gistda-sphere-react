@@ -44,8 +44,11 @@ const BASEMAP_URL = "https://basemap.sphere.gistda.or.th";
 const DEFAULT_TIMEOUT_MS = 15_000;
 /** Longer GET URLs are sent as POST in `"auto"` mode (browsers and proxies cap URL length). */
 const MAX_GET_URL_LENGTH = 2000;
-/** Body Sphere returns (with HTTP 200) when a key may not use a service. */
-const KEY_ERROR_TEXT = "API key error";
+/**
+ * Body Sphere returns (with HTTP 200) when a key may not use a service, e.g.
+ * `sphere Map API key error` or `throw 'Search Service API Key Error';`.
+ */
+const KEY_ERROR = /api key error/i;
 
 /** Why a service call failed. */
 export type SphereServiceErrorCode =
@@ -101,7 +104,7 @@ const ROUTE_TYPE_FLAGS: Record<ServiceRouteType, number> = {
   Tollway: 16,
 };
 
-/** Encodes query parameters, skipping empty values; arrays become repeated keys. */
+/** Encodes query parameters, skipping empty values. Arrays become repeated keys. */
 function toParams(query: Query): URLSearchParams {
   const params = new URLSearchParams();
   for (const [key, value] of Object.entries(query)) {
@@ -115,7 +118,7 @@ function toParams(query: Query): URLSearchParams {
   return params;
 }
 
-/** Builds a URL with query parameters; arrays become repeated keys. */
+/** Builds a URL with query parameters. Arrays become repeated keys. */
 function buildUrl(base: string, query: Query): string {
   const search = toParams(query).toString();
   return search ? `${base}?${search}` : base;
@@ -212,6 +215,11 @@ export function createSphereServices(options: SphereServicesOptions) {
     timeout: defaultTimeout = DEFAULT_TIMEOUT_MS,
   } = options;
   const fetchImpl = options.fetch ?? globalThis.fetch;
+  const extraHeaders: Record<string, string> = {
+    ...options.headers,
+    ...(options.referer ? { Referer: options.referer } : {}),
+  };
+  const headers = Object.keys(extraHeaders).length ? extraHeaders : undefined;
 
   if (!apiKey) {
     throw new Error("createSphereServices: an apiKey is required.");
@@ -249,10 +257,11 @@ export function createSphereServices(options: SphereServicesOptions) {
       response = usePost
         ? await fetchImpl(`${baseUrl}/${path}`, {
             body: toParams(fullQuery),
+            headers,
             method: "POST",
             signal,
           })
-        : await fetchImpl(getUrl, { signal });
+        : await fetchImpl(getUrl, headers ? { headers, signal } : { signal });
       text = await response.text();
     } catch (error) {
       if (timedOut()) {
@@ -276,7 +285,7 @@ export function createSphereServices(options: SphereServicesOptions) {
       cleanup();
     }
 
-    if (text.includes(KEY_ERROR_TEXT)) {
+    if (KEY_ERROR.test(text)) {
       throw new SphereServiceError(
         `The API key was rejected by the Sphere ${path} service. Enable this service for your key at https://sphere.gistda.or.th/ and check the allowed domains.`,
         {

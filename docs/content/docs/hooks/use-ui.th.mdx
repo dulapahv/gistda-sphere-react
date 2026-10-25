@@ -7,6 +7,10 @@ description: ตัวควบคุมในตัว การควบคุ
 
 <UiDemo />
 
+<ShowCode>
+<include cwd meta='title="ui-toggles.tsx"'>components/examples/ui-toggles.tsx</include>
+</ShowCode>
+
 ```tsx
 import { useUi } from "gistda-sphere-react";
 
@@ -43,6 +47,9 @@ function InputSettings() {
 แผนที่ที่กว้างเต็มหน้าจออาจทำให้ผู้ใช้เลื่อนหน้าเว็บไม่ได้ เพราะการเลื่อนจะไปเลื่อนแผนที่แทน `lockMap` จะบังแผนที่ด้วยปุ่มจนกว่าผู้ใช้จะคลิก
 
 ```tsx
+import { SphereMap, useUi } from "gistda-sphere-react";
+import { useEffect } from "react";
+
 function LockedMap() {
   const ui = useUi();
 
@@ -78,5 +85,7 @@ function LockedMap() {
 หากต้องการแผนที่แบบภาพนิ่ง ให้ปิดการโต้ตอบตอนสร้างแผนที่
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+
 <SphereMap input={false} controls={{ DPad: false, Zoombar: false }} />
 ```

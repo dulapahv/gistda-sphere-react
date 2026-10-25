@@ -8,7 +8,7 @@ description: แสดงแผนที่แรกของคุณด้ว�
 ครอบแอปด้วย `SphereProvider` แล้วใช้ `SphereMap` เพื่อแสดงแผนที่
 
 <MapDemo height="400px" zoom={10} center={{ lon: 100.5018, lat: 13.7563 }}>
-  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" detail="เมืองหลวงของประเทศไทย" />
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" detail="Capital of Thailand" />
 </MapDemo>
 
 ```tsx lineNumbers
@@ -34,7 +34,7 @@ function App() {
 ```
 
 <Callout>
-  หากใช้ App Router ของ Next.js ให้วางโค้ดนี้ใน Client Component โดยเพิ่ม `"use client";` ที่บรรทัดแรกของไฟล์
+  หากใช้ App Router ของ Next.js ตัวอย่างนี้ใช้งานใน Server Component เช่น `app/page.tsx` ได้ทันที ส่วนโค้ดที่ใช้ hooks หรือ event handler อย่าง `onClick` ต้องอยู่ใน Client Component โดยเพิ่ม `"use client";` ที่บรรทัดแรกของไฟล์
 </Callout>
 
 ## แนวคิดสำคัญ [#key-concepts]
@@ -44,13 +44,14 @@ function App() {
 3. **คอมโพเนนต์**อย่าง `Marker`, `Polygon`, `Layer` และ `Tag` วางไว้ใน `SphereMap` จะแสดงเมื่อ mount และหายไปเมื่อ unmount แผนที่จึงเปลี่ยนตาม state ของคุณ
 4. **Hooks** อย่าง `useMapControls`, `useSearch`, `useRoute` และ `useUi` ใช้ได้ทุกที่ภายใต้ `SphereProvider` เช่น ในแถบด้านข้าง
 5. **บริการเว็บ** เช่น การนำทาง การแปลงพิกัดเป็นที่อยู่ และข้อมูลการเกษตร เรียกใช้ผ่าน [`useSphereServices`](/th/docs/hooks/use-sphere-services) ได้แม้ไม่มีแผนที่
+6. **ภาษา** แผนที่ ผลการค้นหา และคำแนะนำเส้นทางจะเป็นภาษาไทย เว้นแต่จะกำหนด `language="en"` ที่ [`SphereProvider`](/th/docs/components/sphere-provider#language)
 
 ## การเพิ่มโอเวอร์เลย์ [#adding-overlays]
 
 วางคอมโพเนนต์โอเวอร์เลย์เป็น children ของ `SphereMap`
 
 <MapDemo height="400px" zoom={11} center={{ lon: 100.5018, lat: 13.7563 }}>
-  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" />
+  <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" />
   <Polygon
     positions={[
       { lon: 100.41, lat: 13.78 },
@@ -69,6 +70,8 @@ function App() {
 </MapDemo>
 
 ```tsx lineNumbers
+import { Circle, Marker, Polygon, SphereMap } from "gistda-sphere-react";
+
 <SphereMap style={{ width: '100%', height: '500px' }}>
   <Marker position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" />
   <Polygon

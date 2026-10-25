@@ -1,22 +1,57 @@
 ---
-title: การอัปเกรดจาก 1.4
-description: สิ่งที่เปลี่ยนไป สิ่งที่ต้องแก้ในโค้ด และสิ่งที่ได้เพิ่มโดยไม่ต้องทำอะไร
+title: การอัปเกรด
+description: สิ่งที่เปลี่ยนไปในแต่ละเวอร์ชัน สิ่งที่ต้องแก้ในโค้ด และสิ่งที่เพิ่มเข้ามา
 ---
 
-เวอร์ชันนี้ครอบคลุม Sphere API ทั้งหมดและแก้ไขบั๊กที่ค้างมานานหลายจุด แอปส่วนใหญ่อัปเกรดได้ทันทีโดยไม่ต้องแก้โค้ด แต่หากคุณใช้งานระบบนำทาง `getArea` hook สำหรับเหตุการณ์ของแผนที่ หรือ `TAG_CATEGORIES` ให้ตรวจสอบรายการด้านล่าง
+## อัปเกรดเป็น 2.1 [#upgrading-to-21]
 
-## การเปลี่ยนแปลงที่อาจต้องแก้โค้ด [#changes-that-may-need-code-updates]
+เวอร์ชัน 2.1 ทำให้ใช้งานกับ Next.js และบนเซิร์ฟเวอร์ได้ง่ายขึ้น เพิ่มฟีเจอร์ที่นักพัฒนาต้องการ และแก้ไขบั๊ก แอปส่วนใหญ่อัปเกรดได้โดยไม่ต้องแก้โค้ด แต่หากคุณกำหนดสไตล์ให้คอนเทนเนอร์ของแผนที่ ใช้ type ของแผนที่โดยตรง หรือเรียก `useMapZoom` หรือ `useMapLocation` ให้ตรวจสอบรายการด้านล่าง
+
+### การเปลี่ยนแปลงใน 2.1 [#changes-in-21]
+
+- **แผนที่วาดลงใน element ด้านใน** ตอนนี้ `SphereMap` สร้าง `div` ลูกที่เต็มคอนเทนเนอร์แล้วส่งให้ Sphere แผนที่ที่ถูก remount โดย React StrictMode การเปลี่ยนหน้าฝั่งไคลเอนต์ แท็บ หรือ modal จึงแสดงในตำแหน่งที่ถูกต้อง หาก CSS หรือโค้ดของคุณอ่านคลาสของ MapLibre (เช่น `.maplibregl-map`) จาก element ที่คุณส่ง `className` หรือ `style` ให้ ให้เปลี่ยนไปใช้ element ลูกตัวแรกแทน คอนเทนเนอร์ที่ไม่ได้กำหนด CSS position จะได้ `position: relative`
+- **getter ของแผนที่คืนค่าตามจริง** ใน type ของแผนที่โดยตรง getter อย่าง `map.zoom()` และ `map.location()` มี type เป็นค่าที่คืนกลับมา (`number`, `Location`) แทนที่จะเป็น `number | SphereMap` สามารถลบการทำ type casting ที่เคยเพิ่มไว้ได้เลย
+- **ข้อผิดพลาดของ key สำหรับการค้นหา** ตอนนี้[ไคลเอนต์บริการเว็บ](/th/docs/web-services#errors)รายงานข้อผิดพลาดของ API key จากบริการค้นหาด้วย code `"key"` แทน `"parse"`
+- **`useMapZoom` และ `useMapLocation`** ส่งระดับซูมหรือจุดกึ่งกลางใหม่ให้ handler ส่วน handler ที่ไม่รับอาร์กิวเมนต์ยังทำงานได้ตามเดิม
+
+### สิ่งที่แก้ไขแล้วใน 2.1 [#fixed-in-21]
+
+- แผนที่ที่ mount หลังจากสคริปต์ของ Sphere โหลดเสร็จจะไม่ไปแสดงที่มุมซ้ายบนของหน้าเมื่อใช้ React StrictMode อีกต่อไป (เกิดใน development build ของ Next.js และ Vite)
+- ชั้นข้อมูล 3D Tiles (`type="Tiles3D"`) โหลดได้แล้วใน development ที่ใช้ React StrictMode จากเดิมที่การ mount ครั้งที่สองจะลบชั้นข้อมูลออก
+- คอมโพเนนต์ใช้งานใน Server Component ของ Next.js ได้แล้ว เพราะแพ็กเกจกำกับคอมโพเนนต์ด้วย `"use client"` จากเดิมที่การใช้ `SphereProvider` ใน layout ฝั่งเซิร์ฟเวอร์จะล้มเหลวด้วย `createContext is not a function`
+- ไคลเอนต์บริการเว็บใช้งานบนเซิร์ฟเวอร์กับ key ที่จำกัดโดเมนได้แล้ว ผ่านตัวเลือก `referer` ใหม่
+
+### สิ่งที่เพิ่มเข้ามาใน 2.1 [#new-in-21]
+
+- [`MarkerCluster`](/th/docs/components/marker-cluster): หมุด React นับพันตัวที่จัดเป็นกลุ่ม
+- [`useSuggest`](/th/docs/hooks/use-suggest): คำแนะนำอัตโนมัติที่รอจนผู้ใช้หยุดพิมพ์ชั่วคราวและข้ามผลลัพธ์เก่า
+- มุมมองปัจจุบัน: [`onViewChange`](/th/docs/components/sphere-map#syncing-the-view) ของ `SphereMap`, [`useMapView`](/th/docs/hooks/event-hooks#usemapview) และ `getView()`
+- [`fallback`](/th/docs/components/sphere-map#loading-placeholder) ของ `SphereMap` ที่แสดงจนกว่าแผนที่จะพร้อมใช้งาน
+- [`language`](/th/docs/components/sphere-provider#language) ของ `SphereProvider` สำหรับทุกแผนที่ การค้นหา การนำทาง บริการเว็บ และชื่อหมวดหมู่แท็ก
+- `useRoute`: [`destinations`](/th/docs/hooks/use-route#stops) ในรูปแบบ state และ[ตัวเลือก `auto`](/th/docs/hooks/use-route#options)
+- `goTo` รับ `rotate` ได้ ตรงกับ prop `rotate` และ `setRotate`
+- บริการเว็บ: entry [`gistda-sphere-react/services`](/th/docs/web-services#on-a-server) และตัวเลือก `referer` กับ `headers`
+- Type: `window.deck` มี type แล้ว และ getter ของแผนที่คืน type ของค่าจริง
+- เอกสาร: ตัวอย่างที่ใช้งานได้จริงทุกตัวแสดงโค้ดทั้งหมดได้ในส่วน "แสดงโค้ด"
+
+## อัปเกรดจาก 1.4 เป็น 2.0 [#upgrading-from-14-to-20]
+
+เวอร์ชัน 2.0 ครอบคลุม Sphere API ทั้งหมดและแก้ไขบั๊กที่ค้างมานานหลายจุด แอปส่วนใหญ่อัปเกรดได้ทันทีโดยไม่ต้องแก้โค้ด แต่หากคุณใช้งานระบบนำทาง `getArea` hook สำหรับเหตุการณ์ของแผนที่ หรือ `TAG_CATEGORIES` ให้ตรวจสอบการเปลี่ยนแปลงด้านล่าง
 
 ### ผลลัพธ์การนำทาง [#routing-results]
 
 `getGuide()` คืนค่าช่วงของเส้นทาง (route legs) จาก Sphere ไม่ใช่ขั้นตอนการเลี้ยว จึงเป็นสาเหตุที่การนำทางทีละขั้นเคยแสดงเป็น `undefined` ให้เปลี่ยนไปใช้ `steps` และ `summary` แทน:
 
-```tsx
-// Before
+```tsx title="Before (1.4)"
+import { type RouteGuideStep } from "gistda-sphere-react";
+
 const steps = getGuide() as RouteGuideStep[];
 steps.map((step) => step.instruction); // undefined
+```
 
-// Now
+```tsx title="Now"
+import { useRoute } from "gistda-sphere-react";
+
 const { steps, summary, status, error } = useRoute();
 steps.map((step) => step.instruction); // "Turn right to Sathon Nuea Rd"
 ```
@@ -39,7 +74,7 @@ handler ของ `useMapEvent` จะได้รับทุกอาร์ก
 
 `TAG_CATEGORIES` เคยใช้รหัสสามตัวที่ไม่ตรงกับ POI ใดเลย ตอนนี้เปลี่ยนเป็น `"ธนาคาร/สถาบันการเงิน"` (ธนาคาร), `"เอทีเอ็ม"` (ตู้เอทีเอ็ม) และ `"สถานีบริการน้ำมัน"` (ปั๊มน้ำมัน) หากคุณเก็บรหัสเดิมไว้ ให้อัปเดตด้วย
 
-## สิ่งที่แก้ไขแล้ว [#fixed]
+### สิ่งที่แก้ไขแล้วใน 2.0 [#fixed-in-20]
 
 - `onClick` ของหมุดและรูปทรงทำงานแล้ว (เดิมไม่เคยทำงาน) พร้อมตำแหน่งที่คลิก
 - `lineStyle` วาดเส้นประและเส้นจุดได้แล้ว `ui="None"` ซ่อนส่วนติดต่อผู้ใช้ได้แล้ว และ `input={false}` ปิดการโต้ตอบได้แล้ว
@@ -49,7 +84,7 @@ handler ของ `useMapEvent` จะได้รับทุกอาร์ก
 - การลบ `<Tag name="a|b">` จะลบทั้งสองแท็ก
 - WebGL context ของแผนที่ถูกคืนเมื่อ `SphereMap` unmount
 
-## สิ่งที่เพิ่มเข้ามา [#new]
+### สิ่งที่เพิ่มเข้ามาใน 2.0 [#new-in-20]
 
 - คอมโพเนนต์: [`GeoJson`](/th/docs/components/geojson), [`ObjectOverlay`](/th/docs/components/object-overlay), [`PredefinedOverlay`](/th/docs/components/predefined-overlay), [`Tag`](/th/docs/components/tag), [`MapControl`](/th/docs/components/map-control), [`MenuBar`](/th/docs/components/menu-bar), [`RouteGuide`](/th/docs/components/route-guide), [`SearchResults`](/th/docs/components/search-results)
 - Hooks: [`useUi`](/th/docs/hooks/use-ui), [`useTagCategories`](/th/docs/hooks/use-tag-categories), [`useSphereUtils`](/th/docs/hooks/use-sphere-utils), [`useSphereServices`](/th/docs/hooks/use-sphere-services)

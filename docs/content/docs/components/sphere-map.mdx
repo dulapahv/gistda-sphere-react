@@ -7,7 +7,13 @@ description: The map itself. Hosts overlays, layers and controls, and reports ev
 
 <SphereMapDemo />
 
+<ShowCode>
+<include cwd meta='title="map-events.tsx"'>components/examples/map-events.tsx</include>
+</ShowCode>
+
 ```tsx
+import { Marker, SphereMap } from "gistda-sphere-react";
+
 <SphereMap
   center={{ lon: 100.5018, lat: 13.7563 }}
   zoom={10}
@@ -25,7 +31,7 @@ description: The map itself. Hosts overlays, layers and controls, and reports ev
 
 ## Props
 
-Props marked **live** update the map in place when they change. The others only set the initial state; use the [ref](#ref) or [`useMapControls`](/docs/hooks/use-map-controls) to change them later.
+Props marked **live** update the map in place when they change. The others only set the initial state, so use the [ref](#ref) or [`useMapControls`](/docs/hooks/use-map-controls) to change them later.
 
 | Prop | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -33,7 +39,7 @@ Props marked **live** update the map in place when they change. The others only 
 | `zoom` | `number` | `7` | Initial zoom level (0–22). |
 | `rotate` | `number` | `0` | Initial rotation (bearing) in degrees, clockwise from north. |
 | `pitch` | `number` | `0` | Initial tilt in degrees (up to 60 by default). |
-| `language` | `"th" \| "en"` | `"th"` | **Live.** Language of labels and built-in UI. |
+| `language` | `"th" \| "en"` | provider's, else `"th"` | **Live.** Language of labels and built-in UI. Defaults to [`SphereProvider`'s `language`](/docs/components/sphere-provider#language). |
 | `baseLayer` | `LayerInput` | `"STREETS"` | **Live.** Base map: a built-in layer name, a `sphere.Layer`, a MapLibre style URL or a style object. |
 | `filter` | `FilterType` | `"None"` | **Live.** Color filter: `"None"`, `"Dark"`, `"Light"`, `"Protanopia"` or `"Deuteranopia"`. |
 | `zoomRange` | `Range` | `{ min: 0, max: 22 }` | **Live.** Zoom levels users can reach, `{ min, max }`. |
@@ -45,6 +51,7 @@ Props marked **live** update the map in place when they change. The others only 
 | `ref` | `Ref<SphereMapRef>` | – | Imperative control. See [Ref](#ref). |
 | `style`, `className`, `id` | – | – | Applied to the container `<div>`. |
 | `children` | `ReactNode` | – | Rendered once the map is ready. |
+| `fallback` | `ReactNode` | – | Shown over the map area until the map is ready, such as a spinner. See [Loading placeholder](#loading-placeholder). |
 
 ## Events
 
@@ -52,7 +59,7 @@ Every Sphere map event has a callback prop. Handlers receive the values Sphere r
 
 | Prop | Arguments | When |
 | --- | --- | --- |
-| `onReady` | `(map)` | The map is ready; children render from here on. |
+| `onReady` | `(map)` | The map is ready, and children render from here on. |
 | `onClick` | `({ lat, lon, x, y })` | The map was clicked (not fired when an overlay was clicked). |
 | `onDoubleClick` | `({ lat, lon, x, y })` | The map was double-clicked. |
 | `onMouseMove` | `({ lat, lon, x, y })` | The pointer moved over the map. |
@@ -61,6 +68,7 @@ Every Sphere map event has a callback prop. Handlers receive the values Sphere r
 | `onLocation` | `(center)` | The center moved. |
 | `onRotate` | `(angle)` | The rotation changed. |
 | `onPitch` | `(angle)` | The tilt changed. |
+| `onViewChange` | `({ center, zoom, rotate, pitch, bound })` | The map is ready, or stopped moving. See [Syncing the view](#syncing-the-view). |
 | `onZoomRange` | `({ min, max })` | The allowed zoom range changed. |
 | `onDrag` / `onDrop` | `()` | The user started / stopped dragging the map. |
 | `onIdle` | `()` | The map finished rendering. |
@@ -90,6 +98,9 @@ To listen from a child component instead, use [`useMapEvent`](/docs/hooks/event-
 ## Base maps and filters
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+import { useState } from "react";
+
 const [dark, setDark] = useState(false);
 
 <SphereMap baseLayer="HYBRID" filter={dark ? "Dark" : "None"} />
@@ -98,12 +109,16 @@ const [dark, setDark] = useState(false);
 Built-in base layers are `"SIMPLE"`, `"STREETS"`, `"STREETS_NIGHT"`, `"HYBRID"` and `"IMAGES"`. `baseLayer` also accepts a MapLibre style, such as Sphere's own vector styles:
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+
 <SphereMap baseLayer="https://basemap.sphere.gistda.or.th/vector/sphere_hybrid.json" />
 ```
 
 ## Built-in controls
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+
 <SphereMap controls={{ DPad: false, Zoombar: true, Scale: true, LayerSelector: false }} />
 ```
 
@@ -136,6 +151,8 @@ Without `ui`, Sphere picks the mobile UI when the map is narrower than 600 px.
 `options` is passed to `new sphere.Map()`, and Sphere passes it on to MapLibre. Use it for anything MapLibre supports:
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+
 <SphereMap
   options={{
     maxPitch: 85,         // allow steeper tilts
@@ -145,11 +162,52 @@ Without `ui`, Sphere picks the mobile UI when the map is narrower than 600 px.
 />
 ```
 
+## Loading placeholder
+
+The map appears once Sphere's script has loaded and the map is ready. Until then, `fallback` covers the map area:
+
+```tsx
+import { SphereMap } from "gistda-sphere-react";
+
+<SphereMap
+  fallback={<div className="grid h-full place-items-center">Loading map…</div>}
+  style={{ height: 400 }}
+/>
+```
+
+`fallback` stays up if the script can't load. To show an error instead, read `error` from [`useSphere`](/docs/hooks/use-sphere).
+
+## Syncing the view
+
+`onViewChange` reports the view when the map is ready and each time it stops moving, so it suits saving the view to the URL or your state:
+
+```tsx
+import { type MapView, SphereMap } from "gistda-sphere-react";
+
+function MapWithUrl() {
+  const save = ({ center, zoom }: MapView) => {
+    const params = new URLSearchParams({
+      lat: center.lat.toFixed(5),
+      lon: center.lon.toFixed(5),
+      zoom: zoom.toFixed(2),
+    });
+    history.replaceState(null, "", `?${params}`);
+  };
+
+  return <SphereMap onViewChange={save} style={{ height: 400 }} />;
+}
+```
+
+The view has `center`, `zoom`, `rotate`, `pitch` and `bound` (the visible box). To read it elsewhere, use [`useMapView`](/docs/hooks/event-hooks#usemapview) or `getView()` from [`useMapControls`](/docs/hooks/use-map-controls). `onLocation` and `onZoom` fire on every animation frame instead.
+
 ## Ref
 
 The ref gives you every [`useMapControls`](/docs/hooks/use-map-controls) method plus `getMap()`:
 
 ```tsx
+import { SphereMap, type SphereMapRef } from "gistda-sphere-react";
+import { useRef } from "react";
+
 const mapRef = useRef<SphereMapRef>(null);
 
 <SphereMap ref={mapRef} />
@@ -163,7 +221,8 @@ const maplibre = sphereMap?.Renderer;        // the MapLibre map
 | Method | Description |
 | --- | --- |
 | `getMap()` | The underlying `sphere.Map`, or `null`. Its `Renderer` is the MapLibre map. |
-| `goTo(options, animate?)` | Fly or jump to a view (`center`, `zoom`, `bearing`, `pitch`, `padding`, `duration`). |
+| `getView()` | Center, zoom, rotation, tilt and visible box in one object. |
+| `goTo(options, animate?)` | Fly or jump to a view (`center`, `zoom`, `rotate` or `bearing`, `pitch`, `padding`, `duration`). |
 | `setCenter` / `getCenter` | Center of the map. |
 | `setZoom` / `getZoom`, `zoomIn`, `zoomOut` | Zoom level. |
 | `setRotate` / `getRotate` | Rotation in degrees. |
@@ -178,5 +237,5 @@ const maplibre = sphereMap?.Renderer;        // the MapLibre map
 | `repaint`, `resize` | Redraw, or re-measure after the container changes size. |
 
 <Callout type="warn">
-  Changing `center`, `zoom`, `rotate` or `pitch` props after the first render has no effect. Move the map with the ref or `useMapControls`, so user panning is never overwritten by a re-render.
+  Changing `center`, `zoom`, `rotate` or `pitch` props after the first render has no effect. Move the map with the ref or `useMapControls`, so user panning is never overwritten by a re-render. To keep your state in step with the map, use [`onViewChange`](#syncing-the-view).
 </Callout>

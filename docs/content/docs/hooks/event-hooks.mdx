@@ -7,6 +7,10 @@ Event hooks subscribe a component to map events and unsubscribe when it unmounts
 
 <EventLogDemo />
 
+<ShowCode>
+<include cwd meta='title="event-log.tsx"'>components/examples/event-log.tsx</include>
+</ShowCode>
+
 ## useMapEvent
 
 ```tsx
@@ -32,6 +36,8 @@ The handler's arguments are typed per event (see `SphereEventMap`). The event na
 Handlers can return `false` to cancel cancellable events. Use it with `beforeContextmenu` to add your own menu items or hide the menu:
 
 ```tsx
+import { useMapEvent } from "gistda-sphere-react";
+
 useMapEvent("beforeContextmenu", (menu) => {
   const item = document.createElement("button");
   item.textContent = "Add a stop here";
@@ -46,19 +52,19 @@ useMapEvent("beforeContextmenu", (menu) => {
 | --- | --- | --- |
 | `useMapReady(handler)` | `(map) => void` | Runs once the map is ready, or right away if it already is. |
 | `useMapClick(handler)` | `({ lat, lon, x, y }) => void` | Map clicks (not fired for clicks on overlays). |
-| `useMapZoom(handler)` | `() => void` | Zoom changes. Read the level with `useMapControls().getZoom()`. |
-| `useMapLocation(handler)` | `() => void` | Center changes. Read it with `useMapControls().getCenter()`. |
+| `useMapZoom(handler)` | `(zoom) => void` | Zoom changes, with the new level. Fires on every animation frame. |
+| `useMapLocation(handler)` | `(center) => void` | Center changes, with the new `{ lon, lat }`. Fires on every animation frame. |
 | `useOverlayClick(handler)` | `({ overlay, location }) => void` | Clicks on any overlay. |
 
 ```tsx
-import { useMapControls, useMapReady, useMapZoom } from "gistda-sphere-react";
+import { useMapReady, useMapZoom } from "gistda-sphere-react";
+import { useState } from "react";
 
 function ZoomIndicator() {
-  const { getZoom } = useMapControls();
   const [zoom, setZoom] = useState<number | null>(null);
 
-  useMapReady(() => setZoom(getZoom()));
-  useMapZoom(() => setZoom(getZoom()));
+  useMapReady((map) => setZoom(map.zoom()));
+  useMapZoom(setZoom);
 
   return <span>Zoom {zoom?.toFixed(1)}</span>;
 }
@@ -67,6 +73,28 @@ function ZoomIndicator() {
 <Callout>
   Events like `mousemove`, `zoom`, `location` and `repaint` fire many times per second while the map moves. Avoid heavy work in their handlers, or batch updates with `requestAnimationFrame`.
 </Callout>
+
+## useMapView
+
+`useMapView` returns the current view and updates it when the map stops moving, which suits readouts and saving the view. It returns `null` until the map is ready.
+
+```tsx
+import { useMapView } from "gistda-sphere-react";
+
+function ViewReadout() {
+  const view = useMapView();
+  if (!view) return null;
+
+  const { center, zoom } = view;
+  return (
+    <p>
+      {center.lat.toFixed(4)}, {center.lon.toFixed(4)} at zoom {zoom.toFixed(1)}
+    </p>
+  );
+}
+```
+
+The view has `center`, `zoom`, `rotate`, `pitch` and `bound` (the visible box). For updates on every animation frame, use `useMapZoom` and `useMapLocation` instead.
 
 ## Event props or event hooks?
 

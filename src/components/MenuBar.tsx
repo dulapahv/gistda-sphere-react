@@ -8,7 +8,7 @@ import type { ControlPosition } from "./MapControl";
 export interface MenuBarRef {
   /** The underlying `sphere.MenuBar`. */
   getMenuBar: () => SphereMenuBar | null;
-  /** Select a button by index; a negative index clears the selection. */
+  /** Select a button by index. A negative index clears the selection. */
   select: (index: number) => void;
 }
 

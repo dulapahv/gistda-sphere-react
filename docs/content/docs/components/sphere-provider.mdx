@@ -25,6 +25,7 @@ export function App() {
 | --- | --- | --- | --- |
 | `apiKey` | `string` | **required** | Your Sphere API key. See [API key](/docs/getting-started/api-key). |
 | `children` | `ReactNode` | **required** | Your app. |
+| `language` | `"th" \| "en"` | – | Default language of every map below it, of [`useSphereServices`](/docs/hooks/use-sphere-services) and of [`useTagCategories`](/docs/hooks/use-tag-categories) labels. Maps without their own `language` use it. Without either, maps show Thai. See [Language](#language). |
 | `onLoad` | `() => void` | – | Called once the Sphere script has loaded. |
 | `onError` | `(error: Error) => void` | – | Called when the script can't load, for example when the key isn't allowed on this domain. |
 | `scriptUrl` | `string` | `https://api.sphere.gistda.or.th/map/?key=…` | Load the script from another URL, such as a proxy. |
@@ -45,28 +46,50 @@ function Status() {
 }
 ```
 
+## Language
+
+Maps show Thai labels by default. Set `language` once on the provider to switch every map, along with search results, route instructions and web services results:
+
+```tsx
+import { SphereMap, SphereProvider } from "gistda-sphere-react";
+
+<SphereProvider apiKey={apiKey} language="en">
+  <SphereMap style={{ height: 400 }} />
+</SphereProvider>
+```
+
+A map's own `language` prop takes priority over the provider's.
+
 ## Customizing POI popups
 
 When users click a POI from [`<Tag>`](/docs/components/tag) or a search result, Sphere shows a popup with the place's details. Use `formatPoi` to render your own content:
 
 ```tsx
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider
   apiKey={apiKey}
   formatPoi={(poi) => {
     const element = document.createElement("div");
-    element.innerHTML = `<strong>${poi.name}</strong><br>${poi.address ?? ""}`;
+    const name = document.createElement("strong");
+    name.textContent = poi.name;
+    const address = document.createElement("p");
+    address.textContent = poi.address ?? "";
+    element.append(name, address);
     return element;
   }}
 >
 ```
 
 <Callout type="warn">
-  `formatPoi` returns a DOM element, so escape any text you insert as HTML. Setting `textContent` is the safest option.
+  Insert place data with `textContent`, as above. If you build HTML with `innerHTML` instead, escape every value first.
 </Callout>
 
 To take over the popup completely, for example to load details from your own service, return popup options from `poiPopupOptions`:
 
 ```tsx
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider
   apiKey={apiKey}
   poiPopupOptions={(source, id, name) => ({
@@ -79,11 +102,33 @@ To take over the popup completely, for example to load details from your own ser
 >
 ```
 
-Both hooks are installed on `sphere.Util` while the provider is mounted and restored when it unmounts.
+Both callbacks are installed on `sphere.Util` while the provider is mounted and restored when it unmounts.
 
 ## Using it with Next.js
 
-The provider and every component and hook in this library run in the browser. In the App Router, use them from a Client Component (a file starting with `"use client"`). The [web services client](/docs/web-services) has no such limit and also works on the server.
+Every component in this library is a Client Component, so you can render `SphereProvider` and `SphereMap` from Server Components too, such as your root layout:
+
+```tsx title="app/layout.tsx"
+import { SphereProvider } from "gistda-sphere-react";
+import type { ReactNode } from "react";
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <SphereProvider
+          apiKey={process.env.NEXT_PUBLIC_SPHERE_API_KEY!}
+          language="en"
+        >
+          {children}
+        </SphereProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+Server Components can't pass functions as props or call hooks. Put event handlers such as `onClick`, callbacks such as `formatPoi`, and hooks in a Client Component (a file starting with `"use client"`). The [web services client](/docs/web-services#on-a-server) works on the server too.
 
 ## One map or several
 

@@ -1,0 +1,24 @@
+---
+title: Live vehicle tracking
+description: Markers that move smoothly and turn to their heading, with trails and a follow mode
+---
+
+Three buses drive along their routes. Their markers slide between positions and turn to face where they're going. Follow one to keep it centered:
+
+<LiveTrackingDemo />
+
+<ShowCode>
+<include cwd meta='title="live-tracking.tsx"'>components/examples/live-tracking.tsx</include>
+</ShowCode>
+
+## How it works
+
+- A timer moves the buses every second. In your app, take positions from your server instead, for example over a WebSocket or by polling.
+- `animate` on [`<Marker>`](/docs/components/marker#moving-markers) slides each marker to its new position. The slide lasts a little less than the update interval (900 ms for updates every second), so the movement looks continuous and one slide ends before the next starts.
+- `rotate` turns the icon to the heading, worked out from the direction of travel. Changing it doesn't re-create the marker.
+- Each trail is a [`<Polyline>`](/docs/components/polyline) of the bus's recent positions.
+- Following a bus calls `setCenter` from [`useMapControls`](/docs/hooks/use-map-controls) after each update.
+
+<Callout>
+  `animate` works with HTML and React icons. Keep the marker's other props, such as `title` and `icon`, stable while it moves, since changing them re-creates the marker.
+</Callout>

@@ -47,6 +47,9 @@ type เหล่านี้เป็น union ของสตริง editor 
 | --- | --- |
 | `PoiResult`, `SuggestResult`, `SearchResult`, `AddressResult` | `useSearch` |
 | `RouteStep`, `RouteSummary`, `RouteResult`, `RouteErrorInfo`, `RouteStatus` | `useRoute` |
+| `UseSuggestOptions`, `UseSuggestReturn` | `useSuggest` |
+| `MapView` | `useMapView`, `onViewChange` และ `getView()` |
+| `Cluster`, `MarkerClusterProps` | `MarkerCluster` |
 | `LocalizedTagCategory` | `useTagCategories` |
 | `SphereServices`, `SphereServiceError`, `RouteServiceResult`, `ElevationPoint`… | [บริการเว็บ](/th/docs/web-services) |
 | `SphereEventMap`, `EventName` | ชื่อเหตุการณ์และอาร์กิวเมนต์ของ handler |
@@ -67,12 +70,15 @@ function StoreMarker({ open, ...props }: MarkerProps & { open: boolean }) {
 
 อ็อบเจกต์ของ Sphere เองก็มี type: `SphereMapInstance` (`sphere.Map`), `SphereMarker`, `SpherePolygon`, `SpherePolyline`, `SphereCircle`, `SphereDot`, `SphereRectangle`, `SpherePopup`, `SphereOverlay`, `SphereLayer` และ `SphereNamespace` (ตัวแปร `sphere` ส่วนกลาง) ส่วน `MapLibreMap` ครอบคลุมสมาชิกที่ใช้บ่อยของ `map.Renderer`
 
+เมธอดของ Sphere ใช้ได้ทั้งอ่านและกำหนดค่า เมื่อเรียกโดยไม่ส่งอาร์กิวเมนต์จะคืนค่าพร้อม type ของค่านั้น และเมื่อส่งอาร์กิวเมนต์จะคืนอ็อบเจกต์เดิมเพื่อให้เรียกต่อกันได้:
+
 ```tsx
 import type { SphereMapInstance } from "gistda-sphere-react";
 
-function zoomOf(map: SphereMapInstance) {
-  return map.zoom() as number;
+function zoomIn(map: SphereMapInstance) {
+  const zoom = map.zoom(); // number
+  map.zoom(zoom + 1); // returns the map, for chaining
 }
 ```
 
-เมื่อ import แพ็กเกจแล้ว `window.sphere` จะถูกประกาศ type ให้ทั้งโปรเจกต์
+เมื่อ import แพ็กเกจแล้ว `window.sphere` และ `window.deck` (deck.gl ที่มากับ Sphere ซึ่งกำหนด type แบบหลวม ๆ ไว้เป็น `DeckNamespace`) จะถูกประกาศเป็น global type ให้ทั้งโปรเจกต์ โดยทั้งคู่มี type เป็น optional เนื่องจากจะมีค่าเมื่อสคริปต์ของ Sphere โหลดเสร็จแล้วเท่านั้น ดู[ชั้นข้อมูล deck.gl](/th/docs/components/layer#deckgl-and-raw-maplibre-layers)

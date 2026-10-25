@@ -7,6 +7,7 @@ export {
   useMapZoom,
   useOverlayClick,
 } from "./useMapEvent";
+export { useMapView } from "./useMapView";
 export type {
   BaseOverlay,
   CircleData,
@@ -42,6 +43,8 @@ export { useSphere } from "./useSphere";
 export { useSphereServices } from "./useSphereServices";
 export type { UseSphereUtilsReturn } from "./useSphereUtils";
 export { useSphereUtils } from "./useSphereUtils";
+export type { UseSuggestOptions, UseSuggestReturn } from "./useSuggest";
+export { useSuggest } from "./useSuggest";
 export type {
   LocalizedTagCategory,
   UseTagCategoriesReturn,

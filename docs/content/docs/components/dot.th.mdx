@@ -4,16 +4,17 @@ description: วงกลมขนาดเล็กสำหรับระบ�
 ---
 
 <MapDemo height="400px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }}>
-  <Dot position={{ lon: 100.5018, lat: 13.7563 }} lineColor="red" lineWidth={12} title="กรุงเทพมหานคร" />
-  <Dot position={{ lon: 100.52, lat: 13.77 }} lineColor="blue" lineWidth={8} title="จุด B" />
+  <Dot position={{ lon: 100.5018, lat: 13.7563 }} lineColor="red" lineWidth={12} title="Bangkok" />
+  <Dot position={{ lon: 100.52, lat: 13.77 }} lineColor="blue" lineWidth={8} title="Point B" />
 </MapDemo>
 
 ```tsx
-<Dot
-  position={{ lon: 100.5018, lat: 13.7563 }}
-  lineColor="red"
-  lineWidth={12}
-/>
+import { Dot, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.5018, lat: 13.7563 }} style={{ height: 400 }} zoom={12}>
+  <Dot position={{ lon: 100.5018, lat: 13.7563 }} lineColor="red" lineWidth={12} title="Bangkok" />
+  <Dot position={{ lon: 100.52, lat: 13.77 }} lineColor="blue" lineWidth={8} title="Point B" />
+</SphereMap>
 ```
 
 ต่างจาก [`Circle`](/th/docs/components/circle) ที่รัศมีเป็นระยะทางบนพื้นโลก จุดจะมีขนาดบนหน้าจอเท่าเดิมทุกระดับซูม โดย `lineWidth` คือเส้นผ่านศูนย์กลางเป็นพิกเซล
@@ -34,3 +35,5 @@ description: วงกลมขนาดเล็กสำหรับระบ�
 | `getDot()` | `sphere.Dot` ที่อยู่เบื้องหลัง |
 | `getPosition()` / `setPosition(location)` | อ่านหรือย้ายตำแหน่งจุด |
 | `contains`, `intersects`, `within`, `distanceTo`, `updateStyle`, `togglePopup`, `toGeoJSON` | เหมือนกับ[รูปหลายเหลี่ยม](/th/docs/components/polygon#ref) |
+
+`setPosition` และการลากจะย้ายจุดจนกว่า prop `position` จะเปลี่ยนเป็นตำแหน่งใหม่ เช่นเดียวกับ[หมุด](/th/docs/components/marker#ref-or-position) หากต้องการให้จุดอยู่ในตำแหน่งที่ย้ายไป ให้เก็บตำแหน่งไว้ใน state เช่น จาก `onDrop`

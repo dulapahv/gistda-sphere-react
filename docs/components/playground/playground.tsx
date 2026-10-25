@@ -8,7 +8,7 @@ import {
   SphereProvider,
   useRoute,
 } from "gistda-sphere-react";
-import { useCallback, useState } from "react";
+import { useState } from "react";
 import { MapView } from "./components/MapView";
 import { Sidebar } from "./components/Sidebar";
 import { DataTab } from "./components/tabs/DataTab";
@@ -26,21 +26,6 @@ const API_KEY = process.env.NEXT_PUBLIC_SPHERE_API_KEY ?? "";
 
 /** Defaults for every Phosphor icon in the playground. */
 const ICON_DEFAULTS: IconProps = { size: 14, weight: "bold" };
-
-/** Reads a single `{ lat, lon }` from an overlay's `location()` result. */
-function toLocation(value: unknown): Location | null {
-  if (
-    typeof value === "object" &&
-    value !== null &&
-    "lat" in value &&
-    "lon" in value &&
-    typeof value.lat === "number" &&
-    typeof value.lon === "number"
-  ) {
-    return { lat: value.lat, lon: value.lon };
-  }
-  return null;
-}
 
 /** The playground: a tabbed sidebar driving one declaratively rendered map. */
 function PlaygroundContent({ lang }: { lang: string }) {
@@ -64,9 +49,8 @@ function PlaygroundContent({ lang }: { lang: string }) {
   const [analysis, setAnalysis] = useState<GeoJsonLayer | null>(null);
   const [measureVersion, setMeasureVersion] = useState(0);
   const [outlineFailed, setOutlineFailed] = useState(false);
-  const [routeStops, setRouteStops] = useState<Location[]>([]);
 
-  const { addDestination, listDestinations } = route;
+  const { addDestination } = route;
   const { setMode: setDrawingMode } = drawing;
 
   // Road names come from the routing service in the route's language, so a
@@ -79,15 +63,6 @@ function PlaygroundContent({ lang }: { lang: string }) {
     }
   };
 
-  const syncRouteStops = useCallback(() => {
-    setRouteStops(
-      listDestinations().flatMap((marker) => {
-        const location = toLocation(marker.location());
-        return location ? [location] : [];
-      })
-    );
-  }, [listDestinations]);
-
   const changeTab = (tab: TabId) => {
     setActiveTab(tab);
     setPickMode(null);
@@ -98,7 +73,6 @@ function PlaygroundContent({ lang }: { lang: string }) {
 
   const addRouteStop = (location: Location) => {
     addDestination(location);
-    syncRouteStops();
     setInspectPoint(null);
     changeTab("route");
   };
@@ -112,7 +86,6 @@ function PlaygroundContent({ lang }: { lang: string }) {
   const handleMapClick = (location: Location) => {
     if (pickMode === "routeStop") {
       addDestination(location);
-      syncRouteStops();
       return;
     }
     if (pickMode === "dataPoint") {
@@ -190,10 +163,8 @@ function PlaygroundContent({ lang }: { lang: string }) {
           route: (
             <RouteTab
               onPickModeChange={setPickMode}
-              onStopsChanged={syncRouteStops}
               pickMode={pickMode}
               route={route}
-              stops={routeStops}
               t={t}
             />
           ),

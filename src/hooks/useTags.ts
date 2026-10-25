@@ -18,7 +18,7 @@ export interface UseTagsReturn {
   isReady: boolean;
   /** Names of the tags on the map. */
   list: () => string[];
-  /** Remove a tag; names joined with `|` are removed one by one. */
+  /** Remove a tag. Names joined with `|` are removed one by one. */
   remove: (tag: string) => void;
   /** Replace all tags with this one. */
   set: (tag: string | TagDataFunction, options?: TagOptions) => void;

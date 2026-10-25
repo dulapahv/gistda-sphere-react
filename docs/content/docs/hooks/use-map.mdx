@@ -28,6 +28,9 @@ function ZoomLabel() {
 Sphere draws with [MapLibre GL JS](https://maplibre.org/maplibre-gl-js/docs/). `map.Renderer` is the MapLibre map, so MapLibre features and plugins work too:
 
 ```tsx
+import { useMap } from "gistda-sphere-react";
+import { useEffect } from "react";
+
 const { map } = useMap();
 
 useEffect(() => {

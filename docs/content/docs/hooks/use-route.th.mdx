@@ -7,6 +7,10 @@ description: วางแผนเส้นทางแบบหลายจุ�
 
 <RouteDemo />
 
+<ShowCode>
+<include cwd meta='title="route-planner.tsx"'>components/examples/route-planner.tsx</include>
+</ShowCode>
+
 ```tsx
 import { useRoute } from "gistda-sphere-react";
 
@@ -40,7 +44,7 @@ function Directions() {
 }
 ```
 
-Sphere เป็นผู้วาดเส้นทางและหมุดจุดแวะบนแผนที่ ผู้ใช้ลากจุดแวะได้ และคลิกที่จุดแวะเพื่อลบได้
+Sphere เป็นผู้วาดเส้นทางและหมุดจุดแวะบนแผนที่ ผู้ใช้ลากจุดแวะได้ และคลิกที่จุดแวะเพื่อลบได้ [`destinations`](#stops) จะอัปเดตตามการเปลี่ยนแปลงเหล่านี้ แต่เส้นทางจะคำนวณใหม่เมื่อเรียก `search()` เท่านั้น หรือคำนวณใหม่เองเมื่อเปิด[ตัวเลือก `auto`](#options)
 
 ## สถานะผลลัพธ์ [#result-state]
 
@@ -50,6 +54,7 @@ Sphere เป็นผู้วาดเส้นทางและหมุด�
 | `isCalculating` | `boolean` | ทางลัดของ `status === "calculating"` |
 | `summary` | `RouteSummary \| null` | ผลรวม: `distance` (ม.), `distanceText`, `interval` (วินาที), `intervalText` |
 | `steps` | `RouteStep[]` | คำแนะนำทีละขั้น |
+| `destinations` | `Location[]` | ตำแหน่งของจุดแวะตามลำดับ อัปเดตเมื่อเพิ่ม ลบ สลับลำดับ หรือลากจุดแวะ |
 | `routes` | `RouteResult[]` | ข้อมูลช่วงเส้นทาง (leg) จาก Sphere หนึ่งช่วงต่อจุดแวะสองจุดที่ติดกัน |
 | `error` | `RouteErrorInfo \| null` | สาเหตุที่การคำนวณล่าสุดไม่สำเร็จ |
 | `isReady` | `boolean` | เป็น `true` เมื่อแผนที่พร้อมใช้งาน |
@@ -68,7 +73,7 @@ Sphere เป็นผู้วาดเส้นทางและหมุด�
 | `distance`, `interval` | `640`, `60` | ค่าดิบเป็นเมตรและวินาที |
 | `legIndex` | `0` | ช่วงเส้นทาง (คู่จุดแวะ) ที่ขั้นนี้อยู่ |
 
-คำแนะนำใช้ภาษาของเส้นทาง ซึ่งเปลี่ยนได้ด้วย `setLanguage("en")` หากต้องการแผงนำทางแบบมีสไตล์ของ Sphere ให้เพิ่ม [`<RouteGuide>`](/th/docs/components/route-guide)
+คำแนะนำและผลรวมใช้ภาษาของเส้นทาง ซึ่งเป็นภาษาเดียวกับแผนที่ คือภาษาไทย เว้นแต่จะกำหนด `language` ที่ [`SphereProvider`](/th/docs/components/sphere-provider#language) หรือ `SphereMap` หากต้องการเปลี่ยนเฉพาะภาษาของเส้นทาง ให้เรียก `setLanguage("en")` หากต้องการแผงนำทางแบบมีสไตล์ของ Sphere ให้เพิ่ม [`<RouteGuide>`](/th/docs/components/route-guide)
 
 ชื่อถนนมาจากบริการหาเส้นทางในภาษาที่ใช้ตอนคำนวณ ดังนั้นหลังเปลี่ยนภาษา (ด้วย `setLanguage` หรือ prop `language` ของ `SphereMap`) ให้เรียก `search()` อีกครั้งเพื่ออัปเดตชื่อถนน
 
@@ -99,7 +104,10 @@ const icons = {
 ## ตัวเลือก [#options]
 
 ```tsx
+import { useRoute } from "gistda-sphere-react";
+
 const route = useRoute({
+  auto: true,
   timeout: 15_000,
   onRouteComplete: (routes) => console.log("Done", routes),
   onError: (error) => toast(error.message),
@@ -108,6 +116,7 @@ const route = useRoute({
 
 | ตัวเลือก | ชนิด | คำอธิบาย |
 | --- | --- | --- |
+| `auto` | `boolean` | คำนวณใหม่ทุกครั้งที่จุดแวะเปลี่ยน รวมถึงเมื่อผู้ใช้ลากหรือลบจุดแวะ ปิดไว้โดยค่าเริ่มต้นเช่นเดียวกับ Sphere |
 | `timeout` | `number` | เวลารอ (มิลลิวินาที) ก่อนรายงานข้อผิดพลาด `"timeout"` ค่าเริ่มต้น `20000` ส่ง `0` เพื่อปิด |
 | `onRouteComplete` | `(routes) => void` | คำนวณเส้นทางเสร็จ |
 | `onRouteError` | `(status) => void` | Sphere รายงานรหัสข้อผิดพลาดของการนำทาง |
@@ -120,12 +129,35 @@ const route = useRoute({
 | `addDestination(location, mode?)` | เพิ่มจุดแวะ (ตำแหน่งหรือ `sphere.Marker`) และกำหนดรูปแบบการเดินทางของช่วงถัดไปได้ |
 | `insertDestination(index, location, mode?)` | แทรกจุดแวะที่ลำดับที่กำหนด |
 | `removeDestination(marker)` / `removeDestinationAt(index)` | ลบจุดแวะ |
-| `listDestinations()` / `size()` | หมุดของจุดแวะ / จำนวนจุดแวะ |
+| `listDestinations()` / `size()` | หมุดของจุดแวะ / จำนวนจุดแวะ หากต้องการตำแหน่งในรูปแบบ state ให้ใช้ `destinations` |
 | `reverse()` | สลับลำดับจุดแวะย้อนกลับ |
 | `clearDestinations()` | ลบจุดแวะทั้งหมด |
 | `clearPath()` | ลบเส้นทางที่วาดไว้ แต่เก็บจุดแวะไว้ |
 | `clear()` | ลบจุดแวะและเส้นทาง และรีเซ็ตสถานะผลลัพธ์ |
 | `search()` | คำนวณเส้นทาง |
+
+`destinations` เก็บตำแหน่งของจุดแวะเป็น state ของ React จึงนำไปแสดงในรายการของคุณเองได้:
+
+```tsx
+import { useRoute } from "gistda-sphere-react";
+
+function StopList() {
+  const { destinations, removeDestinationAt } = useRoute({ auto: true });
+
+  return (
+    <ol>
+      {destinations.map((stop, index) => (
+        <li key={`${stop.lon},${stop.lat},${index}`}>
+          {stop.lat.toFixed(4)}, {stop.lon.toFixed(4)}
+          <button onClick={() => removeDestinationAt(index)} type="button">
+            Remove
+          </button>
+        </li>
+      ))}
+    </ol>
+  );
+}
+```
 
 ## รูปแบบการเดินทางและตัวเลือก [#travel-modes-and-options]
 
@@ -137,7 +169,7 @@ const route = useRoute({
 | `setRestrict("Bike", state)` / `isRestrictEnabled("Bike")` | เลี่ยงถนนที่ห้ามรถจักรยานยนต์ |
 | `setLabel(label)` / `getLabel()` | ป้ายบนเส้นทาง: `"Distance"`, `"Time"` หรือ `"Hide"` |
 | `setLineStyle(part, style)` / `getLineStyle(part)` | รูปแบบของเส้น `"Road"`, `"Ferry"`, `"Destination"` หรือ `"Focus"` |
-| `setAuto(state)` / `getAuto()` | คำนวณใหม่อัตโนมัติเมื่อจุดแวะเปลี่ยน |
+| `setAuto(state)` / `getAuto()` | คำนวณใหม่อัตโนมัติเมื่อจุดแวะเปลี่ยน หรือส่งตัวเลือก `auto` แทนก็ได้ |
 | `enableContextMenu()` | เพิ่มรายการ "เดินทางมาจุดนี้" ในเมนูคลิกขวา ซึ่งเพิ่มจุดแวะ ณ ตำแหน่งนั้น และเปิด `auto` ด้วย |
 | `setLanguage(language)` / `getLanguage()` | ภาษาของคำแนะนำและป้าย |
 

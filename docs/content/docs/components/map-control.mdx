@@ -7,8 +7,12 @@ description: Render your own React controls inside the map, positioned and style
 
 <MapControlDemo />
 
+<ShowCode>
+<include cwd meta='title="custom-controls.tsx"'>components/examples/custom-controls.tsx</include>
+</ShowCode>
+
 ```tsx
-import { MapControl, useMapControls } from "gistda-sphere-react";
+import { MapControl, SphereMap, useMapControls } from "gistda-sphere-react";
 
 function HomeButton() {
   const { goTo } = useMapControls();
@@ -43,6 +47,8 @@ function HomeButton() {
 With `group`, buttons get MapLibre's control styles (29 × 29 px, white background). Without it, the container is unstyled, so you can render anything, such as a legend:
 
 ```tsx
+import { MapControl } from "gistda-sphere-react";
+
 <MapControl position="bottom-right" className="rounded bg-white p-2 text-xs shadow">
   <strong>PM2.5 (µg/m³)</strong>
   <Legend />

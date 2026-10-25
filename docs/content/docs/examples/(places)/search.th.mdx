@@ -1,0 +1,18 @@
+---
+title: การค้นหาพร้อมคำแนะนำอัตโนมัติ
+description: ช่องค้นหาที่มีคำแนะนำ รายการผลลัพธ์ และหมุดพร้อมป๊อปอัปแบบ React
+---
+
+พิมพ์เพื่อดูคำแนะนำ กด Enter เพื่อค้นหา แล้วเลือกผลลัพธ์
+
+<SearchDemo />
+
+<ShowCode>
+<include cwd meta='title="place-search.tsx"'>components/examples/place-search.tsx</include>
+</ShowCode>
+
+## ไอเดียเพิ่มเติม [#ideas]
+
+- แสดงขอบเขตของผลลัพธ์ที่เป็นพื้นที่ (จังหวัดหรืออำเภอ) ด้วย [`<ObjectOverlay id={place.id} fitBounds />`](/th/docs/components/object-overlay)
+- ให้ผลลัพธ์เน้นบริเวณที่อยู่บนจอ: `search(keyword, { span: "5km" })` รอบจุดกึ่งกลางแผนที่ หรือใช้[บริการเว็บสำหรับค้นหา](/th/docs/web-services/search-and-places#search)กับ `near`
+- หากต้องการรายการผลลัพธ์สำเร็จรูปของ Sphere ให้ใช้ [`<SearchResults>`](/th/docs/components/search-results) แทนการสร้างเอง

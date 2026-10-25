@@ -10,7 +10,7 @@ import {
   toRouteTypeValue,
 } from "@/internal/enums";
 import { toSphereGeometryOptions } from "@/internal/geometry";
-import { useLatest } from "@/internal/hooks";
+import { isDeepEqual, useLatest } from "@/internal/hooks";
 import { useActiveMap } from "@/internal/useActiveMap";
 import type {
   GeometryOptions,
@@ -74,6 +74,12 @@ export interface RouteErrorInfo {
 }
 
 export interface UseRouteOptions {
+  /**
+   * Re-calculate automatically whenever the stops change, including when
+   * users drag them. Same as calling `setAuto`. Leave it out to keep
+   * Sphere's setting (off by default).
+   */
+  auto?: boolean;
   /** Called with the error for both service errors and timeouts. */
   onError?: (error: RouteErrorInfo) => void;
   /** Called with the calculated legs. */
@@ -82,7 +88,7 @@ export interface UseRouteOptions {
   onRouteError?: (status: number) => void;
   /**
    * Milliseconds to wait for a result after `search()` before reporting a
-   * `"timeout"` error. Default `20000`; `0` disables the timeout.
+   * `"timeout"` error. Default `20000`, and `0` disables the timeout.
    */
   timeout?: number;
 }
@@ -97,6 +103,11 @@ export interface UseRouteReturn {
   clear: () => void;
   clearDestinations: () => void;
   clearPath: () => void;
+  /**
+   * The stops, in order. Updates when stops are added, inserted, removed,
+   * reversed or cleared, and when users drag or remove them on the map.
+   */
+  destinations: Location[];
   /** Enable route planning from the map's right-click menu. */
   enableContextMenu: () => void;
   /** Allow or avoid a kind of route (roads, ferries, tollways). */
@@ -261,13 +272,15 @@ export function useRoute(options?: UseRouteOptions): UseRouteReturn {
   const optionsRef = useLatest(options);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   // Sphere throws when it labels a straight-line (Fly) leg, so route labels
-  // are hidden while Fly is in use; this keeps the labels to restore.
+  // are hidden while Fly is in use. This keeps the labels to restore.
   const hiddenLabelRef = useRef<RouteLabelValue | undefined>(undefined);
 
   const [status, setStatus] = useState<RouteStatus>("idle");
   const [error, setError] = useState<RouteErrorInfo | null>(null);
   const [routes, setRoutes] = useState<RouteResult[]>([]);
+  const [destinations, setDestinations] = useState<Location[]>([]);
   const [language, setLanguageState] = useState<Language>("th");
+  const auto = options?.auto;
 
   const stopTimer = useCallback(() => {
     if (timerRef.current) {
@@ -322,6 +335,39 @@ export function useRoute(options?: UseRouteOptions): UseRouteReturn {
   }, [map, isReady, optionsRef, stopTimer, fail]);
 
   const route = map?.Route;
+
+  /** Re-reads the stops from Sphere, keeping the same array when unchanged. */
+  const syncDestinations = useCallback(() => {
+    const next = (route?.list() ?? []).map((marker) => {
+      const { lat, lon } = marker.location();
+      return { lat, lon };
+    });
+    setDestinations((previous) =>
+      isDeepEqual(previous, next) ? previous : next
+    );
+  }, [route]);
+
+  // Stops change on the map too: dragged, or removed from their popup.
+  useEffect(() => {
+    if (!(isReady && map)) {
+      return;
+    }
+    syncDestinations();
+    map.Event.bind("overlayDrop", syncDestinations);
+    map.Event.bind("overlayChange", syncDestinations);
+    map.Event.bind("routeComplete", syncDestinations);
+    return () => {
+      map.Event.unbind("overlayDrop", syncDestinations);
+      map.Event.unbind("overlayChange", syncDestinations);
+      map.Event.unbind("routeComplete", syncDestinations);
+    };
+  }, [map, isReady, syncDestinations]);
+
+  useEffect(() => {
+    if (route && auto !== undefined) {
+      route.auto(auto);
+    }
+  }, [route, auto]);
 
   /** Hides route labels, remembering the current ones. */
   const hideLabels = useCallback(() => {
@@ -418,20 +464,24 @@ export function useRoute(options?: UseRouteOptions): UseRouteReturn {
       addDestination: (destination, destinationMode) => {
         const value = mode(destinationMode);
         changeSafely(value, () => route?.add(destination, value));
+        syncDestinations();
       },
       clear: () => {
         route?.clear();
         restoreLabels();
         resetResults();
+        syncDestinations();
       },
       clearDestinations: () => {
         route?.clearDestination();
         restoreLabels();
+        syncDestinations();
       },
       clearPath: () => {
         route?.clearPath();
         resetResults();
       },
+      destinations,
       enableContextMenu: () => {
         route?.enableContextMenu();
       },
@@ -519,6 +569,7 @@ export function useRoute(options?: UseRouteOptions): UseRouteReturn {
       insertDestination: (index, destination, destinationMode) => {
         const value = mode(destinationMode);
         changeSafely(value, () => route?.insert(index, destination, value));
+        syncDestinations();
       },
       isCalculating: status === "calculating",
       isReady,
@@ -540,13 +591,16 @@ export function useRoute(options?: UseRouteOptions): UseRouteReturn {
       removeDestination: (destination) => {
         route?.remove(destination);
         restoreLabels();
+        syncDestinations();
       },
       removeDestinationAt: (index) => {
         route?.removeAt(index);
         restoreLabels();
+        syncDestinations();
       },
       reverse: () => {
         route?.reverse();
+        syncDestinations();
       },
       routes,
       search,
@@ -617,5 +671,7 @@ export function useRoute(options?: UseRouteOptions): UseRouteReturn {
     resetResults,
     changeSafely,
     restoreLabels,
+    destinations,
+    syncDestinations,
   ]);
 }

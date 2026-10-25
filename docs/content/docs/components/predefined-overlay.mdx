@@ -7,7 +7,13 @@ description: Live traffic cameras, road events and air quality from Sphere
 
 <PredefinedOverlaysDemo />
 
+<ShowCode>
+<include cwd meta='title="live-overlays.tsx"'>components/examples/live-overlays.tsx</include>
+</ShowCode>
+
 ```tsx
+import { PredefinedOverlay, SphereMap } from "gistda-sphere-react";
+
 <SphereMap>
   <PredefinedOverlay type="cameras" />
   <PredefinedOverlay type="events" refresh={60} />

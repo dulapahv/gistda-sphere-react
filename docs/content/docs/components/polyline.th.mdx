@@ -14,23 +14,30 @@ description: เส้นที่ลากผ่านหลายจุด ร
     lineColor="blue"
     lineWidth={4}
     lineStyle="Dashed"
-    title="เส้นทาง A"
+    title="Route A"
   />
 </MapDemo>
 
 ```tsx
-<Polyline
-  positions={[
-    { lon: 100.4, lat: 13.7 },
-    { lon: 100.5, lat: 13.8 },
-    { lon: 100.6, lat: 13.7 },
-    { lon: 100.7, lat: 13.8 },
-  ]}
-  lineColor="blue"
-  lineWidth={4}
-  lineStyle="Dashed"
-/>
+import { Polyline, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.55, lat: 13.75 }} style={{ height: 400 }} zoom={10}>
+  <Polyline
+    positions={[
+      { lon: 100.4, lat: 13.7 },
+      { lon: 100.5, lat: 13.8 },
+      { lon: 100.6, lat: 13.7 },
+      { lon: 100.7, lat: 13.8 },
+    ]}
+    lineColor="blue"
+    lineWidth={4}
+    lineStyle="Dashed"
+    title="Route A"
+  />
+</SphereMap>
 ```
+
+ตัวอย่างสั้น ๆ ด้านล่างละ `<SphereMap>` ไว้ แต่โอเวอร์เลย์ทุกตัวต้องอยู่ภายใน `<SphereMap>` เสมอ
 
 ## Props
 
@@ -45,6 +52,8 @@ description: เส้นที่ลากผ่านหลายจุด ร
 `lineStyle` รับค่า `"Solid"`, `"Dashed"`, `"Dot"` หรือรูปแบบเส้นประที่กำหนดเอง
 
 ```tsx
+import { Polyline } from "gistda-sphere-react";
+
 <Polyline positions={path} lineStyle={[12, 4, 2, 4]} lineWidth={3} />
 ```
 

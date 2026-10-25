@@ -15,6 +15,8 @@ import {
   createMapControls,
   type LayerInput,
   type MapControls,
+  type MapView,
+  readView,
   resolveLayer,
 } from "@/internal/mapControls";
 import type {
@@ -37,6 +39,13 @@ import type {
   WheelEventData,
 } from "@/types";
 
+/** Covers the map area while `fallback` is shown. */
+const FALLBACK_STYLE: CSSProperties = {
+  inset: 0,
+  position: "absolute",
+  zIndex: 1,
+};
+
 /** Visibility of built-in UI controls, keyed by control name. */
 export type UiControlsConfig = Partial<Record<UiControlName, boolean>>;
 
@@ -47,7 +56,7 @@ export interface SphereMapRef extends Omit<MapControls, "isReady"> {
 
 /** Event callback props, one per Sphere event. */
 export interface SphereMapEventProps {
-  /** Return `false` to cancel the context menu; use `menu.add()` to add items. */
+  /** Return `false` to cancel the context menu, or use `menu.add()` to add items. */
   // biome-ignore lint/suspicious/noConfusingVoidType: returning false cancels the menu
   onBeforeContextMenu?: (menu: MenuEvent) => void | boolean;
   onClick?: (location: PointerLocation) => void;
@@ -91,6 +100,12 @@ export interface SphereMapEventProps {
   /** Drawing toolbar mode changed. */
   onToolbarChange?: (mode: string) => void;
   onTooltipChange?: (message: unknown) => void;
+  /**
+   * The view (center, zoom, rotation, tilt and visible box) when the map is
+   * ready and each time it stops moving. Use it to sync the view to the URL
+   * or your state. `onLocation` and `onZoom` fire on every animation frame.
+   */
+  onViewChange?: (view: MapView) => void;
   onWheel?: (data: WheelEventData) => void;
   onZoom?: (zoom: number) => void;
   onZoomRange?: (range: Range) => void;
@@ -108,12 +123,20 @@ export interface SphereMapProps extends SphereMapEventProps {
   className?: string;
   /** Show or hide built-in UI controls, e.g. `{ DPad: false, Scale: true }`. */
   controls?: UiControlsConfig;
-  /** Color filter. Changing it updates the map; removing it clears the filter. */
+  /**
+   * Shown over the map area until the map is ready, e.g. a spinner. Use
+   * `useSphere().error` to show something when the script fails to load.
+   */
+  fallback?: ReactNode;
+  /** Color filter. Changing it updates the map, and removing it clears the filter. */
   filter?: FilterType;
   id?: string;
   /** Allow user input (initial value). */
   input?: boolean;
-  /** Label and UI language. Changing it updates the map in place. */
+  /**
+   * Label and UI language. Changing it updates the map in place. Defaults to
+   * `SphereProvider`'s `language`, then Thai.
+   */
   language?: Language;
   /** Restore the last viewed location/zoom from local storage. */
   lastView?: boolean;
@@ -212,6 +235,24 @@ function toInitialBaseLayer(
     : new sphere.Layer(resolved);
 }
 
+/**
+ * Creates the element one map instance renders into, filling `container`.
+ * Each instance gets its own: removing a map strips MapLibre's classes from
+ * its element and Sphere leaves elements behind, which would break a new map
+ * created in the same `<div>` (React's StrictMode mounts effects twice).
+ */
+function createPlaceholder(container: HTMLElement): HTMLDivElement {
+  const { position } = getComputedStyle(container);
+  if (!position || position === "static") {
+    container.style.position = "relative";
+  }
+  const placeholder = document.createElement("div");
+  placeholder.style.position = "absolute";
+  placeholder.style.inset = "0";
+  container.prepend(placeholder);
+  return placeholder;
+}
+
 /** Applies `controls` visibility to the built-in UI controls. */
 function applyControls(map: SphereMapInstance, controls: UiControlsConfig) {
   for (const [name, visible] of Object.entries(controls)) {
@@ -228,7 +269,7 @@ export function SphereMap({
   zoom = 7,
   zoomRange,
   center,
-  language = "th",
+  language: languageProp,
   input = true,
   lastView = false,
   ui,
@@ -237,6 +278,7 @@ export function SphereMap({
   pitch,
   baseLayer,
   controls,
+  fallback,
   options: extraOptions,
   className,
   style,
@@ -246,7 +288,14 @@ export function SphereMap({
   const containerRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<SphereMapInstance | null>(null);
   const [isReady, setIsReady] = useState(false);
-  const { sphere, isLoaded, registerMap, unregisterMap } = useSphereContext();
+  const {
+    sphere,
+    isLoaded,
+    language: providerLanguage,
+    registerMap,
+    unregisterMap,
+  } = useSphereContext();
+  const language = languageProp ?? providerLanguage ?? "th";
   const callbacksRef = useLatest<MapCallbacks>(callbacks);
 
   const stableZoomRange = useDeepMemo(zoomRange);
@@ -273,11 +322,13 @@ export function SphereMap({
   });
 
   useEffect(() => {
-    if (!(isLoaded && sphere && containerRef.current)) {
+    const container = containerRef.current;
+    if (!(isLoaded && sphere && container)) {
       return;
     }
 
     const initial = initialPropsRef.current;
+    const placeholder = createPlaceholder(container);
     let map: SphereMapInstance;
 
     try {
@@ -286,7 +337,7 @@ export function SphereMap({
         input: initial.input,
         language: initial.language,
         lastView: initial.lastView,
-        placeholder: containerRef.current,
+        placeholder,
         zoom: initial.zoom,
       };
       if (initial.zoomRange) {
@@ -310,6 +361,7 @@ export function SphereMap({
 
       map = new sphere.Map(options);
     } catch (error) {
+      placeholder.remove();
       callbacksRef.current.onError?.(toError(error));
       return;
     }
@@ -336,6 +388,10 @@ export function SphereMap({
     };
     map.Event.bind("error", handleError);
 
+    const handleMoveEnd = () => {
+      callbacksRef.current.onViewChange?.(readView(map));
+    };
+
     const handleReady = () => {
       if (initial.filter) {
         map.enableFilter(toFilterValue(sphere, initial.filter));
@@ -349,9 +405,11 @@ export function SphereMap({
       if (initial.controls) {
         applyControls(map, initial.controls);
       }
+      map.Renderer.on("moveend", handleMoveEnd);
       setIsReady(true);
       registerMap(map);
       callbacksRef.current.onReady?.(map);
+      callbacksRef.current.onViewChange?.(readView(map));
     };
     map.Event.bind("ready", handleReady);
 
@@ -361,10 +419,11 @@ export function SphereMap({
       }
       map.Event.unbind("error", handleError);
       map.Event.unbind("ready", handleReady);
+      map.Renderer?.off("moveend", handleMoveEnd);
       unregisterMap(map);
       mapRef.current = null;
       setIsReady(false);
-      // Free the WebGL context; Sphere has no destroy API of its own. React
+      // Free the WebGL context, since Sphere has no destroy API of its own. React
       // unmounts parents first, so this waits until the overlays and layers
       // inside the map have removed themselves: Sphere's deck.gl layers throw
       // when used after the renderer is gone.
@@ -372,8 +431,9 @@ export function SphereMap({
         try {
           map.Renderer?.remove();
         } catch {
-          // The renderer may not have finished initializing; nothing to free.
+          // The renderer may not have finished initializing, so there's nothing to free.
         }
+        placeholder.remove();
       });
     };
   }, [isLoaded, sphere, registerMap, unregisterMap, callbacksRef]);
@@ -461,6 +521,9 @@ export function SphereMap({
       <MapProvider isReady={isReady} map={mapRef.current}>
         {isReady && children}
       </MapProvider>
+      {isReady || fallback === undefined ? null : (
+        <div style={FALLBACK_STYLE}>{fallback}</div>
+      )}
     </div>
   );
 }

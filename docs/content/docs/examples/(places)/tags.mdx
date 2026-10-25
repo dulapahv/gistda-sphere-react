@@ -1,0 +1,23 @@
+---
+title: Points of interest by category
+description: Let users pick POI categories and show them on the map
+---
+
+Pick a category, then toggle tags to show those places on the map:
+
+<TagsDemo />
+
+<ShowCode>
+<include cwd meta='title="tag-picker.tsx"'>components/examples/tag-picker.tsx</include>
+</ShowCode>
+
+Each `<Tag>` adds its layer when it mounts and removes it when it unmounts, so the map always matches `activeTags`. To manage tags imperatively instead, use [`useTags`](/docs/hooks/use-tags):
+
+```tsx
+import { useTags } from "gistda-sphere-react";
+
+const { add, remove, clear } = useTags();
+add("โรงพยาบาล");
+add("เอทีเอ็ม");
+remove("โรงพยาบาล");
+```

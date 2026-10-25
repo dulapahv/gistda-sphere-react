@@ -21,7 +21,7 @@ export const ROUTE_TURN = {
 interface TurnPhrase {
   /** Phrase used when the step has no road name. */
   alone: string;
-  /** Phrase placed before the road name; empty to show the name alone. */
+  /** Phrase placed before the road name. Leave it empty to show the name alone. */
   to: string;
 }
 
@@ -85,7 +85,7 @@ export function getTurnInstruction(
   roadName: string | null | undefined,
   language: Language = "en"
 ): string {
-  // Service data can omit the name; treat it like a step without a road.
+  // Service data can omit the name, so treat it like a step without a road.
   const name =
     typeof roadName === "string" && roadName !== NO_ROAD_NAME
       ? roadName.trim()

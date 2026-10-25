@@ -25,6 +25,7 @@ export function App() {
 | --- | --- | --- | --- |
 | `apiKey` | `string` | **จำเป็น** | API key ของ Sphere ดู[การขอ API Key](/th/docs/getting-started/api-key) |
 | `children` | `ReactNode` | **จำเป็น** | แอปของคุณ |
+| `language` | `"th" \| "en"` | – | ภาษาเริ่มต้นของทุกแผนที่ที่อยู่ภายใน รวมถึง [`useSphereServices`](/th/docs/hooks/use-sphere-services) และชื่อหมวดหมู่ของ [`useTagCategories`](/th/docs/hooks/use-tag-categories) แผนที่ที่ไม่ได้กำหนด `language` เองจะใช้ค่านี้ หากไม่กำหนดจะแสดงภาษาไทย ดู[ภาษา](#language) |
 | `onLoad` | `() => void` | – | เรียกเมื่อโหลดสคริปต์ Sphere เสร็จ |
 | `onError` | `(error: Error) => void` | – | เรียกเมื่อโหลดสคริปต์ไม่สำเร็จ เช่น key ไม่ได้อนุญาตให้ใช้กับโดเมนนี้ |
 | `scriptUrl` | `string` | `https://api.sphere.gistda.or.th/map/?key=…` | โหลดสคริปต์จาก URL อื่น เช่น proxy |
@@ -45,28 +46,50 @@ function Status() {
 }
 ```
 
+## ภาษา [#language]
+
+แผนที่จะแสดงป้ายชื่อเป็นภาษาไทยโดยค่าเริ่มต้น กำหนด `language` ที่ provider เพียงครั้งเดียวเพื่อเปลี่ยนภาษาของทุกแผนที่ รวมถึงผลการค้นหา คำแนะนำการนำทาง และผลลัพธ์จากบริการเว็บ:
+
+```tsx
+import { SphereMap, SphereProvider } from "gistda-sphere-react";
+
+<SphereProvider apiKey={apiKey} language="en">
+  <SphereMap style={{ height: 400 }} />
+</SphereProvider>
+```
+
+`language` ที่กำหนดบนแผนที่แต่ละแผนที่จะมีผลเหนือค่าของ provider
+
 ## ปรับแต่งป๊อปอัปของ POI [#customizing-poi-popups]
 
 เมื่อผู้ใช้คลิก POI จาก [`<Tag>`](/th/docs/components/tag) หรือผลการค้นหา Sphere จะแสดงป๊อปอัปรายละเอียดของสถานที่ ใช้ `formatPoi` เพื่อแสดงเนื้อหาของคุณเอง
 
 ```tsx
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider
   apiKey={apiKey}
   formatPoi={(poi) => {
     const element = document.createElement("div");
-    element.innerHTML = `<strong>${poi.name}</strong><br>${poi.address ?? ""}`;
+    const name = document.createElement("strong");
+    name.textContent = poi.name;
+    const address = document.createElement("p");
+    address.textContent = poi.address ?? "";
+    element.append(name, address);
     return element;
   }}
 >
 ```
 
 <Callout type="warn">
-  `formatPoi` คืนค่าเป็น DOM element จึงต้อง escape ข้อความที่แทรกเป็น HTML ทุกครั้ง การกำหนด `textContent` ปลอดภัยที่สุด
+  ให้แทรกข้อมูลสถานที่ด้วย `textContent` ตามตัวอย่างด้านบน หากสร้าง HTML ด้วย `innerHTML` แทน ต้อง escape ทุกค่าก่อน
 </Callout>
 
 หากต้องการควบคุมป๊อปอัปทั้งหมด เช่น โหลดรายละเอียดจากบริการของคุณเอง ให้คืนค่า popup options จาก `poiPopupOptions`
 
 ```tsx
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider
   apiKey={apiKey}
   poiPopupOptions={(source, id, name) => ({
@@ -83,7 +106,29 @@ function Status() {
 
 ## การใช้งานกับ Next.js [#using-it-with-nextjs]
 
-provider รวมถึงคอมโพเนนต์และ hooks ทั้งหมดในไลบรารีนี้ทำงานในเบราว์เซอร์ หากใช้ App Router ให้เรียกใช้จาก Client Component (ไฟล์ที่ขึ้นต้นด้วย `"use client"`) ส่วน[ไคลเอนต์บริการเว็บ](/th/docs/web-services)ไม่มีข้อจำกัดนี้และใช้งานบนเซิร์ฟเวอร์ได้ด้วย
+คอมโพเนนต์ทุกตัวในไลบรารีนี้เป็น Client Component จึงเรียกใช้ `SphereProvider` และ `SphereMap` จาก Server Component ได้ด้วย เช่น ใน root layout:
+
+```tsx title="app/layout.tsx"
+import { SphereProvider } from "gistda-sphere-react";
+import type { ReactNode } from "react";
+
+export default function RootLayout({ children }: { children: ReactNode }) {
+  return (
+    <html lang="en">
+      <body>
+        <SphereProvider
+          apiKey={process.env.NEXT_PUBLIC_SPHERE_API_KEY!}
+          language="en"
+        >
+          {children}
+        </SphereProvider>
+      </body>
+    </html>
+  );
+}
+```
+
+Server Component ส่งฟังก์ชันเป็น props และเรียกใช้ hooks ไม่ได้ ดังนั้นให้วาง event handler เช่น `onClick` ฟังก์ชัน callback เช่น `formatPoi` และ hooks ไว้ใน Client Component (ไฟล์ที่ขึ้นต้นด้วย `"use client"`) ส่วน[ไคลเอนต์บริการเว็บ](/th/docs/web-services#on-a-server)ใช้งานบนเซิร์ฟเวอร์ได้เช่นกัน
 
 ## แผนที่เดียวหรือหลายแผนที่ [#one-map-or-several]
 

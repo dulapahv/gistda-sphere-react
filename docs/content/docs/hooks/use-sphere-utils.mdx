@@ -8,7 +8,13 @@ description: Format distances, areas and times, and convert WKT, KML, GPX, GML, 
 ```tsx
 import { useSphereUtils } from "gistda-sphere-react";
 
-function Measurements({ meters, squareMeters, seconds }) {
+interface MeasurementsProps {
+  meters: number;
+  seconds: number;
+  squareMeters: number;
+}
+
+function Measurements({ meters, squareMeters, seconds }: MeasurementsProps) {
   const { formatDistance, formatArea, formatThaiArea, formatInterval } = useSphereUtils();
   return (
     <ul>
@@ -50,6 +56,8 @@ All converters return promises, because the first call loads Sphere's converter 
 | `topoJsonToGeoJSON(json, object)` | One object of a TopoJSON topology, by name or object. |
 
 ```tsx
+import { useSphereUtils } from "gistda-sphere-react";
+
 const { kmlToGeoJSON } = useSphereUtils();
 
 async function showFile(file: File) {
@@ -63,6 +71,8 @@ async function showFile(file: File) {
 `project` transforms coordinates between coordinate systems given as [proj4](http://proj4js.org/) strings, from WGS84 unless you say otherwise:
 
 ```tsx
+import { useSphereUtils } from "gistda-sphere-react";
+
 const { project } = useSphereUtils();
 
 // WGS84 → UTM zone 47N

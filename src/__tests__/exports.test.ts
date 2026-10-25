@@ -2,6 +2,7 @@ import { describe, expect, expectTypeOf, it } from "vitest";
 import {
   createSphereServices,
   getTurnInstruction,
+  MarkerCluster,
   type PredefinedOverlay,
   PredefinedOverlay as PredefinedOverlayComponent,
   ROUTE_TURN,
@@ -9,7 +10,9 @@ import {
   type SphereMapInstance,
   SphereServiceError,
   useMapReady,
+  useMapView,
   useSphereServices,
+  useSuggest,
   useUi,
 } from "@/index";
 
@@ -30,8 +33,11 @@ describe("package exports", () => {
     for (const value of [
       createSphereServices,
       getTurnInstruction,
+      MarkerCluster,
       useMapReady,
+      useMapView,
       useSphereServices,
+      useSuggest,
       useUi,
     ]) {
       expect(typeof value).toBe("function");

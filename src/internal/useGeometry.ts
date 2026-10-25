@@ -35,13 +35,13 @@ interface UseGeometryParams<T extends SpherePolyline> {
   /** Creates the overlay, or returns `null` when the shape is incomplete. */
   create: (sphere: SphereNamespace, options: SphereGeometryOptions) => T | null;
   props: GeometryComponentProps<T>;
-  /** Shape data; the overlay is re-created when it changes (compared by value). */
+  /** Shape data. The overlay is re-created when it changes (compared by value). */
   shape: unknown;
 }
 
 interface UseGeometryResult<T extends SpherePolyline> {
   overlayRef: RefObject<T | null>;
-  /** Portal for `popupContent`; render it from the component. */
+  /** Portal for `popupContent`, to render from the component. */
   portal: ReactNode;
 }
 

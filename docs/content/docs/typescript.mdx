@@ -47,6 +47,9 @@ The library converts these to the values Sphere expects at runtime, so you never
 | --- | --- |
 | `PoiResult`, `SuggestResult`, `SearchResult`, `AddressResult` | `useSearch` |
 | `RouteStep`, `RouteSummary`, `RouteResult`, `RouteErrorInfo`, `RouteStatus` | `useRoute` |
+| `UseSuggestOptions`, `UseSuggestReturn` | `useSuggest` |
+| `MapView` | `useMapView`, `onViewChange` and `getView()` |
+| `Cluster`, `MarkerClusterProps` | `MarkerCluster` |
 | `LocalizedTagCategory` | `useTagCategories` |
 | `SphereServices`, `SphereServiceError`, `RouteServiceResult`, `ElevationPoint`… | [Web services](/docs/web-services) |
 | `SphereEventMap`, `EventName` | Event names and their handler arguments |
@@ -67,12 +70,15 @@ function StoreMarker({ open, ...props }: MarkerProps & { open: boolean }) {
 
 The raw Sphere objects are typed too: `SphereMapInstance` (`sphere.Map`), `SphereMarker`, `SpherePolygon`, `SpherePolyline`, `SphereCircle`, `SphereDot`, `SphereRectangle`, `SpherePopup`, `SphereOverlay`, `SphereLayer` and `SphereNamespace` (the global `sphere`). `MapLibreMap` covers the commonly used members of `map.Renderer`.
 
+Sphere's methods both read and set a value. Called without arguments they return the value with its own type, and with an argument they return the object for chaining:
+
 ```tsx
 import type { SphereMapInstance } from "gistda-sphere-react";
 
-function zoomOf(map: SphereMapInstance) {
-  return map.zoom() as number;
+function zoomIn(map: SphereMapInstance) {
+  const zoom = map.zoom(); // number
+  map.zoom(zoom + 1); // returns the map, for chaining
 }
 ```
 
-`window.sphere` is declared globally once you import the package.
+`window.sphere` and `window.deck` (Sphere's copy of deck.gl, typed loosely as `DeckNamespace`) are declared globally once you import the package. Both are optional, since they exist only after Sphere's script has loaded. See [deck.gl layers](/docs/components/layer#deckgl-and-raw-maplibre-layers).

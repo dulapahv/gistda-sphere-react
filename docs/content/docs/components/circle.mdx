@@ -15,12 +15,18 @@ description: A circle around a center point, with area and radius measurement
 </MapDemo>
 
 ```tsx
-<Circle
-  center={{ lon: 100.5018, lat: 13.7563 }}
-  radius={0.1}
-  fillColor="rgba(0, 128, 255, 0.3)"
-  lineColor="blue"
-/>
+import { Circle, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.5018, lat: 13.7563 }} style={{ height: 400 }} zoom={10}>
+  <Circle
+    center={{ lon: 100.5018, lat: 13.7563 }}
+    radius={0.1}
+    fillColor="rgba(0, 128, 255, 0.3)"
+    lineColor="blue"
+    lineWidth={2}
+    title="Coverage area"
+  />
+</SphereMap>
 ```
 
 ## Props

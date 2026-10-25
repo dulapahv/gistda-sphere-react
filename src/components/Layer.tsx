@@ -20,7 +20,7 @@ export interface LayerProps {
   beforeId?: string;
   bound?: Bound;
   extraQuery?: string;
-  /** Image MIME type (WMS/WMTS) or file extension (XYZ/TMS/WMTS_REST); `false` omits it. */
+  /** Image MIME type (WMS/WMTS) or file extension (XYZ/TMS/WMTS_REST). `false` omits it. */
   format?: string | false;
   id?: string;
   /** Use this layer as the base map instead of adding it on top. */

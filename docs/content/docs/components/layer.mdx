@@ -7,7 +7,13 @@ description: Built-in data layers, WMS/WMTS/TMS/XYZ tiles, vector styles, heatma
 
 <LayerDemo />
 
+<ShowCode>
+<include cwd meta='title="layer-picker.tsx"'>components/examples/layer-picker.tsx</include>
+</ShowCode>
+
 ```tsx
+import { Layer, SphereMap } from "gistda-sphere-react";
+
 <SphereMap baseLayer="STREETS">
   <Layer preset="TRAFFIC" />
   <Layer name="bluemarble_terrain" type="WMS" url="https://ms.longdo.com/mapproxy/service" opacity={0.6} />
@@ -57,6 +63,8 @@ Use one of `preset`, `name`, `style` or `layer` to choose what to show.
 | `IMAGES` | Satellite imagery | `DROUGHT` | Drought areas |
 
 ```tsx
+import { Layer } from "gistda-sphere-react";
+
 <Layer preset="PM25" />
 ```
 
@@ -65,6 +73,8 @@ Set the base map with [`SphereMap`'s `baseLayer`](/docs/components/sphere-map#ba
 ## Tile services
 
 ```tsx
+import { Layer } from "gistda-sphere-react";
+
 {/* WMS */}
 <Layer
   name="bluemarble_terrain"
@@ -92,6 +102,8 @@ See [Custom WMS layer](/docs/examples/custom-wms-layer) for a complete example.
 `style` takes a MapLibre style object (or URL). Give its sources IDs that don't clash with other layers:
 
 ```tsx
+import { Layer } from "gistda-sphere-react";
+
 <Layer
   style={{
     sources: {
@@ -107,10 +119,12 @@ The [3D and advanced layers guide](/docs/examples/advanced-layers) shows heatmap
 ## 3D tiles and I3S
 
 ```tsx
+import { Layer } from "gistda-sphere-react";
+
 <Layer
-  name="sf-buildings"
-  type="I3S"
-  url="https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0"
+  name="buildings"
+  type="Tiles3D"
+  url="https://raw.githubusercontent.com/CesiumGS/3d-tiles-samples/main/1.0/TilesetWithRequestVolume/tileset.json"
   onTilesetLoad={(tileset) => {
     const [lon, lat] = tileset.cartographicCenter ?? [];
     goTo({ center: { lon, lat }, zoom: (tileset.zoom ?? 13) + 3, pitch: 60 });
@@ -118,27 +132,38 @@ The [3D and advanced layers guide](/docs/examples/advanced-layers) shows heatmap
 />
 ```
 
-`type="Tiles3D"` loads OGC 3D Tiles (`tileset.json`), including point clouds (use `pointSize`).
+`type="Tiles3D"` loads OGC 3D Tiles (`tileset.json`), such as these sample buildings from Cesium. For point clouds, set `pointSize`, and `options={{ getPointColor: [37, 99, 235, 255] }}` when the points have no colors of their own (deck.gl draws them black). Everything in `options` goes to deck.gl's `Tile3DLayer`.
+
+<Callout type="warn">
+  `type="I3S"` is part of Sphere's API, but Sphere's current runtime can't draw I3S meshes: the tileset loads, then deck.gl reports an error on every frame and nothing appears. Use 3D Tiles until GISTDA fixes it.
+</Callout>
 
 ## deck.gl and raw MapLibre layers
 
-Sphere bundles deck.gl. Wrap a deck.gl layer in `deck.MapboxLayer` and pass it as `layer`:
+Sphere bundles deck.gl and puts it on `window.deck`. Wrap a deck.gl layer in `deck.MapboxLayer` and pass it as `layer`:
 
 ```tsx
-const model = useMemo(
-  () =>
-    new window.deck.MapboxLayer({
-      id: "model",
-      type: window.deck.ScenegraphLayer,
-      data: [{ position: [100.5, 13.7, 0] }],
-      getPosition: (d) => d.position,
-      scenegraph: "https://example.com/model.glb",
-    }),
-  []
-);
+import { Layer } from "gistda-sphere-react";
+import { useMemo } from "react";
 
-<Layer layer={model} />
+const model = useMemo(() => {
+  const { deck } = window;
+  if (!deck) {
+    return null;
+  }
+  return new deck.MapboxLayer({
+    id: "model",
+    type: deck.ScenegraphLayer,
+    data: [{ position: [100.5, 13.7, 0] }],
+    getPosition: (d: { position: number[] }) => d.position,
+    scenegraph: "https://example.com/model.glb",
+  });
+}, []);
+
+{model && <Layer layer={model} />}
 ```
+
+`window.deck` is typed as optional, because it only exists once Sphere's script has loaded, so check it first. Inside `SphereMap` it's always there, since children render once the map is ready. Its members are typed loosely (`DeckNamespace`), so type your accessors' arguments yourself, as with `d` above.
 
 <Callout>
   Create layer objects once (with `useMemo`) or outside the component. A new object on every render re-adds the layer each time.

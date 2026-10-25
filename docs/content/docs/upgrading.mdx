@@ -1,22 +1,57 @@
 ---
-title: Upgrading from 1.4
-description: What changed, what to update in your code, and what you get for free
+title: Upgrading
+description: What changed in each release, what to update in your code, and what's new
 ---
 
-This release covers the whole Sphere API and fixes several long-standing bugs. Most apps upgrade without changes; check the list below if you use routing, `getArea`, map event hooks or `TAG_CATEGORIES`.
+## Upgrading to 2.1
 
-## Changes that may need code updates
+2.1 makes the library easier to use with Next.js and on servers, adds features developers asked for, and fixes bugs. Most apps upgrade without changes, but check the list below if you style the map's container, use the raw map's types, or call `useMapZoom` or `useMapLocation`.
+
+### Changes in 2.1
+
+- **The map draws into an inner element.** `SphereMap` now gives Sphere a child `div` that fills its container, so maps remounted by React StrictMode, client-side navigation, tabs or modals render in place. If your CSS or code reads MapLibre's classes (such as `.maplibregl-map`) on the element you pass `className` or `style` to, use its first child instead. A container with no CSS position gets `position: relative`.
+- **Map getters return values.** In the raw map types, getters such as `map.zoom()` and `map.location()` are typed as their value (`number`, `Location`) instead of `number | SphereMap`. Remove casts you added for them.
+- **Search key errors.** The [web services client](/docs/web-services#errors) now reports the search service's API key error with code `"key"` instead of `"parse"`.
+- **`useMapZoom` and `useMapLocation`** pass the new zoom level or center to the handler. Handlers without arguments keep working.
+
+### Fixed in 2.1
+
+- Maps that mount after the Sphere script has loaded no longer draw in the page's top-left corner under React StrictMode (development builds of Next.js and Vite).
+- 3D tile layers (`type="Tiles3D"`) load in development with React StrictMode. Before, the second mount removed the layer.
+- Components work in Next.js Server Components, since the package marks them `"use client"`. Before, rendering `SphereProvider` in a server layout failed with `createContext is not a function`.
+- The web services client works on servers with domain-restricted keys, through the new `referer` option.
+
+### New in 2.1
+
+- [`MarkerCluster`](/docs/components/marker-cluster): thousands of React markers, grouped into clusters.
+- [`useSuggest`](/docs/hooks/use-suggest): autocomplete that waits for typing to pause and ignores old responses.
+- The current view: [`onViewChange`](/docs/components/sphere-map#syncing-the-view) on `SphereMap`, [`useMapView`](/docs/hooks/event-hooks#usemapview) and `getView()`.
+- [`fallback`](/docs/components/sphere-map#loading-placeholder) on `SphereMap`, shown until the map is ready.
+- [`language`](/docs/components/sphere-provider#language) on `SphereProvider`, for every map, search, routing, web services and tag category labels.
+- `useRoute`: [`destinations`](/docs/hooks/use-route#stops) as state, and the [`auto` option](/docs/hooks/use-route#options).
+- `goTo` accepts `rotate`, matching the `rotate` prop and `setRotate`.
+- Web services: the [`gistda-sphere-react/services`](/docs/web-services#on-a-server) entry, and the `referer` and `headers` options.
+- Types: `window.deck` is typed, and map getters return their value type.
+- Docs: every live demo shows its full code under "Show code".
+
+## Upgrading from 1.4 to 2.0
+
+2.0 covers the whole Sphere API and fixes several long-standing bugs. Most apps upgrade without changes, but check the changes below if you use routing, `getArea`, map event hooks or `TAG_CATEGORIES`.
 
 ### Routing results
 
-`getGuide()` returns Sphere's route legs, not steps; this is why turn-by-turn directions showed `undefined` before. Use the new `steps` and `summary` instead:
+`getGuide()` returns Sphere's route legs, not steps, which is why turn-by-turn directions showed `undefined` before. Use the new `steps` and `summary` instead:
 
-```tsx
-// Before
+```tsx title="Before (1.4)"
+import { type RouteGuideStep } from "gistda-sphere-react";
+
 const steps = getGuide() as RouteGuideStep[];
 steps.map((step) => step.instruction); // undefined
+```
 
-// Now
+```tsx title="Now"
+import { useRoute } from "gistda-sphere-react";
+
 const { steps, summary, status, error } = useRoute();
 steps.map((step) => step.instruction); // "Turn right to Sathon Nuea Rd"
 ```
@@ -39,17 +74,17 @@ steps.map((step) => step.instruction); // "Turn right to Sathon Nuea Rd"
 
 `TAG_CATEGORIES` used three IDs that match no POIs. They're now `"ธนาคาร/สถาบันการเงิน"` (banks), `"เอทีเอ็ม"` (ATMs) and `"สถานีบริการน้ำมัน"` (gas stations). If you stored the old IDs, update them.
 
-## Fixed
+### Fixed in 2.0
 
 - `onClick` on markers and shapes now fires (it never did), with the click location.
-- `lineStyle` now draws dashed and dotted lines; `ui="None"` now hides the UI; `input={false}` now disables interaction.
+- `lineStyle` now draws dashed and dotted lines, `ui="None"` now hides the UI, and `input={false}` now disables interaction.
 - `useMapReady` now runs its handler.
 - `language` and `filter` on `SphereMap` update the map in place. You no longer need `key={language}` to remount the map.
 - Shapes keep their identity when colors or width change, instead of being redrawn.
 - Removing a `<Tag name="a|b">` removes both tags.
 - The map's WebGL context is released when `SphereMap` unmounts.
 
-## New
+### New in 2.0
 
 - Components: [`GeoJson`](/docs/components/geojson), [`ObjectOverlay`](/docs/components/object-overlay), [`PredefinedOverlay`](/docs/components/predefined-overlay), [`Tag`](/docs/components/tag), [`MapControl`](/docs/components/map-control), [`MenuBar`](/docs/components/menu-bar), [`RouteGuide`](/docs/components/route-guide), [`SearchResults`](/docs/components/search-results).
 - Hooks: [`useUi`](/docs/hooks/use-ui), [`useTagCategories`](/docs/hooks/use-tag-categories), [`useSphereUtils`](/docs/hooks/use-sphere-utils), [`useSphereServices`](/docs/hooks/use-sphere-services).

@@ -1,0 +1,21 @@
+---
+title: Delivery zones
+description: Find which delivery zone a point falls in, with polygon refs and spatial tests
+---
+
+Click the map or drag the pin to see whether a place is inside a delivery zone, and what delivery costs there:
+
+<DeliveryZonesDemo />
+
+<ShowCode>
+<include cwd meta='title="delivery-zones.tsx"'>components/examples/delivery-zones.tsx</include>
+</ShowCode>
+
+## How it works
+
+- Each zone is a [`<Polygon>`](/docs/components/polygon). A callback ref keeps every zone's ref in a `Map` keyed by name, and removes it when the zone unmounts.
+- `contains(location)` on a polygon ref tells whether a point lies inside the zone. [Spatial analysis](/docs/examples/spatial-analysis) covers the other tests.
+- A click on a zone is an overlay click, so the map handles both `onClick` and `onOverlayClick`.
+- `fillColor` is a live prop, so highlighting the matching zone updates the polygon without re-creating it.
+
+To check an address that users type, find it with [`useSearch`](/docs/hooks/use-search) or [`useSuggest`](/docs/hooks/use-suggest), then pass its `{ lon, lat }` to the same check.

@@ -4,17 +4,26 @@ description: An information bubble anchored to a location, with text, HTML or Re
 ---
 
 <MapDemo height="350px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }}>
-  <Popup position={{ lon: 100.5018, lat: 13.7563 }} title="Bangkok" detail="Capital of Thailand" />
+  <Popup
+    position={{ lon: 100.5018, lat: 13.7563 }}
+    title="Bangkok"
+    detail="Capital of Thailand"
+  />
 </MapDemo>
 
 ```tsx
-<Popup
-  position={{ lon: 100.5018, lat: 13.7563 }}
-  title="Bangkok"
-  detail="Capital of Thailand"
-  onClose={() => setOpen(false)}
-/>
+import { Popup, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.5018, lat: 13.7563 }} style={{ height: 350 }} zoom={12}>
+  <Popup
+    position={{ lon: 100.5018, lat: 13.7563 }}
+    title="Bangkok"
+    detail="Capital of Thailand"
+  />
+</SphereMap>
 ```
+
+The shorter samples below leave out `<SphereMap>`, but every overlay goes inside one.
 
 A `<Popup>` is open while it's rendered: render it conditionally, and remove it in `onClose`. For popups that open when a marker or shape is clicked, use their `detail`, `popup` or `popupContent` props instead.
 
@@ -38,6 +47,8 @@ A `<Popup>` is open while it's rendered: render it conditionally, and remove it 
 ## React content
 
 ```tsx
+import { Popup } from "gistda-sphere-react";
+
 {selected && (
   <Popup
     position={selected.location}
@@ -53,6 +64,9 @@ A `<Popup>` is open while it's rendered: render it conditionally, and remove it 
 ## Show a popup where the user clicks
 
 ```tsx
+import { type Location, Popup, SphereMap } from "gistda-sphere-react";
+import { useState } from "react";
+
 const [clicked, setClicked] = useState<Location | null>(null);
 
 <SphereMap onClick={({ lat, lon }) => setClicked({ lat, lon })}>
@@ -75,3 +89,5 @@ const [clicked, setClicked] = useState<Location | null>(null);
 | `getElement()` | The popup's DOM element. |
 | `getPosition()` / `setPosition(location)` | Read or move the popup. |
 | `setTitle(text)` / `setDetail(text)` | Change the text without re-creating the popup. |
+
+`setPosition` moves the popup until the `position` prop changes to a new location. Changing `title`, `detail` or `size` re-creates the popup at `position`, so keep the location in state if the popup should stay where you moved it.

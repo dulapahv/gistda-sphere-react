@@ -20,6 +20,8 @@ export interface SphereServicesOptions {
   baseUrl?: string;
   /** `fetch` implementation (defaults to the global one). */
   fetch?: typeof fetch;
+  /** Extra headers sent with every request, e.g. for your own proxy. */
+  headers?: Record<string, string>;
   /** Default language for services that support it. Default `"th"`. */
   locale?: Language;
   /**
@@ -28,7 +30,14 @@ export interface SphereServicesOptions {
    * polygons or route matrices. Every Sphere service accepts both.
    */
   method?: "auto" | "get" | "post";
-  /** Request timeout in milliseconds. Default `15000`; `0` disables it. */
+  /**
+   * A page URL of a host your key allows, sent as the `Referer` header.
+   * Needed on servers when your key is restricted to certain hosts: Sphere
+   * checks the referrer, and server requests don't send one. Browsers ignore
+   * it and send the page's own referrer.
+   */
+  referer?: string;
+  /** Request timeout in milliseconds. Default `15000`, and `0` disables it. */
   timeout?: number;
 }
 
@@ -344,7 +353,7 @@ export interface PopulationResult {
 export interface TagCategoryInfo {
   icon: string;
   name: { en: string; th: string };
-  /** Tags in the category; `name.th` is the tag ID used with `Tags.set/add`. */
+  /** Tags in the category. `name.th` is the tag ID used with `Tags.set/add`. */
   sub?: Array<{ icon: string; name: { en: string; th: string } }>;
 }
 

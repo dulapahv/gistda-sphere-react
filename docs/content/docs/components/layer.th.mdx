@@ -7,7 +7,13 @@ description: ชั้นข้อมูลในตัว ไทล์ WMS/WMTS
 
 <LayerDemo />
 
+<ShowCode>
+<include cwd meta='title="layer-picker.tsx"'>components/examples/layer-picker.tsx</include>
+</ShowCode>
+
 ```tsx
+import { Layer, SphereMap } from "gistda-sphere-react";
+
 <SphereMap baseLayer="STREETS">
   <Layer preset="TRAFFIC" />
   <Layer name="bluemarble_terrain" type="WMS" url="https://ms.longdo.com/mapproxy/service" opacity={0.6} />
@@ -57,6 +63,8 @@ description: ชั้นข้อมูลในตัว ไทล์ WMS/WMTS
 | `IMAGES` | ภาพดาวเทียม | `DROUGHT` | พื้นที่ภัยแล้ง |
 
 ```tsx
+import { Layer } from "gistda-sphere-react";
+
 <Layer preset="PM25" />
 ```
 
@@ -65,6 +73,8 @@ description: ชั้นข้อมูลในตัว ไทล์ WMS/WMTS
 ## บริการไทล์ [#tile-services]
 
 ```tsx
+import { Layer } from "gistda-sphere-react";
+
 {/* WMS */}
 <Layer
   name="bluemarble_terrain"
@@ -92,6 +102,8 @@ description: ชั้นข้อมูลในตัว ไทล์ WMS/WMTS
 `style` รับอ็อบเจ็กต์สไตล์ (หรือ URL) ของ MapLibre โดย ID ของ source ต้องไม่ซ้ำกับเลเยอร์อื่น
 
 ```tsx
+import { Layer } from "gistda-sphere-react";
+
 <Layer
   style={{
     sources: {
@@ -107,10 +119,12 @@ description: ชั้นข้อมูลในตัว ไทล์ WMS/WMTS
 ## 3D Tiles และ I3S [#3d-tiles-and-i3s]
 
 ```tsx
+import { Layer } from "gistda-sphere-react";
+
 <Layer
-  name="sf-buildings"
-  type="I3S"
-  url="https://tiles.arcgis.com/tiles/z2tnIkrLQ2BRzr6P/arcgis/rest/services/SanFrancisco_Bldgs/SceneServer/layers/0"
+  name="buildings"
+  type="Tiles3D"
+  url="https://raw.githubusercontent.com/CesiumGS/3d-tiles-samples/main/1.0/TilesetWithRequestVolume/tileset.json"
   onTilesetLoad={(tileset) => {
     const [lon, lat] = tileset.cartographicCenter ?? [];
     goTo({ center: { lon, lat }, zoom: (tileset.zoom ?? 13) + 3, pitch: 60 });
@@ -118,27 +132,38 @@ description: ชั้นข้อมูลในตัว ไทล์ WMS/WMTS
 />
 ```
 
-`type="Tiles3D"` ใช้โหลด OGC 3D Tiles (`tileset.json`) รวมถึง point cloud (ใช้ `pointSize`)
+`type="Tiles3D"` ใช้โหลด OGC 3D Tiles (`tileset.json`) เช่น อาคารตัวอย่างจาก Cesium นี้ สำหรับพอยต์คลาวด์ให้กำหนด `pointSize` และกำหนด `options={{ getPointColor: [37, 99, 235, 255] }}` เมื่อจุดไม่มีสีของตัวเอง (deck.gl จะวาดเป็นสีดำ) ค่าทั้งหมดใน `options` จะส่งต่อให้ `Tile3DLayer` ของ deck.gl
+
+<Callout type="warn">
+  `type="I3S"` อยู่ใน API ของ Sphere แต่ runtime ปัจจุบันของ Sphere ยังวาด mesh แบบ I3S ไม่ได้ โดย tileset จะโหลดสำเร็จ จากนั้น deck.gl จะรายงานข้อผิดพลาดทุกเฟรมและไม่มีอะไรแสดงผล ให้ใช้ 3D Tiles แทนจนกว่า GISTDA จะแก้ไข
+</Callout>
 
 ## เลเยอร์ deck.gl และ MapLibre [#deckgl-and-raw-maplibre-layers]
 
-Sphere มี deck.gl มาในตัว ให้ห่อเลเยอร์ deck.gl ด้วย `deck.MapboxLayer` แล้วส่งเป็น `layer`
+Sphere มี deck.gl มาในตัวและเก็บไว้ที่ `window.deck` ให้ห่อชั้นข้อมูล deck.gl ด้วย `deck.MapboxLayer` แล้วส่งเป็น `layer`:
 
 ```tsx
-const model = useMemo(
-  () =>
-    new window.deck.MapboxLayer({
-      id: "model",
-      type: window.deck.ScenegraphLayer,
-      data: [{ position: [100.5, 13.7, 0] }],
-      getPosition: (d) => d.position,
-      scenegraph: "https://example.com/model.glb",
-    }),
-  []
-);
+import { Layer } from "gistda-sphere-react";
+import { useMemo } from "react";
 
-<Layer layer={model} />
+const model = useMemo(() => {
+  const { deck } = window;
+  if (!deck) {
+    return null;
+  }
+  return new deck.MapboxLayer({
+    id: "model",
+    type: deck.ScenegraphLayer,
+    data: [{ position: [100.5, 13.7, 0] }],
+    getPosition: (d: { position: number[] }) => d.position,
+    scenegraph: "https://example.com/model.glb",
+  });
+}, []);
+
+{model && <Layer layer={model} />}
 ```
+
+`window.deck` มี type เป็น optional เพราะจะมีค่าเมื่อสคริปต์ของ Sphere โหลดเสร็จแล้วเท่านั้น จึงควรตรวจสอบก่อนใช้งาน แต่หากอยู่ภายใน `SphereMap` จะมีค่านี้เสมอเนื่องจากคอมโพเนนต์ลูกจะแสดงผลเมื่อแผนที่พร้อมใช้งานแล้ว ทั้งนี้สมาชิกของ `window.deck` มี type แบบหลวม ๆ (`DeckNamespace`) จึงควรระบุ type ให้กับอาร์กิวเมนต์ของ accessor เอง เช่น `d` ในตัวอย่างด้านบน
 
 <Callout>
   สร้างอ็อบเจ็กต์เลเยอร์เพียงครั้งเดียว (ด้วย `useMemo`) หรือสร้างนอกคอมโพเนนต์ หากสร้างอ็อบเจ็กต์ใหม่ทุกครั้งที่ render เลเยอร์จะถูกเพิ่มใหม่ทุกครั้ง

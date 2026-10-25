@@ -17,9 +17,9 @@ description: ทุกส่วนของ GISTDA Sphere JavaScript API แล�
 | `map.location()` | prop `center`, `setCenter`, `getCenter`, `onLocation` |
 | `map.bound()` | `setBound`, `getBound` |
 | `map.move()` | `panBy` |
-| `map.goTo()` | `goTo` |
+| `map.goTo()` | `goTo` (ใช้ `rotate` หรือ `bearing`) |
 | `map.rotate()`, `map.pitch()` | prop `rotate`/`pitch`, `setRotate`/`getRotate`, `setPitch`/`getPitch`, `onRotate`/`onPitch` |
-| `map.language()` | prop `language`, `setLanguage`, `getLanguage` |
+| `map.language()` | prop `language` (หรือของ `SphereProvider`), `setLanguage`, `getLanguage` |
 | `map.enableFilter()`, `sphere.Filter` | prop `filter`, `setFilter`, `getFilter` |
 | `map.resize()`, `map.repaint()` | `resize`, `repaint` |
 | `map.id()`, `map.placeholder()` | `useMap().map` |
@@ -84,7 +84,7 @@ description: ทุกส่วนของ GISTDA Sphere JavaScript API แล�
 
 | Sphere | ไลบรารี ([`useRoute`](/th/docs/hooks/use-route)) |
 | --- | --- |
-| `add()`, `insert()`, `remove()`, `removeAt()`, `list()`, `size()` | `addDestination`, `insertDestination`, `removeDestination`, `removeDestinationAt`, `listDestinations`, `size` |
+| `add()`, `insert()`, `remove()`, `removeAt()`, `list()`, `size()` | `addDestination`, `insertDestination`, `removeDestination`, `removeDestinationAt`, `listDestinations`, `size` และ `destinations` ในรูปแบบ state |
 | `clearDestination()`, `clearPath()`, `clear()`, `reverse()`, `search()` | `clearDestinations`, `clearPath`, `clear`, `reverse`, `search` |
 | `distance()`, `interval()` | `summary`, `getDistance`, `getInterval` |
 | `guide()` | `steps`, `routes`, `getSteps`, `getGuide` |
@@ -94,7 +94,7 @@ description: ทุกส่วนของ GISTDA Sphere JavaScript API แล�
 | `enableRestrict()`, `sphere.RouteRestrict` | `setRestrict`, `isRestrictEnabled` |
 | `label()`, `sphere.RouteLabel` | `setLabel`, `getLabel` |
 | `line()`, `sphere.RouteLine` | `setLineStyle`, `getLineStyle` |
-| `auto()` | `setAuto`, `getAuto` |
+| `auto()` | ตัวเลือก `auto`, `setAuto`, `getAuto` |
 | `enableContextMenu()` | `enableContextMenu` |
 | `placeholder()` | [`<RouteGuide>`](/th/docs/components/route-guide), `setPlaceholder` |
 | `language()` | `setLanguage`, `getLanguage` |
@@ -104,7 +104,7 @@ description: ทุกส่วนของ GISTDA Sphere JavaScript API แล�
 
 | Sphere | ไลบรารี |
 | --- | --- |
-| `map.Search.search()`, `suggest()`, `address()`, `nearPoi()` | เมธอดชื่อเดียวกันของ [`useSearch`](/th/docs/hooks/use-search) |
+| `map.Search.search()`, `suggest()`, `address()`, `nearPoi()` | เมธอดชื่อเดียวกันของ [`useSearch`](/th/docs/hooks/use-search) และ [`useSuggest`](/th/docs/hooks/use-suggest) สำหรับคำแนะนำขณะพิมพ์แบบ debounce |
 | `map.Search.placeholder()`, `SearchUiOptions` | [`<SearchResults>`](/th/docs/components/search-results), `setPlaceholder` |
 | `map.Search.clear()`, `enablePopup()`, `language()` | `clear`, `enablePopup`/`isPopupEnabled`, `setLanguage`/`getLanguage` |
 | `map.Tags.add()`, `set()`, `remove()`, `clear()`, `list()`, `size()` | [`<Tag>`](/th/docs/components/tag), [`useTags`](/th/docs/hooks/use-tags) |
@@ -166,8 +166,12 @@ description: ทุกส่วนของ GISTDA Sphere JavaScript API แล�
 
 - คอมโพเนนต์แบบ declarative ที่คืนทรัพยากรให้อัตโนมัติเมื่อเลิกใช้ พร้อม prop ที่อัปเดตแผนที่ทันทีโดยไม่ต้องสร้างใหม่
 - ใช้เนื้อหา React เป็นไอคอนหมุด ป๊อปอัป และตัวควบคุมแผนที่
+- การจัดกลุ่มหมุด React ด้วย [`<MarkerCluster>`](/th/docs/components/marker-cluster)
+- มุมมองปัจจุบันในรูปแบบ state ([`onViewChange`](/th/docs/components/sphere-map#syncing-the-view), [`useMapView`](/th/docs/hooks/event-hooks#usemapview)), `fallback` ระหว่างโหลด และคำแนะนำอัตโนมัติแบบ debounce ([`useSuggest`](/th/docs/hooks/use-suggest))
+- กำหนด [`language`](/th/docs/components/sphere-provider#language) ที่ `SphereProvider` เพียงครั้งเดียวสำหรับแผนที่ การค้นหา การนำทาง และบริการเว็บ
 - ผลลัพธ์เส้นทางเป็น React state: `status`, `summary`, `steps` สำหรับนำทางทีละขั้นที่อ่านเข้าใจง่าย และการจัดการเมื่อหมดเวลาสำหรับ key ที่ไม่ได้เปิดบริการนำทาง
 - `onError` สำหรับอ็อบเจกต์ที่โหลดไม่สำเร็จ และข้อผิดพลาดพร้อมรหัสสำหรับบริการเว็บทุกตัว
 - การวิเคราะห์เชิงพื้นที่และการวัดขนาดบน ref ของรูปทรงทุกชนิด
-- ไคลเอนต์บริการเว็บที่มี type ครบ และใช้บนเซิร์ฟเวอร์ได้ด้วย
+- ไคลเอนต์บริการเว็บที่มี type ครบถ้วนและใช้งานบนเซิร์ฟเวอร์ได้ พร้อม entry `gistda-sphere-react/services` แยกต่างหาก และตัวเลือก `referer` สำหรับ key ที่จำกัดโดเมน
+- คอมโพเนนต์ระบุ `"use client"` ไว้แล้ว จึงเรียกใช้จาก Server Component ของ Next.js ได้ทันที
 - จัดการข้อจำกัดของ Sphere ให้อัตโนมัติ: `input={false}` เพื่อปิดการโต้ตอบ, ป้ายชื่อในโหมด Fly, การลบแท็กแบบ `"a|b"`, ค่าพื้นที่แบบข้อความธรรมดา และอื่น ๆ

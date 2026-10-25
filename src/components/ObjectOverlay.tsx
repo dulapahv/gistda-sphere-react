@@ -47,7 +47,7 @@ export interface ObjectOverlayProps
   /** Called with the object's data and created overlays once loaded. */
   onLoad?: (data: unknown, overlays: SphereOverlay[]) => void;
   ref?: Ref<ObjectOverlayRef>;
-  /** Milliseconds to wait before calling `onError`. Default `15000`; `0` disables it. */
+  /** Milliseconds to wait before calling `onError`. Default `15000`, and `0` disables it. */
   timeout?: number;
 }
 

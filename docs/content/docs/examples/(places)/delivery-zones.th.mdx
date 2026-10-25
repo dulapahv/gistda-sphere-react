@@ -1,0 +1,21 @@
+---
+title: พื้นที่จัดส่ง
+description: ตรวจสอบว่าจุดที่เลือกอยู่ในพื้นที่จัดส่งใด ด้วย ref ของรูปหลายเหลี่ยมและการทดสอบเชิงพื้นที่
+---
+
+คลิกแผนที่หรือลากหมุดเพื่อดูว่าสถานที่นั้นอยู่ในพื้นที่จัดส่งหรือไม่ และมีค่าจัดส่งเท่าไร:
+
+<DeliveryZonesDemo />
+
+<ShowCode>
+<include cwd meta='title="delivery-zones.tsx"'>components/examples/delivery-zones.tsx</include>
+</ShowCode>
+
+## หลักการทำงาน [#how-it-works]
+
+- แต่ละพื้นที่เป็น [`<Polygon>`](/th/docs/components/polygon) โดย callback ref จะเก็บ ref ของทุกพื้นที่ไว้ใน `Map` ที่ใช้ชื่อพื้นที่เป็น key และลบออกเมื่อพื้นที่นั้นถูก unmount
+- `contains(location)` ของ ref รูปหลายเหลี่ยมบอกว่าจุดนั้นอยู่ภายในพื้นที่หรือไม่ ดูการทดสอบแบบอื่นได้ที่[การวิเคราะห์เชิงพื้นที่](/th/docs/examples/spatial-analysis)
+- การคลิกบนพื้นที่ถือเป็นการคลิกโอเวอร์เลย์ แผนที่จึงจัดการทั้ง `onClick` และ `onOverlayClick`
+- `fillColor` เป็น prop ที่อัปเดตได้ทันที การไฮไลต์พื้นที่ที่ตรงกันจึงอัปเดตรูปหลายเหลี่ยมโดยไม่ต้องสร้างใหม่
+
+หากต้องการตรวจสอบที่อยู่ที่ผู้ใช้พิมพ์ ให้ค้นหาด้วย [`useSearch`](/th/docs/hooks/use-search) หรือ [`useSuggest`](/th/docs/hooks/use-suggest) แล้วส่งค่า `{ lon, lat }` ที่ได้ไปตรวจสอบด้วยวิธีเดียวกัน

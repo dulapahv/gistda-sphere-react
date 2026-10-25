@@ -9,13 +9,13 @@
     "...hooks",
     "---บริการเว็บ---",
     "...web-services",
-    "---ตัวอย่าง---",
-    "...examples",
     "---อ้างอิง---",
     "api-coverage",
     "ref-apis",
     "typescript",
     "upgrading",
-    "troubleshooting"
+    "troubleshooting",
+    "---ตัวอย่าง---",
+    "...examples"
   ]
 }

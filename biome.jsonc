@@ -24,6 +24,19 @@
           }
         }
       }
+    },
+    {
+      // The docs show these examples to readers as complete files. Their lists
+      // are never reordered, so index keys are fine, and ignore comments would
+      // only add noise to code meant for copying.
+      "includes": ["docs/components/examples/**"],
+      "linter": {
+        "rules": {
+          "suspicious": {
+            "noArrayIndexKey": "off"
+          }
+        }
+      }
     }
   ],
   "linter": {

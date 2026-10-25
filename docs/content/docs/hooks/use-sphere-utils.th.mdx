@@ -8,7 +8,13 @@ description: จัดรูปแบบระยะทาง พื้นที
 ```tsx
 import { useSphereUtils } from "gistda-sphere-react";
 
-function Measurements({ meters, squareMeters, seconds }) {
+interface MeasurementsProps {
+  meters: number;
+  seconds: number;
+  squareMeters: number;
+}
+
+function Measurements({ meters, squareMeters, seconds }: MeasurementsProps) {
   const { formatDistance, formatArea, formatThaiArea, formatInterval } = useSphereUtils();
   return (
     <ul>
@@ -50,6 +56,8 @@ function Measurements({ meters, squareMeters, seconds }) {
 | `topoJsonToGeoJSON(json, object)` | อ็อบเจกต์หนึ่งใน TopoJSON topology โดยระบุด้วยชื่อหรืออ็อบเจกต์ |
 
 ```tsx
+import { useSphereUtils } from "gistda-sphere-react";
+
 const { kmlToGeoJSON } = useSphereUtils();
 
 async function showFile(file: File) {
@@ -63,6 +71,8 @@ async function showFile(file: File) {
 `project` แปลงพิกัดระหว่างระบบพิกัดที่ระบุเป็นสตริง [proj4](http://proj4js.org/) โดยแปลงจาก WGS84 หากไม่ได้ระบุต้นทาง
 
 ```tsx
+import { useSphereUtils } from "gistda-sphere-react";
+
 const { project } = useSphereUtils();
 
 // WGS84 → UTM zone 47N

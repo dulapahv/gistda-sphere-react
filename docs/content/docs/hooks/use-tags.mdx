@@ -39,6 +39,10 @@ function FoodToggle() {
 Pass a function instead of a name to supply POIs yourself. Sphere calls it for every map tile:
 
 ```tsx
+import { useTags } from "gistda-sphere-react";
+
+const { add } = useTags();
+
 add((tile) =>
   myStores
     .filter((store) => isInTile(store, tile))
@@ -46,6 +50,8 @@ add((tile) =>
 );
 ```
 
+Here, `myStores` is your data and `isInTile` your own check of whether a store falls inside the tile, which has `x`, `y` and `z` (zoom).
+
 ## Tag names
 
-Tags are identified by Thai names, such as `"ธนาคาร/สถาบันการเงิน"` (banks) or `"โรงพยาบาล"` (hospitals). [`useTagCategories`](/docs/hooks/use-tag-categories) loads the full list with English labels; `TAG_CATEGORIES` is a smaller built-in list that needs no request.
+Tags are identified by Thai names, such as `"ธนาคาร/สถาบันการเงิน"` (banks) or `"โรงพยาบาล"` (hospitals). [`useTagCategories`](/docs/hooks/use-tag-categories) loads the full list with English labels, and `TAG_CATEGORIES` is a smaller built-in list that needs no request.

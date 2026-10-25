@@ -1,0 +1,82 @@
+---
+title: useSuggest
+description: คำแนะนำอัตโนมัติสำหรับช่องค้นหา พร้อมทำ debounce และป้องกันผลลัพธ์แสดงสลับลำดับ
+---
+
+`useSuggest` ค้นหาคำแนะนำอัตโนมัติขณะผู้ใช้พิมพ์ โดยจะรอจนกว่าผู้ใช้จะหยุดพิมพ์ชั่วคราว และข้ามผลลัพธ์ของคำค้นหาเก่า ทำให้ผลลัพธ์ที่ตอบกลับช้าไม่ไปทับคำแนะนำที่ใหม่กว่า ใช้งานได้ทั้งภายใน `SphereMap` และทุกที่ภายใต้ `SphereProvider`
+
+<SearchDemo />
+
+<ShowCode>
+<include cwd meta='title="place-search.tsx"'>components/examples/place-search.tsx</include>
+</ShowCode>
+
+```tsx
+import { useMapControls, useSearch, useSuggest } from "gistda-sphere-react";
+import { useState } from "react";
+
+function SearchBox() {
+  const [keyword, setKeyword] = useState("");
+  const { suggestions, isLoading } = useSuggest(keyword, { limit: 5 });
+  const { search } = useSearch();
+  const { goTo } = useMapControls();
+
+  async function choose(name: string) {
+    setKeyword(name);
+    const { data } = await search(name, { limit: 1 });
+    const [place] = data;
+    if (place) {
+      goTo({ center: { lon: place.lon, lat: place.lat }, zoom: 16 });
+    }
+  }
+
+  return (
+    <div>
+      <input
+        aria-label="Search places"
+        onChange={(event) => setKeyword(event.target.value)}
+        value={keyword}
+      />
+      {isLoading ? <p>Searching…</p> : null}
+      <ul>
+        {suggestions.map((suggestion, index) => (
+          <li key={`${suggestion.name}:${index}`}>
+            <button onClick={() => choose(suggestion.name)} type="button">
+              {suggestion.name}
+            </button>
+          </li>
+        ))}
+      </ul>
+    </div>
+  );
+}
+```
+
+## พารามิเตอร์ [#parameters]
+
+| พารามิเตอร์ | ชนิด | ค่าเริ่มต้น | คำอธิบาย |
+| --- | --- | --- | --- |
+| `keyword` | `string` | **จำเป็น** | ข้อความที่ผู้ใช้พิมพ์ โดยไม่นับช่องว่างหน้าและท้าย |
+| `options.debounce` | `number` | `250` | เวลารอ (มิลลิวินาที) หลังคำค้นหาเปลี่ยนครั้งล่าสุด |
+| `options.minLength` | `number` | `2` | ความยาวต่ำสุดของคำค้นหาที่จะค้นหา คำที่สั้นกว่านี้จะไม่มีคำแนะนำ |
+| `options.limit`, `options.offset` | `number` | – | การแบ่งหน้า |
+| `options.area` | `string` | – | เฉพาะสถานที่ในรหัสพื้นที่นี้ เช่น `"10"` สำหรับกรุงเทพฯ |
+| `options.dataset` | `string` | – | ชุดข้อมูลที่จะค้นหา |
+
+## ค่าที่คืนกลับ [#return-value]
+
+| ฟิลด์ | ชนิด | คำอธิบาย |
+| --- | --- | --- |
+| `suggestions` | `SuggestResult[]` | คำแนะนำของคำค้นหาล่าสุด จะว่างเมื่อคำค้นหาสั้นกว่า `minLength` |
+| `isLoading` | `boolean` | เป็น `true` ตั้งแต่คำค้นหาเปลี่ยนจนกว่าคำแนะนำจะมาถึง |
+| `error` | `Error \| null` | สาเหตุที่การค้นหาครั้งล่าสุดล้มเหลว (ถ้ามี) |
+
+`SuggestResult` แต่ละรายการมี `name` และหากมีข้อมูล จะมี `highlight` (ชื่อที่ครอบส่วนที่ตรงกันด้วย HTML) และ `dataset` ชื่ออาจซ้ำกันได้ จึงควรใช้ `name` ร่วมกับลำดับ (index) เป็น key ของ React ตามตัวอย่างด้านบน
+
+## ภาษา [#language]
+
+คำแนะนำจะใช้ภาษาเดียวกับแผนที่ ซึ่งค่าเริ่มต้นคือภาษาไทย ให้กำหนด `language` ที่ [`SphereProvider`](/th/docs/components/sphere-provider#language) หรือ `SphereMap` เพื่อให้ได้คำแนะนำภาษาอังกฤษ
+
+<Callout>
+  คำแนะนำเป็นเพียงชื่อ ไม่ใช่สถานที่ หากต้องการแสดงสถานที่บนแผนที่ ให้ค้นหาชื่อที่เลือกด้วย [`useSearch`](/th/docs/hooks/use-search) ตามตัวอย่างด้านบน
+</Callout>

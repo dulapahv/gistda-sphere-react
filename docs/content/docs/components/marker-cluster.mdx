@@ -1,0 +1,88 @@
+---
+title: MarkerCluster
+description: Show thousands of points as markers, grouped into numbered clusters that split apart as users zoom in
+---
+
+`<MarkerCluster>` groups nearby points into numbered cluster markers, and renders the other points with your `renderMarker`, so every point keeps its React icon, popup and events. Clusters split apart as users zoom in, and only markers in or near the visible area are rendered, so thousands of points stay fast.
+
+<MarkerClusterDemo />
+
+<ShowCode>
+<include cwd meta='title="clustered-places.tsx"'>components/examples/clustered-places.tsx</include>
+</ShowCode>
+
+```tsx
+import { type Location, Marker, MarkerCluster, SphereMap } from "gistda-sphere-react";
+
+interface Station {
+  id: string;
+  name: string;
+  position: Location;
+}
+
+function StationMap({ stations }: { stations: Station[] }) {
+  return (
+    <SphereMap style={{ height: 500 }}>
+      <MarkerCluster
+        getPosition={(station) => station.position}
+        items={stations}
+        renderMarker={(station) => (
+          <Marker position={station.position} title={station.name} />
+        )}
+      />
+    </SphereMap>
+  );
+}
+```
+
+## Props
+
+| Prop | Type | Default | Description |
+| --- | --- | --- | --- |
+| `items` | `T[]` | **required** | The points. Memoize large arrays, since a new array is clustered again. |
+| `getPosition` | `(item) => Location` | **required** | Where each item is. |
+| `renderMarker` | `(item, index) => ReactNode` | **required** | Renders a point that isn't in a cluster, usually as a `<Marker>`. `index` is the item's position in `items`. |
+| `renderCluster` | `(cluster) => ReactNode` | blue bubble with the count | Icon content of a cluster marker. |
+| `onClusterClick` | `(cluster) => void` | zoom in | Replaces the default of zooming in to the cluster's points. |
+| `radius` | `number` | `60` | How close points must be to cluster, in screen pixels. |
+| `minPoints` | `number` | `2` | Fewest points that form a cluster. |
+| `maxZoom` | `number` | `16` | Points never cluster above this zoom. |
+
+## Clusters
+
+`renderCluster` and `onClusterClick` receive a `Cluster`:
+
+| Field | Description |
+| --- | --- |
+| `count` | How many points the cluster holds. |
+| `items` | The points themselves. |
+| `position` | The points' average position, where the cluster marker is. |
+| `bound` | The points' bounding box, `{ minLon, minLat, maxLon, maxLat }`. |
+| `key` | An ID that stays the same while the cluster keeps its first point and size. |
+
+Cluster icons are [React marker icons](/docs/components/marker#react-icons), so you can style them freely. This example lists a cluster's points instead of zooming in:
+
+```tsx
+import { Marker, MarkerCluster } from "gistda-sphere-react";
+import { useState } from "react";
+
+const [selected, setSelected] = useState<Station[]>([]);
+
+<MarkerCluster
+  getPosition={(station) => station.position}
+  items={stations}
+  onClusterClick={(cluster) => setSelected(cluster.items)}
+  renderCluster={(cluster) => <span className="cluster-badge">{cluster.count}</span>}
+  renderMarker={(station) => <Marker position={station.position} title={station.name} />}
+/>
+```
+
+## How it works
+
+Points are grouped again when the zoom level changes. Whole zoom levels are used, so clusters stay put while users pan or zoom a little. Above `maxZoom`, every point gets its own marker.
+
+Only clusters and markers in or near the visible area are rendered, and the others appear as users pan toward them. A marker that leaves that area unmounts, so React state inside it resets when it comes back.
+
+<Callout>
+  For hundreds of thousands of points, cluster in MapLibre with a [`<Layer>` style](/docs/examples/advanced-layers#clustering) instead. The GPU draws the points, so it's faster, but it shows circles rather than React markers.
+</Callout>

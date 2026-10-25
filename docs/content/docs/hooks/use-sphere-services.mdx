@@ -7,10 +7,15 @@ description: A typed client for Sphere's REST web services, using the provider's
 
 <ServicesDemo />
 
-```tsx
-import { SphereServiceError, useSphereServices } from "gistda-sphere-react";
+<ShowCode>
+<include cwd meta='title="service-calls.tsx"'>components/examples/service-calls.tsx</include>
+</ShowCode>
 
-function Elevation({ location }) {
+```tsx
+import { type Location, SphereServiceError, useSphereServices } from "gistda-sphere-react";
+import { useEffect, useState } from "react";
+
+function Elevation({ location }: { location: Location }) {
   const services = useSphereServices({ locale: "en" });
   const [meters, setMeters] = useState<number | null>(null);
 
@@ -35,23 +40,24 @@ function Elevation({ location }) {
 
 | Option | Type | Default | Description |
 | --- | --- | --- | --- |
-| `locale` | `"th" \| "en"` | `"th"` | Default language of results. |
+| `locale` | `"th" \| "en"` | provider's `language`, else `"th"` | Default language of results. |
 | `timeout` | `number` | `15000` | Milliseconds before a request fails with a `"timeout"` error. |
 | `method` | `"auto" \| "get" \| "post"` | `"auto"` | How requests are sent. See the [web services overview](/docs/web-services). |
 | `baseUrl` | `string` | `https://api.sphere.gistda.or.th/services` | Service URL, e.g. a proxy. |
 | `fetch` | `typeof fetch` | global `fetch` | Your own fetch implementation. |
+| `headers` | `Record<string, string>` | – | Extra headers for every request, such as for your own proxy. |
 
 The client is memoized: it only changes when the options do.
 
 ## Without React
 
-Outside React, or on a server, create the same client with `createSphereServices`:
+Outside React, or on a server, create the same client with `createSphereServices`. Import it from `gistda-sphere-react/services` to leave out React and the map code:
 
 ```ts
-import { createSphereServices } from "gistda-sphere-react";
+import { createSphereServices } from "gistda-sphere-react/services";
 
 const services = createSphereServices({ apiKey: process.env.SPHERE_API_KEY! });
 const { data } = await services.search.search("โรงพยาบาล", { limit: 5 });
 ```
 
-See [Web services](/docs/web-services) for every service, error handling and examples.
+On a server, a key limited to certain domains also needs the `referer` option. See [On a server](/docs/web-services#on-a-server), and [Web services](/docs/web-services) for every service, error handling and examples.

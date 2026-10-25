@@ -7,7 +7,13 @@ description: ตัวแผนที่ รองรับโอเวอร์
 
 <SphereMapDemo />
 
+<ShowCode>
+<include cwd meta='title="map-events.tsx"'>components/examples/map-events.tsx</include>
+</ShowCode>
+
 ```tsx
+import { Marker, SphereMap } from "gistda-sphere-react";
+
 <SphereMap
   center={{ lon: 100.5018, lat: 13.7563 }}
   zoom={10}
@@ -33,7 +39,7 @@ props ที่ระบุว่า **อัปเดตทันที** จ�
 | `zoom` | `number` | `7` | ระดับซูมเริ่มต้น (0–22) |
 | `rotate` | `number` | `0` | มุมหมุนเริ่มต้นเป็นองศา ตามเข็มนาฬิกาจากทิศเหนือ |
 | `pitch` | `number` | `0` | มุมเอียงเริ่มต้นเป็นองศา (สูงสุด 60 โดยค่าเริ่มต้น) |
-| `language` | `"th" \| "en"` | `"th"` | **อัปเดตทันที** ภาษาของป้ายชื่อและ UI ในตัว |
+| `language` | `"th" \| "en"` | ค่าของ provider หรือ `"th"` | **อัปเดตทันที** ภาษาของป้ายชื่อและ UI ในตัว ค่าเริ่มต้นคือ [`language` ของ `SphereProvider`](/th/docs/components/sphere-provider#language) |
 | `baseLayer` | `LayerInput` | `"STREETS"` | **อัปเดตทันที** แผนที่ฐาน: ชื่อเลเยอร์ในตัว, `sphere.Layer`, URL ของสไตล์ MapLibre หรืออ็อบเจ็กต์สไตล์ |
 | `filter` | `FilterType` | `"None"` | **อัปเดตทันที** ตัวกรองสี: `"None"`, `"Dark"`, `"Light"`, `"Protanopia"` หรือ `"Deuteranopia"` |
 | `zoomRange` | `Range` | `{ min: 0, max: 22 }` | **อัปเดตทันที** ช่วงระดับซูมที่ผู้ใช้ซูมได้ `{ min, max }` |
@@ -45,6 +51,7 @@ props ที่ระบุว่า **อัปเดตทันที** จ�
 | `ref` | `Ref<SphereMapRef>` | – | ควบคุมแบบ imperative ดู [Ref](#ref) |
 | `style`, `className`, `id` | – | – | กำหนดให้กับ `<div>` คอนเทนเนอร์ |
 | `children` | `ReactNode` | – | แสดงเมื่อแผนที่พร้อมใช้งาน |
+| `fallback` | `ReactNode` | – | แสดงทับพื้นที่แผนที่จนกว่าแผนที่จะพร้อมใช้งาน เช่น ตัวบอกสถานะการโหลด ดู[ตัวแสดงระหว่างโหลด](#loading-placeholder) |
 
 ## เหตุการณ์ [#events]
 
@@ -61,6 +68,7 @@ props ที่ระบุว่า **อัปเดตทันที** จ�
 | `onLocation` | `(center)` | จุดกึ่งกลางเปลี่ยน |
 | `onRotate` | `(angle)` | มุมหมุนเปลี่ยน |
 | `onPitch` | `(angle)` | มุมเอียงเปลี่ยน |
+| `onViewChange` | `({ center, zoom, rotate, pitch, bound })` | แผนที่พร้อมใช้งาน หรือหยุดเคลื่อนที่ ดู[การซิงก์มุมมอง](#syncing-the-view) |
 | `onZoomRange` | `({ min, max })` | ช่วงซูมที่อนุญาตเปลี่ยน |
 | `onDrag` / `onDrop` | `()` | ผู้ใช้เริ่ม / หยุดลากแผนที่ |
 | `onIdle` | `()` | แผนที่แสดงผลเสร็จ |
@@ -90,6 +98,9 @@ props ที่ระบุว่า **อัปเดตทันที** จ�
 ## แผนที่ฐานและตัวกรองสี [#base-maps-and-filters]
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+import { useState } from "react";
+
 const [dark, setDark] = useState(false);
 
 <SphereMap baseLayer="HYBRID" filter={dark ? "Dark" : "None"} />
@@ -98,12 +109,16 @@ const [dark, setDark] = useState(false);
 แผนที่ฐานในตัว ได้แก่ `"SIMPLE"`, `"STREETS"`, `"STREETS_NIGHT"`, `"HYBRID"` และ `"IMAGES"` และ `baseLayer` ยังรับสไตล์ MapLibre ได้ด้วย เช่น สไตล์เวกเตอร์ของ Sphere
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+
 <SphereMap baseLayer="https://basemap.sphere.gistda.or.th/vector/sphere_hybrid.json" />
 ```
 
 ## ตัวควบคุมในตัว [#built-in-controls]
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+
 <SphereMap controls={{ DPad: false, Zoombar: true, Scale: true, LayerSelector: false }} />
 ```
 
@@ -136,6 +151,8 @@ const [dark, setDark] = useState(false);
 `options` จะถูกส่งให้ `new sphere.Map()` และ Sphere จะส่งต่อให้ MapLibre ใช้กับทุกอย่างที่ MapLibre รองรับได้
 
 ```tsx
+import { SphereMap } from "gistda-sphere-react";
+
 <SphereMap
   options={{
     maxPitch: 85,         // allow steeper tilts
@@ -145,11 +162,52 @@ const [dark, setDark] = useState(false);
 />
 ```
 
+## ตัวแสดงระหว่างโหลด [#loading-placeholder]
+
+แผนที่จะแสดงเมื่อสคริปต์ของ Sphere โหลดเสร็จและแผนที่พร้อมใช้งาน ระหว่างนั้น `fallback` จะแสดงทับพื้นที่แผนที่:
+
+```tsx
+import { SphereMap } from "gistda-sphere-react";
+
+<SphereMap
+  fallback={<div className="grid h-full place-items-center">Loading map…</div>}
+  style={{ height: 400 }}
+/>
+```
+
+หากโหลดสคริปต์ไม่สำเร็จ `fallback` จะยังแสดงอยู่ หากต้องการแสดงข้อผิดพลาดแทน ให้อ่าน `error` จาก [`useSphere`](/th/docs/hooks/use-sphere)
+
+## การซิงก์มุมมอง [#syncing-the-view]
+
+`onViewChange` จะรายงานมุมมองเมื่อแผนที่พร้อมใช้งาน และทุกครั้งที่แผนที่หยุดเคลื่อนที่ จึงเหมาะสำหรับบันทึกมุมมองไว้ใน URL หรือ state ของคุณ:
+
+```tsx
+import { type MapView, SphereMap } from "gistda-sphere-react";
+
+function MapWithUrl() {
+  const save = ({ center, zoom }: MapView) => {
+    const params = new URLSearchParams({
+      lat: center.lat.toFixed(5),
+      lon: center.lon.toFixed(5),
+      zoom: zoom.toFixed(2),
+    });
+    history.replaceState(null, "", `?${params}`);
+  };
+
+  return <SphereMap onViewChange={save} style={{ height: 400 }} />;
+}
+```
+
+มุมมองประกอบด้วย `center`, `zoom`, `rotate`, `pitch` และ `bound` (ขอบเขตที่มองเห็น) หากต้องการอ่านจากที่อื่น ให้ใช้ [`useMapView`](/th/docs/hooks/event-hooks#usemapview) หรือ `getView()` จาก [`useMapControls`](/th/docs/hooks/use-map-controls) ส่วน `onLocation` และ `onZoom` จะทำงานทุกเฟรมของแอนิเมชัน
+
 ## Ref
 
 ref มีเมธอดทั้งหมดของ [`useMapControls`](/th/docs/hooks/use-map-controls) และ `getMap()`
 
 ```tsx
+import { SphereMap, type SphereMapRef } from "gistda-sphere-react";
+import { useRef } from "react";
+
 const mapRef = useRef<SphereMapRef>(null);
 
 <SphereMap ref={mapRef} />
@@ -163,7 +221,8 @@ const maplibre = sphereMap?.Renderer;        // the MapLibre map
 | เมธอด | คำอธิบาย |
 | --- | --- |
 | `getMap()` | `sphere.Map` ที่อยู่เบื้องหลัง หรือ `null` โดย `Renderer` คือแผนที่ MapLibre |
-| `goTo(options, animate?)` | เคลื่อนไปยังมุมมองที่กำหนด (`center`, `zoom`, `bearing`, `pitch`, `padding`, `duration`) |
+| `getView()` | จุดกึ่งกลาง ระดับซูม มุมหมุน มุมเอียง และขอบเขตที่มองเห็นในอ็อบเจกต์เดียว |
+| `goTo(options, animate?)` | เคลื่อนไปยังมุมมองที่กำหนด (`center`, `zoom`, `rotate` หรือ `bearing`, `pitch`, `padding`, `duration`) |
 | `setCenter` / `getCenter` | จุดกึ่งกลางของแผนที่ |
 | `setZoom` / `getZoom`, `zoomIn`, `zoomOut` | ระดับซูม |
 | `setRotate` / `getRotate` | มุมหมุนเป็นองศา |
@@ -178,5 +237,5 @@ const maplibre = sphereMap?.Renderer;        // the MapLibre map
 | `repaint`, `resize` | วาดใหม่ หรือวัดขนาดใหม่หลังคอนเทนเนอร์เปลี่ยนขนาด |
 
 <Callout type="warn">
-  การเปลี่ยน props `center`, `zoom`, `rotate` หรือ `pitch` หลังการแสดงผลครั้งแรกจะไม่มีผล ให้เลื่อนแผนที่ด้วย ref หรือ `useMapControls` เพื่อไม่ให้การ re-render ไปทับตำแหน่งที่ผู้ใช้เลื่อนไว้
+  การเปลี่ยน props `center`, `zoom`, `rotate` หรือ `pitch` หลังการแสดงผลครั้งแรกจะไม่มีผล ให้เลื่อนแผนที่ด้วย ref หรือ `useMapControls` เพื่อไม่ให้การ re-render ไปทับตำแหน่งที่ผู้ใช้เลื่อนไว้ หากต้องการให้ state ของคุณสอดคล้องกับแผนที่ ให้ใช้ [`onViewChange`](#syncing-the-view)
 </Callout>

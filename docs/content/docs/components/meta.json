@@ -5,6 +5,7 @@
     "sphere-map",
     "---Overlays---",
     "marker",
+    "marker-cluster",
     "popup",
     "polygon",
     "polyline",

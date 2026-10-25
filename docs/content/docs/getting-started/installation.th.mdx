@@ -25,8 +25,8 @@ bun add gistda-sphere-react
 
 ## สิ่งที่ต้องมี [#requirements]
 
-- **React 19 ขึ้นไป** โดย `react` และ `react-dom` เป็น peer dependency
-- **เบราว์เซอร์** แผนที่แสดงผลฝั่งไคลเอนต์ หากใช้ App Router ของ Next.js ให้ใช้คอมโพเนนต์ใน Client Component (`"use client"`)
+- **React 19 ขึ้นไป** ใช้ได้กับโปรเจกต์ทุกรูปแบบ เช่น Vite, Next.js หรือ React Router โดย `react` และ `react-dom` เป็น peer dependency
+- **เบราว์เซอร์** แผนที่แสดงผลฝั่งไคลเอนต์ หากใช้ App Router ของ Next.js จะเรียกใช้คอมโพเนนต์จาก Server Component หรือ Client Component ก็ได้ แต่ hooks และ event handler ต้องอยู่ใน Client Component (`"use client"`) ดู[การใช้งานกับ Next.js](/th/docs/components/sphere-provider#using-it-with-nextjs) ส่วน[ไคลเอนต์บริการเว็บ](/th/docs/web-services#on-a-server)ใช้งานบนเซิร์ฟเวอร์ได้ด้วย
 - **API key** จาก GISTDA ดู[การขอ API key](/th/docs/getting-started/api-key)
 
 ## ขั้นตอนถัดไป [#next-steps]

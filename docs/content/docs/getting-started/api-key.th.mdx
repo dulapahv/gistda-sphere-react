@@ -42,7 +42,11 @@ description: ขอ API key ของ GISTDA Sphere จำกัดเว็บ�
 ส่ง key ให้ `SphereProvider`
 
 ```tsx
-<SphereProvider apiKey="YOUR_API_KEY">{/* your app */}</SphereProvider>
+import { SphereProvider } from "gistda-sphere-react";
+
+<SphereProvider apiKey="YOUR_API_KEY">
+  <App />
+</SphereProvider>
 ```
 
 เก็บ key ไว้ในตัวแปรสภาพแวดล้อม (environment variable) เพื่อไม่ให้ติดไปกับซอร์สโค้ดใน Git
@@ -52,6 +56,8 @@ NEXT_PUBLIC_SPHERE_API_KEY=your_api_key
 ```
 
 ```tsx
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider apiKey={process.env.NEXT_PUBLIC_SPHERE_API_KEY!}>
 ```
 
@@ -60,9 +66,11 @@ VITE_SPHERE_API_KEY=your_api_key
 ```
 
 ```tsx
+import { SphereProvider } from "gistda-sphere-react";
+
 <SphereProvider apiKey={import.meta.env.VITE_SPHERE_API_KEY}>
 ```
 
 <Callout type="warn">
-  ตัวแปรที่มี prefix สำหรับเบราว์เซอร์ (`NEXT_PUBLIC_`, `VITE_`) ยังคงถูกรวมไว้ใน JavaScript ของคุณ สิ่งที่ปกป้อง key คือการจำกัดโฮสต์ หากเรียก [`createSphereServices`](/th/docs/web-services) ฝั่งเซิร์ฟเวอร์ ให้ใช้ key แยกอีกตัวที่ไม่มี prefix สำหรับเบราว์เซอร์
+  ตัวแปรที่มี prefix สำหรับเบราว์เซอร์ (`NEXT_PUBLIC_`, `VITE_`) ยังคงถูกรวมไว้ใน JavaScript ของคุณ สิ่งที่ปกป้อง key คือการจำกัดโฮสต์ หากเรียก [`createSphereServices`](/th/docs/web-services#on-a-server) ฝั่งเซิร์ฟเวอร์ ให้ใช้ key แยกอีกตัวที่ไม่มี prefix สำหรับเบราว์เซอร์ เซิร์ฟเวอร์ไม่ได้ส่งโฮสต์ที่ Sphere ใช้ตรวจสอบ ดังนั้น key ที่จำกัดโฮสต์ต้องกำหนดตัวเลือก `referer` ด้วย
 </Callout>

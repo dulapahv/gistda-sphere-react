@@ -4,17 +4,26 @@ description: กล่องข้อมูลที่ชี้ไปยัง�
 ---
 
 <MapDemo height="350px" zoom={12} center={{ lon: 100.5018, lat: 13.7563 }}>
-  <Popup position={{ lon: 100.5018, lat: 13.7563 }} title="กรุงเทพมหานคร" detail="เมืองหลวงของประเทศไทย" />
+  <Popup
+    position={{ lon: 100.5018, lat: 13.7563 }}
+    title="Bangkok"
+    detail="Capital of Thailand"
+  />
 </MapDemo>
 
 ```tsx
-<Popup
-  position={{ lon: 100.5018, lat: 13.7563 }}
-  title="Bangkok"
-  detail="Capital of Thailand"
-  onClose={() => setOpen(false)}
-/>
+import { Popup, SphereMap } from "gistda-sphere-react";
+
+<SphereMap center={{ lon: 100.5018, lat: 13.7563 }} style={{ height: 350 }} zoom={12}>
+  <Popup
+    position={{ lon: 100.5018, lat: 13.7563 }}
+    title="Bangkok"
+    detail="Capital of Thailand"
+  />
+</SphereMap>
 ```
+
+ตัวอย่างสั้น ๆ ด้านล่างละ `<SphereMap>` ไว้ แต่โอเวอร์เลย์ทุกตัวต้องอยู่ภายใน `<SphereMap>` เสมอ
 
 `<Popup>` จะเปิดอยู่ตราบที่ถูกแสดงผล ให้แสดงแบบมีเงื่อนไขและนำออกใน `onClose` สำหรับป๊อปอัปที่เปิดเมื่อคลิกหมุดหรือรูปทรง ให้ใช้ props `detail`, `popup` หรือ `popupContent` ของคอมโพเนนต์นั้นแทน
 
@@ -38,6 +47,8 @@ description: กล่องข้อมูลที่ชี้ไปยัง�
 ## เนื้อหาแบบ React [#react-content]
 
 ```tsx
+import { Popup } from "gistda-sphere-react";
+
 {selected && (
   <Popup
     position={selected.location}
@@ -53,6 +64,9 @@ description: กล่องข้อมูลที่ชี้ไปยัง�
 ## แสดงป๊อปอัปตรงจุดที่ผู้ใช้คลิก [#show-a-popup-where-the-user-clicks]
 
 ```tsx
+import { type Location, Popup, SphereMap } from "gistda-sphere-react";
+import { useState } from "react";
+
 const [clicked, setClicked] = useState<Location | null>(null);
 
 <SphereMap onClick={({ lat, lon }) => setClicked({ lat, lon })}>
@@ -75,3 +89,5 @@ const [clicked, setClicked] = useState<Location | null>(null);
 | `getElement()` | DOM element ของป๊อปอัป |
 | `getPosition()` / `setPosition(location)` | อ่านหรือย้ายตำแหน่งป๊อปอัป |
 | `setTitle(text)` / `setDetail(text)` | เปลี่ยนข้อความโดยไม่ต้องสร้างป๊อปอัปใหม่ |
+
+`setPosition` จะย้ายป๊อปอัปจนกว่า prop `position` จะเปลี่ยนเป็นตำแหน่งใหม่ การเปลี่ยน `title`, `detail` หรือ `size` จะสร้างป๊อปอัปใหม่ที่ `position` ดังนั้นหากต้องการให้ป๊อปอัปอยู่ในตำแหน่งที่ย้ายไป ให้เก็บตำแหน่งไว้ใน state

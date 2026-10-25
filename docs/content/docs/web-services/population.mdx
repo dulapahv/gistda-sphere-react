@@ -23,10 +23,12 @@ console.log(result.data, result.meta);
 Shapes drawn on the map can be turned into WKT. For a polygon ref:
 
 ```ts
+import { type GeoJSONFeature, type GeoJSONPolygon } from "gistda-sphere-react";
+
 const feature = polygonRef.current?.toGeoJSON() as GeoJSONFeature<GeoJSONPolygon>;
 const ring = feature.geometry.coordinates[0];
 const wkt = `POLYGON((${ring.map(([lon, lat]) => `${lon} ${lat}`).join(", ")}))`;
 const result = await services.population.get(wkt);
 ```
 
-Large polygons make long requests; the client sends them as POST automatically.
+Large polygons make long requests, so the client sends them as POST automatically.

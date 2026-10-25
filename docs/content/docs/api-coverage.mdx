@@ -17,9 +17,9 @@ This page maps the [Sphere API reference](https://api.sphere.gistda.or.th/map/do
 | `map.location()` | `center` prop, `setCenter`, `getCenter`, `onLocation` |
 | `map.bound()` | `setBound`, `getBound` |
 | `map.move()` | `panBy` |
-| `map.goTo()` | `goTo` |
+| `map.goTo()` | `goTo` (with `rotate` or `bearing`) |
 | `map.rotate()`, `map.pitch()` | `rotate`/`pitch` props, `setRotate`/`getRotate`, `setPitch`/`getPitch`, `onRotate`/`onPitch` |
-| `map.language()` | `language` prop, `setLanguage`, `getLanguage` |
+| `map.language()` | `language` prop (or `SphereProvider`'s), `setLanguage`, `getLanguage` |
 | `map.enableFilter()`, `sphere.Filter` | `filter` prop, `setFilter`, `getFilter` |
 | `map.resize()`, `map.repaint()` | `resize`, `repaint` |
 | `map.id()`, `map.placeholder()` | `useMap().map` |
@@ -59,7 +59,7 @@ The methods in the right column are on [`useMapControls`](/docs/hooks/use-map-co
 | `sphere.Popup`, `PopupOptions` | [`<Popup>`](/docs/components/popup) |
 | `sphere.Polyline`, `Polygon`, `Circle`, `Dot`, `Rectangle`, `GeometryOptions` | [`<Polyline>`](/docs/components/polyline), [`<Polygon>`](/docs/components/polygon), [`<Circle>`](/docs/components/circle), [`<Dot>`](/docs/components/dot), [`<Rectangle>`](/docs/components/rectangle) |
 | `sphere.LineStyle` | `lineStyle="Solid" \| "Dashed" \| "Dot"` |
-| GeoJSON input | `positions`/`position` accept GeoJSON; [`<GeoJson>`](/docs/components/geojson) for whole documents |
+| GeoJSON input | `positions`/`position` accept GeoJSON, and [`<GeoJson>`](/docs/components/geojson) shows whole documents |
 | `overlay.location()` | `position` props, `setPosition`, `getPosition` |
 | `overlay.visibleRange()` | `visibleRange` prop |
 | `overlay.shift()` | ref `shift` |
@@ -84,7 +84,7 @@ The methods in the right column are on [`useMapControls`](/docs/hooks/use-map-co
 
 | Sphere | Library ([`useRoute`](/docs/hooks/use-route)) |
 | --- | --- |
-| `add()`, `insert()`, `remove()`, `removeAt()`, `list()`, `size()` | `addDestination`, `insertDestination`, `removeDestination`, `removeDestinationAt`, `listDestinations`, `size` |
+| `add()`, `insert()`, `remove()`, `removeAt()`, `list()`, `size()` | `addDestination`, `insertDestination`, `removeDestination`, `removeDestinationAt`, `listDestinations`, `size`, and `destinations` as state |
 | `clearDestination()`, `clearPath()`, `clear()`, `reverse()`, `search()` | `clearDestinations`, `clearPath`, `clear`, `reverse`, `search` |
 | `distance()`, `interval()` | `summary`, `getDistance`, `getInterval` |
 | `guide()` | `steps`, `routes`, `getSteps`, `getGuide` |
@@ -94,7 +94,7 @@ The methods in the right column are on [`useMapControls`](/docs/hooks/use-map-co
 | `enableRestrict()`, `sphere.RouteRestrict` | `setRestrict`, `isRestrictEnabled` |
 | `label()`, `sphere.RouteLabel` | `setLabel`, `getLabel` |
 | `line()`, `sphere.RouteLine` | `setLineStyle`, `getLineStyle` |
-| `auto()` | `setAuto`, `getAuto` |
+| `auto()` | `auto` option, `setAuto`, `getAuto` |
 | `enableContextMenu()` | `enableContextMenu` |
 | `placeholder()` | [`<RouteGuide>`](/docs/components/route-guide), `setPlaceholder` |
 | `language()` | `setLanguage`, `getLanguage` |
@@ -104,7 +104,7 @@ The methods in the right column are on [`useMapControls`](/docs/hooks/use-map-co
 
 | Sphere | Library |
 | --- | --- |
-| `map.Search.search()`, `suggest()`, `address()`, `nearPoi()` | [`useSearch`](/docs/hooks/use-search) methods of the same name |
+| `map.Search.search()`, `suggest()`, `address()`, `nearPoi()` | [`useSearch`](/docs/hooks/use-search) methods of the same name, and [`useSuggest`](/docs/hooks/use-suggest) for debounced suggestions |
 | `map.Search.placeholder()`, `SearchUiOptions` | [`<SearchResults>`](/docs/components/search-results), `setPlaceholder` |
 | `map.Search.clear()`, `enablePopup()`, `language()` | `clear`, `enablePopup`/`isPopupEnabled`, `setLanguage`/`getLanguage` |
 | `map.Tags.add()`, `set()`, `remove()`, `clear()`, `list()`, `size()` | [`<Tag>`](/docs/components/tag), [`useTags`](/docs/hooks/use-tags) |
@@ -166,8 +166,12 @@ The library also adds things the Sphere API doesn't have:
 
 - Declarative components that clean up after themselves, with props that update the map in place.
 - React content as marker icons, popups and map controls.
+- Clustering for React markers with [`<MarkerCluster>`](/docs/components/marker-cluster).
+- The current view as state ([`onViewChange`](/docs/components/sphere-map#syncing-the-view), [`useMapView`](/docs/hooks/event-hooks#usemapview)), a loading `fallback`, and debounced autocomplete ([`useSuggest`](/docs/hooks/use-suggest)).
+- One [`language`](/docs/components/sphere-provider#language) setting on `SphereProvider` for maps, search, routing and web services.
 - Route results as React state: `status`, `summary`, turn-by-turn `steps` with readable instructions, and a timeout for keys without routing.
 - `onError` for objects that never load, and errors with codes for every web service.
 - Spatial analysis and measurements on every shape ref.
-- A typed web services client that works on servers too.
+- A typed web services client that works on servers too, with its own `gistda-sphere-react/services` entry and a `referer` option for domain-restricted keys.
+- Components marked `"use client"`, so they render from Next.js Server Components.
 - Workarounds for Sphere quirks: `input={false}` disabling interaction, labels in Fly mode, removing `"a|b"` tags, plain-text areas, and more.

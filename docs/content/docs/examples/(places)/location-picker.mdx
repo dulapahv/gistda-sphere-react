@@ -1,0 +1,24 @@
+---
+title: Location picker
+description: Let users pick a spot by moving the map under a fixed pin, and look up its address
+---
+
+Delivery and ride-hailing apps often keep a pin in the middle of the map and let users move the map under it. When the map stops, this example reads the center and looks up its address:
+
+<LocationPickerDemo />
+
+<ShowCode>
+<include cwd meta='title="location-picker.tsx"'>components/examples/location-picker.tsx</include>
+</ShowCode>
+
+## How it works
+
+- The pin is an element on top of the map with `pointer-events: none`, so dragging still moves the map.
+- [`onViewChange`](/docs/components/sphere-map#syncing-the-view) reports the center once the map stops moving, so there's one lookup per move instead of one per frame.
+- `address()` from [`useSearch`](/docs/hooks/use-search#addresses) turns the center into an address. An answer for an older center is ignored, so a slow lookup never replaces a newer one.
+
+<Callout type="warn">
+  Addresses need the address service enabled for your API key. Without it, `address()` resolves `null`, and the example tells users so.
+</Callout>
+
+To let users search first, add [`useSuggest`](/docs/hooks/use-suggest) and move the map to the chosen place with `goTo`.

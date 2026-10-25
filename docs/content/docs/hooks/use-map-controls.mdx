@@ -3,9 +3,13 @@ title: useMapControls
 description: Move, zoom, rotate and tilt the map, and manage layers, filters and language from anywhere
 ---
 
-`useMapControls` controls the map imperatively, for example from buttons in a sidebar. It works anywhere under `SphereProvider`; the same methods are on [`SphereMap`'s ref](/docs/components/sphere-map#ref).
+`useMapControls` controls the map imperatively, for example from buttons in a sidebar. It works anywhere under `SphereProvider`, and the same methods are on [`SphereMap`'s ref](/docs/components/sphere-map#ref).
 
 <ControlsDemo />
+
+<ShowCode>
+<include cwd meta='title="control-panel.tsx"'>components/examples/control-panel.tsx</include>
+</ShowCode>
 
 ```tsx
 import { useMapControls } from "gistda-sphere-react";
@@ -27,7 +31,8 @@ function Toolbar() {
 
 | Method | Description |
 | --- | --- |
-| `goTo(options, animate?)` | Move to a view. `options`: `center`, `zoom`, `bearing`, `pitch`, `padding`, `duration`. Animates by default. |
+| `goTo(options, animate?)` | Move to a view. `options`: `center`, `zoom`, `rotate` (or `bearing`), `pitch`, `padding`, `duration`. Animates by default. |
+| `getView()` | Center, zoom, rotation, tilt and visible box in one object, or `null` before the map is ready. |
 | `setCenter(location, animate?)` / `getCenter()` | Center of the map. |
 | `setZoom(zoom, animate?)` / `getZoom()` | Zoom level. |
 | `zoomIn(animate?)` / `zoomOut(animate?)` | Zoom one level in or out. |
@@ -37,6 +42,8 @@ function Toolbar() {
 | `panBy({ x, y }, animate?)` | Pan by pixels. |
 | `setZoomRange(range)` / `getZoomRange()` | Zoom levels users can reach. |
 
+`rotate` and `bearing` are the same angle: `rotate` matches `SphereMap`'s prop and `setRotate`, and `bearing` is MapLibre's name for it. If you pass both, `bearing` wins.
+
 ## Layers and appearance
 
 | Method | Description |
@@ -44,7 +51,7 @@ function Toolbar() {
 | `setBaseLayer(layer)` | Change the base map: a built-in name, a `sphere.Layer`, or a MapLibre style URL or object. |
 | `addLayer(layer, beforeId?)` / `removeLayer(layer)` | Add or remove a layer on top of the base map. |
 | `clearLayers()` / `getLayers()` | Remove all added layers / list the map's layers. |
-| `setFilter(filter)` / `getFilter()` | Color filter: `"Dark"`, `"Light"`, `"Protanopia"`, `"Deuteranopia"` or `"None"`. |
+| `setFilter(filter)` / `getFilter()` | Color filter: `"Dark"`, `"Light"`, `"Protanopia"` or `"Deuteranopia"`. `"None"` or `false` clears it. |
 | `setLanguage(language)` / `getLanguage()` | Labels and UI language, `"th"` or `"en"`. |
 | `loadPredefinedOverlay(type, options?)` / `unloadPredefinedOverlay(type)` | Live `"cameras"`, `"events"` or `"aqi"` overlays. |
 

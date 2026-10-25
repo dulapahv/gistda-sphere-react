@@ -7,7 +7,13 @@ description: Show points of interest by category, or features from your own WFS 
 
 <TagsDemo />
 
+<ShowCode>
+<include cwd meta='title="tag-picker.tsx"'>components/examples/tag-picker.tsx</include>
+</ShowCode>
+
 ```tsx
+import { SphereMap, Tag } from "gistda-sphere-react";
+
 <SphereMap>
   <Tag name="โรงพยาบาล" />
   <Tag name="วัด,พิพิธภัณฑ์" visibleRange={{ min: 12, max: 22 }} />
@@ -20,7 +26,7 @@ Tags are identified by their Thai names, such as `"โรงพยาบาล"`
 
 | Prop | Type | Description |
 | --- | --- | --- |
-| `name` | `string` | **Required.** Tag name; several names separated by commas (one layer) or `\|` (separate layers); or `"%"` for all POIs. For WFS/OGC sources, the name of the data layer or collection. |
+| `name` | `string` | **Required.** A tag name. Separate several names with commas for one layer or with `\|` for separate layers, or use `"%"` for all POIs. For WFS/OGC sources, the name of the data layer or collection. |
 | `visibleRange` | `Range` | Zoom levels where the POIs show. |
 | `label` | `Range \| boolean` | Zoom levels where names show, or `true` to show them across `visibleRange`. |
 | `icon` | `"big" \| "small" \| Icon` | Bigger or smaller default icons, or your own image icon. |
@@ -36,6 +42,8 @@ Any other prop is passed to Sphere's `Tags.add`. For WFS/OGC sources these are [
 ## Your own WFS or OGC API data
 
 ```tsx
+import { Tag } from "gistda-sphere-react";
+
 <Tag
   name="StructurePnt"
   type="OGC"

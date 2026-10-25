@@ -1,0 +1,12 @@
+{
+  "title": "Places and routes",
+  "defaultOpen": true,
+  "pages": [
+    "search",
+    "location-picker",
+    "store-locator",
+    "delivery-zones",
+    "routing",
+    "tags"
+  ]
+}
